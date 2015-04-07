@@ -32,18 +32,19 @@ def main():
                     release_data = dict()
                     track_data = dict()
                     if "mbid" in metadata:
-                        curr, release_data, track_data = MetaInformer.find_meta_release(metadata["mbid"][0],
-                                                                    int(metadata["tracknumber"][0]) - 1,
-                                                                    int(metadata["discnumber"][0]), curr)
+                        release_id = metadata["mbid"][0]
+                        track_number = int(metadata["tracknumber"][0]) - 1
+                        disc_num = int(metadata["discnumber"][0])
                     elif "musicbrainz_albumid" in metadata:
-                        curr, release_data, track_data = MetaInformer.find_meta_release(metadata["musicbrainz_albumid"],
-                                                                                        metadata["tracknumber"],
-                                                                                        metadata["discnumber"], curr)
-                    elif "musicbrainz_releasetrackid" in metadata:
-                        MetaInformer.find_meta_track(metadata["musicbrainz_releasetrackid"],
-                                                     curr)
+                        release_id = metadata["musicbrainz_albumid"]
+                        trackk_number = metadata["tracknumber"]
+                        disc_num =  metadata["discnumber"]
 
+                print "Process " + name
+                try:
+                    curr, release_data, track_data = MetaInformer.find_meta_release(release_id, track_number, disc_num, curr)
                     JsonSerializer.serialize_print(metadata, release_data, track_data, name, args.output_directory)
-
+                except UnicodeDecodeError:
+                    print "    ERROR: Invalid characters!"
 
 main()

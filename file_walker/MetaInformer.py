@@ -31,10 +31,22 @@ def find_meta_release(mbid, tracknum, discnum, curr):
         release_info["disambiguation"] = release['disambiguation']
     if ("label-info-list" in release):
         release_info["label-info-list"] = release["label-info-list"]
-    release_info["date"] = release['date']
-    release_info["country"] = release['country']
-    release_info["barcode"] = release['barcode']
-    release_info["asin"] = release['asin']
+    if ("date" in release):
+        release_info["date"] = release['date']
+    else:
+        release_info["date"] = ""
+    if ("country" in release):
+        release_info["country"] = release['country']
+    else:
+        release_info["country"] = ""
+    if ("barcode" in release):
+        release_info["barcode"] = release['barcode']
+    else:
+        release_info["barcode"] = ""
+    if ("asin" in release):
+        release_info["asin"] = release['asin']
+    else:
+        release_info["asin"] = ""
 
     track = curr[mbid]["medium-list"][disc_index]["track-list"][tracknum]
     track_info = {}
