@@ -31,7 +31,7 @@ def serialize(metadata, release_data, track_data, old_file):
     return json.dumps({"assets": assets})
 
 
-def serialize_print(metadata, release_data, track_data, old_file, output_dir):
+def to_file(metadata, release_data, track_data, old_file, output_dir):
     """
     Prints json-formatted metadata to a file
 
