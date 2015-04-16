@@ -7,7 +7,8 @@ It is assumed that you already have Python 2.7 or greater installed, and it is i
 1. Checkout this repository
 2. Install musicbrainzngs  `pip install musicbrainzngs`
 3. Install mutagen  `pip install mutagen`
-4. Profit!
+4. Install yattag  `pip install yattag`
+5. Profit!
  
 ### Programs
 #### File Walker
