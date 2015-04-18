@@ -103,6 +103,34 @@ def save_track(metadata, release_data, track_data, old_file, output_dir):
         f.write(formatted_data.encode("UTF-8"))
 
 def save_release(release, output_dir):
+    """
+		<KEXPMBID>release-xxxx-xxxx-xxxxx-xxxxxxx</KEXPMBID>
+		<KEXPReleaseGroupMBID>releasegroup MBID</KEXPReleaseGroupMBID>
+
+		<KEXPArtist>0923598e-2b97-4527-b984-5feed94c168d</KEXPArtist><!-- multiple cardinality -->
+		<KEXPReleaseArtistCredit>artist 1, artist 2, etc..</KEXPReleaseArtistCredit>
+		<KEXPLabel>011d1192-6f65-45bd-85c4-0400dd45693e</KEXPLabel><!-- multiple cardinality -->
+
+		<KEXPArea>Area</KEXPArea>
+		<KEXPAreaMBID>area MBID</KEXPAreaMBID>
+		<KEXPASIN>ASIN dfsdsdf</KEXPASIN>
+		<KEXPReleaseBarcode>Barcode</KEXPReleaseBarcode>
+		<KEXPReleaseCatalogNumber>2132</KEXPReleaseCatalogNumber> <!-- multiple cardinality -->
+		<KEXPCountryCode>US</KEXPCountryCode>
+		<KEXPReleasePackaging>DVD</KEXPReleasePackaging> <!-- multiple cardinality -->
+
+		<KEXPDisambiguation>Disambiguation</KEXPDisambiguation>
+
+		<KEXPDateReleased>1999-03-22</KEXPDateReleased> <!--	short text: No specific format required -->
+		<KEXPFirstReleaseDate>1999-03-25</KEXPFirstReleaseDate> <!--	short text: No specific format required -->
+		<KEXPLength>10:23</KEXPLength>
+
+		<KEXPLink>http://link 1</KEXPLink> <!-- multiple cardinality -->
+
+		<KEXPTag>TAG 1</KEXPTag> <!-- multiple cardinality -->
+		<KEXPTag>tag 2</KEXPTag>
+    """
+
     doc, tag, text = Doc().tagtext()
 
     doc.asis('<?xml version="1.0" encoding="UTF-8"?>')
@@ -116,7 +144,51 @@ def save_release(release, output_dir):
                 text(release["release-title"])
             with tag('GlossaryType'):
                 text('Release')
+            with tag('KEXPMBID'):
+                text(release["release_id"])
+            with tag('KEXPReleaseGroupMBID'):
+                text(release["release_group_id"])
+            full_name = ''    
+            for artist in release["artist-credit"]:
+    
+                if 'artist' in artist:
+                    a = artist['artist']
+                    full_name = full_name + a['name']
+                    with tag('KEXPArtist'):
+                        text(a['id'])
+                else:
+                    full_name = full_name + artist
+            with tag('KEXPReleaseArtistCredit'):
+                text(full_name)
+                
+            for label in release["labels"]:
+                if 'label-info' in label:
+                    a = label['label-info']
+                    with tag('KEXPlabel'):
+                        text(a['id'])
 
+            with tag('KEXPCountryCode'):
+                text(release["country"])
+            with tag('KEXPASIN'):
+                text(release["asin"])
+            with tag('KEXPReleaseBarcode'):
+                text(release["barcode"])
+            with tag('KEXPReleasePackaging'):
+                text(release["packaging"])
+            with tag('KEXPDisambiguation'):
+                text(release["disambiguation"])
+            with tag('KEXPDateReleased'):
+                text(release["date"])
+            with tag('KEXPFirstReleaseDate'):
+                text(release["first_release_date"])
+            for item in release["tags"]:
+                with tag('KEXPTag'):
+                    text(release["tag"]["name"])
+            #with tag('KEXPLength'):
+            #    text(release[""])
+            #for item in release["links"]:
+            #    with tag('KEXPLink'):
+            #        text(release[""])
 
     formatted_data = indent(doc.getvalue())
 

@@ -7,7 +7,7 @@ import musicbrainzngs as ngs
 #####
 def get_release(release_id):
     ngs.set_useragent("hidat_audio_pipeline", "0.1")
-    include=["artist-credits", "recordings", "isrcs", "media"]
+    include=["artist-credits", "recordings", "isrcs", "media", "release-groups", "labels"]
     mb_release = ngs.get_release_by_id(release_id, includes=include)['release']
     return mb_release
 
@@ -22,13 +22,22 @@ def process_release(mb_release, discnum):
     release_info["disc_num"] = discnum
     release_info["disc_count"] = len(mb_release["medium-list"])
     release_info["release-title"] = mb_release['title']
+    rg = mb_release['release-group']
+    release_info["release_group_id"] = rg['id']
+    release_info["first_release_date"] = rg['first-release-date']
+    if 'tag-list' in rg:
+        release_info['tags'] = rg['tag-list']
+    else:
+        release_info['tags'] = []
     if ('title' in mb_release["medium-list"][disc_index]):
-        release_info["disc-title"] = mb_release["medium-list"][disc_index]['title']
+        release_info["disc-title"] = mb_release["medium-list"][disc_index]['first-release-date']
     release_info["artist-credit"] = mb_release['artist-credit']
     if ("disambiguation" in mb_release):
         release_info["disambiguation"] = mb_release['disambiguation']
+    else:
+        release_info["disambiguation"] = ''
     if ("label-info-list" in mb_release):
-        release_info["label-info-list"] = mb_release["label-info-list"]
+        release_info["labels"] = mb_release["label-info-list"]
     if ("date" in mb_release):
         release_info["date"] = mb_release['date']
     else:
@@ -45,6 +54,11 @@ def process_release(mb_release, discnum):
         release_info["asin"] = mb_release['asin']
     else:
         release_info["asin"] = ""
+    if ("packaging" in mb_release):
+        release_info["packaging"] = mb_release['packaging']
+    else:
+        release_info["packaging"] = ""
+
 
     return release_info
 
