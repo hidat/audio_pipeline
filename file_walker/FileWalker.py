@@ -4,6 +4,7 @@ import MetaInformer
 import argparse
 import mutagen
 import JsonSerializer
+import DaletTrack
 
 _file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis"}
 
@@ -21,7 +22,7 @@ def main():
     args = parser.parse_args()
 
 
-    curr = {}
+    cached_releases = {}
     for root, dir, files in os.walk(args.input_directory):
         for name in files:
             name = root + "/" + name
@@ -42,8 +43,8 @@ def main():
 
                 print "Process " + name
                 try:
-                    curr, release_data, track_data = MetaInformer.find_meta_release(release_id, track_number, disc_num, curr)
-                    JsonSerializer.to_file(metadata, release_data, track_data, name, args.output_directory)
+                    cached_releases, release_data, track_data = MetaInformer.find_meta_release(release_id, track_number, disc_num, cached_releases)
+                    DaletTrack.to_file(metadata, release_data, track_data, name, args.output_directory)
                 except UnicodeDecodeError:
                     print "    ERROR: Invalid characters!"
 
