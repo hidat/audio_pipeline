@@ -17,9 +17,10 @@ def find_meta_release(mbid, tracknum, discnum, cached_releases):
 
     if mbid not in cached_releases:
         include=["artist-credits", "recordings", "isrcs", "media"]
-        cached_releases[mbid] = ngs.get_release_by_id(mbid, includes=include)['release']
+        release = ngs.get_release_by_id(mbid, includes=include)['release']
+    else:
+        release = cached_releases[mbid]
 
-    release = cached_releases[mbid]
     release_info = {}
     release_info["release_id"] = mbid
     release_info["disc_num"] = discnum
@@ -61,4 +62,4 @@ def find_meta_release(mbid, tracknum, discnum, cached_releases):
         track_info["isrcs"] = track["recording"]["isrc-list"]
     track_info["artist-credit"] = track["artist-credit"]
 
-    return cached_releases, release_info, track_info
+    return release, release_info, track_info

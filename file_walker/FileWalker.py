@@ -4,26 +4,15 @@ import MetaInformer
 import argparse
 import mutagen
 import JsonSerializer
-import DaletTrack
+import DaletSerializer
 
 _file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis"}
 
-def main():
-    """
-    Crawls the given directory for audio files (currently only processes FLAC) and
-    extracts raw metadata (expected to be acquired by ripping using dBpoweramp) and
-    metadata from musicbrainz, json-formatted.
-
-    Currently will only correctly process flac files (or other
-    """
-    parser = argparse.ArgumentParser(description='Get metadata from FLAC files.')
-    parser.add_argument('input_directory', help="Input audio file.")
-    parser.add_argument('output_directory', help="Directory to store output files. MUST ALREADY EXIST for now.")
-    args = parser.parse_args()
-
-
+def process_directory(source_dir, output_dir):
     cached_releases = {}
-    for root, dir, files in os.walk(args.input_directory):
+    serializer = DaletSerializer
+    current_release_id = ''
+    for root, dir, files in os.walk(source_dir):
         for name in files:
             name = root + "/" + name
             ext = os.path.splitext(name)[1].lower()
@@ -41,11 +30,34 @@ def main():
                         track_number = metadata["tracknumber"]
                         disc_num =  metadata["discnumber"]
 
-                print "Process " + name
+                print "Processing " + name
                 try:
-                    cached_releases, release_data, track_data = MetaInformer.find_meta_release(release_id, track_number, disc_num, cached_releases)
-                    DaletTrack.to_file(metadata, release_data, track_data, name, args.output_directory)
+                    if release_id != current_release_id and current_release_id != '':
+                        serializer.on_current_release_done(cached_releases[current_release_id], output_dir)
+                        current_release_id = release_id
+
+                    release, release_data, track_data = MetaInformer.find_meta_release(release_id, track_number, disc_num, cached_releases)
+                    if release_id not in cached_releases:
+                        cached_releases[release_id] = release
+
+                    serializer.on_track_processed(metadata, release_data, track_data, name, output_dir)
+
                 except UnicodeDecodeError:
                     print "    ERROR: Invalid characters!"
+
+def main():
+    """
+    Crawls the given directory for audio files (currently only processes FLAC) and
+    extracts raw metadata (expected to be acquired by ripping using dBpoweramp) and
+    metadata from musicbrainz, json-formatted.
+
+    Currently will only correctly process flac files (or other
+    """
+    parser = argparse.ArgumentParser(description='Get metadata from FLAC files.')
+    parser.add_argument('input_directory', help="Input audio file.")
+    parser.add_argument('output_directory', help="Directory to store output files. MUST ALREADY EXIST for now.")
+    args = parser.parse_args()
+    process_directory(args.input_directory, args.output_directory)
+
 
 main()
