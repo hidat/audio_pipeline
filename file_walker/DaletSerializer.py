@@ -30,8 +30,6 @@ def serialize(metadata, release_data, track_data, old_file):
         <KEXPTotalTracks>13</KEXPTotalTracks>
         <KEXPReleaseArtistDistributionRule>T</KEXPReleaseArtistDistributionRule>
         <KEXPVariousArtistReleaseTitleDistributionRule>E</KEXPVariousArtistReleaseTitleDistributionRule>
-
-
     """
 
     doc, tag, text = Doc().tagtext()
@@ -86,7 +84,7 @@ def serialize(metadata, release_data, track_data, old_file):
     return indent(doc.getvalue())
 
 
-def on_track_processed(metadata, release_data, track_data, old_file, output_dir):
+def save_track(metadata, release_data, track_data, old_file, output_dir):
     """
     Prints json-formatted metadata to a file
 
@@ -104,5 +102,24 @@ def on_track_processed(metadata, release_data, track_data, old_file, output_dir)
     with open(output_file, "wb") as f:
         f.write(formatted_data.encode("UTF-8"))
 
-def on_release_processed(release_data, output_dir):
-    return True
+def save_release(release, output_dir):
+    doc, tag, text = Doc().tagtext()
+
+    doc.asis('<?xml version="1.0" encoding="UTF-8"?>')
+    with tag('Titles'):
+        with tag('GlossaryValue'):
+            with tag('Key1'):
+                text(release["release_id"])
+            with tag('ItemCode'):
+                text(release["release_id"])
+            with tag('title'):
+                text(release["release-title"])
+            with tag('GlossaryType'):
+                text('Release')
+
+
+    formatted_data = indent(doc.getvalue())
+
+    output_file = path.join(output_dir, 'r' + release["release_id"] + ".xml")
+    with open(output_file, "wb") as f:
+        f.write(formatted_data.encode("UTF-8"))
