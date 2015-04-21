@@ -6,7 +6,7 @@ import mutagen
 import JsonSerializer
 import DaletSerializer
 
-_file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis"}
+_file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis", ".wav" : "wma"}
 
 def process_directory(source_dir, output_dir, serializer):
     cached_mb_releases = {}
@@ -21,6 +21,26 @@ def process_directory(source_dir, output_dir, serializer):
                 raw_metadata = mutagen.File(file_name)
                 release_id = ''
                 if _file_types[ext] == "vorbis":
+                    if "mbid" in raw_metadata:
+                        release_id = raw_metadata["mbid"][0]
+                        track_num = int(raw_metadata["tracknumber"][0]) - 1
+                        disc_num = int(raw_metadata["discnumber"][0])
+                    elif "musicbrainz_albumid" in raw_metadata:
+                        release_id = raw_metadata["musicbrainz_albumid"]
+                        track_num = raw_metadata["tracknumber"]
+                        disc_num =  raw_metadata["discnumber"]
+                elif _file_types[ext] == "aac":
+                    #raw_metadata.tags._DictProxy__dict['----:com.apple.iTunes:MBID']
+                    raw_metadata = raw_metadata.tags._DictProxy__dict
+                    if '----:com.apple.iTunes:MBID' in raw_metadata:
+                        release_id = str(raw_metadata['----:com.apple.iTunes:MBID'][0])
+                        track_num = int(raw_metadata['trkn'][0][0]) - 1
+                        disc_num = int(raw_metadata['disk'][0][0])
+                    elif '----:com.apple.iTunes:MusicBrainz Album Id' in raw_metadata:
+                        release_id = str(raw_metadata['----:com.apple.iTunes:MusicBrainz Album Id'][0])
+                        track_num = int(raw_metadata['trkn'][0][0]) - 1
+                        disc_num = int(raw_metadata['disk'][0][0])
+                elif _file_types[ext] == "id3":
                     if "mbid" in raw_metadata:
                         release_id = raw_metadata["mbid"][0]
                         track_num = int(raw_metadata["tracknumber"][0]) - 1
