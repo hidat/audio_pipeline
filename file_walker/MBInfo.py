@@ -29,8 +29,10 @@ def process_release(mb_release, discnum):
         release_info['tags'] = rg['tag-list']
     else:
         release_info['tags'] = []
+
     if ('title' in mb_release["medium-list"][disc_index]):
-        release_info["disc-title"] = mb_release["medium-list"][disc_index]['first-release-date']
+        release_info["disc-title"] = mb_release["medium-list"][disc_index]['title']
+
     release_info["artist-credit"] = mb_release['artist-credit']
     if ("disambiguation" in mb_release):
         release_info["disambiguation"] = mb_release['disambiguation']

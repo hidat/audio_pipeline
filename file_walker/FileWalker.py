@@ -3,17 +3,49 @@ import os
 import MBInfo
 import argparse
 import mutagen
+import shutil
 import JsonSerializer
 import DaletSerializer
 
 _file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis"}
 
-def process_directory(source_dir, output_dir, serializer):
+def process_directory(source_dir, output_dir, serializer, delete_processed):
     cached_mb_releases = {}
     current_release_id = ''
+
+    track_meta_dir = os.path.join(output_dir, 'track_meta')
+    if not os.path.exists(track_meta_dir):
+        os.makedirs(track_meta_dir)
+    artist_meta_dir = os.path.join(output_dir, 'artist_meta')
+    if not os.path.exists(artist_meta_dir):
+        os.makedirs(artist_meta_dir)
+    release_meta_dir = os.path.join(output_dir, 'release_meta')
+    if not os.path.exists(release_meta_dir):
+        os.makedirs(release_meta_dir)
+    track_dir = os.path.join(output_dir, 'track')
+    if not os.path.exists(track_dir):
+        os.makedirs(track_dir)
+
+    track_success_dir = os.path.join(output_dir, 'found')
+    if not os.path.exists(track_success_dir):
+        os.makedirs(track_success_dir)
+    print "Track Success: ", track_success_dir
+
+    track_fail_dir = os.path.join(output_dir, 'not_found')
+    if not os.path.exists(track_fail_dir):
+        os.makedirs(track_fail_dir)
+    print "Track Faile: ", track_fail_dir
+
+    path_start = len(source_dir) + 1
     for root, dir, files in os.walk(source_dir):
-        for file_name in files:
-            file_name = root + "/" + file_name
+        if len(root) > path_start:
+            path = root[path_start:]
+        else:
+            path = u''
+        print path
+        for src_name in files:
+            file_name = os.path.join(root, src_name)
+            copy_to_path = ''
             ext = os.path.splitext(file_name)[1].lower()
             if ext in _file_types:
 
@@ -67,16 +99,33 @@ def process_directory(source_dir, output_dir, serializer):
                                 mb_release = MBInfo.get_release(release_id)
                                 cached_mb_releases[release_id] = mb_release
                                 release = MBInfo.process_release(mb_release, disc_num)
-                                serializer.save_release(release, output_dir)
+                                serializer.save_release(release, release_meta_dir)
 
                         track_data = MBInfo.process_track(mb_release, disc_num, track_num)
+                        serializer.save_track(raw_metadata, release, track_data, file_name, track_meta_dir)
 
-                        serializer.save_track(raw_metadata, release, track_data, file_name, output_dir)
+                        target = os.path.join(track_dir, track_data["track_id"] + ext)
+                        shutil.copy(file_name, target)
+
+                        copy_to_path = os.path.join(track_success_dir, path)
+                        shutil.copy(file_name, target)
 
                     except UnicodeDecodeError:
                         print "    ERROR: Invalid characters!"
                 else:
                     print "Skipping " + file_name
+                    copy_to_path = os.path.join(track_fail_dir, path)
+
+                # Move the file out of the source directory
+                if copy_to_path > '':
+                    if not os.path.exists(copy_to_path):
+                        os.makedirs(copy_to_path)
+                    target = os.path.join(copy_to_path, src_name)
+                    if delete_processed:
+                        shutil.move(file_name, target)
+                    else:
+                        shutil.copy(file_name, target)
+
 def main():
     """
     Crawls the given directory for audio files (currently only processes FLAC) and
@@ -89,7 +138,7 @@ def main():
     parser.add_argument('input_directory', help="Input audio file.")
     parser.add_argument('output_directory', help="Directory to store output files. MUST ALREADY EXIST for now.")
     args = parser.parse_args()
-    process_directory(args.input_directory, args.output_directory, DaletSerializer)
+    process_directory(args.input_directory, args.output_directory, DaletSerializer, False)
 
 
 main()

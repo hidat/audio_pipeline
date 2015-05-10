@@ -179,8 +179,9 @@ def save_release(release, output_dir):
                 text(release["disambiguation"])
             with tag('KEXPDateReleased'):
                 text(release["date"])
-            with tag('KEXPFirstReleaseDate'):
-                text(release["first_release_date"])
+            if "first_release_date" in release:
+              with tag('KEXPFirstReleaseDate'):
+                  text(release["first_release_date"])
             for item in release["tags"]:
                 with tag('KEXPTag'):
                     text(release["tag"]["name"])
