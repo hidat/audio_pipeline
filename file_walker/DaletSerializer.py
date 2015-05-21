@@ -63,6 +63,11 @@ def serialize(metadata, release_data, track_data, old_file):
                 text(track_data["track_num"].__str__())
             with tag('KEXPTotalTracks'):
                 text(track_data["track_count"].__str__())
+            with tag('KEXPPrimaryGenre'):
+                text(track_data["kexp_category"].__str__())
+            with tag('KEXPObsenityRating'):
+                text(track_data["kexp_obscenity_rating"].__str__())
+
             full_name = ""
             for artist in track_data["artist-credit"]:
 

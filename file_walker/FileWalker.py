@@ -6,11 +6,13 @@ import mutagen
 import shutil
 import JsonSerializer
 import DaletSerializer
+import csv
 
 _file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis"}
 
 def process_directory(source_dir, output_dir, serializer, delete_processed):
     cached_mb_releases = {}
+    unique_artists = {}
     current_release_id = ''
 
     track_meta_dir = os.path.join(output_dir, 'track_meta')
@@ -52,6 +54,8 @@ def process_directory(source_dir, output_dir, serializer, delete_processed):
                 # Get the MusicBrainz Release ID from the file
                 raw_metadata = mutagen.File(file_name)
                 release_id = ''
+                kexp_obscenity_rating = ''
+                kexp_category = ''
                 if _file_types[ext] == "vorbis":
                     if "mbid" in raw_metadata:
                         release_id = raw_metadata["mbid"][0]
@@ -73,6 +77,11 @@ def process_directory(source_dir, output_dir, serializer, delete_processed):
                         release_id = str(raw_metadata['----:com.apple.iTunes:MusicBrainz Album Id'][0])
                         track_num = int(raw_metadata['trkn'][0][0]) - 1
                         disc_num = int(raw_metadata['disk'][0][0])
+                    if '----:com.apple.iTunes:KEXPPRIMARYGENRE' in raw_metadata:
+                        kexp_category = raw_metadata['----:com.apple.iTunes:KEXPPRIMARYGENRE'][0]
+                    if '----:com.apple.iTunes:KEXPOBSCENITYRATING' in raw_metadata:
+                        kexp_category = raw_metadata['----:com.apple.iTunes:KEXPOBSCENITYRATING'][0]
+
 
                 elif _file_types[ext] == "id3":
                     raw_metadata = raw_metadata.tags._DictProxy__dict
@@ -101,14 +110,33 @@ def process_directory(source_dir, output_dir, serializer, delete_processed):
                                 release = MBInfo.process_release(mb_release, disc_num)
                                 serializer.save_release(release, release_meta_dir)
 
+                        # Pull metadata from MusicBrainz
                         track_data = MBInfo.process_track(mb_release, disc_num, track_num)
+
+                        # Add KEXP added metadata from tags
+                        track_data['kexp_category'] = kexp_category
+                        track_data['kexp_obscenity_rating'] = kexp_obscenity_rating
+
+                        # Extract artist information
+
+                        # Save the metadata
                         serializer.save_track(raw_metadata, release, track_data, file_name, track_meta_dir)
 
+                        # Copy files to to success directory
                         target = os.path.join(track_dir, track_data["track_id"] + ext)
                         shutil.copy(file_name, target)
 
+                        # Make a backup of original file just in case
                         copy_to_path = os.path.join(track_success_dir, path)
                         shutil.copy(file_name, target)
+
+                        # Add any new artist to our unique artists list
+                        for artist in track_data["artist-credit"]:
+                            if 'artist' in artist:
+                                a = artist['artist']
+                                artist_id = a['id']
+                                if not (artist_id in unique_artists):
+                                    unique_artists[artist_id] = a['name']
 
                     except UnicodeDecodeError:
                         print "    ERROR: Invalid characters!"
@@ -126,6 +154,14 @@ def process_directory(source_dir, output_dir, serializer, delete_processed):
                     else:
                         shutil.copy(file_name, target)
 
+    # Write out our list of unique artists
+    artist_fn = os.path.join(artist_meta_dir, 'unique_artists.csv')
+    with open(artist_fn, 'wb') as csvfile:
+        artist_writer = csv.writer(csvfile)
+        for artist_id, artist_name in unique_artists.iteritems():
+            print  artist_id + ', ' + artist_name
+            artist_writer.writerow([artist_id.encode('utf-8'), artist_name.encode('utf-8', 'ignore')])
+
 def main():
     """
     Crawls the given directory for audio files (currently only processes FLAC) and
@@ -134,7 +170,7 @@ def main():
 
     Currently will only correctly process flac files (or other
     """
-    parser = argparse.ArgumentParser(description='Get metadata from FLAC files.')
+    parser = argparse.ArgumentParser(description='Get metadata from files.')
     parser.add_argument('input_directory', help="Input audio file.")
     parser.add_argument('output_directory', help="Directory to store output files. MUST ALREADY EXIST for now.")
     args = parser.parse_args()
