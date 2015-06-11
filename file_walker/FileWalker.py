@@ -31,20 +31,20 @@ def process_directory(source_dir, output_dir, serializer, delete_processed):
     track_success_dir = os.path.join(output_dir, 'found')
     if not os.path.exists(track_success_dir):
         os.makedirs(track_success_dir)
-    print "Track Success: ", track_success_dir
+    print("Track Success: ", track_success_dir)
 
     track_fail_dir = os.path.join(output_dir, 'not_found')
     if not os.path.exists(track_fail_dir):
         os.makedirs(track_fail_dir)
-    print "Track Faile: ", track_fail_dir
+    print("Track Faile: ", track_fail_dir)
 
     path_start = len(source_dir) + 1
     for root, dir, files in os.walk(source_dir):
         if len(root) > path_start:
             path = root[path_start:]
         else:
-            path = u''
-        print path
+            path = ''
+        print(path)
         for src_name in files:
             file_name = os.path.join(root, src_name)
             copy_to_path = ''
@@ -85,17 +85,17 @@ def process_directory(source_dir, output_dir, serializer, delete_processed):
 
                 elif _file_types[ext] == "id3":
                     raw_metadata = raw_metadata.tags._DictProxy__dict
-                    if u'TXXX:MBID' in raw_metadata:
-                        release_id = raw_metadata[u'TXXX:MBID'].text[0]
+                    if 'TXXX:MBID' in raw_metadata:
+                        release_id = raw_metadata['TXXX:MBID'].text[0]
                         track_num = int(raw_metadata['TRCK'].text[0].split('/')[0]) - 1
                         disc_num = int(raw_metadata['TPOS'].text[0].split('/')[0])
-                    elif u'TXXX:MusicBrainz Album Id' in raw_metadata:
-                        release_id = raw_metadata[u'TXXX:MusicBrainz Album Id'].text[0]
+                    elif 'TXXX:MusicBrainz Album Id' in raw_metadata:
+                        release_id = raw_metadata['TXXX:MusicBrainz Album Id'].text[0]
                         track_num = int(raw_metadata['TRCK'].text[0].split('/')[0]) - 1
                         disc_num = int(raw_metadata['TPOS'].text[0].split('/')[0])
 
                 if release_id > '':
-                    print "Processing " + file_name
+                    print("Processing " + file_name)
                     try:
                         # Check if this is a new release (generally means we are in a new directory)
                         if release_id != current_release_id:
@@ -139,9 +139,9 @@ def process_directory(source_dir, output_dir, serializer, delete_processed):
                                     unique_artists[artist_id] = a['name']
 
                     except UnicodeDecodeError:
-                        print "    ERROR: Invalid characters!"
+                        print("    ERROR: Invalid characters!")
                 else:
-                    print "Skipping " + file_name
+                    print("Skipping " + file_name)
                     copy_to_path = os.path.join(track_fail_dir, path)
 
                 # Move the file out of the source directory
@@ -159,7 +159,7 @@ def process_directory(source_dir, output_dir, serializer, delete_processed):
     with open(artist_fn, 'wb') as csvfile:
         artist_writer = csv.writer(csvfile)
         for artist_id, artist_name in unique_artists.iteritems():
-            print  artist_id + ', ' + artist_name
+            print(artist_id + ', ' + artist_name)
             artist_writer.writerow([artist_id.encode('utf-8'), artist_name.encode('utf-8', 'ignore')])
 
 def main():
