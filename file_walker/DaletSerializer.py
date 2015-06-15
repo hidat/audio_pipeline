@@ -249,7 +249,7 @@ def save_artist(artist, output_dir):
 
             if "disambiguation" in artist:
                 with tag('KEXPDisambiguation'):
-                    text(artist["annotation"]["disambiguation"])
+                    text(artist["disambiguation"])
 
             if "type" in artist:
                 with tag('KEXPArtistType'):
