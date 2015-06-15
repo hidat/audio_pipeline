@@ -62,9 +62,9 @@ def process_directory(source_dir, output_dir, serializer, delete_processed):
                         track_num = int(raw_metadata["tracknumber"][0]) - 1
                         disc_num = int(raw_metadata["discnumber"][0])
                     elif "musicbrainz_albumid" in raw_metadata:
-                        release_id = raw_metadata["musicbrainz_albumid"]
-                        track_num = raw_metadata["tracknumber"]
-                        disc_num =  raw_metadata["discnumber"]
+                        release_id = raw_metadata["musicbrainz_albumid"][0]
+                        track_num = int(raw_metadata["tracknumber"][0]) - 1
+                        disc_num =  int(raw_metadata["discnumber"][0])
 
                 elif _file_types[ext] == "aac":
                     #raw_metadata.tags._DictProxy__dict['----:com.apple.iTunes:MBID']

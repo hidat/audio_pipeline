@@ -220,8 +220,11 @@ def save_artist(artist, output_dir):
                 text(artist["id"])
             with tag('ItemCode'):
                 text(artist["id"])
-            with tag('title'):      # need to figure out what's title vs KEXPName
-                text(artist["name"])
+            title = artist["name"]
+            if "disambiguation" in artist:
+                title = title + " (" + artist["disambiguation"] + ")"
+            with tag('title'):
+                text(title)
             with tag('GlossaryType'):
                 text('Artist')
             with tag('KEXPName'):
@@ -243,9 +246,10 @@ def save_artist(artist, output_dir):
                 if "annotation" in artist["annotation"]:
                     with tag('KEXPAnnotation'):
                         text(artist["annotation"]["text"])
-                if "disambiguation" in artist["annotation"]:
-                    with tag('KEXPDisambiguation'):
-                        text(artist["annotation"]["disambiguation"])
+
+            if "disambiguation" in artist:
+                with tag('KEXPDisambiguation'):
+                    text(artist["annotation"]["disambiguation"])
 
             if "type" in artist:
                 with tag('KEXPArtistType'):
@@ -255,6 +259,7 @@ def save_artist(artist, output_dir):
                     text(artist["begin-area"]["name"])
                 with tag('KEXPBeginAreaMBID'):
                     text(artist["begin-area"]["id"])
+
             if "life-span" in artist:
                 if "begin" in artist["life-span"]:
                     with tag('KEXPBeginDate'):
@@ -262,9 +267,14 @@ def save_artist(artist, output_dir):
                 if "end" in artist["life-span"]:
                     with tag('KEXPEndDate'):
                         text(artist["life-span"]["end"])
-#                    if 'ended' in artist["life-span"]:
-#                        with tag('KEXPEnded'):
-#                            text("1")
+                    if 'ended' in artist["life-span"]:
+                        if artist["life-span"]["ended"] == True:
+                            with tag('KEXPEnded'):
+                                text("1")
+                        else:
+                            with tag('KEXPEnded'):
+                                text("0")
+
             if "country" in artist:
                 with tag('KEXPCountry'):
                     text(artist["area"]["name"])
