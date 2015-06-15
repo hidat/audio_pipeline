@@ -74,7 +74,7 @@ def process_directory(source_dir, output_dir, serializer, delete_processed):
                         track_num = int(raw_metadata['trkn'][0][0]) - 1
                         disc_num = int(raw_metadata['disk'][0][0])
                     elif '----:com.apple.iTunes:MusicBrainz Album Id' in raw_metadata:
-                        release_id = str(raw_metadata['----:com.apple.iTunes:MusicBrainz Album Id'][0])
+                        release_id = str(raw_metadata['----:com.apple.iTunes:MusicBrainz Album Id'][0], encoding='UTF-8')
                         track_num = int(raw_metadata['trkn'][0][0]) - 1
                         disc_num = int(raw_metadata['disk'][0][0])
                     if '----:com.apple.iTunes:KEXPPRIMARYGENRE' in raw_metadata:
