@@ -201,3 +201,105 @@ def save_release(release, output_dir):
     output_file = path.join(output_dir, 'r' + release["release_id"] + ".xml")
     with open(output_file, "wb") as f:
         f.write(formatted_data.encode("UTF-8"))
+
+def save_artist(artist, output_dir):
+    """
+
+    :param artist:
+    :param output_dir:
+    :return:
+    """
+
+    doc, tag, text = Doc().tagtext()
+
+    doc.asis('<?xml version="1.0" encoding="UTF-8"?>')
+    with tag('Titles'):
+        with tag('GlossaryValue'):
+            # mandatory fields
+            with tag('Key1'):
+                text(artist["id"])
+            with tag('ItemCode'):
+                text(artist["id"])
+            with tag('title'):      # need to figure out what's title vs KEXPName
+                text(artist["name"])
+            with tag('GlossaryType'):
+                text('Artist')
+            with tag('KEXPName'):
+                text(artist["name"])
+            with tag('KEXPSortName'):
+                text(artist["sort-name"])
+            with tag('KEXPMBID'):
+                text(artist["id"])
+
+            # optional fields
+
+            if "alias-list" in artist:
+                for alias in artist["alias-list"]:
+                    if 'alias' in alias:
+                        with tag('KEXPAlias'):
+                            text(alias['alias'])
+
+            if "annotation" in artist:
+                if "annotation" in artist["annotation"]:
+                    with tag('KEXPAnnotation'):
+                        text(artist["annotation"]["text"])
+                if "disambiguation" in artist["annotation"]:
+                    with tag('KEXPDisambiguation'):
+                        text(artist["annotation"]["disambiguation"])
+
+            if "type" in artist:
+                with tag('KEXPArtistType'):
+                    text(artist["type"])
+            if "begin-area" in artist:
+                with tag('KEXPBeginArea'):
+                    text(artist["begin-area"]["name"])
+                with tag('KEXPBeginAreaMBID'):
+                    text(artist["begin-area"]["id"])
+            if "life-span" in artist:
+                if "begin" in artist["life-span"]:
+                    with tag('KEXPBeginDate'):
+                        text(artist["life-span"]["begin"])
+                if "end" in artist["life-span"]:
+                    with tag('KEXPEndDate'):
+                        text(artist["life-span"]["end"])
+                    if 'ended' in artist["life-span"]:
+                        with tag('KEXPEnded'):
+                            text("1")
+            if "country" in artist:
+                with tag('KEXPCountry'):
+                    text(artist["area"]["name"])
+                with tag('KEXPCountryMBID'):
+                    text(artist["area"]["id"])
+            if "end-area" in artist:
+                with tag('KEXPEndArea'):
+                    text(artist["end-area"]["name"])
+                with tag('KEXPEndAreaMBID'):
+                    text(artist["end-area"]["id"])
+
+            if "ipi-list" in artist:
+                for code in artist["ipi-list"]:
+                    with tag('KEXPIPICode'):
+                        text(code)
+
+            if "isni-list" in artist:
+                for code in artist["isni-list"]:
+                    with tag('KEXPISNICode'):
+                        text(code)
+
+            if "url-relation-list" in artist:
+                for link in artist["url-relation-list"]:
+                    if 'target' in link:
+                        with tag('KEXPLink'):
+                            text(link['target'])
+
+            if "artist-relation-list" in artist:
+                for member in artist["artist-relation-list"]:
+                    if member["type"] == 'member of band':
+                        with tag('KEXPMember'):
+                            text(member["artist"]["id"])
+
+    formatted_data = indent(doc.getvalue())
+
+    output_file = path.join(output_dir, 'r' + artist["id"] + ".xml")
+    with open(output_file, "wb") as f:
+        f.write(formatted_data.encode("UTF-8"))

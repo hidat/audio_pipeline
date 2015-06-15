@@ -36,7 +36,7 @@ def process_directory(source_dir, output_dir, serializer, delete_processed):
     track_fail_dir = os.path.join(output_dir, 'not_found')
     if not os.path.exists(track_fail_dir):
         os.makedirs(track_fail_dir)
-    print("Track Faile: ", track_fail_dir)
+    print("Track Fail: ", track_fail_dir)
 
     path_start = len(source_dir) + 1
     for root, dir, files in os.walk(source_dir):
@@ -95,7 +95,7 @@ def process_directory(source_dir, output_dir, serializer, delete_processed):
                         disc_num = int(raw_metadata['TPOS'].text[0].split('/')[0])
 
                 if release_id > '':
-                    print("Processing " + file_name)
+                    print("Processing " + ascii(file_name))
                     try:
                         # Check if this is a new release (generally means we are in a new directory)
                         if release_id != current_release_id:
@@ -137,11 +137,12 @@ def process_directory(source_dir, output_dir, serializer, delete_processed):
                                 artist_id = a['id']
                                 if not (artist_id in unique_artists):
                                     unique_artists[artist_id] = a['name']
+                                    serializer.save_artist(MBInfo.get_artist(artist_id), artist_meta_dir)
 
                     except UnicodeDecodeError:
                         print("    ERROR: Invalid characters!")
                 else:
-                    print("Skipping " + file_name)
+                    print("Skipping " + ascii(file_name))
                     copy_to_path = os.path.join(track_fail_dir, path)
 
                 # Move the file out of the source directory
@@ -156,11 +157,11 @@ def process_directory(source_dir, output_dir, serializer, delete_processed):
 
     # Write out our list of unique artists
     artist_fn = os.path.join(artist_meta_dir, 'unique_artists.csv')
-    with open(artist_fn, 'wb') as csvfile:
-        artist_writer = csv.writer(csvfile)
-        for artist_id, artist_name in unique_artists.iteritems():
-            print(artist_id + ', ' + artist_name)
-            artist_writer.writerow([artist_id.encode('utf-8'), artist_name.encode('utf-8', 'ignore')])
+    # with open(artist_fn, 'wb') as csvfile:
+    #    artist_writer = csv.writer(csvfile)
+    #    for artist_id, artist_name in unique_artists.iteritems():
+    #        print(artist_id + ', ' + artist_name)
+    #        artist_writer.writerow([artist_id.encode('utf-8'), artist_name.encode('utf-8', 'ignore')])
 
 def main():
     """
