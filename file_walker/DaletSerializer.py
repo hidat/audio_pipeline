@@ -262,9 +262,9 @@ def save_artist(artist, output_dir):
                 if "end" in artist["life-span"]:
                     with tag('KEXPEndDate'):
                         text(artist["life-span"]["end"])
-                    if 'ended' in artist["life-span"]:
-                        with tag('KEXPEnded'):
-                            text("1")
+#                    if 'ended' in artist["life-span"]:
+#                        with tag('KEXPEnded'):
+#                            text("1")
             if "country" in artist:
                 with tag('KEXPCountry'):
                     text(artist["area"]["name"])
