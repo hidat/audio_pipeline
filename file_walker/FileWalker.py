@@ -136,8 +136,18 @@ def process_directory(source_dir, output_dir, serializer, delete_processed):
                                 a = artist['artist']
                                 artist_id = a['id']
                                 if not (artist_id in unique_artists):
+                                    artist_meta = MBInfo.get_artist(artist_id)
                                     unique_artists[artist_id] = a['name']
-                                    serializer.save_artist(MBInfo.get_artist(artist_id), artist_meta_dir)
+                                    artist_members = []
+                                    if "artist-relation-list" in artist_meta:
+                                        for member in artist_meta["artist-relation-list"]:
+                                            member_id = member["artist"]["id"]
+                                            if not (member_id in unique_artists):
+                                                if member["type"] == 'member of band':
+                                                    unique_artists[member_id] = member["artist"]["name"]
+                                                    artist_members.append(MBInfo.get_artist(member_id))
+
+                                    serializer.save_artist(artist_meta, artist_members, artist_meta_dir)
 
                     except UnicodeDecodeError:
                         print("    ERROR: Invalid characters!")
