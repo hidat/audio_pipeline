@@ -270,7 +270,7 @@ def save_artist(artist, artist_members, output_dir):
                         with tag('KEXPEndDate'):
                             text(member["life-span"]["end"])
                         if 'ended' in member["life-span"]:
-                            if member["life-span"]["ended"] == True:
+                            if member["life-span"]["ended"].lower() == "true":
                                 with tag('KEXPEnded'):
                                     text("1")
                             else:
@@ -359,7 +359,7 @@ def save_artist(artist, artist_members, output_dir):
                     with tag('KEXPEndDate'):
                         text(artist["life-span"]["end"])
                     if 'ended' in artist["life-span"]:
-                        if artist["life-span"]["ended"] == True:
+                        if artist["life-span"]["ended"].lower() == "true":
                             with tag('KEXPEnded'):
                                 text("1")
                         else:
