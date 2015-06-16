@@ -288,7 +288,7 @@ def save_one_artist(artist, tag, text):
             with tag('KEXPEndDate'):
                 text(artist["life-span"]["end"])
             if 'ended' in artist["life-span"]:
-                if artist["life-span"]["ended"] == True:
+                if artist["life-span"]["ended"].lower() == "true":
                     with tag('KEXPEnded'):
                         text("1")
                 else:
