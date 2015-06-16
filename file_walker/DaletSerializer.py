@@ -216,182 +216,10 @@ def save_artist(artist, artist_members, output_dir):
     with tag('Titles'):
         for member in artist_members:
             with tag('GlossaryValue'):
-
-                # mandatory fields
-                with tag('Key1'):
-                    text(member["id"])
-                with tag('ItemCode'):
-                    text(member["id"])
-                title = member["name"]
-                if "disambiguation" in member:
-                    title = title + " (" + member["disambiguation"] + ")"
-                with tag('title'):
-                    text(title)
-                with tag('GlossaryType'):
-                    text('Artist')
-                with tag('KEXPName'):
-                    text(member["name"])
-                with tag('KEXPSortName'):
-                    text(member["sort-name"])
-                with tag('KEXPMBID'):
-                    text(member["id"])
-
-                # optional fields
-
-                if "alias-list" in member:
-                    for alias in member["alias-list"]:
-                        if 'alias' in alias:
-                            with tag('KEXPAlias'):
-                                text(alias['alias'])
-
-                if "annotation" in member:
-                    if "annotation" in member["annotation"]:
-                        with tag('KEXPAnnotation'):
-                            text(member["annotation"]["text"])
-
-                if "disambiguation" in member:
-                    with tag('KEXPDisambiguation'):
-                        text(member["disambiguation"])
-
-                if "type" in member:
-                    with tag('KEXPArtistType'):
-                        text(member["type"])
-                if "begin-area" in member:
-                    with tag('KEXPBeginArea'):
-                        text(member["begin-area"]["name"])
-                    with tag('KEXPBeginAreaMBID'):
-                        text(member["begin-area"]["id"])
-
-                if "life-span" in member:
-                    if "begin" in member["life-span"]:
-                        with tag('KEXPBeginDate'):
-                            text(member["life-span"]["begin"])
-                    if "end" in member["life-span"]:
-                        with tag('KEXPEndDate'):
-                            text(member["life-span"]["end"])
-                        if 'ended' in member["life-span"]:
-                            if member["life-span"]["ended"] == True:
-                                with tag('KEXPEnded'):
-                                    text("1")
-                            else:
-                                with tag('KEXPEnded'):
-                                    text("0")
-
-                if "country" in member:
-                    with tag('KEXPCountry'):
-                        text(member["area"]["name"])
-                    with tag('KEXPCountryMBID'):
-                        text(member["area"]["id"])
-                if "end-area" in member:
-                    with tag('KEXPEndArea'):
-                        text(member["end-area"]["name"])
-                    with tag('KEXPEndAreaMBID'):
-                        text(member["end-area"]["id"])
-
-                if "ipi-list" in member:
-                    for code in member["ipi-list"]:
-                        with tag('KEXPIPICode'):
-                            text(code)
-
-                if "isni-list" in member:
-                    for code in member["isni-list"]:
-                        with tag('KEXPISNICode'):
-                            text(code)
-
-                if "url-relation-list" in member:
-                    for link in member["url-relation-list"]:
-                        if 'target' in link:
-                            with tag('KEXPLink'):
-                                text(link['target'])
+                save_one_artist(member, tag, text)
 
         with tag('GlossaryValue'):
-
-            # mandatory fields
-            with tag('Key1'):
-                text(artist["id"])
-            with tag('ItemCode'):
-                text(artist["id"])
-            title = artist["name"]
-            if "disambiguation" in artist:
-                title = title + " (" + artist["disambiguation"] + ")"
-            with tag('title'):
-                text(title)
-            with tag('GlossaryType'):
-                text('Artist')
-            with tag('KEXPName'):
-                text(artist["name"])
-            with tag('KEXPSortName'):
-                text(artist["sort-name"])
-            with tag('KEXPMBID'):
-                text(artist["id"])
-
-            # optional fields
-
-            if "alias-list" in artist:
-                for alias in artist["alias-list"]:
-                    if 'alias' in alias:
-                        with tag('KEXPAlias'):
-                            text(alias['alias'])
-
-            if "annotation" in artist:
-                if "annotation" in artist["annotation"]:
-                    with tag('KEXPAnnotation'):
-                        text(artist["annotation"]["text"])
-
-            if "disambiguation" in artist:
-                with tag('KEXPDisambiguation'):
-                    text(artist["disambiguation"])
-
-            if "type" in artist:
-                with tag('KEXPArtistType'):
-                    text(artist["type"])
-            if "begin-area" in artist:
-                with tag('KEXPBeginArea'):
-                    text(artist["begin-area"]["name"])
-                with tag('KEXPBeginAreaMBID'):
-                    text(artist["begin-area"]["id"])
-
-            if "life-span" in artist:
-                if "begin" in artist["life-span"]:
-                    with tag('KEXPBeginDate'):
-                        text(artist["life-span"]["begin"])
-                if "end" in artist["life-span"]:
-                    with tag('KEXPEndDate'):
-                        text(artist["life-span"]["end"])
-                    if 'ended' in artist["life-span"]:
-                        if artist["life-span"]["ended"] == True:
-                            with tag('KEXPEnded'):
-                                text("1")
-                        else:
-                            with tag('KEXPEnded'):
-                                text("0")
-
-            if "country" in artist:
-                with tag('KEXPCountry'):
-                    text(artist["area"]["name"])
-                with tag('KEXPCountryMBID'):
-                    text(artist["area"]["id"])
-            if "end-area" in artist:
-                with tag('KEXPEndArea'):
-                    text(artist["end-area"]["name"])
-                with tag('KEXPEndAreaMBID'):
-                    text(artist["end-area"]["id"])
-
-            if "ipi-list" in artist:
-                for code in artist["ipi-list"]:
-                    with tag('KEXPIPICode'):
-                        text(code)
-
-            if "isni-list" in artist:
-                for code in artist["isni-list"]:
-                    with tag('KEXPISNICode'):
-                        text(code)
-
-            if "url-relation-list" in artist:
-                for link in artist["url-relation-list"]:
-                    if 'target' in link:
-                        with tag('KEXPLink'):
-                            text(link['target'])
+            save_one_artist(artist, tag, text)
 
             if "artist-relation-list" in artist:
                 for member in artist["artist-relation-list"]:
@@ -404,3 +232,92 @@ def save_artist(artist, artist_members, output_dir):
     output_file = path.join(output_dir, 'r' + artist["id"] + ".xml")
     with open(output_file, "wb") as f:
         f.write(formatted_data.encode("UTF-8"))
+
+
+def save_one_artist(artist, tag, text):
+    # mandatory fields
+    with tag('Key1'):
+        text(artist["id"])
+    with tag('ItemCode'):
+        text(artist["id"])
+    title = artist["name"]
+    if "disambiguation" in artist:
+        title = title + " (" + artist["disambiguation"] + ")"
+    with tag('title'):
+        text(title)
+    with tag('GlossaryType'):
+        text('Artist')
+    with tag('KEXPName'):
+        text(artist["name"])
+    with tag('KEXPSortName'):
+        text(artist["sort-name"])
+    with tag('KEXPMBID'):
+        text(artist["id"])
+
+    # optional fields
+
+    if "alias-list" in artist:
+        for alias in artist["alias-list"]:
+            if 'alias' in alias:
+                with tag('KEXPAlias'):
+                    text(alias['alias'])
+
+    if "annotation" in artist:
+        if "annotation" in artist["annotation"]:
+            with tag('KEXPAnnotation'):
+                text(artist["annotation"]["text"])
+
+    if "disambiguation" in artist:
+        with tag('KEXPDisambiguation'):
+            text(artist["disambiguation"])
+
+    if "type" in artist:
+        with tag('KEXPArtistType'):
+            text(artist["type"])
+    if "begin-area" in artist:
+        with tag('KEXPBeginArea'):
+            text(artist["begin-area"]["name"])
+        with tag('KEXPBeginAreaMBID'):
+            text(artist["begin-area"]["id"])
+
+    if "life-span" in artist:
+        if "begin" in artist["life-span"]:
+            with tag('KEXPBeginDate'):
+                text(artist["life-span"]["begin"])
+        if "end" in artist["life-span"]:
+            with tag('KEXPEndDate'):
+                text(artist["life-span"]["end"])
+            if 'ended' in artist["life-span"]:
+                if artist["life-span"]["ended"] == True:
+                    with tag('KEXPEnded'):
+                        text("1")
+                else:
+                    with tag('KEXPEnded'):
+                        text("0")
+
+    if "country" in artist:
+        with tag('KEXPCountry'):
+            text(artist["area"]["name"])
+        with tag('KEXPCountryMBID'):
+            text(artist["area"]["id"])
+    if "end-area" in artist:
+        with tag('KEXPEndArea'):
+            text(artist["end-area"]["name"])
+        with tag('KEXPEndAreaMBID'):
+            text(artist["end-area"]["id"])
+
+    if "ipi-list" in artist:
+        for code in artist["ipi-list"]:
+            with tag('KEXPIPICode'):
+                text(code)
+
+    if "isni-list" in artist:
+        for code in artist["isni-list"]:
+            with tag('KEXPISNICode'):
+                text(code)
+
+    if "url-relation-list" in artist:
+        for link in artist["url-relation-list"]:
+            if 'target' in link:
+                with tag('KEXPLink'):
+                    text(link['target'])
