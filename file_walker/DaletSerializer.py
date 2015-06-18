@@ -235,6 +235,14 @@ def save_artist(artist, artist_members, output_dir):
 
 
 def save_one_artist(artist, tag, text):
+    """
+    Save one artist data
+
+    :param artist:
+    :param tag:
+    :param text:
+    :return:
+    """
     # mandatory fields
     with tag('Key1'):
         text(artist["id"])
