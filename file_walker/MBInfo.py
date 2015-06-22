@@ -90,7 +90,8 @@ def process_track(mb_release, discnum, tracknum):
     track_info["release_track_id"] = track["id"]
     track_info["track_id"] = track["recording"]["id"]
     track_info["title"] = track["recording"]["title"]
-    track_info["length"] = track["recording"]["length"]
+    if "length" in track["recording"]:
+        track_info["length"] = track["recording"]["length"]
     if ("isrc-list" in track["recording"]):
         track_info["isrcs"] = track["recording"]["isrc-list"]
     track_info["artist-credit"] = track["artist-credit"]

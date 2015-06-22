@@ -48,7 +48,7 @@ def process_directory(source_dir, output_dir, serializer, delete_processed):
             path = root[path_start:]
         else:
             path = ''
-        print(path)
+        print(ascii(path))
         for src_name in files:
             file_name = os.path.join(root, src_name)
             copy_to_path = ''
@@ -59,6 +59,7 @@ def process_directory(source_dir, output_dir, serializer, delete_processed):
                 sha1 = hashlib.sha1()
                 f = open(file_name, 'rb')
                 sha1.update(f.read())
+                f.close()
                 hash_file = os.path.join(processed_hashes, sha1.hexdigest())
 
                 if not os.path.exists(hash_file):
@@ -177,16 +178,9 @@ def process_directory(source_dir, output_dir, serializer, delete_processed):
                             shutil.copy(file_name, target)
 
                     hash_file_d = open(hash_file, 'w+')
-                    hash_file_d.write(file_name)
+                    hash_file_d.write(ascii(file_name))
                     hash_file_d.close()
 
-    # Write out our list of unique artists
-    artist_fn = os.path.join(artist_meta_dir, 'unique_artists.csv')
-    # with open(artist_fn, 'wb') as csvfile:
-    #    artist_writer = csv.writer(csvfile)
-    #    for artist_id, artist_name in unique_artists.iteritems():
-    #        print(artist_id + ', ' + artist_name)
-    #        artist_writer.writerow([artist_id.encode('utf-8'), artist_name.encode('utf-8', 'ignore')])
 
 def main():
     """
