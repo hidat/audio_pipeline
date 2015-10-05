@@ -154,6 +154,7 @@ def save_release(release, output_dir):
             with tag('KEXPReleaseGroupMBID'):
                 text(release["release_group_id"])
             full_name = ''    
+            dist_cat = ''
             for artist in release["artist-credit"]:
     
                 if 'artist' in artist:
@@ -161,10 +162,17 @@ def save_release(release, output_dir):
                     full_name = full_name + a['name']
                     with tag('KEXPArtist'):
                         text(a['id'])
+
+                    dist_cat = a['sort-name']
+                    if 'disambiguation' in a:
+                        dist_cat = dist_cat + ' (' + a['disambiguation'] + ')'
                 else:
                     full_name = full_name + artist
+                    dist_cat = full_name
             with tag('KEXPReleaseArtistCredit'):
                 text(full_name)
+            with tag('KEXPDistributionCategory'):
+                text(dist_cat)
                 
             for label in release["labels"]:
                 if 'label-info' in label:
