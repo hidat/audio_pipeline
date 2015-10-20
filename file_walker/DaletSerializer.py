@@ -2,6 +2,7 @@ __author__ = 'hidat'
 
 from yattag import Doc, indent
 import os.path as path
+import uuid as UUID
 
 def serialize(metadata, release_data, track_data, old_file):
     """
@@ -33,6 +34,7 @@ def serialize(metadata, release_data, track_data, old_file):
     """
 
     doc, tag, text = Doc().tagtext()
+    uuid = str(UUID.uuid4())
 
     doc.asis('<?xml version="1.0" encoding="UTF-8"?>')
     with tag('titles'):
@@ -52,9 +54,9 @@ def serialize(metadata, release_data, track_data, old_file):
             with tag('KEXPTrackMBID'):
                 text(track_data["release_track_id"])
             with tag('ItemCode'):
-                text(track_data["release_track_id"])
+                text(uuid)
             with tag('Key1'):
-                text(track_data["release_track_id"])
+                text(uuid)
             with tag('KEXPRecordingMBID'):
                 text(track_data["track_id"])
             with tag('Title'):
