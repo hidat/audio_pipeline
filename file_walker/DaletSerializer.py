@@ -2,7 +2,6 @@ __author__ = 'hidat'
 
 from yattag import Doc, indent
 import os.path as path
-import uuid as UUID
 
 def serialize(metadata, release_data, track_data, old_file):
     """
@@ -34,7 +33,6 @@ def serialize(metadata, release_data, track_data, old_file):
     """
 
     doc, tag, text = Doc().tagtext()
-    uuid = str(UUID.uuid4())
 
     doc.asis('<?xml version="1.0" encoding="UTF-8"?>')
     with tag('titles'):
@@ -54,9 +52,9 @@ def serialize(metadata, release_data, track_data, old_file):
             with tag('KEXPTrackMBID'):
                 text(track_data["release_track_id"])
             with tag('ItemCode'):
-                text(uuid)
+                text(track_data["item_code"])
             with tag('Key1'):
-                text(uuid)
+                text(track_data["item_code"])
             with tag('KEXPRecordingMBID'):
                 text(track_data["track_id"])
             with tag('Title'):
@@ -67,7 +65,7 @@ def serialize(metadata, release_data, track_data, old_file):
                 text(track_data["track_count"].__str__())
             with tag('KEXPPrimaryGenre'):
                 text(track_data["kexp_category"].__str__())
-            with tag('KEXPObsenityRating'):
+            with tag('KEXPFCCObscenityRating'):
                 text(track_data["kexp_obscenity_rating"].__str__())
 
             full_name = ""
@@ -105,7 +103,7 @@ def save_track(metadata, release_data, track_data, old_file, output_dir):
 
     formatted_data = serialize(metadata, release_data, track_data, old_file)
 
-    output_file = path.join(output_dir, track_data["track_id"] + ".xml")
+    output_file = path.join(output_dir, track_data["item_code"] + ".xml")
     with open(output_file, "wb") as f:
         f.write(formatted_data.encode("UTF-8"))
 

@@ -8,6 +8,7 @@ import JsonSerializer
 import DaletSerializer
 import csv
 import hashlib
+import uuid as UUID
 
 _file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis"}
 
@@ -129,13 +130,17 @@ def process_directory(source_dir, output_dir, serializer, delete_processed):
                             track_data['kexp_category'] = kexp_category
                             track_data['kexp_obscenity_rating'] = kexp_obscenity_rating
 
+                            # Assign a unique item code so we can have multiple tracks with the same MBID
+                            uuid = str(UUID.uuid4())
+                            track_data["item_code"] = uuid
+                            
                             # Extract artist information
 
                             # Save the metadata
                             serializer.save_track(raw_metadata, release, track_data, file_name, track_meta_dir)
 
                             # Copy files to to success directory
-                            target = os.path.join(track_dir, track_data["track_id"] + ext)
+                            target = os.path.join(track_dir, track_data["item_code"] + ext)
                             shutil.copy(file_name, target)
 
                             # Make a backup of original file just in case
