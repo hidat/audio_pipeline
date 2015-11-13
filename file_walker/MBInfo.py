@@ -23,6 +23,7 @@ def get_artist(artist_id):
 #####
 def process_release(mb_release, discnum):
     disc_index = discnum - 1
+        
     release_info = {}
     release_info["release_id"] = mb_release['id']
     release_info["disc_num"] = discnum
@@ -38,7 +39,12 @@ def process_release(mb_release, discnum):
 
     if ('title' in mb_release["medium-list"][disc_index]):
         release_info["disc-title"] = mb_release["medium-list"][disc_index]['title']
-
+            
+    if ('format' in mb_release['medium-list'][disc_index]):
+        release_info['format'] = mb_release["medium-list"][disc_index]['format']
+    else:
+        release_info['format'] = ""
+        
     release_info["artist-credit"] = mb_release['artist-credit']
     if ("disambiguation" in mb_release):
         release_info["disambiguation"] = mb_release['disambiguation']

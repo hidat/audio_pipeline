@@ -12,7 +12,7 @@ import uuid as UUID
 
 _file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis"}
 
-def process_directory(source_dir, output_dir, serializer, delete_processed):
+def process_directory(source_dir, output_dir, source, serializer, delete_processed):
     cached_mb_releases = {}
     unique_artists = {}
     current_release_id = ''
@@ -137,7 +137,7 @@ def process_directory(source_dir, output_dir, serializer, delete_processed):
                             # Extract artist information
 
                             # Save the metadata
-                            serializer.save_track(raw_metadata, release, track_data, file_name, track_meta_dir)
+                            serializer.save_track(raw_metadata, release, track_data, source, file_name, track_meta_dir)
 
                             # Copy files to to success directory
                             target = os.path.join(track_dir, track_data["item_code"] + ext)
@@ -198,8 +198,9 @@ def main():
     parser = argparse.ArgumentParser(description='Get metadata from files.')
     parser.add_argument('input_directory', help="Input audio file.")
     parser.add_argument('output_directory', help="Directory to store output files. MUST ALREADY EXIST for now.")
+    parser.add_argument('-s', '--source', default="CD Library", help="KEXPSource value - Melly or CD Library; defaults to CD Library")
     args = parser.parse_args()
-    process_directory(args.input_directory, args.output_directory, DaletSerializer, False)
+    process_directory(args.input_directory, args.output_directory, args.source, DaletSerializer, False)
 
 
 main()

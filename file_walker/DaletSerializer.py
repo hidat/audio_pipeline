@@ -3,15 +3,15 @@ __author__ = 'hidat'
 from yattag import Doc, indent
 import os.path as path
 
-def serialize(metadata, release_data, track_data, old_file):
+def serialize(metadata, release_data, track_data, source, old_file):
     """
-    Produces a json-formatted string of all metadata
+    Produces a Dalet-happy XML-formatted string of all metadata
 
     :param metadata: The raw metadata
     :param release_data: The release metadata from musicbrainz
     :param track_data: The track metadata from musicbrainz
     :param old_file: The name of the original file
-    :return: A json-formatted string with all metadata
+    :return: An XML-formatted string with all metadata
 
         <KEXPRelease>abf86b2b-6a77-4e68-87e2-56a824f5a608</KEXPRelease>
         <KEXPMediumNumber>1</KEXPMediumNumber>
@@ -30,10 +30,11 @@ def serialize(metadata, release_data, track_data, old_file):
         <KEXPTotalTracks>13</KEXPTotalTracks>
         <KEXPReleaseArtistDistributionRule>T</KEXPReleaseArtistDistributionRule>
         <KEXPVariousArtistReleaseTitleDistributionRule>E</KEXPVariousArtistReleaseTitleDistributionRule>
+        <KEXPContentType>music library track</KEXPContentType>
     """
 
     doc, tag, text = Doc().tagtext()
-
+    
     doc.asis('<?xml version="1.0" encoding="UTF-8"?>')
     with tag('titles'):
         with tag('title'):
@@ -43,12 +44,14 @@ def serialize(metadata, release_data, track_data, old_file):
                 text(release_data["disc_num"].__str__())
             with tag('KEXPTotalMediums'):
                 text(release_data["disc_count"].__str__())
+            # keep track of artist sort-name for KEXPReleaseArtistDistributionRule
+            sort_name = " "
             for artist in release_data["artist-credit"]:
                 if 'artist' in artist:
                     a = artist['artist']
                     with tag('KEXPReleaseArtistSortName'):
-                        text(a['sort-name'])
-
+                        sort_name = a['sort-name']
+                        text(sort_name)
             with tag('KEXPTrackMBID'):
                 text(track_data["release_track_id"])
             with tag('ItemCode'):
@@ -81,15 +84,19 @@ def serialize(metadata, release_data, track_data, old_file):
             with tag('KEXPArtistCredit'):
                 text(full_name)
             with tag('KEXPReleaseArtistDistributionRule'):
-                text('T')
+                text(sort_name[:1])
             with tag('KEXPVariousArtistReleaseTitleDistributionRule'):
-                text('E')
+                text(release_data["release-title"][:1])
+            with tag('KEXPContentType'):
+                text("music library track")
+            with tag('KEXPSource'):
+                text(source)
 
 
     return indent(doc.getvalue())
 
 
-def save_track(metadata, release_data, track_data, old_file, output_dir):
+def save_track(metadata, release_data, track_data, source, old_file, output_dir):
     """
     Prints json-formatted metadata to a file
 
@@ -101,8 +108,8 @@ def save_track(metadata, release_data, track_data, old_file, output_dir):
     :return:
     """
 
-    formatted_data = serialize(metadata, release_data, track_data, old_file)
-
+    formatted_data = serialize(metadata, release_data, track_data, source, old_file)
+    
     output_file = path.join(output_dir, track_data["item_code"] + ".xml")
     with open(output_file, "wb") as f:
         f.write(formatted_data.encode("UTF-8"))
@@ -137,7 +144,12 @@ def save_release(release, output_dir):
     """
 
     doc, tag, text = Doc().tagtext()
-
+    
+    print(release)
+        
+    # glossary_title = release['release_title'] + release['artist-credit'] + release['date'] + release['country'] + release['labels'] + release['format'] + release['catalog-number']
+    glossary_title = release['release-title']
+    
     doc.asis('<?xml version="1.0" encoding="UTF-8"?>')
     with tag('Titles'):
         with tag('GlossaryValue'):
@@ -145,8 +157,8 @@ def save_release(release, output_dir):
                 text(release["release_id"])
             with tag('ItemCode'):
                 text(release["release_id"])
-            with tag('title'):
-                text(release["release-title"])
+            with tag('KEXPTitle'):
+                text(release['release-title'])
             with tag('GlossaryType'):
                 text('Release')
             with tag('KEXPMBID'):
@@ -171,15 +183,26 @@ def save_release(release, output_dir):
                     dist_cat = full_name
             with tag('KEXPReleaseArtistCredit'):
                 text(full_name)
+                
+            glossary_title = glossary_title + " " + full_name + " " + release['date'] + " " + release['country']
+                
             with tag('KEXPDistributionCategory'):
                 text(dist_cat)
                 
+            catalog_num_list = []
             for label in release["labels"]:
                 if 'label-info' in label:
                     a = label['label-info']
+                    glossary_title = glossary_title + " " + a['id']
+                    catalog_num_list.append(a['catalog-number'])
                     with tag('KEXPlabel'):
                         text(a['id'])
 
+            glossary_title = glossary_title + " " + release['format']
+            for catalog_num in catalog_num_list:
+                glossary_title = glossary_title + " " + str(catalog_num)
+            with tag('title'):
+                text(glossary_title)
             with tag('KEXPCountryCode'):
                 text(release["country"])
             with tag('KEXPASIN'):
