@@ -78,6 +78,10 @@ def process_directory(source_dir, output_dir, source, category, serializer, dele
                             release_id = raw_metadata["musicbrainz_albumid"][0]
                             track_num = int(raw_metadata["tracknumber"][0]) - 1
                             disc_num =  int(raw_metadata["discnumber"][0])
+                        if "KEXPPRIMARYGENRE" in raw_metadata:
+                            kexp_category = raw_metadata["KEXPPRIMARYGENRE"][0]
+                        if "KEXPFCCOBSCENITYRATING" in raw_metadata:
+                            kexp_obscenity_rating = raw_metadata["KEXPFCCOBSCENITYRATING"][0]
 
                     elif _file_types[ext] == "aac":
                         #raw_metadata.tags._DictProxy__dict['----:com.apple.iTunes:MBID']
@@ -93,7 +97,7 @@ def process_directory(source_dir, output_dir, source, category, serializer, dele
                         if '----:com.apple.iTunes:KEXPPRIMARYGENRE' in raw_metadata:
                             kexp_category = raw_metadata['----:com.apple.iTunes:KEXPPRIMARYGENRE'][0]
                         if '----:com.apple.iTunes:KEXPOBSCENITYRATING' in raw_metadata:
-                            kexp_category = raw_metadata['----:com.apple.iTunes:KEXPOBSCENITYRATING'][0]
+                            kexp_obscenity_rating = raw_metadata['----:com.apple.iTunes:KEXPOBSCENITYRATING'][0]
 
 
                     elif _file_types[ext] == "id3":
@@ -106,6 +110,10 @@ def process_directory(source_dir, output_dir, source, category, serializer, dele
                             release_id = raw_metadata['TXXX:MusicBrainz Album Id'].text[0]
                             track_num = int(raw_metadata['TRCK'].text[0].split('/')[0]) - 1
                             disc_num = int(raw_metadata['TPOS'].text[0].split('/')[0])
+                        if 'TXXX:KEXPPRIMARYGENRE' in raw_metadata:
+                            kexp_category = raw_metadata['TXXX:KEXPPRIMARYGENRE'].text[0]
+                        if 'TXXX:KEXPFCCOBSCENITYRATING' in raw_metadata:
+                            kexp_obscenity_rating = raw_metadata['TXXX:KEXPFCCOBSCENITYRATING'].text[0]
 
                     if release_id > '':
                         print("Processing " + ascii(file_name))
@@ -195,13 +203,15 @@ def main():
 
     Currently will only correctly process flac files (or other
     """
-    options = {"Recent Acquisitions": "ACQ", "ACQ": "ACQ", "Electronic": "ELE", "ELE": "ELE", "Experimental": "EXP", "EXP": "EXP", "Hip Hop": "HIP", "HIP": "HIP", "Jazz": "JAZ", "JAZ": "JAZ", "Live on KEXP": "LIV", "LIV": "LIV", "Local": "LOC", "Reggae": "REG", "REG": "REG", "Rock": "ROCK", "Pop": "ROC", "Rock/Pop": "ROC", "ROC": "ROC", "Roots": "ROO", "ROO": "ROO", "Rotation": "ROT", "ROT": "ROT", "Shows Around Town": "SHO", "SHO": "SHO", "Soundtracks": "SOU", "SOU": "SOU", "World": "WOR", "WOR": "WOR"}
+    options = {"ACQ": "Recent Acquisitions", "ELE": "Electronic", "EXP": "Experimental", "HIP": "Hip Hop", "JAZ": "Jazz", "LIV": "Live on KEXP", "LOC": "Local", "REG": "Reggae", "ROC": "Rock/Pop", "ROO": "Roots", "ROT": "Rotation", "SHO": "Shows Around Town", "SOU": "Soundtracks", "WOR": "World"}
+    #options = {"Recent Acquisitions": "ACQ", "ACQ": "ACQ", "Electronic": "ELE", "ELE": "ELE", "Experimental": "EXP", "EXP": "EXP", "Hip Hop": "HIP", "HIP": "HIP", "Jazz": "JAZ", "JAZ": "JAZ", "Live on KEXP": "LIV", "LIV": "LIV", "Local": "LOC", "Reggae": "REG", "REG": "REG", "Rock": "ROCK", "Pop": "ROC", "Rock/Pop": "ROC", "ROC": "ROC", "Roots": "ROO", "ROO": "ROO", "Rotation": "ROT", "ROT": "ROT", "Shows Around Town": "SHO", "SHO": "SHO", "Soundtracks": "SOU", "SOU": "SOU", "World": "WOR", "WOR": "WOR"}
     parser = argparse.ArgumentParser(description='Get metadata from files.')
     parser.add_argument('input_directory', help="Input audio file.")
     parser.add_argument('output_directory', help="Directory to store output files. MUST ALREADY EXIST for now.")
     parser.add_argument('category', choices=["Recent Acquisitions", "ACQ", "Electronic", "ELE", "Experimental", "EXP", "Hip Hop", "HIP", "Jazz", "JAZ", "Live on KEXP", "LIV", "Local", "Reggae", "REG", "Rock", "Pop", "Rock/Pop", "ROC", "Roots", "ROO", "Rotation", "ROT", "Shows Around Town", "SHO", "Soundtracks", "SOU", "World", "WOR"], help="Category or genre of releases being filewalked")
     parser.add_argument('-s', '--source', default="CD Library", choices=["CD Library", "Melly"], help="KEXPSource value - Melly or CD Library; defaults to CD Library")
     args = parser.parse_args()
+    source = args.source if (args.source not in options) else options[args.source]
     process_directory(args.input_directory, args.output_directory, args.source, options[args.category], DaletSerializer, False)
 
 

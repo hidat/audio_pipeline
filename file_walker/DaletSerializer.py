@@ -219,7 +219,7 @@ def save_release(release, category, output_dir):
             for item in release["tags"]:
                 with tag('KEXPTag'):
                     text(release["tag"]["name"])
-            with tag('KEXPCategory'):
+            with tag('KEXPPrimaryGenre'):
                 text(category)
             #with tag('KEXPLength'):
             #    text(release[""])
