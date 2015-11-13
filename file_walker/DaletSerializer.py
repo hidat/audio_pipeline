@@ -114,7 +114,7 @@ def save_track(metadata, release_data, track_data, source, old_file, output_dir)
     with open(output_file, "wb") as f:
         f.write(formatted_data.encode("UTF-8"))
 
-def save_release(release, output_dir):
+def save_release(release, category, output_dir):
     """
 		<KEXPMBID>release-xxxx-xxxx-xxxxx-xxxxxxx</KEXPMBID>
 		<KEXPReleaseGroupMBID>releasegroup MBID</KEXPReleaseGroupMBID>
@@ -144,9 +144,7 @@ def save_release(release, output_dir):
     """
 
     doc, tag, text = Doc().tagtext()
-    
-    print(release)
-        
+            
     # glossary_title = release['release_title'] + release['artist-credit'] + release['date'] + release['country'] + release['labels'] + release['format'] + release['catalog-number']
     glossary_title = release['release-title']
     
@@ -221,6 +219,8 @@ def save_release(release, output_dir):
             for item in release["tags"]:
                 with tag('KEXPTag'):
                     text(release["tag"]["name"])
+            with tag('KEXPCategory'):
+                text(category)
             #with tag('KEXPLength'):
             #    text(release[""])
             #for item in release["links"]:

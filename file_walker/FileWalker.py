@@ -12,7 +12,7 @@ import uuid as UUID
 
 _file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis"}
 
-def process_directory(source_dir, output_dir, source, serializer, delete_processed):
+def process_directory(source_dir, output_dir, source, category, serializer, delete_processed):
     cached_mb_releases = {}
     unique_artists = {}
     current_release_id = ''
@@ -121,7 +121,7 @@ def process_directory(source_dir, output_dir, source, serializer, delete_process
                                     mb_release = MBInfo.get_release(release_id)
                                     cached_mb_releases[release_id] = mb_release
                                     release = MBInfo.process_release(mb_release, disc_num)
-                                    serializer.save_release(release, release_meta_dir)
+                                    serializer.save_release(release, category, release_meta_dir)
 
                             # Pull metadata from MusicBrainz
                             track_data = MBInfo.process_track(mb_release, disc_num, track_num)
@@ -195,12 +195,14 @@ def main():
 
     Currently will only correctly process flac files (or other
     """
+    options = {"Recent Acquisitions": "ACQ", "ACQ": "ACQ", "Electronic": "ELE", "ELE": "ELE", "Experimental": "EXP", "EXP": "EXP", "Hip Hop": "HIP", "HIP": "HIP", "Jazz": "JAZ", "JAZ": "JAZ", "Live on KEXP": "LIV", "LIV": "LIV", "Local": "LOC", "Reggae": "REG", "REG": "REG", "Rock": "ROCK", "Pop": "ROC", "Rock/Pop": "ROC", "ROC": "ROC", "Roots": "ROO", "ROO": "ROO", "Rotation": "ROT", "ROT": "ROT", "Shows Around Town": "SHO", "SHO": "SHO", "Soundtracks": "SOU", "SOU": "SOU", "World": "WOR", "WOR": "WOR"}
     parser = argparse.ArgumentParser(description='Get metadata from files.')
     parser.add_argument('input_directory', help="Input audio file.")
     parser.add_argument('output_directory', help="Directory to store output files. MUST ALREADY EXIST for now.")
-    parser.add_argument('-s', '--source', default="CD Library", help="KEXPSource value - Melly or CD Library; defaults to CD Library")
+    parser.add_argument('category', choices=["Recent Acquisitions", "ACQ", "Electronic", "ELE", "Experimental", "EXP", "Hip Hop", "HIP", "Jazz", "JAZ", "Live on KEXP", "LIV", "Local", "Reggae", "REG", "Rock", "Pop", "Rock/Pop", "ROC", "Roots", "ROO", "Rotation", "ROT", "Shows Around Town", "SHO", "Soundtracks", "SOU", "World", "WOR"], help="Category or genre of releases being filewalked")
+    parser.add_argument('-s', '--source', default="CD Library", choices=["CD Library", "Melly"], help="KEXPSource value - Melly or CD Library; defaults to CD Library")
     args = parser.parse_args()
-    process_directory(args.input_directory, args.output_directory, args.source, DaletSerializer, False)
+    process_directory(args.input_directory, args.output_directory, args.source, options[args.category], DaletSerializer, False)
 
 
 main()

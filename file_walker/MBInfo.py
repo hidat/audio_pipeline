@@ -91,7 +91,7 @@ def process_track(mb_release, discnum, tracknum):
 
     track = mb_release["medium-list"][disc_index]["track-list"][tracknum]
     track_info = {}
-    track_info["track_num"] = tracknum
+    track_info["track_num"] = mb_release["medium-list"][disc_index]["track-list"][tracknum]['number']
     track_info["track_count"] = len(mb_release["medium-list"][disc_index]["track-list"])
     track_info["release_track_id"] = track["id"]
     track_info["track_id"] = track["recording"]["id"]
