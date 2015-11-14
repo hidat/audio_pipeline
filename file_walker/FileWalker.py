@@ -9,6 +9,7 @@ import DaletSerializer
 import csv
 import hashlib
 import uuid as UUID
+import sys
 
 _file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis"}
 
@@ -65,7 +66,14 @@ def process_directory(source_dir, output_dir, source, category, serializer, dele
 
                 if not os.path.exists(hash_file):
                     # Get the MusicBrainz Release ID from the file
-                    raw_metadata = mutagen.File(file_name)
+                    try:
+                        raw_metadata = mutagen.File(file_name)
+                    except IOError:
+                        print("Error reading file {0}".format(ascii(file_name)))
+                        print("Skipping " + ascii(file_name))
+                        copy_to_path = os.path.join(track_fail_dir, path)
+                        break
+                        
                     release_id = ''
                     kexp_obscenity_rating = ''
                     kexp_category = ''

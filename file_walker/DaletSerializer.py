@@ -182,23 +182,24 @@ def save_release(release, category, output_dir):
             with tag('KEXPReleaseArtistCredit'):
                 text(full_name)
                 
-            glossary_title = glossary_title + " " + full_name + " " + release['date'] + " " + release['country']
-                
+            glossary_title = "{0} {1} {2} {3} ".format(glossary_title, full_name, release['date'], release['country'])
             with tag('KEXPDistributionCategory'):
                 text(dist_cat)
                 
             catalog_num_list = []
             for label in release["labels"]:
-                if 'label-info' in label:
-                    a = label['label-info']
-                    glossary_title = glossary_title + " " + a['id']
-                    catalog_num_list.append(a['catalog-number'])
+                if 'label' in label:
+                    a = label['label']
+                    glossary_title = "{0} {1}".format(glossary_title, a['name'])
                     with tag('KEXPlabel'):
                         text(a['id'])
-
-            glossary_title = glossary_title + " " + release['format']
+                if 'catalog-number' in label:
+                    catalog_num_list.append(label['catalog-number'])
+            
+            glossary_title = "{0} {1}".format(glossary_title, release['format'])
             for catalog_num in catalog_num_list:
-                glossary_title = glossary_title + " " + str(catalog_num)
+                glossary_title = "{0} {1}".format(glossary_title, str(catalog_num))
+            print(glossary_title)
             with tag('title'):
                 text(glossary_title)
             with tag('KEXPCountryCode'):
