@@ -199,7 +199,6 @@ def save_release(release, category, output_dir):
             glossary_title = "{0} {1}".format(glossary_title, release['format'])
             for catalog_num in catalog_num_list:
                 glossary_title = "{0} {1}".format(glossary_title, str(catalog_num))
-            print(glossary_title)
             with tag('title'):
                 text(glossary_title)
             with tag('KEXPCountryCode'):

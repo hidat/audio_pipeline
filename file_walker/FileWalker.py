@@ -11,7 +11,7 @@ import hashlib
 import uuid as UUID
 import sys
 
-_file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis"}
+_file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis", "ERROR_EXT": "ERROR_EXT"}
 
 def process_directory(source_dir, output_dir, source, category, serializer, delete_processed):
     cached_mb_releases = {}
@@ -63,16 +63,15 @@ def process_directory(source_dir, output_dir, source, category, serializer, dele
                 sha1.update(f.read())
                 f.close()
                 hash_file = os.path.join(processed_hashes, sha1.hexdigest())
-
+                
                 if not os.path.exists(hash_file):
                     # Get the MusicBrainz Release ID from the file
                     try:
                         raw_metadata = mutagen.File(file_name)
                     except IOError:
-                        print("Error reading file {0}".format(ascii(file_name)))
-                        print("Skipping " + ascii(file_name))
+                        print("Errror reading file {0}".format(ascii(file_name)))
                         copy_to_path = os.path.join(track_fail_dir, path)
-                        break
+                        ext = "ERROR_EXT"
                         
                     release_id = ''
                     kexp_obscenity_rating = ''
@@ -205,14 +204,14 @@ def process_directory(source_dir, output_dir, source, category, serializer, dele
 
 def main():
     """
-    Crawls the given directory for audio files (currently only processes FLAC) and
+    Crawls the given directory for audio files and
     extracts raw metadata (expected to be acquired by ripping using dBpoweramp) and
-    metadata from musicbrainz, json-formatted.
+    metadata from musicbrainz.
 
     Currently will only correctly process flac files (or other
     """
-    options = {"ACQ": "Recent Acquisitions", "ELE": "Electronic", "EXP": "Experimental", "HIP": "Hip Hop", "JAZ": "Jazz", "LIV": "Live on KEXP", "LOC": "Local", "REG": "Reggae", "ROC": "Rock/Pop", "ROO": "Roots", "ROT": "Rotation", "SHO": "Shows Around Town", "SOU": "Soundtracks", "WOR": "World"}
-    #options = {"Recent Acquisitions": "ACQ", "ACQ": "ACQ", "Electronic": "ELE", "ELE": "ELE", "Experimental": "EXP", "EXP": "EXP", "Hip Hop": "HIP", "HIP": "HIP", "Jazz": "JAZ", "JAZ": "JAZ", "Live on KEXP": "LIV", "LIV": "LIV", "Local": "LOC", "Reggae": "REG", "REG": "REG", "Rock": "ROCK", "Pop": "ROC", "Rock/Pop": "ROC", "ROC": "ROC", "Roots": "ROO", "ROO": "ROO", "Rotation": "ROT", "ROT": "ROT", "Shows Around Town": "SHO", "SHO": "SHO", "Soundtracks": "SOU", "SOU": "SOU", "World": "WOR", "WOR": "WOR"}
+    options = {"ACQ": "Recent Acquisitions", "ELE": "Electronic", "EXP": "Experimental", "HIP": "Hip Hop", "JAZ": "Jazz", "LIV": "Live on KEXP", "LOC": "Local", "REG": "Reggae", "ROC": "Rock/Pop", "Rock": "Rock/Pop", "Pop": "Rock/Pop", "ROO": "Roots", "ROT": "Rotation", "SHO": "Shows Around Town", "SOU": "Soundtracks", "WOR": "World"}
+    #options = {"Recent Acquisitions": "ACQ", "Electronic": "ELE", "Experimental": "EXP", "Hip Hop": "HIP", "Jazz": "JAZ", "Live on KEXP": "LIV", "Local": "LOC", "Reggae": "REG", "Rock": "ROCK", "Pop": "ROC", "Rock/Pop": "ROC", "Roots": "ROO", "Rotation": "ROT", "Shows Around Town": "SHO", "Soundtracks": "SOU", "World": "WOR"}
     parser = argparse.ArgumentParser(description='Get metadata from files.')
     parser.add_argument('input_directory', help="Input audio file.")
     parser.add_argument('output_directory', help="Directory to store output files. MUST ALREADY EXIST for now.")
