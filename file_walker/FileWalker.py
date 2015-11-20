@@ -13,7 +13,7 @@ import sys
 
 _file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis", "ERROR_EXT": "ERROR_EXT"}
 
-def process_directory(source_dir, output_dir, source, category, serializer, delete_processed):
+def process_directory(source_dir, output_dir, input_release_meta, input_track_meta, serializer, delete_processed):
     cached_mb_releases = {}
     unique_artists = {}
     current_release_id = ''
@@ -102,9 +102,9 @@ def process_directory(source_dir, output_dir, source, category, serializer, dele
                             track_num = int(raw_metadata['trkn'][0][0]) - 1
                             disc_num = int(raw_metadata['disk'][0][0])
                         if '----:com.apple.iTunes:KEXPPRIMARYGENRE' in raw_metadata:
-                            kexp_category = raw_metadata['----:com.apple.iTunes:KEXPPRIMARYGENRE'][0]
-                        if '----:com.apple.iTunes:KEXPOBSCENITYRATING' in raw_metadata:
-                            kexp_obscenity_rating = raw_metadata['----:com.apple.iTunes:KEXPOBSCENITYRATING'][0]
+                            kexp_category = str(raw_metadata['----:com.apple.iTunes:KEXPPRIMARYGENRE'][0], encoding='UTF-8')
+                        if '----:com.apple.iTunes:KEXPFCCOBSCENITYRATING' in raw_metadata:
+                            kexp_obscenity_rating = str(raw_metadata['----:com.apple.iTunes:KEXPFCCOBSCENITYRATING'][0], encoding='UTF-8')
 
 
                     elif _file_types[ext] == "id3":
@@ -133,10 +133,12 @@ def process_directory(source_dir, output_dir, source, category, serializer, dele
                                 if release_id in cached_mb_releases:
                                     mb_release = cached_mb_releases[release_id]
                                 else:
+                                    # pull and cache release metadata
                                     mb_release = MBInfo.get_release(release_id)
                                     cached_mb_releases[release_id] = mb_release
                                     release = MBInfo.process_release(mb_release, disc_num)
-                                    serializer.save_release(release, category, release_meta_dir)
+                                    # save release meta
+                                    serializer.save_release(release, input_release_meta, release_meta_dir)
 
                             # Pull metadata from MusicBrainz
                             track_data = MBInfo.process_track(mb_release, disc_num, track_num)
@@ -144,15 +146,17 @@ def process_directory(source_dir, output_dir, source, category, serializer, dele
                             # Add KEXP added metadata from tags
                             track_data['kexp_category'] = kexp_category
                             track_data['kexp_obscenity_rating'] = kexp_obscenity_rating
-
-                            # Assign a unique item code so we can have multiple tracks with the same MBID
-                            uuid = str(UUID.uuid4())
-                            track_data["item_code"] = uuid
                             
-                            # Extract artist information
+                            # If this is a radio edit, assign a unique track id so we can also have a non-radio edit with the same MBID
+                            if kexp_obscenity_rating.upper() == "RADIO EDIT":
+                                item_code = str(UUID.uuid4())
+                            else:
+                                item_code = track_data["release_track_id"]
+                                                                
+                            track_data["item_code"] = item_code
 
-                            # Save the metadata
-                            serializer.save_track(raw_metadata, release, track_data, source, file_name, track_meta_dir)
+                            # Save the track metadata
+                            serializer.save_track(raw_metadata, release, track_data, input_track_meta, file_name, track_meta_dir)
 
                             # Copy files to to success directory
                             target = os.path.join(track_dir, track_data["item_code"] + ext)
@@ -210,16 +214,33 @@ def main():
 
     Currently will only correctly process flac files (or other
     """
-    options = {"ACQ": "Recent Acquisitions", "ELE": "Electronic", "EXP": "Experimental", "HIP": "Hip Hop", "JAZ": "Jazz", "LIV": "Live on KEXP", "LOC": "Local", "REG": "Reggae", "ROC": "Rock/Pop", "Rock": "Rock/Pop", "Pop": "Rock/Pop", "ROO": "Roots", "ROT": "Rotation", "SHO": "Shows Around Town", "SOU": "Soundtracks", "WOR": "World"}
-    #options = {"Recent Acquisitions": "ACQ", "Electronic": "ELE", "Experimental": "EXP", "Hip Hop": "HIP", "Jazz": "JAZ", "Live on KEXP": "LIV", "Local": "LOC", "Reggae": "REG", "Rock": "ROCK", "Pop": "ROC", "Rock/Pop": "ROC", "Roots": "ROO", "Rotation": "ROT", "Shows Around Town": "SHO", "Soundtracks": "SOU", "World": "WOR"}
+    # dict of passed choices -> what we want for category, source, and rotation
+    options = {"acq": "Recent Acquisitions", "recent acquisitions": "Recent Acquisitions", "electronic": "Electronic",
+               "ele": "Electronic", "exp": "Experimental", "experimental": "Experimental", "hip": "Hip Hop",
+               "hip hop": "Hip Hop", "jaz": "Jazz", "jazz": "Jazz", "liv": "Live on KEXP", "live on kexp": "Live on Kexp",
+               "loc": "Local", "local": "Local", "reg": "Reggae", "reggae": "Reggae", "roc": "Rock/Pop", "rock": "Rock/Pop",
+               "pop": "Rock/Pop", "rock/pop": "Rock/Pop", "roo": "Roots", "roots": "Roots",
+               "rot": "Rotation", "rotation": "Rotation", "sho": "Shows Around Town", "shows around town": "Shows Around Town",
+               "sou": "Soundtracks", "soundtracks": "Soundtracks", "wor": "World", "world": "World",
+               "cd library": "CD Library", "melly": "Melly",
+               "heavy": "Heavy", "library": "Library", "light": "Light", "medium": "Medium", "r/n": "R/N"}
+               
     parser = argparse.ArgumentParser(description='Get metadata from files.')
     parser.add_argument('input_directory', help="Input audio file.")
     parser.add_argument('output_directory', help="Directory to store output files. MUST ALREADY EXIST for now.")
-    parser.add_argument('category', choices=["Recent Acquisitions", "ACQ", "Electronic", "ELE", "Experimental", "EXP", "Hip Hop", "HIP", "Jazz", "JAZ", "Live on KEXP", "LIV", "Local", "Reggae", "REG", "Rock", "Pop", "Rock/Pop", "ROC", "Roots", "ROO", "Rotation", "ROT", "Shows Around Town", "SHO", "Soundtracks", "SOU", "World", "WOR"], help="Category or genre of releases being filewalked")
-    parser.add_argument('-s', '--source', default="CD Library", choices=["CD Library", "Melly"], help="KEXPSource value - Melly or CD Library; defaults to CD Library")
+    parser.add_argument('-c', '--category', type=str.lower, choices=["recent acquisitions", "acq", "electronc", "ele", "experimental", "exp", "hip hop", "hip", "jaz", "jazz", "live on kexp", "liv", "local", "reggae", "reg", "rock", "pop", "rock/pop", "roc", "roots", "roo", "rotation", "rot", "shows around town", "sho", "soundtracks", "sou", "world", "wor"], help="Category or genre of releases being filewalked")
+    parser.add_argument('-s', '--source', type=str.lower, choices=["cd library", "melly"], help="KEXPSource value - Melly or CD Library")
+    parser.add_argument('-r', '--rotation', type=str.lower, choices=["heavy", "library", "light", "medium", "r/n"], help="Rotation workflow value")
+    
     args = parser.parse_args()
-    source = args.source if (args.source not in options) else options[args.source]
-    process_directory(args.input_directory, args.output_directory, args.source, options[args.category], DaletSerializer, False)
+        
+    input_release_meta = {}
+    input_track_meta = {}
+    input_release_meta["category"] = options[args.category] if args.category != None else " "
+    input_release_meta["rotation"] = options[args.rotation] if args.rotation != None else " "
+    input_track_meta["source"] = options[args.source] if args.source != None else " "
+        
+    process_directory(args.input_directory, args.output_directory, input_release_meta, input_track_meta, DaletSerializer, False)
 
 
 main()

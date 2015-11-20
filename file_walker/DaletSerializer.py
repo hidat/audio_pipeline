@@ -3,7 +3,7 @@ __author__ = 'hidat'
 from yattag import Doc, indent
 import os.path as path
 
-def serialize(metadata, release_data, track_data, source, old_file):
+def serialize(metadata, release_data, track_data, input_meta, old_file):
     """
     Produces a Dalet-happy XML-formatted string of all metadata
 
@@ -90,13 +90,13 @@ def serialize(metadata, release_data, track_data, source, old_file):
             with tag('KEXPContentType'):
                 text("music library track")
             with tag('KEXPSource'):
-                text(source)
+                text(input_meta["source"])
 
 
     return indent(doc.getvalue())
 
 
-def save_track(metadata, release_data, track_data, source, old_file, output_dir):
+def save_track(metadata, release_data, track_data, input_meta, old_file, output_dir):
     """
     Prints json-formatted metadata to a file
 
@@ -108,13 +108,13 @@ def save_track(metadata, release_data, track_data, source, old_file, output_dir)
     :return:
     """
 
-    formatted_data = serialize(metadata, release_data, track_data, source, old_file)
+    formatted_data = serialize(metadata, release_data, track_data, input_meta, old_file)
     
     output_file = path.join(output_dir, track_data["item_code"] + ".xml")
     with open(output_file, "wb") as f:
         f.write(formatted_data.encode("UTF-8"))
 
-def save_release(release, category, output_dir):
+def save_release(release, input_meta, output_dir):
     """
 		<KEXPMBID>release-xxxx-xxxx-xxxxx-xxxxxxx</KEXPMBID>
 		<KEXPReleaseGroupMBID>releasegroup MBID</KEXPReleaseGroupMBID>
@@ -220,7 +220,9 @@ def save_release(release, category, output_dir):
                 with tag('KEXPTag'):
                     text(release["tag"]["name"])
             with tag('KEXPPrimaryGenre'):
-                text(category)
+                text(input_meta["category"])
+            with tag('KEXPReleaseRotationStatus'):
+                text(input_meta["rotation"])
             #with tag('KEXPLength'):
             #    text(release[""])
             #for item in release["links"]:
