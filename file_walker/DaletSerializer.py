@@ -2,6 +2,7 @@ __author__ = 'hidat'
 
 from yattag import Doc, indent
 import os.path as path
+import unicodedata
 
 def serialize(metadata, release_data, track_data, input_meta, old_file):
     """
@@ -10,6 +11,7 @@ def serialize(metadata, release_data, track_data, input_meta, old_file):
     :param metadata: The raw metadata
     :param release_data: The release metadata from musicbrainz
     :param track_data: The track metadata from musicbrainz
+    :param input_meta: The metadata from the command line
     :param old_file: The name of the original file
     :return: An XML-formatted string with all metadata
 
@@ -83,10 +85,17 @@ def serialize(metadata, release_data, track_data, input_meta, old_file):
                     full_name = full_name + artist
             with tag('KEXPArtistCredit'):
                 text(full_name)
+                
+            artistDistRule = sort_name[:1]
+            if not artistDistRule.isalpha():
+                artistDistRule = '#'
+#            else:
+#                artistDistRule = unicodedata.normalize('NFKD', artistDistRule).encode('ASCII', 'ignore').decode()
+            
             with tag('KEXPReleaseArtistDistributionRule'):
-                text(sort_name[:1])
+                text(artistDistRule)
             with tag('KEXPVariousArtistReleaseTitleDistributionRule'):
-                text(release_data["release-title"][:1])
+                text(release_data["release_title"][:1])
             with tag('KEXPContentType'):
                 text("music library track")
             with tag('KEXPSource'):
@@ -146,17 +155,17 @@ def save_release(release, input_meta, output_dir):
     doc, tag, text = Doc().tagtext()
             
     # glossary_title = release['release_title'] + release['artist-credit'] + release['date'] + release['country'] + release['labels'] + release['format'] + release['catalog-number']
-    glossary_title = release['release-title']
+    glossary_title = release['release_title']
     
     doc.asis('<?xml version="1.0" encoding="UTF-8"?>')
     with tag('Titles'):
         with tag('GlossaryValue'):
             with tag('Key1'):
-                text(release["release_id"])
+                text(release["item_code"])
             with tag('ItemCode'):
-                text(release["release_id"])
+                text(release["item_code"])
             with tag('KEXPTitle'):
-                text(release['release-title'])
+                text(release['release_title'])
             with tag('GlossaryType'):
                 text('Release')
             with tag('KEXPMBID'):
@@ -231,6 +240,7 @@ def save_release(release, input_meta, output_dir):
 
     formatted_data = indent(doc.getvalue())
 
+    
     output_file = path.join(output_dir, 'r' + release["release_id"] + ".xml")
     with open(output_file, "wb") as f:
         f.write(formatted_data.encode("UTF-8"))
@@ -278,14 +288,11 @@ def save_one_artist(artist, tag, text):
     """
     # mandatory fields
     with tag('Key1'):
-        text(artist["id"])
+        text(artist["item_code"])
     with tag('ItemCode'):
-        text(artist["id"])
-    title = artist["name"]
-    if "disambiguation" in artist:
-        title = title + " (" + artist["disambiguation"] + ")"
+        text(artist["item_code"])
     with tag('title'):
-        text(title)
+        text(artist["title"])
     with tag('GlossaryType'):
         text('Artist')
     with tag('KEXPName'):

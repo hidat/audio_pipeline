@@ -10,14 +10,16 @@ import csv
 import hashlib
 import uuid as UUID
 import sys
+import datetime
 
 _file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis", "ERROR_EXT": "ERROR_EXT"}
 
 def process_directory(source_dir, output_dir, input_release_meta, input_track_meta, serializer, delete_processed):
     cached_mb_releases = {}
     unique_artists = {}
+    unique_labels = set([])
     current_release_id = ''
-
+    
     track_meta_dir = os.path.join(output_dir, 'track_meta')
     if not os.path.exists(track_meta_dir):
         os.makedirs(track_meta_dir)
@@ -44,6 +46,17 @@ def process_directory(source_dir, output_dir, input_release_meta, input_track_me
         os.makedirs(track_fail_dir)
     print("Track Fail: ", track_fail_dir)
 
+    log_dir = os.path.join(output_dir, 'session_logs')
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+    print("Logs: ", log_dir)
+    
+    # set up current log file
+    date_time = datetime.datetime
+    ts = date_time.now()
+    # create & open log file
+    log_file_name = os.path.join(log_dir, ts.strftime("filewalker_log_%d-%m-%y-%H%M%S%f.txt"))
+    
     path_start = len(source_dir) + 1
     for root, dir, files in os.walk(source_dir):
         if len(root) > path_start:
@@ -59,9 +72,9 @@ def process_directory(source_dir, output_dir, input_release_meta, input_track_me
 
                 # check if file is in processed_hash directory
                 sha1 = hashlib.sha1()
-                f = open(file_name, 'rb')
-                sha1.update(f.read())
-                f.close()
+                with open(file_name, 'rb') as f:
+                    sha1.update(f.read())
+                
                 hash_file = os.path.join(processed_hashes, sha1.hexdigest())
                 
                 if not os.path.exists(hash_file):
@@ -72,7 +85,7 @@ def process_directory(source_dir, output_dir, input_release_meta, input_track_me
                         print("Errror reading file {0}".format(ascii(file_name)))
                         copy_to_path = os.path.join(track_fail_dir, path)
                         ext = "ERROR_EXT"
-                        
+                    
                     release_id = ''
                     kexp_obscenity_rating = ''
                     kexp_category = ''
@@ -123,6 +136,11 @@ def process_directory(source_dir, output_dir, input_release_meta, input_track_me
                             kexp_obscenity_rating = raw_metadata['TXXX:KEXPFCCOBSCENITYRATING'].text[0]
 
                     if release_id > '':
+                    
+                        # open log file for writing log data
+                        # currently the log file will be littered with duplicate tracks
+                        log_file = open(log_file_name, 'ab')
+                    
                         print("Processing " + ascii(file_name))
                         try:
                             # Check if this is a new release (generally means we are in a new directory)
@@ -139,7 +157,13 @@ def process_directory(source_dir, output_dir, input_release_meta, input_track_me
                                     release = MBInfo.process_release(mb_release, disc_num)
                                     # save release meta
                                     serializer.save_release(release, input_release_meta, release_meta_dir)
-
+                                    # save release to log
+                                    log_file.write(release["log_text"].encode("UTF-8"))
+                                    for label in release["labels"]:
+                                        if 'label' in label:
+                                            label_log = "label\t" + str(label['label']['id']) + "\t" + str(label['label']['name']) + "\r\n"
+                                            log_file.write(label_log.encode("UTF-8"))
+                            
                             # Pull metadata from MusicBrainz
                             track_data = MBInfo.process_track(mb_release, disc_num, track_num)
 
@@ -150,11 +174,17 @@ def process_directory(source_dir, output_dir, input_release_meta, input_track_me
                             # If this is a radio edit, assign a unique track id so we can also have a non-radio edit with the same MBID
                             if kexp_obscenity_rating.upper() == "RADIO EDIT":
                                 item_code = str(UUID.uuid4())
+                                track_type = str("track-with-filewalker-GUID")
                             else:
                                 item_code = track_data["release_track_id"]
-                                                                
+                                track_type = str("track")
+
                             track_data["item_code"] = item_code
 
+                            # Save track info to log file
+                            track_log = track_type + "\t" + str(track_data["item_code"]) + "\t" + str(track_data["title"]) + "\r\n"
+                            log_file.write(track_log.encode("UTF-8"))
+                                
                             # Save the track metadata
                             serializer.save_track(raw_metadata, release, track_data, input_track_meta, file_name, track_meta_dir)
 
@@ -173,7 +203,7 @@ def process_directory(source_dir, output_dir, input_release_meta, input_track_me
                                     artist_id = a['id']
                                     if not (artist_id in unique_artists):
                                         artist_meta = MBInfo.get_artist(artist_id)
-                                        unique_artists[artist_id] = a['name']
+                                        unique_artists[artist_id] = artist_meta['title']
                                         artist_members = []
                                         if "artist-relation-list" in artist_meta:
                                             for member in artist_meta["artist-relation-list"]:
@@ -182,11 +212,17 @@ def process_directory(source_dir, output_dir, input_release_meta, input_track_me
                                                     if member["type"] == 'member of band':
                                                         unique_artists[member_id] = member["artist"]["name"]
                                                         artist_members.append(MBInfo.get_artist(member_id))
-
+                                        
+                                        # add artist to log file
+                                        log = artist_meta["log_text"]
+                                        log_file.write(log.encode("UTF-8"))
+                                        for member in artist_members:
+                                            log_file.write(member["log_text"].encode("UTF-8"))
                                         serializer.save_artist(artist_meta, artist_members, artist_meta_dir)
 
                         except UnicodeDecodeError:
                             print("    ERROR: Invalid characters!")
+                        log_file.close()
                     else:
                         print("Skipping " + ascii(file_name))
                         copy_to_path = os.path.join(track_fail_dir, path)
@@ -201,10 +237,8 @@ def process_directory(source_dir, output_dir, input_release_meta, input_track_me
                         else:
                             shutil.copy(file_name, target)
 
-                    hash_file_d = open(hash_file, 'w+')
-                    hash_file_d.write(ascii(file_name))
-                    hash_file_d.close()
-
+                    with open(hash_file, 'w+') as hash_file_d:
+                        hash_file_d.write(ascii(file_name))
 
 def main():
     """
@@ -228,17 +262,17 @@ def main():
     parser = argparse.ArgumentParser(description='Get metadata from files.')
     parser.add_argument('input_directory', help="Input audio file.")
     parser.add_argument('output_directory', help="Directory to store output files. MUST ALREADY EXIST for now.")
-    parser.add_argument('-c', '--category', type=str.lower, choices=["recent acquisitions", "acq", "electronc", "ele", "experimental", "exp", "hip hop", "hip", "jaz", "jazz", "live on kexp", "liv", "local", "reggae", "reg", "rock", "pop", "rock/pop", "roc", "roots", "roo", "rotation", "rot", "shows around town", "sho", "soundtracks", "sou", "world", "wor"], help="Category or genre of releases being filewalked")
-    parser.add_argument('-s', '--source', type=str.lower, choices=["cd library", "melly"], help="KEXPSource value - Melly or CD Library")
-    parser.add_argument('-r', '--rotation', type=str.lower, choices=["heavy", "library", "light", "medium", "r/n"], help="Rotation workflow value")
+    parser.add_argument('-c', '--category', type=str.casefold, choices=["recent acquisitions", "acq", "electronc", "ele", "experimental", "exp", "hip hop", "hip", "jaz", "jazz", "live on kexp", "liv", "local", "reggae", "reg", "rock", "pop", "rock/pop", "roc", "roots", "roo", "rotation", "rot", "shows around town", "sho", "soundtracks", "sou", "world", "wor"], help="Category or genre of releases being filewalked")
+    parser.add_argument('-s', '--source', type=str.casefold, choices=["cd library", "melly"], help="KEXPSource value - Melly or CD Library")
+    parser.add_argument('-r', '--rotation', type=str.casefold, choices=["heavy", "library", "light", "medium", "r/n"], help="Rotation workflow value")
     
     args = parser.parse_args()
         
     input_release_meta = {}
     input_track_meta = {}
-    input_release_meta["category"] = options[args.category] if args.category != None else " "
-    input_release_meta["rotation"] = options[args.rotation] if args.rotation != None else " "
-    input_track_meta["source"] = options[args.source] if args.source != None else " "
+    input_release_meta["category"] = options[args.category] if args.category != None else ""
+    input_release_meta["rotation"] = options[args.rotation] if args.rotation != None else ""
+    input_track_meta["source"] = options[args.source] if args.source != None else ""
         
     process_directory(args.input_directory, args.output_directory, input_release_meta, input_track_meta, DaletSerializer, False)
 
