@@ -85,17 +85,11 @@ def serialize(metadata, release_data, track_data, input_meta, old_file):
                     full_name = full_name + artist
             with tag('KEXPArtistCredit'):
                 text(full_name)
-                
-            artistDistRule = sort_name[:1]
-            if not artistDistRule.isalpha():
-                artistDistRule = '#'
-#            else:
-#                artistDistRule = unicodedata.normalize('NFKD', artistDistRule).encode('ASCII', 'ignore').decode()
             
             with tag('KEXPReleaseArtistDistributionRule'):
-                text(artistDistRule)
+                text(track_data['artist_dist_rule'])
             with tag('KEXPVariousArtistReleaseTitleDistributionRule'):
-                text(release_data["release_title"][:1])
+                text(track_data['various_artist_dist_rule'])
             with tag('KEXPContentType'):
                 text("music library track")
             with tag('KEXPSource'):
@@ -173,27 +167,20 @@ def save_release(release, input_meta, output_dir):
             with tag('KEXPReleaseGroupMBID'):
                 text(release["release_group_id"])
             full_name = ''    
-            dist_cat = ''
             for artist in release["artist-credit"]:
-    
                 if 'artist' in artist:
                     a = artist['artist']
                     full_name = full_name + a['name']
                     with tag('KEXPArtist'):
                         text(a['id'])
-
-                    dist_cat = a['sort-name']
-                    if 'disambiguation' in a:
-                        dist_cat = dist_cat + ' (' + a['disambiguation'] + ')'
                 else:
                     full_name = full_name + artist
-                    dist_cat = full_name
             with tag('KEXPReleaseArtistCredit'):
                 text(full_name)
                 
             glossary_title = "{0} {1} {2} {3} ".format(glossary_title, full_name, release['date'], release['country'])
             with tag('KEXPDistributionCategory'):
-                text(dist_cat)
+                text(release['distribution_category'])
                 
             catalog_num_list = []
             for label in release["labels"]:
@@ -208,6 +195,10 @@ def save_release(release, input_meta, output_dir):
             glossary_title = "{0} {1}".format(glossary_title, release['format'])
             for catalog_num in catalog_num_list:
                 glossary_title = "{0} {1}".format(glossary_title, str(catalog_num))
+                
+            glossary_title = glossary_title.replace('\\', '-')
+            glossary_title = glossary_title.replace('/', '-')
+            glossary_title = glossary_title.replace('\"', '\'')
             with tag('title'):
                 text(glossary_title)
             with tag('KEXPCountryCode'):

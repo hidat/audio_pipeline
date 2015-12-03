@@ -1,6 +1,7 @@
 __author__ = 'cephalopodblue'
 import os
 import MBInfo
+import MetaProcessor
 import argparse
 import mutagen
 import shutil
@@ -154,7 +155,7 @@ def process_directory(source_dir, output_dir, input_release_meta, input_track_me
                                     # pull and cache release metadata
                                     mb_release = MBInfo.get_release(release_id)
                                     cached_mb_releases[release_id] = mb_release
-                                    release = MBInfo.process_release(mb_release, disc_num)
+                                    release = MetaProcessor.process_release(mb_release, disc_num)
                                     # save release meta
                                     serializer.save_release(release, input_release_meta, release_meta_dir)
                                     # save release to log
@@ -165,7 +166,7 @@ def process_directory(source_dir, output_dir, input_release_meta, input_track_me
                                             log_file.write(label_log.encode("UTF-8"))
                             
                             # Pull metadata from MusicBrainz
-                            track_data = MBInfo.process_track(mb_release, disc_num, track_num)
+                            track_data = MetaProcessor.process_track(mb_release, disc_num, track_num)
 
                             # Add KEXP added metadata from tags
                             track_data['kexp_category'] = kexp_category
