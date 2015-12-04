@@ -30,37 +30,59 @@ Walks a directory structure full of audio files and does the following:
    * Currently files can only be written as Dalet-compatible XML
 
 FileWalker accepts the following options:
+
  * *--source, -s*
-  Record original source of files
-    Valid options:
+ Record original source of files
+
+  Valid options:
+
       Melly
+
       CD Library
       
  * *--category, -c*
-  Record category of files
+ Record category of files
+
     Allowed Values:
-      EXP - Experimental
-      HIP - Hip Hop
-      JAZ - Jazz
-      LOC - Local
-      REG - Reggae
-      ROC - Rock & Pop
-      ROO - Roots
-      SOU - Soundtracks
-      WOR - World
-      ACQ - Recent Acquisitions
-      LIV - Live on KEXP
+
+    EXP - Experimental
+
+    HIP - Hip Hop
+
+    JAZ - Jazz
+
+    LOC - Local
+
+    REG - Reggae
+
+    ROC - Rock & Pop
+
+    ROO - Roots
+
+    SOU - Soundtracks
+
+    WOR - World
+
+    ACQ - Recent Acquisitions
+
+    LIV - Live on KEXP
       
  * *--rotation, -r*
-  Record rotation status of files
-    Allowed values:
+ Record rotation status of files
+
+  Allowed values:
+
       Heavy
+
       Library
+
       Light
+
       Medium
+      
       R/N
       
-To Run
+######To Run
 
 1. Change to the `file_walker` directory
 2. run `FileWalker.py source_directory destination_directory options`
