@@ -195,7 +195,6 @@ def process_directory(source_dir, output_dir, input_release_meta, input_track_me
 
                             # Make a backup of original file just in case
                             copy_to_path = os.path.join(track_success_dir, path)
-                            shutil.copy(file_name, target)
 
                             # Add any new artist to our unique artists list
                             for artist in track_data["artist-credit"]:
@@ -263,6 +262,7 @@ def main():
     parser = argparse.ArgumentParser(description='Get metadata from files.')
     parser.add_argument('input_directory', help="Input audio file.")
     parser.add_argument('output_directory', help="Directory to store output files. MUST ALREADY EXIST for now.")
+    parser.add_argument('-c', '--delete', default=False, help="Delete audio files from input_directory after processing")
     parser.add_argument('-c', '--category', type=str.casefold, choices=["recent acquisitions", "acq", "electronc", "ele", "experimental", "exp", "hip hop", "hip", "jaz", "jazz", "live on kexp", "liv", "local", "reggae", "reg", "rock", "pop", "rock/pop", "roc", "roots", "roo", "rotation", "rot", "shows around town", "sho", "soundtracks", "sou", "world", "wor"], help="Category or genre of releases being filewalked")
     parser.add_argument('-s', '--source', type=str.casefold, choices=["cd library", "melly"], help="KEXPSource value - Melly or CD Library")
     parser.add_argument('-r', '--rotation', type=str.casefold, choices=["heavy", "library", "light", "medium", "r/n"], help="Rotation workflow value")
@@ -275,7 +275,7 @@ def main():
     input_release_meta["rotation"] = options[args.rotation] if args.rotation != None else ""
     input_track_meta["source"] = options[args.source] if args.source != None else ""
         
-    process_directory(args.input_directory, args.output_directory, input_release_meta, input_track_meta, DaletSerializer, False)
+    process_directory(args.input_directory, args.output_directory, input_release_meta, input_track_meta, DaletSerializer, args.delete)
 
 
 main()
