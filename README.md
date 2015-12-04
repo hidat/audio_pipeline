@@ -32,18 +32,14 @@ Walks a directory structure full of audio files and does the following:
 FileWalker accepts the following options:
 
  * *--source, -s*  
-   Record original source of files
-
+    Passes in the source of audio files, to be recorded in XML.  
     Allowed values:
-    
         Melly  
         CD Library
       
  * *--category, -c*   
-   Record category of files
-
+    Passes in the category of audio files, to be recorded in XML.
     Allowed values:
-    
         EXP - Experimental  
         HIP - Hip Hop  
         JAZ - Jazz  
@@ -57,10 +53,8 @@ FileWalker accepts the following options:
         LIV - Live on KEXP
       
  * *--rotation, -r*  
-   Record rotation status of files
-
+    Passes in the rotation status of audio files, to be recorded in XML.
     Allowed values:
-   
         Heavy  
         Library  
         Light  
