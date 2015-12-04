@@ -31,55 +31,37 @@ Walks a directory structure full of audio files and does the following:
 
 FileWalker accepts the following options:
 
- * *--source, -s*
- Record original source of files
+ * *--source, -s*  
+   Record original source of files
 
-  Valid options:
-
-      Melly
-
+    Valid options:
+      Melly  
       CD Library
       
  * *--category, -c*
- Record category of files
+   Record category of files
 
     Allowed Values:
-
-    EXP - Experimental
-
-    HIP - Hip Hop
-
-    JAZ - Jazz
-
-    LOC - Local
-
-    REG - Reggae
-
-    ROC - Rock & Pop
-
-    ROO - Roots
-
-    SOU - Soundtracks
-
-    WOR - World
-
-    ACQ - Recent Acquisitions
-
-    LIV - Live on KEXP
+      EXP - Experimental  
+      HIP - Hip Hop  
+      JAZ - Jazz  
+      LOC - Local  
+      REG - Reggae  
+      ROC - Rock & Pop  
+      ROO - Roots  
+      SOU - Soundtracks  
+      WOR - World  
+      ACQ - Recent Acquisitions  
+      LIV - Live on KEXP
       
- * *--rotation, -r*
- Record rotation status of files
+ * *--rotation, -r*  
+   Record rotation status of files
 
-  Allowed values:
-
-      Heavy
-
-      Library
-
-      Light
-
-      Medium
-      
+   Allowed values:
+      Heavy  
+      Library  
+      Light  
+      Medium  
       R/N
       
 ######To Run
