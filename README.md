@@ -29,46 +29,45 @@ Walks a directory structure full of audio files and does the following:
    * XML files are named according to their ItemCode. Release and Artist XML filenames are given prefix 'r'.
    * Currently files can only be written as Dalet-compatible XML
 
-FileWalker accepts the following options:
+#######FileWalker accepts the following options:
 
- * *--source, -s*  
- 
-        Passes in the source of audio files, to be recorded in XML.  
+ * *--source, -s*
+    Passes in the source of audio files, to be recorded in XML.
         
-        **Allowed values:**
+    **Allowed values:**
     
-            Melly  
-            CD Library
+    - Melly  
+    - CD Library
       
- * *--category, -c*   
+ * *--category, -c*
  
-        Passes in the category of audio files, to be recorded in XML.  
+    Passes in the category of audio files, to be recorded in XML.
         
-        **Allowed values:**
-    
-            EXP - Experimental  
-            HIP - Hip Hop  
-            JAZ - Jazz  
-            LOC - Local  
-            REG - Reggae  
-            ROC - Rock & Pop  
-            ROO - Roots  
-            SOU - Soundtracks  
-            WOR - World  
-            ACQ - Recent Acquisitions  
-            LIV - Live on KEXP
+    **Allowed values:**
+
+    - EXP - Experimental  
+    - HIP - Hip Hop  
+    - JAZ - Jazz  
+    - LOC - Local  
+    - REG - Reggae  
+    - ROC - Rock & Pop  
+    - ROO - Roots  
+    - SOU - Soundtracks  
+    - WOR - World  
+    - ACQ - Recent Acquisitions  
+    - LIV - Live on KEXP
       
  * *--rotation, -r*  
  
-        Passes in the rotation status of audio files, to be recorded in XML.  
+    Passes in the rotation status of audio files, to be recorded in XML.  
         
-        **Allowed values:**
+    **Allowed values:**
     
-            Heavy  
-            Library  
-            Light  
-            Medium  
-            R/N
+    - Heavy   
+    - Library  
+    - Light  
+    - Medium  
+    - R/N
       
 ######To Run
 
