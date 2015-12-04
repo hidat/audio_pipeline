@@ -1,4 +1,4 @@
-# Audio Pipeline [KEXP-specific documentation]
+# Audio Pipeline
 A set of audio processing tools used to process and prepare audio file for ingestion into asset management systems.
 
 ### To Install
@@ -29,9 +29,9 @@ Walks a directory structure full of audio files and does the following:
    * XML files are named according to their ItemCode. Release and Artist XML filenames are given prefix 'r'.
    * Currently files can only be written as Dalet-compatible XML
 
-#######FileWalker accepts the following options:
+######Options:
 
- * *--source, -s*
+ * *--source, -s*  
     Passes in the source of audio files, to be recorded in XML.
         
     **Allowed values:**
@@ -39,8 +39,7 @@ Walks a directory structure full of audio files and does the following:
     - Melly  
     - CD Library
       
- * *--category, -c*
- 
+ * *--category, -c*   
     Passes in the category of audio files, to be recorded in XML.
         
     **Allowed values:**
@@ -57,8 +56,7 @@ Walks a directory structure full of audio files and does the following:
     - ACQ - Recent Acquisitions  
     - LIV - Live on KEXP
       
- * *--rotation, -r*  
- 
+ * *--rotation, -r*   
     Passes in the rotation status of audio files, to be recorded in XML.  
         
     **Allowed values:**
