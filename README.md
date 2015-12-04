@@ -34,35 +34,38 @@ FileWalker accepts the following options:
  * *--source, -s*  
    Record original source of files
 
-    Valid options:
-      Melly  
-      CD Library
+    Allowed values:
+    
+        Melly  
+        CD Library
       
- * *--category, -c*
+ * *--category, -c*   
    Record category of files
 
-    Allowed Values:
-      EXP - Experimental  
-      HIP - Hip Hop  
-      JAZ - Jazz  
-      LOC - Local  
-      REG - Reggae  
-      ROC - Rock & Pop  
-      ROO - Roots  
-      SOU - Soundtracks  
-      WOR - World  
-      ACQ - Recent Acquisitions  
-      LIV - Live on KEXP
+    Allowed values:
+    
+        EXP - Experimental  
+        HIP - Hip Hop  
+        JAZ - Jazz  
+        LOC - Local  
+        REG - Reggae  
+        ROC - Rock & Pop  
+        ROO - Roots  
+        SOU - Soundtracks  
+        WOR - World  
+        ACQ - Recent Acquisitions  
+        LIV - Live on KEXP
       
  * *--rotation, -r*  
    Record rotation status of files
 
-   Allowed values:
-      Heavy  
-      Library  
-      Light  
-      Medium  
-      R/N
+    Allowed values:
+   
+        Heavy  
+        Library  
+        Light  
+        Medium  
+        R/N
       
 ######To Run
 
