@@ -83,13 +83,13 @@ def process_artist(mb_artist):
 # == Process Release
 # Pulls out the release information that we are interested in from the raw MusicBrainz release
 #####
-def process_release(mb_release, discnum):
-    disc_index = discnum - 1
+def process_release(mb_release):
+#    disc_index = discnum - 1
         
     release_info = {}
     release_info["item_code"] = mb_release['id']
     release_info["release_id"] = mb_release['id']
-    release_info["disc_num"] = discnum
+#    release_info["disc_num"] = discnum
     release_info["disc_count"] = len(mb_release["medium-list"])
     release_info["release_title"] = mb_release['title']
     rg = mb_release['release-group']
@@ -100,13 +100,18 @@ def process_release(mb_release, discnum):
     else:
         release_info['tags'] = []
 
-    if ('title' in mb_release["medium-list"][disc_index]):
-        release_info["disc-title"] = mb_release["medium-list"][disc_index]['title']
+#    if ('title' in mb_release["medium-list"][disc_index]):
+#        release_info["disc-title"] = mb_release["medium-list"][disc_index]['title']
+    
+    release_info['format'] = set([])
+    for disc in mb_release["medium-list"]:
+        if 'format' in disc:
+            release_info['format'].add(disc['format'])
             
-    if ('format' in mb_release['medium-list'][disc_index]):
-        release_info['format'] = mb_release["medium-list"][disc_index]['format']
-    else:
-        release_info['format'] = ""
+#    if ('format' in mb_release['medium-list'][disc_index]):
+#        release_info['format'] = mb_release["medium-list"][disc_index]['format']
+#    else:
+#        release_info['format'] = ""
         
     release_info["artist-credit"] = mb_release['artist-credit']
     if ("disambiguation" in mb_release):
@@ -169,6 +174,7 @@ def process_track(mb_release, discnum, tracknum):
 
     track = mb_release["medium-list"][disc_index]["track-list"][tracknum]
     track_info = {}
+    track_info["disc_num"] = discnum
     track_info["track_num"] = tracknum + 1 # change track numbers back to 1-index
     track_info["track_count"] = len(mb_release["medium-list"][disc_index]["track-list"])
     track_info["release_track_id"] = track["id"]

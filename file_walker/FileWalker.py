@@ -144,26 +144,22 @@ def process_directory(source_dir, output_dir, input_release_meta, input_track_me
                     
                         print("Processing " + ascii(file_name))
                         try:
-                            # Check if this is a new release (generally means we are in a new directory)
-                            if release_id != current_release_id:
-                                current_release_id = release_id
-
-                                #See if we have already cached the release, or we need to pull if from MusicBrainz
-                                if release_id in cached_mb_releases:
-                                    mb_release = cached_mb_releases[release_id]
-                                else:
-                                    # pull and cache release metadata
-                                    mb_release = MBInfo.get_release(release_id)
-                                    cached_mb_releases[release_id] = mb_release
-                                    release = MetaProcessor.process_release(mb_release, disc_num)
-                                    # save release meta
-                                    serializer.save_release(release, input_release_meta, release_meta_dir)
-                                    # save release to log
-                                    log_file.write(release["log_text"].encode("UTF-8"))
-                                    for label in release["labels"]:
-                                        if 'label' in label:
-                                            label_log = "label\t" + str(label['label']['id']) + "\t" + str(label['label']['name']) + "\r\n"
-                                            log_file.write(label_log.encode("UTF-8"))
+                            #See if we have already cached the release, or we need to pull if from MusicBrainz
+                            if release_id in cached_mb_releases:
+                                mb_release = cached_mb_releases[release_id]
+                            else:
+                                # pull and cache release metadata
+                                mb_release = MBInfo.get_release(release_id)
+                                cached_mb_releases[release_id] = mb_release
+                                release = MetaProcessor.process_release(mb_release)
+                                # save release meta
+                                serializer.save_release(release, input_release_meta, release_meta_dir)
+                                # save release to log
+                                log_file.write(release["log_text"].encode("UTF-8"))
+                                for label in release["labels"]:
+                                    if 'label' in label:
+                                        label_log = "label\t" + str(label['label']['id']) + "\t" + str(label['label']['name']) + "\r\n"
+                                        log_file.write(label_log.encode("UTF-8"))
                             
                             # Pull metadata from MusicBrainz
                             track_data = MetaProcessor.process_track(mb_release, disc_num, track_num)
@@ -195,7 +191,7 @@ def process_directory(source_dir, output_dir, input_release_meta, input_track_me
 
                             # Make a backup of original file just in case
                             copy_to_path = os.path.join(track_success_dir, path)
-
+                        
                             # Add any new artist to our unique artists list
                             for artist in track_data["artist-credit"]:
                                 if 'artist' in artist:
@@ -262,7 +258,7 @@ def main():
     parser = argparse.ArgumentParser(description='Get metadata from files.')
     parser.add_argument('input_directory', help="Input audio file.")
     parser.add_argument('output_directory', help="Directory to store output files. MUST ALREADY EXIST for now.")
-    parser.add_argument('-c', '--delete', default=False, help="Delete audio files from input_directory after processing")
+    parser.add_argument('-d', '--delete', default=False, help="Delete audio files from input_directory after processing")
     parser.add_argument('-c', '--category', type=str.casefold, choices=["recent acquisitions", "acq", "electronc", "ele", "experimental", "exp", "hip hop", "hip", "jaz", "jazz", "live on kexp", "liv", "local", "reggae", "reg", "rock", "pop", "rock/pop", "roc", "roots", "roo", "rotation", "rot", "shows around town", "sho", "soundtracks", "sou", "world", "wor"], help="Category or genre of releases being filewalked")
     parser.add_argument('-s', '--source', type=str.casefold, choices=["cd library", "melly"], help="KEXPSource value - Melly or CD Library")
     parser.add_argument('-r', '--rotation', type=str.casefold, choices=["heavy", "library", "light", "medium", "r/n"], help="Rotation workflow value")

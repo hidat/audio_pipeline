@@ -43,7 +43,7 @@ def serialize(metadata, release_data, track_data, input_meta, old_file):
             with tag('KEXPRelease'):
                 text(release_data["release_id"])
             with tag('KEXPMediumNumber'):
-                text(release_data["disc_num"].__str__())
+                text(track_data["disc_num"].__str__())
             with tag('KEXPTotalMediums'):
                 text(release_data["disc_count"].__str__())
             # keep track of artist sort-name for KEXPReleaseArtistDistributionRule
@@ -192,7 +192,8 @@ def save_release(release, input_meta, output_dir):
                 if 'catalog-number' in label:
                     catalog_num_list.append(label['catalog-number'])
             
-            glossary_title = "{0} {1}".format(glossary_title, release['format'])
+            
+            glossary_title = "{0} {1}".format(glossary_title, " ".join(release['format']))
             for catalog_num in catalog_num_list:
                 glossary_title = "{0} {1}".format(glossary_title, str(catalog_num))
                 
@@ -263,7 +264,7 @@ def save_artist(artist, artist_members, output_dir):
 
     formatted_data = indent(doc.getvalue())
 
-    output_file = path.join(output_dir, 'r' + artist["id"] + ".xml")
+    output_file = path.join(output_dir, 'a' + artist["id"] + ".xml")
     with open(output_file, "wb") as f:
         f.write(formatted_data.encode("UTF-8"))
 
