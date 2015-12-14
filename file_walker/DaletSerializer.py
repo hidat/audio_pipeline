@@ -220,10 +220,17 @@ def save_release(release, input_meta, output_dir):
             for item in release["tags"]:
                 with tag('KEXPTag'):
                     text(release["tag"]["name"])
-            with tag('KEXPPrimaryGenre'):
-                text(input_meta["category"])
-            with tag('KEXPReleaseRotationStatus'):
-                text(input_meta["rotation"])
+                    
+            if (len(input_meta["rotation"]) > 0):
+                r_status = stringCleanup(input_meta["rotation"])
+                secondary_category = "CATEGORIES/ROTATION/" + r_status
+                with tag('secondary_category'):
+                    text(secondary_category)
+                with tag('KEXPReleaseRotationStatus'):
+                    text(input_meta["rotation"])
+            if (len(input_meta["category"]) > 0):
+                with tag('KEXPPrimaryGenre'):
+                    text(input_meta["category"])
             #with tag('KEXPLength'):
             #    text(release[""])
             #for item in release["links"]:
@@ -361,3 +368,9 @@ def save_one_artist(artist, tag, text):
             if 'target' in link:
                 with tag('KEXPLink'):
                     text(link['target'])
+                    
+def stringCleanup(text):
+    clean = {'\\': '-', '/': '-', '\"': '\''}
+    for character, replacement in clean.items():
+        text = text.replace(character, replacement)
+    return text
