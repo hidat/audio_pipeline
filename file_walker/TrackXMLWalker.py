@@ -17,7 +17,15 @@ import unicodedata
 
 _file_types = set([".xml"])
 
-def process_directory(source_dir, output_dir, glossary_ids, input_release_meta, serializer):
+def process_directory(source_dir, output_dir, glossary_list_file, input_release_meta, serializer):
+
+    glossary_ids = []
+    with open(glossary_list_file, 'r') as f:
+        for line in f:
+            line = unicodedata.normalize('NFKD', line).encode('ascii', 'ignore').decode()
+            glossary_ids.append(line.rstrip())
+    glossary_ids = set(glossary_ids)
+    
     path_start = len(source_dir) + 1
     
     track_meta_dir = os.path.join(output_dir, 'track_meta')
@@ -40,8 +48,17 @@ def process_directory(source_dir, output_dir, glossary_ids, input_release_meta, 
         os.makedirs(log_dir)
     print("Logs: ", log_dir)
     
+    # A bunch of counts for dumb housekeeping / sanity checks
+    list_total_count = len(glossary_ids)
     list_release_count = 0
     list_artist_count = 0
+    list_unknown_count = 0
+    
+    unknown_artists = 0
+    unknown_releases = 0
+    
+    total_releases = 0
+    total_artists = 0
     
     release_ids = set([])
     artist_ids = set([])
@@ -50,14 +67,18 @@ def process_directory(source_dir, output_dir, glossary_ids, input_release_meta, 
     date_time = datetime.datetime
     ts = date_time.now()
     
-    unique_log_id = ts.strftime("filewalker_log_%d-%m-%y-%H%M%S%f.txt")
+    unique_log_id = ts.strftime("%d-%m-%y-%H%M%S%f.txt")
     
     # create standard log file
-    log_file_name = os.path.join(log_dir, unique_log_id)    
+    log_file_name = os.path.join(log_dir, "filewalker_log_" + unique_log_id)    
     # create log of failed glossary IDs
-    failed_log_name = os.path.join(fail_dir, unique_log_id)
+    failed_log_name = os.path.join(fail_dir, "fail_log_" + unique_log_id)
     # log of releases that need new metadata b/c they need to be associated with an artist
-    artist_release_log_name = os.path.join(log_dir, unique_log_id)
+    artist_release_log_name = os.path.join(log_dir, "releases_from_artists_log_" + unique_log_id)
+    
+    # Make a 'log' that's just a copy of the glossary list
+    glossary_list_log_name = os.path.join(log_dir, "glossary_list_log_" + unique_log_id)
+    shutil.copy(glossary_list_file, glossary_list_log_name)
     
     # open standard log file; we'll just open fail and artist log as necessary
     log_file = open(log_file_name, 'ab')
@@ -87,29 +108,34 @@ def process_directory(source_dir, output_dir, glossary_ids, input_release_meta, 
                 artist_id = track_xml.find('KEXPArtist').text
                 
                 if release_id in glossary_ids:
+                    # Keep track of how many glossaries were releases:
+                    if release_id not in release_ids:
+                        list_release_count += 1
+                    
                     # Put this GUID in the release id set so we know to get release XML for items
                     release_ids.add(release_id)
-                    
-                    list_release_count += 1;
                     
                     # copy this track metadata
                     target = os.path.join(track_meta_dir, src_name)
                     shutil.copy(file_name, target)
                 if artist_id in glossary_ids:
+                    # Keep track of how many glossaries were artists:
+                    if artist_id not in artist_ids:
+                        list_artist_count += 1
+                
                     # Put this GUID in the artist id set so we know to get artist XML for items
                     artist_ids.add(artist_id)
-                    
-                    list_artist_count += 1;
-                    
+                                                            
+                    if release_id not in release_ids:
+                        # make a note of releases re-metadataed b/c of artist in the artist_release_log
+                        with open(artist_release_log_name, 'ab') as f:
+                            log_text = "artist\t" + artist_id + "\trelease\t" + release_id + "\r\n"
+                            f.write(log_text.encode("UTF-8"))
+                        
                     # Put release ID of track associated with this artist in release id set
                     # so we get new XML for releases associated with this artist
                     release_ids.add(release_id)
-                    
-                    # make a note of this in the artist_release_log
-                    with open(artist_release_log_name, 'ab') as f:
-                        log_text = "artist\t" + str(artist_id) + "\trelease\t" + str(release_id)
-                        f.write(log_text.encode("UTF-8"))
-                    
+
                     # copy this track metadata
                     target = os.path.join(track_meta_dir, src_name)
                     shutil.copy(file_name, target)
@@ -119,6 +145,8 @@ def process_directory(source_dir, output_dir, glossary_ids, input_release_meta, 
     glossary_ids = glossary_ids.difference(set(release_ids))
     glossary_ids = glossary_ids.difference(set(artist_ids))
     
+    list_unknown_count = len(glossary_ids)
+    
     # All glossary ids in release_ids are definitely releases, so just do a standard serialization
     # There should not be duplicates, and frankly if there are I'm not going to bother filtering them out right now.
     print("\nBEGINNING RELEASE GLOSSARY PROCESSING")
@@ -126,6 +154,9 @@ def process_directory(source_dir, output_dir, glossary_ids, input_release_meta, 
         print("Processing release " + str(release_id))
         try:
             mb_release = MBInfo.get_release(release_id)
+            
+            total_releases += 1
+            
             release = MetaProcessor.process_release(mb_release)
             # save release meta
             serializer.save_release(release, input_release_meta, release_meta_dir)
@@ -147,6 +178,9 @@ def process_directory(source_dir, output_dir, glossary_ids, input_release_meta, 
         try:
             print("Processing artist " + str(artist_id))
             mb_artist = MBInfo.get_artist(artist_id)
+            
+            total_artists += 1
+            
             artist_members = []
             if "artist-relation-list" in mb_artist:
                 for member in mb_artist["artist-relation-list"]:
@@ -176,6 +210,11 @@ def process_directory(source_dir, output_dir, glossary_ids, input_release_meta, 
         try:
             print("Processing " + str(glossary_id) + " as artist")
             mb_artist = MBInfo.get_artist(glossary_id)
+            
+            # successfully retrieved artist info, so this is an artist. increment counter.
+            unknown_artists += 1
+            total_artists += 1
+            
             artist_members = []
             if "artist-relation-list" in mb_artist:
                 for member in mb_artist["artist-relation-list"]:
@@ -196,6 +235,11 @@ def process_directory(source_dir, output_dir, glossary_ids, input_release_meta, 
                 # Glossary ID was not an artist ID, so we'll try again as release ID
                 print("Processing " + str(glossary_id) + " as release")
                 mb_release = MBInfo.get_release(glossary_id)
+                
+                # successfully retrieved release info, so this is a release. increment counter.
+                unknown_releases += 1
+                total_releases += 1
+                
                 release = MetaProcessor.process_release(mb_release)
                 # save release meta
                 serializer.save_release(release, input_release_meta, release_meta_dir)
@@ -211,8 +255,13 @@ def process_directory(source_dir, output_dir, glossary_ids, input_release_meta, 
                 print("ERROR: " + str(glossary_id) + " is not a valid artist or release MBID!")
                 with open(failed_log_name, 'a') as f:
                     f.write(glossary_id)
+                                        
+    print("Total number of glossaries passed in: " + str(list_total_count))
     print("Number of glossaries in list that are releases: " + str(list_release_count))
     print("Number of glossaries in list that are artists: " + str(list_artist_count))
+    print("Number of glossaries in list that were unknown: " + str(list_unknown_count))
+    print("Number of unknown that are releases: " + str(unknown_releases))
+    print("Number of unknown that are artists: " + str(unknown_artists))
     log_file.close()
        
 def main():
@@ -242,11 +291,6 @@ def main():
     input_release_meta["category"] = options[args.category] if args.category != None else ""
     input_release_meta["rotation"] = options[args.rotation] if args.rotation != None else ""
 
-    glossary_ids = []
-    with open(args.glossary_list_file, 'r') as f:
-        for line in f:
-            line = unicodedata.normalize('NFKD', line).encode('ascii', 'ignore').decode()
-            glossary_ids.append(line.rstrip())
-    process_directory(args.input_directory, args.output_directory, set(glossary_ids), input_release_meta, DaletSerializer)
+    process_directory(args.input_directory, args.output_directory, args.glossary_list_file, input_release_meta, DaletSerializer)
 
 main()
