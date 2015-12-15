@@ -40,19 +40,28 @@ def process_directory(source_dir, output_dir, glossary_ids, input_release_meta, 
         os.makedirs(log_dir)
     print("Logs: ", log_dir)
     
+    list_release_count = 0
+    list_artist_count = 0
+    
     release_ids = set([])
     artist_ids = set([])
     
     # set up current log file
     date_time = datetime.datetime
     ts = date_time.now()
-    # create & open log file
-    log_file_name = os.path.join(log_dir, ts.strftime("filewalker_log_%d-%m-%y-%H%M%S%f.txt"))
+    
+    unique_log_id = ts.strftime("filewalker_log_%d-%m-%y-%H%M%S%f.txt")
+    
+    # create standard log file
+    log_file_name = os.path.join(log_dir, unique_log_id)    
+    # create log of failed glossary IDs
+    failed_log_name = os.path.join(fail_dir, unique_log_id)
+    # log of releases that need new metadata b/c they need to be associated with an artist
+    artist_release_log_name = os.path.join(log_dir, unique_log_id)
+    
+    # open standard log file; we'll just open fail and artist log as necessary
     log_file = open(log_file_name, 'ab')
     
-    # create log of failed glossary IDs
-    failed_log_name = os.path.join(fail_dir, ts.strftime("filewalker_failure_log_%d-%m-%y-%H%M%S%f.txt"))
-
     if os.path.basename(source_dir) == '':
         # probably have an extra / in the name; check back one
         source_dir = os.path.dirname(source_dir)
@@ -81,15 +90,25 @@ def process_directory(source_dir, output_dir, glossary_ids, input_release_meta, 
                     # Put this GUID in the release id set so we know to get release XML for items
                     release_ids.add(release_id)
                     
+                    list_release_count += 1;
+                    
                     # copy this track metadata
                     target = os.path.join(track_meta_dir, src_name)
                     shutil.copy(file_name, target)
                 if artist_id in glossary_ids:
                     # Put this GUID in the artist id set so we know to get artist XML for items
                     artist_ids.add(artist_id)
+                    
+                    list_artist_count += 1;
+                    
                     # Put release ID of track associated with this artist in release id set
                     # so we get new XML for releases associated with this artist
                     release_ids.add(release_id)
+                    
+                    # make a note of this in the artist_release_log
+                    with open(artist_release_log_name, 'ab') as f:
+                        log_text = "artist\t" + str(artist_id) + "\trelease\t" + str(release_id)
+                        f.write(log_text.encode("UTF-8"))
                     
                     # copy this track metadata
                     target = os.path.join(track_meta_dir, src_name)
@@ -102,6 +121,7 @@ def process_directory(source_dir, output_dir, glossary_ids, input_release_meta, 
     
     # All glossary ids in release_ids are definitely releases, so just do a standard serialization
     # There should not be duplicates, and frankly if there are I'm not going to bother filtering them out right now.
+    print("\nBEGINNING RELEASE GLOSSARY PROCESSING")
     for release_id in release_ids:
         print("Processing release " + str(release_id))
         try:
@@ -118,9 +138,11 @@ def process_directory(source_dir, output_dir, glossary_ids, input_release_meta, 
         except musicbrainz.ResponseError:
             # if somehow a non-valid release MBID got in the release_ids dict
             # move it back into the glossary_ids list to try at end:
+            System.out.println("MUSICBRAINZ RESPONSE ERROR ON RELEASE " + release_id)
             glossary_ids.append(release_id)
     
     # All glossary IDs in artist_ids are definitely artists. Standard artist meta serialization.
+    print("\nBEGINNING ARTIST GLOSSARY PROCESSING")
     for artist_id in artist_ids:
         try:
             print("Processing artist " + str(artist_id))
@@ -129,7 +151,8 @@ def process_directory(source_dir, output_dir, glossary_ids, input_release_meta, 
             if "artist-relation-list" in mb_artist:
                 for member in mb_artist["artist-relation-list"]:
                     member_id = member['artist']['id']
-                    if member['type'] == 'member of band':
+                    if member['type'] == 'member of band' and "direction" in member \
+                            and member["direction"] == "backward":
                         artist_members.append(MBInfo.get_artist(member_id))
                         
             # add artist to log
@@ -142,11 +165,13 @@ def process_directory(source_dir, output_dir, glossary_ids, input_release_meta, 
         except musicbrainz.ResponseError:
             # If somehow a nonvalid artist MBID got in the artist_ids dict
             # move it back into the glossary_ids list to try at end:
+            System.out.println("MUSICBRAINZ RESPONSE ERROR ON ARTIST " + artist_id)
             glossary_ids.append(artist_id)
 
     # Hopefully all glossary IDs have been properly sorted, but if they haven't:
     # First try w/ glossary ID as artist ID, then w/ glossary ID as release ID
     # For release IDs, we'll just pretend that the disc number is 1 (for now)
+    print("\nPROCESSING UNKNOWN GLOSSARIES")
     for glossary_id in glossary_ids:
         try:
             print("Processing " + str(glossary_id) + " as artist")
@@ -155,7 +180,8 @@ def process_directory(source_dir, output_dir, glossary_ids, input_release_meta, 
             if "artist-relation-list" in mb_artist:
                 for member in mb_artist["artist-relation-list"]:
                     member_id = member['artist']['id']
-                    if member['type'] == 'member of band':
+                    if member['type'] == 'member of band' and "direction" in member \
+                            and member["direction"] == "backward":
                         artist_members.append(MBInfo.get_artist(member_id))
                         
             # add artist to log
@@ -185,6 +211,9 @@ def process_directory(source_dir, output_dir, glossary_ids, input_release_meta, 
                 print("ERROR: " + str(glossary_id) + " is not a valid artist or release MBID!")
                 with open(failed_log_name, 'a') as f:
                     f.write(glossary_id)
+    print("Number of glossaries in list that are releases: " + str(list_release_count))
+    print("Number of glossaries in list that are artists: " + str(list_artist_count))
+    log_file.close()
        
 def main():
     """

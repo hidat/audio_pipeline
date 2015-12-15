@@ -265,7 +265,8 @@ def save_artist(artist, artist_members, output_dir):
 
             if "artist-relation-list" in artist:
                 for member in artist["artist-relation-list"]:
-                    if member["type"] == 'member of band':
+                    if member["type"] == 'member of band' and "direction" in member \
+                            and member["direction"] == "backward":
                         with tag('KEXPMember'):
                             text(member["artist"]["id"])
 

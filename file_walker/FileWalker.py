@@ -205,7 +205,8 @@ def process_directory(source_dir, output_dir, input_release_meta, input_track_me
                                             for member in artist_meta["artist-relation-list"]:
                                                 member_id = member["artist"]["id"]
                                                 if not (member_id in unique_artists):
-                                                    if member["type"] == 'member of band':
+                                                    if member["type"] == 'member of band' and 'direction' in member \
+                                                            and member["direction"] == "backward":
                                                         unique_artists[member_id] = member["artist"]["name"]
                                                         artist_members.append(MBInfo.get_artist(member_id))
                                         
