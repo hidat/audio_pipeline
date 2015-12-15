@@ -73,5 +73,3 @@ Walks a directory structure of audio files and does the following:
 2. run `FileWalker.py source_directory destination_directory options`
 
 IMPORTANT: Audio files must have release MBID, as well as track number and disc number associated with that MBID, for FileWalker to succeed. 
-
-# Audio Pipeline 
