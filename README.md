@@ -4,7 +4,7 @@ A set of audio processing tools used to process and prepare audio file for inges
 ### To Install
 It is assumed that you already have Python 3.4 or greater installed, and it is in your path.
 
-1. Checkout this repository [Branch: Python 3]
+1. Checkout this repository
 2. Install musicbrainzngs  `pip install musicbrainzngs`
 3. Install mutagen  `pip install mutagen`
 4. Install yattag  `pip install yattag`
