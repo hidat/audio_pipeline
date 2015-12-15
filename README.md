@@ -12,7 +12,7 @@ It is assumed that you already have Python 3.4 or greater installed, and it is i
  
 ### Programs
 #### File Walker
-Walks a directory structure full of audio files and does the following:
+Walks a directory structure of audio files and does the following:
  * Pulls out the MusicBrainz Release ID, Track Number, and Disc Number from the file metadata
  * Querys MusicBrainz based on the Release ID, Track Number, and Disc Number, and return the metadata for the Track and Release
  * Querys MusicBrainz based on the Artist ID of all artist's in the album's Artist Credit, and return the metadata for each Artist

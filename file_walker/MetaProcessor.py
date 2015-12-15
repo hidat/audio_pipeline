@@ -4,6 +4,7 @@ import unicodedata
 #####
 # == Process Artist
 # Pulls out the artist metadata that we are interested in from the raw MusicBrainz artist meta
+# NOT CURRENTLY IN USE
 #####
 def process_artist(mb_artist):
     artist_info = {}
@@ -99,20 +100,12 @@ def process_release(mb_release):
         release_info['tags'] = rg['tag-list']
     else:
         release_info['tags'] = []
-
-#    if ('title' in mb_release["medium-list"][disc_index]):
-#        release_info["disc-title"] = mb_release["medium-list"][disc_index]['title']
     
     release_info['format'] = set([])
     for disc in mb_release["medium-list"]:
         if 'format' in disc:
             release_info['format'].add(disc['format'])
-            
-#    if ('format' in mb_release['medium-list'][disc_index]):
-#        release_info['format'] = mb_release["medium-list"][disc_index]['format']
-#    else:
-#        release_info['format'] = ""
-        
+                    
     release_info["artist-credit"] = mb_release['artist-credit']
     if ("disambiguation" in mb_release):
         release_info["disambiguation"] = mb_release['disambiguation']

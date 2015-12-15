@@ -4,37 +4,15 @@ from yattag import Doc, indent
 import os.path as path
 import unicodedata
 
-def serialize(metadata, release_data, track_data, input_meta, old_file):
+def save_track(release_data, track_data, batch_meta, output_dir):
     """
-    Produces a Dalet-happy XML-formatted string of all metadata
+    Create an XML file of track metadata that Dalet will be happy with
 
-    :param metadata: The raw metadata
-    :param release_data: The release metadata from musicbrainz
-    :param track_data: The track metadata from musicbrainz
-    :param input_meta: The metadata from the command line
-    :param old_file: The name of the original file
-    :return: An XML-formatted string with all metadata
-
-        <KEXPRelease>abf86b2b-6a77-4e68-87e2-56a824f5a608</KEXPRelease>
-        <KEXPMediumNumber>1</KEXPMediumNumber>
-        <KEXPTotalMediums>1</KEXPTotalMediums>
-        <KEXPAcoustID>e491f92a-e936-41fb-9ca8-9ef80e5c5cf1</KEXPAcoustID>
-        <KEXPReleaseArtistSortName>THEESatisfaction</KEXPReleaseArtistSortName>
-        <Key1>742531b4-743f-413d-8e0c-98820bdf4f1a</Key1>
-        <ItemCode>742531b4-743f-413d-8e0c-98820bdf4f1a</ItemCode>
-        <KEXPRecordingMBID>64876b1f-f85e-4329-a3c9-1e669b240122</KEXPRecordingMBID>
-        <KEXPTrackMBID>742531b4-743f-413d-8e0c-98820bdf4f1a</KEXPTrackMBID>
-        <Title>EarthEE</Title>
-        <KEXPFCCObscenityRating>YELLOW DOT</KEXPFCCObscenityRating>
-        <KEXPArtistCredit>THEESatisfaction feat. Shabazz Palaces, Porter Ray and Erik Blood</KEXPArtistCredit>
-        <KEXPArtist>bb5edacd-c97d-42df-9174-2fa7abbf69ee</KEXPArtist>
-        <KEXPTrackNumber>7</KEXPTrackNumber>
-        <KEXPTotalTracks>13</KEXPTotalTracks>
-        <KEXPReleaseArtistDistributionRule>T</KEXPReleaseArtistDistributionRule>
-        <KEXPVariousArtistReleaseTitleDistributionRule>E</KEXPVariousArtistReleaseTitleDistributionRule>
-        <KEXPContentType>music library track</KEXPContentType>
+    :param release_data: Processed release metadata from MusicBrainz
+    :param track_data: Processed track metadata from MusicBrainz
+    :param input_meta: Batch metadata (from command line)
+    :param output_dir: Output directory to write XML file to
     """
-
     doc, tag, text = Doc().tagtext()
     
     doc.asis('<?xml version="1.0" encoding="UTF-8"?>')
@@ -93,32 +71,21 @@ def serialize(metadata, release_data, track_data, input_meta, old_file):
             with tag('KEXPContentType'):
                 text("music library track")
             with tag('KEXPSource'):
-                text(input_meta["source"])
+                text(batch_meta["source"])
 
 
-    return indent(doc.getvalue())
-
-
-def save_track(metadata, release_data, track_data, input_meta, old_file, output_dir):
-    """
-    Prints json-formatted metadata to a file
-
-    :param metadata: The raw metadata
-    :param release_data: The release metadata from musicbrainz
-    :param track_data: Track metadata from musicbrainz
-    :param old_file: Original name of the audio file
-    :param output_dir: The directory that file is being written to
-    :return:
-    """
-
-    formatted_data = serialize(metadata, release_data, track_data, input_meta, old_file)
-    
+    formatted_data = indent(doc.getvalue())    
     output_file = path.join(output_dir, track_data["item_code"] + ".xml")
     with open(output_file, "wb") as f:
         f.write(formatted_data.encode("UTF-8"))
 
 def save_release(release, input_meta, output_dir):
     """
+    Create an XML file of release metadata that Dalet will be happy with
+    
+    :param release: Processed release metadata from MusicBrainz
+    :param input_meta: Batch metadata from the command line
+    :param output_dir: Output directory to write XML file to
 		<KEXPMBID>release-xxxx-xxxx-xxxxx-xxxxxxx</KEXPMBID>
 		<KEXPReleaseGroupMBID>releasegroup MBID</KEXPReleaseGroupMBID>
 
@@ -246,10 +213,14 @@ def save_release(release, input_meta, output_dir):
 
 def save_artist(artist, artist_members, output_dir):
     """
-
-    :param artist:
-    :param output_dir:
-    :return:
+    Create an XML file of artist metadata that Dalet will be happy with.
+    
+    If the artist is a group that has multiple members, not an individual, 
+    all member metadata (for artists new to this batch) will also be generated.
+    
+    :param artist: Processed metadata from MusicBrainz for 'main' artist
+    :param artist_members: Processed artist metadata from MusicBrainz for any members of 'artist'
+    :param output_dir: Output directory to write XML file to
     """
 
     doc, tag, text = Doc().tagtext()
@@ -279,12 +250,11 @@ def save_artist(artist, artist_members, output_dir):
 
 def save_one_artist(artist, tag, text):
     """
-    Save one artist data
+    Save the metadata for one artist
 
-    :param artist:
-    :param tag:
-    :param text:
-    :return:
+    :param artist: Processed artist metadata from MusicBrainz
+    :param tag: Yattag 'tag' 
+    :param text: Yattag 'text'
     """
     # mandatory fields
     with tag('Key1'):

@@ -15,7 +15,8 @@ import datetime
 
 _file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis", "ERROR_EXT": "ERROR_EXT"}
 
-def process_directory(source_dir, output_dir, input_release_meta, input_track_meta, serializer, delete_processed):
+
+def process_directory(source_dir, output_dir, input_meta, serializer, delete_processed):
     cached_mb_releases = {}
     unique_artists = {}
     unique_labels = set([])
@@ -153,7 +154,7 @@ def process_directory(source_dir, output_dir, input_release_meta, input_track_me
                                 cached_mb_releases[release_id] = mb_release
                                 release = MetaProcessor.process_release(mb_release)
                                 # save release meta
-                                serializer.save_release(release, input_release_meta, release_meta_dir)
+                                serializer.save_release(release, input_meta, release_meta_dir)
                                 # save release to log
                                 log_file.write(release["log_text"].encode("UTF-8"))
                                 for label in release["labels"]:
@@ -183,7 +184,7 @@ def process_directory(source_dir, output_dir, input_release_meta, input_track_me
                             log_file.write(track_log.encode("UTF-8"))
                                 
                             # Save the track metadata
-                            serializer.save_track(raw_metadata, release, track_data, input_track_meta, file_name, track_meta_dir)
+                            serializer.save_track(release, track_data, input_meta, track_meta_dir)
 
                             # Copy files to to success directory
                             target = os.path.join(track_dir, track_data["item_code"] + ext)
@@ -239,11 +240,9 @@ def process_directory(source_dir, output_dir, input_release_meta, input_track_me
 
 def main():
     """
-    Crawls the given directory for audio files and
-    extracts raw metadata (expected to be acquired by ripping using dBpoweramp) and
-    metadata from musicbrainz.
-
-    Currently will only correctly process flac files (or other
+    Crawls the given directory for audio files, extracting raw metadata
+    and metadata from MusicBrainz.
+    For success, audio file must have a release MBID in metadata.
     """
     # dict of passed choices -> what we want for category, source, and rotation
     options = {"acq": "Recent Acquisitions", "recent acquisitions": "Recent Acquisitions", "electronic": "Electronic",
@@ -260,19 +259,18 @@ def main():
     parser.add_argument('input_directory', help="Input audio file.")
     parser.add_argument('output_directory', help="Directory to store output files. MUST ALREADY EXIST for now.")
     parser.add_argument('-d', '--delete', default=False, help="Delete audio files from input_directory after processing")
-    parser.add_argument('-c', '--category', type=str.casefold, choices=["recent acquisitions", "acq", "electronc", "ele", "experimental", "exp", "hip hop", "hip", "jaz", "jazz", "live on kexp", "liv", "local", "reggae", "reg", "rock", "pop", "rock/pop", "roc", "roots", "roo", "rotation", "rot", "shows around town", "sho", "soundtracks", "sou", "world", "wor"], help="Category or genre of releases being filewalked")
+    parser.add_argument('-c', '--category', type=str.casefold, choices=["recent acquisitions", "acq", "electronic", "ele", "experimental", "exp", "hip hop", "hip", "jaz", "jazz", "live on kexp", "liv", "local", "reggae", "reg", "rock", "pop", "rock/pop", "roc", "roots", "roo", "rotation", "rot", "shows around town", "sho", "soundtracks", "sou", "world", "wor"], help="Category or genre of releases being filewalked")
     parser.add_argument('-s', '--source', type=str.casefold, choices=["cd library", "melly"], help="KEXPSource value - Melly or CD Library")
     parser.add_argument('-r', '--rotation', type=str.casefold, choices=["heavy", "library", "light", "medium", "r/n"], help="Rotation workflow value")
     
     args = parser.parse_args()
         
-    input_release_meta = {}
-    input_track_meta = {}
-    input_release_meta["category"] = options[args.category] if args.category != None else ""
-    input_release_meta["rotation"] = options[args.rotation] if args.rotation != None else ""
-    input_track_meta["source"] = options[args.source] if args.source != None else ""
+    input_meta = {}
+    input_meta["category"] = options[args.category] if args.category != None else ""
+    input_meta["rotation"] = options[args.rotation] if args.rotation != None else ""
+    input_meta["source"] = options[args.source] if args.source != None else ""
         
-    process_directory(args.input_directory, args.output_directory, input_release_meta, input_track_meta, DaletSerializer, args.delete)
+    process_directory(args.input_directory, args.output_directory, input_meta, DaletSerializer, args.delete)
 
 
 main()
