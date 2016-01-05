@@ -131,8 +131,14 @@ class process_directory:
         return release_data, track_data
 
     def update_metadata(self, file_name, new_meta):
-        # save the passed metadata to the specified filename
-        print('asdjkljlaksjd')
+        # saves the key: value tags contained in new_meta
+        # as metadata tags of the audio file
+        audio = mutagen.File(file_name)
+        for tag_name, tag_value in new_meta.items():
+            # check if this tag is already in the metadata
+            # if it is, just overwrite it?
+            audio[str(tag_name)] = tag_value
+            audio.save()
         
     def has_next(self):
         next = False

@@ -11,8 +11,11 @@ def main():
     directory = sys.argv[1]
     meta_model = MetaModel.process_directory(directory)
     
-    frame = MetaView.MetaFrame()
-    frame.mainloop()
+    while meta_model.has_next():
+        releases, tracks = meta_model.get_meta()
+        for dir, release_info in releases.items():
+            frame = MetaView.MetaFrame(release_info, tracks)
+            frame.mainloop()
     
     # while meta_model.has_next():
         # releases, tracks = meta_model.get_meta()
