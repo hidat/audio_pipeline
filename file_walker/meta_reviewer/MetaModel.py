@@ -38,8 +38,10 @@ class process_directory:
         release_dir = os.path.join(self.root, self.cur_release)
         
         # Get next release
-        if (len(self.cur_release) > 0):
+        if self.releases is not None and (len(self.releases) > 0):
             self.cur_release = self.releases.pop()
+        else:
+            self.cur_release = None
             
         files = os.listdir(release_dir)
         # list of release metadata
@@ -134,6 +136,7 @@ class process_directory:
         # saves the key: value tags contained in new_meta
         # as metadata tags of the audio file
         audio = mutagen.File(file_name)
+        print(new_meta)
         for tag_name, tag_value in new_meta.items():
             # check if this tag is already in the metadata
             # if it is, just overwrite it?
@@ -141,11 +144,9 @@ class process_directory:
             audio.save()
         
     def has_next(self):
-        next = False
-        
-        if len(self.releases) > 0:
-            next = True
-        else:
+        if self.cur_release is None or len(self.cur_release) < 1:
             next = False
+        else:
+            next = True
             
         return next

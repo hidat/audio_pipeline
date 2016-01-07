@@ -63,7 +63,16 @@ def save_track(release_data, track_data, batch_meta, output_dir):
                     full_name = full_name + artist
             with tag('KEXPArtistCredit'):
                 text(full_name)
-            
+
+            primary_category = "/i/forgot"
+            if sort_name.casefold() is "various artists":
+                primary_category = primary_category + track_data['various_artist_dist_rule']
+            else:
+                primary_category = primary_category + track_data['artist_dist_rule']
+            primary_category = primary_category + sort_name + "/what"
+
+            with tag('primary_category'):
+                text(primary_category)
             with tag('KEXPReleaseArtistDistributionRule'):
                 text(track_data['artist_dist_rule'])
             with tag('KEXPVariousArtistReleaseTitleDistributionRule'):
