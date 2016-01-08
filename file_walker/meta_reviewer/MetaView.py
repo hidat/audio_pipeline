@@ -3,7 +3,7 @@ from Util import *
 
 class MetaFrame(tk.Frame):
 
-    def __init__(self, release_info, track_info, master=None):
+    def __init__(self, input_processor, release_info, track_info, master=None):
         tk.Frame.__init__(self, master, bg="black")
         
         self.release_frame = tk.Frame(self, bg="black")
@@ -41,7 +41,7 @@ class MetaFrame(tk.Frame):
         self.input.focus_set()
         self.input.select_range(0, tk.END)
 
-        #self.input.bind('<Key-Return>', MetaControl.MetaCotroller.process_contents)
+        self.input.bind('<Key-Return>', input_processor)
         
         self.input_frame.pack(pady=5)
         
@@ -52,19 +52,21 @@ class MetaFrame(tk.Frame):
             for label in self.track_display[name].values():
                 label.config(fg='yellow')
         
+        
     def red(self, name):
         if name in self.track_display.keys():
-            print(name)
             for label in self.track_display[name].values():
                 label.config(fg='red')
         
 
     def clear_input(self):
-        self.input.select_range(0, tk.END)
-        #self.input.delete(0, tk.END)
+        self.input.delete(0, tk.END)
         
+        
+    # split into 'display_release'/'display_track' for initial display
+    # and update_release / update_track, to update the metadata for one track
+    # q - we won't be changing the track titles, so it's okay if they're okay
     def update_release(self, release_info):
-    
         release_display = {}
         for key, value in release_info.items():
             key = str(key)
@@ -113,7 +115,6 @@ class MetaFrame(tk.Frame):
         for name in keys:
             track = self.track_display[name]
             for attribute, label in track.items():
-                print(attribute)
                 label.config(width=frame_widths[attribute])
                 label.pack(side="top")
                 

@@ -13,8 +13,7 @@ class MetaController:
         if self.meta_model.has_next():
             releases, tracks = self.meta_model.get_meta()
             for directory, release_info in releases.items():
-                self.frame = MetaView.MetaFrame(release_info, tracks)
-                self.frame.input.bind('<Key-Return>', self.process_input)
+                self.frame = MetaView.MetaFrame(self.process_input, release_info, tracks)
                 self.frame.mainloop()
 
     def process_input(self, event):
@@ -55,7 +54,6 @@ class MetaController:
             releases, tracks = self.meta_model.get_meta()
             for directory, release_info in releases.items():
                 self.frame = MetaView.MetaFrame(release_info, tracks)
-                self.frame.input.bind('<Key-Return>', self.process_input)
                 self.frame.mainloop()
         else:
             self.frame.quit()
