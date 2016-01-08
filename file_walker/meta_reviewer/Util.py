@@ -10,7 +10,7 @@ release_categories = ["name", "album_artist", "disc_num"]
 
 
 kexp_tags = {"obscenity": "KEXPFCCOBSCENITYRATING", "genre": "KEXPPRIMARYGENRE"}
-kexp_values = {"y": "Yellow Dot", "r": "Red Dot"}
+kexp_values = {"y": "YELLOW DOT", "r": "RED DOT"}
 
 def minutes_seconds(length):
     # turns a floating point value into a string of (approximate)
@@ -19,6 +19,8 @@ def minutes_seconds(length):
     raw = length / 60
     minutes = int(raw)
     seconds = int((raw - minutes) * 60)
+    if seconds < 10:
+        seconds = "0" + str(seconds)
     final = str(minutes) + ":" + str(seconds)
     return final
 
