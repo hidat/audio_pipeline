@@ -2,6 +2,7 @@ import MetaModel
 import MetaView
 import sys
 from Util import *
+import re
 
 
 class MetaController:
@@ -31,12 +32,12 @@ class MetaController:
                 if value == "y" or value == "yellow" or value == "yellow dot":
                     new_meta = {kexp_tags["obscenity"]: kexp_values["y"]}
                     self.meta_model.update_metadata(file_name, new_meta)
-                    self.frame.yellow(file_name)
+                    self.frame.update_track(file_name, new_meta)
                     self.frame.clear_input()
                 elif value == "r" or value == "red" or value == "red dot":
                     new_meta = {kexp_tags["obscenity"]: kexp_values["r"]}
                     self.meta_model.update_metadata(file_name, new_meta)
-                    self.frame.red(file_name)
+                    self.frame.update_track(file_name, new_meta)
                     self.frame.clear_input()
                 else:
                     print("Invalid Input")
@@ -53,7 +54,7 @@ class MetaController:
         if self.meta_model.has_next():
             releases, tracks = self.meta_model.get_meta()
             for directory, release_info in releases.items():
-                self.frame = MetaView.MetaFrame(release_info, tracks)
+                self.frame = MetaView.MetaFrame(self.process_input, release_info, tracks)
                 self.frame.mainloop()
         else:
             self.frame.quit()

@@ -1,39 +1,60 @@
 import tkinter as tk
 from Util import *
 
+bg_color = "black"
+text_color = "light gray"
+yellow = "yellow"
+red = "red"
+heading = ('Helvetica', '10', 'bold')
+standard = ('Ariel', '10')
+
 class MetaFrame(tk.Frame):
 
-    def __init__(self, input_processor, release_info, track_info, master=None):
-        tk.Frame.__init__(self, master, bg="black")
-        
-        self.release_frame = tk.Frame(self, bg="black")
-        self.release_attribute_frames = []
-        for value in release_categories:
-            value = str(value)
-            self.release_attribute_frames.append(tk.Frame(self.release_frame, bg="black"))
-            
+    def __init__(self, input_processor, release_info, track_info, background="black", master=None):
+        global bg_color
+        bg_color = background
+        tk.Frame.__init__(self, master, bg=bg_color)
+
         self.current_tracks = {}
-            
-        self.track_frame = tk.Frame(self, bg="black")
-        self.track_attribute_frames = []
-        for value in track_categories:
-            value = str(value)
-            self.track_attribute_frames.append(tk.Frame(self.track_frame, bg="black"))
 
-        self.track_display = {}
-        self.update_tracks(track_info)
-        self.update_release(release_info)
+        self.release_frame = tk.Frame(self, bg=bg_color)
+        self.track_frame = tk.Frame(self, bg=bg_color)
+        self.input_frame = tk.Frame(self, bg=bg_color)
         
-        self.release_frame.pack(padx=10, pady=5)
-        for frame in self.release_attribute_frames:
-            frame.pack(side="left", padx=20)
-        for frame in self.track_attribute_frames:
-            frame.pack(side="left", padx=20)
-        self.track_frame.pack(padx=10, pady=5)
+        self.release_frame.grid(row=0, column=0, sticky="w", padx=10, pady=5)
+        self.track_frame.grid(row=1, column=0, sticky="e", padx=10, pady=5)
+        self.input_frame.grid(row=2, column=0, sticky="w", padx=10, pady=5)
 
-        self.input_frame = tk.Frame(self)
+        release_attribute_labels = []
+        self.release_attributes = {}
+        colval = 0
+        for value in release_categories:
+            index = release_categories.index(value)
+            value = str(value)
+            release_attribute_label = tk.Label(self.release_frame, fg=text_color, font=heading, 
+                                                 bg=bg_color, text=release_mapping[value])
+            release_attribute_labels.append(release_attribute_label)
+            release_attribute_labels[index].grid(row=0, column=colval, sticky="w", padx=10, pady=5)
+            colval += 1
+
+        self.display_release(release_info)
+
+        track_attribute_labels = []
+        self.track_attributes = {}
+        colval = 1
+        for value in track_categories:
+            index = track_categories.index(value)
+            value = str(value)
+            track_attribute_label = tk.Label(self.track_frame, fg=text_color, font=heading, 
+                                             bg=bg_color, text=track_mapping[value])
+            track_attribute_labels.append(track_attribute_label)
+            track_attribute_labels[index].grid(row=0, column=colval, sticky="w", padx=10, pady=5)
+            colval += 1
+
+        self.display_tracks(track_info)
+
         self.input = tk.Entry(self.input_frame, exportselection=0)
-        self.input.pack()
+        self.input.grid()
 
         self.input_value = tk.StringVar()
         self.input_value.set("Input input here")
@@ -42,81 +63,76 @@ class MetaFrame(tk.Frame):
         self.input.select_range(0, tk.END)
 
         self.input.bind('<Key-Return>', input_processor)
-        
-        self.input_frame.pack(pady=5)
-        
-        self.pack()
 
-    def yellow(self, name):
-        if name in self.track_display.keys():
-            for label in self.track_display[name].values():
-                label.config(fg='yellow')
-        
-        
-    def red(self, name):
-        if name in self.track_display.keys():
-            for label in self.track_display[name].values():
-                label.config(fg='red')
-        
+        self.grid()
 
-    def clear_input(self):
-        self.input.delete(0, tk.END)
-        
-        
-    # split into 'display_release'/'display_track' for initial display
-    # and update_release / update_track, to update the metadata for one track
-    # q - we won't be changing the track titles, so it's okay if they're okay
-    def update_release(self, release_info):
-        release_display = {}
-        for key, value in release_info.items():
-            key = str(key)
-            if key in release_categories:
-                value = str(value)
-                index = release_categories.index(key)
-                release_display[key] = tk.Label(self.release_attribute_frames[index], text=value,
-                                                 anchor="nw", bg="black", fg="white")
-                release_display[key].pack(side="top")
-            
-    def update_tracks(self, track_info):
+    def display_release(self, release_info):
+        rowval = 1
+        colval = 0
+        for key in release_categories:
+            if key in release_info.keys():
+                value = str(release_info[key])
+            else:
+                value = ""
+            index = release_categories.index(key)
+            self.release_attributes[key] = tk.Label(self.release_frame, text=value, anchor="nw",
+                                                    bg=bg_color, fg=text_color)
+            self.release_attributes[key].grid(row=rowval, column=colval, sticky="w", padx=10, pady=5)
+            colval += 1
+
+    def display_tracks(self, track_info):
         self.current_tracks.clear()
-        self.track_display.clear()
-        
-        frame_widths = {}
+        self.track_attributes.clear()
+
+        padding_label = tk.Label(self.track_frame, text="        ", bg=bg_color)
+        padding_label.grid(row=0, column=0)
+
         keys = track_info.keys()
         keys = list(keys)
         keys.sort()
 
+        rowval = 1
+        colval = 1
         for name in keys:
             track = track_info[name]
             self.current_tracks[track["track_num"]] = name
-            self.track_display[name] = {}
+            self.track_attributes[name] = {}
 
-            color = "light gray"
+            color = text_color
             if "KEXPFCCOBSCENITYRATING" in track.keys():
                 obscenity = track["KEXPFCCOBSCENITYRATING"].casefold()
                 if obscenity == "yellow dot":
-                    color = "yellow"
+                    color = yellow
                 elif obscenity == "red dot":
-                    color = "red"
+                    color = red
 
             for key in track_categories:
-                if key not in frame_widths.keys():
-                    frame_widths[key] = 0
                 value = ""
                 index = track_categories.index(key)
                 if key in track.keys():
                     value = str(track[key])
-                    frame_widths[key] = max(frame_widths[key], len(value))
-                        
-                self.track_display[name][key] = tk.Label(self.track_attribute_frames[index],
-                                                             text=value, anchor="nw", fg=color, bg="black")
+                self.track_attributes[name][key] = tk.Label(self.track_frame, text=value, anchor="nw", fg=color, bg=bg_color)
+                self.track_attributes[name][key].grid(row=rowval, column=colval, sticky="w", padx=10, pady=5)
+                colval += 1
+            rowval += 1
+            colval = 1
 
+    def update_track(self, name, new_meta):
+        for key in track_categories:
+            value=""
+            if key in new_meta.keys():
+                value = str(new_meta[key])
+                self.track_attributes[name][key].config(text=value)
+            if "KEXPFCCOBSCENITYRATING" in new_meta.keys():
+                obscenity = new_meta["KEXPFCCOBSCENITYRATING"].casefold()
+                if obscenity == "yellow dot":
+                    color = yellow
+                elif obscenity == "red dot":
+                    color = red
+                self.track_attributes[name][key].config(fg=color)
+            
+    def clear_input(self):
+        self.input.delete(0, tk.END)
 
-        for name in keys:
-            track = self.track_display[name]
-            for attribute, label in track.items():
-                label.config(width=frame_widths[attribute])
-                label.pack(side="top")
-                
     def quit(self):
         self.destroy()

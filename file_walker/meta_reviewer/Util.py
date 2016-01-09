@@ -1,6 +1,6 @@
 file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis", "ERROR_EXT": "ERROR_EXT"}
 
-release_mapping = {"name": "Album Name", "album_artist": "Album Artist", "disc_num": "Disc Number"}
+release_mapping = {"name": "Album Name", "album_artist": "Album Artist", "disc_num": "Disc"}
 track_mapping = {"name": "Title", "artist": "Artist", "track_num": "Track Number", "length": "Length",
                  "KEXPFCCOBSCENITYRATING": "KEXPFCCOBSCENITYRATING"}
 
