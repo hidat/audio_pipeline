@@ -11,54 +11,67 @@ class MetaController:
         self.meta_model = MetaModel.process_directory(root_dir)
         self.root_dir = root_dir
 
+        self.base_frame = MetaView.AppFrame()
+        
         if self.meta_model.has_next():
-            releases, tracks = self.meta_model.get_meta()
+            releases, tracks = self.meta_model.get_next_meta()
             for directory, release_info in releases.items():
-                self.frame = MetaView.MetaFrame(self.process_input, release_info, tracks)
-                self.frame.mainloop()
+                self.frame = MetaView.MetaFrame(self.process_input, release_info, tracks, master=self.base_frame)
+                self.frame.mainloop()        
 
     def process_input(self, event):
         contents = self.frame.input_value.get().split()
         content_length = len(contents)
-        print(contents)
         if content_length == 2:
             try:
                 track_num = int(contents[0])
                 value = contents[1].casefold()
-                if track_num not in self.frame.current_tracks.keys():\
-                   print("Invalid Track Number")
-                else:
-                    file_name = self.frame.current_tracks[track_num]            
-                if value == "y" or value == "yellow" or value == "yellow dot":
-                    new_meta = {kexp_tags["obscenity"]: kexp_values["y"]}
-                    self.meta_model.update_metadata(file_name, new_meta)
-                    self.frame.update_track(file_name, new_meta)
-                    self.frame.clear_input()
-                elif value == "r" or value == "red" or value == "red dot":
-                    new_meta = {kexp_tags["obscenity"]: kexp_values["r"]}
-                    self.meta_model.update_metadata(file_name, new_meta)
-                    self.frame.update_track(file_name, new_meta)
-                    self.frame.clear_input()
-                else:
-                    print("Invalid Input")
+                self.new_meta_input(track_num, value)
             except ValueError: # find out what the tried-to-turn-non-integer-into-int exception is
                 print("Invalid Input")
         if content_length == 1:
             value = contents[0].casefold()
-            if value == "done":
-                # move to next album
-                self.next_album()
-
-    def next_album(self):
-        self.frame.quit()
-        if self.meta_model.has_next():
-            releases, tracks = self.meta_model.get_meta()
-            for directory, release_info in releases.items():
-                self.frame = MetaView.MetaFrame(self.process_input, release_info, tracks)
-                self.frame.mainloop()
+            self.change_displayed_album(value)
+            
+    def new_meta_input(self, track_num, value):
+        # if we had an input that we've determined is new metadata,
+        # add it to the metadata of the specified track
+        if track_num not in self.frame.current_tracks.keys():\
+           print("Invalid Track Number")
         else:
-            self.frame.quit()
-        
+            file_name = self.frame.current_tracks[track_num]            
+        if value == "y" or value == "yellow" or value == "yellow dot":
+            new_meta = {kexp_tags["obscenity"]: kexp_values["y"]}
+        elif value == "r" or value == "red" or value == "red dot":
+            new_meta = {kexp_tags["obscenity"]: kexp_values["r"]}
+        else:
+            print("Invalid Input")
+            
+        if new_meta:
+            self.meta_model.update_metadata(file_name, new_meta)
+            self.frame.update_track(file_name, new_meta)
+            self.frame.clear_input()
+            
+    def change_displayed_album(self, command):
+        # change the album data we're seeing
+        if command == "done" or command == "next":
+            if self.meta_model.has_next():
+                releases, tracks = self.meta_model.get_next_meta()
+                self.next_album(releases, tracks)
+            else:
+                self.frame.really_quit()
+        elif command == "prev" or command == "previous" or command == "last":
+            if self.meta_model.has_prev():
+                releases, tracks = self.meta_model.get_previous_meta()
+                self.next_album(releases, tracks)
+            else:
+                self.frame.really_quit()
+
+    def next_album(self, releases, tracks):
+        self.frame.quit()
+        for directory, release_info in releases.items():
+            self.frame = MetaView.MetaFrame(self.process_input, release_info, tracks, master=self.base_frame)
+            self.frame.mainloop()        
                 
 def main():
     if len(sys.argv) < 2:

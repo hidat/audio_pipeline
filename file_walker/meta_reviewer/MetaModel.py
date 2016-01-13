@@ -8,41 +8,60 @@ from Util import *
 class process_directory:
 
     def __init__(self, src_dir):
-        # walk the source directory for child directories, each of which is a ripped disc
+        # Create a new process_directory item, which finds all directories
+        # in the specified directory (one layer)
+        # and will get the relevent metadata from all audio files contained in those directories
         directories = os.listdir(src_dir)
         
         self.releases = []
         self.root = src_dir
         
         for item in directories:
-            self.releases.append(item)
+            item = os.path.join(self.root, item)
+            if os.path.isdir(item):
+                self.releases.append(item)
         
         self.releases.sort()
         self.releases.reverse()
         
-        self.cur_release = self.releases.pop()
+        if len(self.releases) > 0:
+            self.cur_release = -1
+        else:
+            self.cur_release = None
     
     def get_next_meta(self):
-        print('asdf')
-        
-    def get_last_meta(self):
-        print('asd')
     
-    def get_meta(self):
-        # Get the relevant metadata of the current release and iterate to the next release
+        # get index of next release
+        next_release = self.cur_release + 1
+
+        # iterate current release
+        self.cur_release = next_release
+        
+        meta = self.get_meta(next_release)
+        return meta
+        
+    def get_previous_meta(self):
+        # get index of previous release
+        prev_release = self.cur_release - 1
+        
+        # iterate current release
+        self.cur_release = prev_release
+        
+        meta = self.get_meta(prev_release)
+        return meta
+            
+    
+    def get_meta(self, release_index):
+        # Get the relevent metadata for the specified release
         # returns a tuple (release_meta, track_meta)
         # where release_meta and track_meta are both dictionaries of tag_name : tag_contents
         
         # Right now we're just gonna assume that The Info Is Good
-        
-        release_dir = os.path.join(self.root, self.cur_release)
-        
-        # Get next release
-        if self.releases is not None and (len(self.releases) > 0):
-            self.cur_release = self.releases.pop()
+        if release_index >= 0 and release_index < len(self.releases):
+            release_dir = self.releases[release_index]
         else:
-            self.cur_release = None
-            
+            return None, None
+        
         files = os.listdir(release_dir)
         # list of release metadata
         release_data = {}
@@ -136,7 +155,6 @@ class process_directory:
         # saves the key: value tags contained in new_meta
         # as metadata tags of the audio file
         audio = mutagen.File(file_name)
-        print(new_meta)
         for tag_name, tag_value in new_meta.items():
             # check if this tag is already in the metadata
             # if it is, just overwrite it?
@@ -144,7 +162,19 @@ class process_directory:
             audio.save()
         
     def has_next(self):
-        if self.cur_release is None or len(self.cur_release) < 1:
+        if self.cur_release is None:
+            next = False
+        elif (self.cur_release + 1) >= len(self.releases):
+            next = False
+        else:
+            next = True
+            
+        return next
+        
+    def has_prev(self):
+        if self.cur_release is None:
+            next = False
+        elif (self.cur_release - 1) < 0:
             next = False
         else:
             next = True

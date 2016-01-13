@@ -8,13 +8,21 @@ red = "red"
 heading = ('Helvetica', '10', 'bold')
 standard = ('Ariel', '10')
 
+class AppFrame(tk.Frame):
+
+    def __init__(self, background="black", master=None):
+        global bg_color
+        bg_color = "black"
+        tk.Frame.__init__(self, master, bg=bg_color)
+        self.grid()
+        
+    def quit(self):
+        self.master.destroy()
+
 class MetaFrame(tk.Frame):
 
-    def __init__(self, input_processor, release_info, track_info, background="black", master=None):
-        global bg_color
-        bg_color = background
+    def __init__(self, input_processor, release_info, track_info, master=None):
         tk.Frame.__init__(self, master, bg=bg_color)
-
         self.current_tracks = {}
 
         self.release_frame = tk.Frame(self, bg=bg_color)
@@ -136,3 +144,6 @@ class MetaFrame(tk.Frame):
 
     def quit(self):
         self.destroy()
+
+    def really_quit(self):
+        self.master.quit()
