@@ -10,18 +10,132 @@ standard = ('Ariel', '10')
 
 class AppFrame(tk.Frame):
 
-    def __init__(self, background="black", master=None):
+    def __init__(self, input_processor, background="black", master=None):
+        self.meta_display = None
+        self.button = None
+        
+        self.meta_location = (1, 1)
+        self.input_location = (2, 1)
+    
         global bg_color
         bg_color = "black"
         tk.Frame.__init__(self, master, bg=bg_color)
+
+        self.input_frame = InputFrame(master=self)
+        self.input_frame.grid(row=self.input_location[0], column=self.input_location[1])
+        
         self.grid()
+
+    def display_meta(self, release_info, track_info):
+        if self.meta_display is not None:
+            self.meta_display.quit()
+        
+        self.meta_display = MetaFrame(release_info, track_info, self)
+        self.meta_display.grid(row=self.meta_location[0], column=self.meta_location[1])
+        
+    def allow_input(self, input_processor):
+        self.input_frame.input_entry(input_processor)
+        
+    def clear_input(self):
+        self.input_frame.clear_input()
+        
+    def complete_button(self, option="Quit?"):
+        self.input_frame.button(options=option)
+        
+    def get_input(self):
+        if self.input_frame.entrybox is not None:
+            contents = self.input_frame.input_value.get()
+        return contents
         
     def quit(self):
         self.master.destroy()
 
+       
+class InputFrame(tk.Frame):
+
+    def __init__(self, master=None):
+        self.entrybox = None
+        self.complete_button = None
+    
+        tk.Frame.__init__(self, master, bg=bg_color)
+        self.grid()
+        
+    def input_entry(self, input_processor):
+        # use an entry box to get user input
+        if self.complete_button is not None:
+            self.complete_button.destroy()
+        
+        self.entrybox = tk.Entry(self, exportselection=0)
+        self.entrybox.grid()
+        
+        self.input_value = tk.StringVar()
+        self.input_value.set("Input input here")
+        self.entrybox['textvariable'] = self.input_value
+        self.entrybox.focus_set()
+        self.entrybox.select_range(0, tk.END)
+        
+        self.entrybox.bind('<Key-Return>', input_processor)
+        
+    def clear_input(self):
+        if self.entrybox is not None:
+            self.entrybox.delete(0, tk.END)
+          
+    def button(self, options="Quit?"):
+        if self.entrybox is not None:
+            self.entrybox.destroy()
+        self.complete_button = tk.Button(self, text=options, command=self.quit_all)
+        self.complete_button.grid()
+        
+        self.complete_button.bind('<Key-Return>', self.complete_button['command'])
+        self.complete_button.focus_set()
+    
+    def quit(self):
+        self.destroy()
+        
+    def quit_all(self):
+        self.master.quit()
+        
+class EntryFrame(tk.Frame):
+    # Frame that keeps track of the input
+    def __init__(self, input_processor, master=None):
+        tk.Frame.__init__(self, master, bg=bg_color)
+
+        self.input = tk.Entry(self, exportselection=0)
+        self.input.grid()
+
+        self.input_value = tk.StringVar()
+        self.input_value.set("Input input here")
+        self.input["textvariable"] = self.input_value
+        self.input.focus_set()
+        self.input.select_range(0, tk.END)
+
+        self.input.bind('<Key-Return>', input_processor)
+        
+    def clear_input(self):
+        self.input.delete(0, tk.END)
+        
+    def quit(self):
+        self.destroy()
+
+        
+class OptionsFrame(tk.Frame):
+    # Frame with a 'quit' button
+    def __init__(self, options="Quit?", master=None):
+        tk.Frame.__init__(self, master, bg=bg_color)
+        
+        self.complete_button = tk.Button(self, text=options, command=self.quit_all)
+        
+        self.complete_button.grid()
+        
+    def quit(self):
+        self.destroy()
+        
+    def quit_all(self):
+        self.master.quit()
+
 class MetaFrame(tk.Frame):
 
-    def __init__(self, input_processor, release_info, track_info, master=None):
+    def __init__(self, release_info, track_info, master=None):
         tk.Frame.__init__(self, master, bg=bg_color)
         self.current_tracks = {}
 
@@ -60,17 +174,6 @@ class MetaFrame(tk.Frame):
             colval += 1
 
         self.display_tracks(track_info)
-
-        self.input = tk.Entry(self.input_frame, exportselection=0)
-        self.input.grid()
-
-        self.input_value = tk.StringVar()
-        self.input_value.set("Input input here")
-        self.input["textvariable"] = self.input_value
-        self.input.focus_set()
-        self.input.select_range(0, tk.END)
-
-        self.input.bind('<Key-Return>', input_processor)
 
         self.grid()
 
@@ -139,9 +242,6 @@ class MetaFrame(tk.Frame):
                     color = red
                 self.track_attributes[name][key].config(fg=color)
             
-    def clear_input(self):
-        self.input.delete(0, tk.END)
-
     def quit(self):
         self.destroy()
 

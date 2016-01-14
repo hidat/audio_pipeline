@@ -16,43 +16,23 @@ import datetime
 _file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis", "ERROR_EXT": "ERROR_EXT"}
 
 
-def process_directory(source_dir, output_dir, input_meta, serializer, delete_processed):
+def process_directory(source_dir, output_dir, input_meta, generate, serializer, delete_processed):
     cached_mb_releases = {}
     unique_artists = {}
     unique_labels = set([])
     current_release_id = ''
     
-    track_meta_dir = os.path.join(output_dir, 'track_meta')
-    if not os.path.exists(track_meta_dir):
-        os.makedirs(track_meta_dir)
-    artist_meta_dir = os.path.join(output_dir, 'artist_meta')
-    if not os.path.exists(artist_meta_dir):
-        os.makedirs(artist_meta_dir)
-    release_meta_dir = os.path.join(output_dir, 'release_meta')
-    if not os.path.exists(release_meta_dir):
-        os.makedirs(release_meta_dir)
-    track_dir = os.path.join(output_dir, 'track')
-    if not os.path.exists(track_dir):
-        os.makedirs(track_dir)
-    processed_hashes = os.path.join(output_dir, 'processed_hashes')
-    if not os.path.exists(processed_hashes):
-        os.makedirs(processed_hashes)
-
-    track_success_dir = os.path.join(output_dir, 'found')
-    if not os.path.exists(track_success_dir):
-        os.makedirs(track_success_dir)
-    print("Track Success: ", track_success_dir)
-
-    track_fail_dir = os.path.join(output_dir, 'not_found')
-    if not os.path.exists(track_fail_dir):
-        os.makedirs(track_fail_dir)
-    print("Track Fail: ", track_fail_dir)
-
-    log_dir = os.path.join(output_dir, 'session_logs')
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-    print("Logs: ", log_dir)
+    # Get location of metadata files
+    track_meta_dir, artist_meta_dir, release_meta_dir = meta_directories(output_dir)
     
+    # If copying audio (not just generating metadata), 
+    # get the locations that audio files will be copied to
+    if not generate:
+        track_dir, track_success_dir, track_fail_dir = audio_directories(output_dir)
+    
+    # Get directories for log files & processed hashes
+    processed_hashes, log_dir = info_directories(output_dir)
+
     # set up current log file
     date_time = datetime.datetime
     ts = date_time.now()
@@ -70,8 +50,8 @@ def process_directory(source_dir, output_dir, input_meta, serializer, delete_pro
             file_name = os.path.join(root, src_name)
             copy_to_path = ''
             ext = os.path.splitext(file_name)[1].lower()
+            
             if ext in _file_types:
-
                 # check if file is in processed_hash directory
                 sha1 = hashlib.sha1()
                 with open(file_name, 'rb') as f:
@@ -84,58 +64,13 @@ def process_directory(source_dir, output_dir, input_meta, serializer, delete_pro
                     try:
                         raw_metadata = mutagen.File(file_name)
                     except IOError:
-                        print("Errror reading file {0}".format(ascii(file_name)))
-                        copy_to_path = os.path.join(track_fail_dir, path)
+                        print("Error reading file {0}".format(ascii(file_name)))
+                        if not generate:
+                            copy_to_path = os.path.join(track_fail_dir, path)
                         ext = "ERROR_EXT"
                     
-                    release_id = ''
-                    kexp_obscenity_rating = ''
-                    kexp_category = ''
-                    if _file_types[ext] == "vorbis":
-                        if "mbid" in raw_metadata:
-                            release_id = raw_metadata["mbid"][0]
-                            track_num = int(raw_metadata["tracknumber"][0]) - 1
-                            disc_num = int(raw_metadata["discnumber"][0])
-                        elif "musicbrainz_albumid" in raw_metadata:
-                            release_id = raw_metadata["musicbrainz_albumid"][0]
-                            track_num = int(raw_metadata["tracknumber"][0]) - 1
-                            disc_num =  int(raw_metadata["discnumber"][0])
-                        if "KEXPPRIMARYGENRE" in raw_metadata:
-                            kexp_category = raw_metadata["KEXPPRIMARYGENRE"][0]
-                        if "KEXPFCCOBSCENITYRATING" in raw_metadata:
-                            kexp_obscenity_rating = raw_metadata["KEXPFCCOBSCENITYRATING"][0]
-
-                    elif _file_types[ext] == "aac":
-                        #raw_metadata.tags._DictProxy__dict['----:com.apple.iTunes:MBID']
-                        raw_metadata = raw_metadata.tags._DictProxy__dict
-                        if '----:com.apple.iTunes:MBID' in raw_metadata:
-                            release_id = str(raw_metadata['----:com.apple.iTunes:MBID'][0])
-                            track_num = int(raw_metadata['trkn'][0][0]) - 1
-                            disc_num = int(raw_metadata['disk'][0][0])
-                        elif '----:com.apple.iTunes:MusicBrainz Album Id' in raw_metadata:
-                            release_id = str(raw_metadata['----:com.apple.iTunes:MusicBrainz Album Id'][0], encoding='UTF-8')
-                            track_num = int(raw_metadata['trkn'][0][0]) - 1
-                            disc_num = int(raw_metadata['disk'][0][0])
-                        if '----:com.apple.iTunes:KEXPPRIMARYGENRE' in raw_metadata:
-                            kexp_category = str(raw_metadata['----:com.apple.iTunes:KEXPPRIMARYGENRE'][0], encoding='UTF-8')
-                        if '----:com.apple.iTunes:KEXPFCCOBSCENITYRATING' in raw_metadata:
-                            kexp_obscenity_rating = str(raw_metadata['----:com.apple.iTunes:KEXPFCCOBSCENITYRATING'][0], encoding='UTF-8')
-
-
-                    elif _file_types[ext] == "id3":
-                        raw_metadata = raw_metadata.tags._DictProxy__dict
-                        if 'TXXX:MBID' in raw_metadata:
-                            release_id = raw_metadata['TXXX:MBID'].text[0]
-                            track_num = int(raw_metadata['TRCK'].text[0].split('/')[0]) - 1
-                            disc_num = int(raw_metadata['TPOS'].text[0].split('/')[0])
-                        elif 'TXXX:MusicBrainz Album Id' in raw_metadata:
-                            release_id = raw_metadata['TXXX:MusicBrainz Album Id'].text[0]
-                            track_num = int(raw_metadata['TRCK'].text[0].split('/')[0]) - 1
-                            disc_num = int(raw_metadata['TPOS'].text[0].split('/')[0])
-                        if 'TXXX:KEXPPRIMARYGENRE' in raw_metadata:
-                            kexp_category = raw_metadata['TXXX:KEXPPRIMARYGENRE'].text[0]
-                        if 'TXXX:KEXPFCCOBSCENITYRATING' in raw_metadata:
-                            kexp_obscenity_rating = raw_metadata['TXXX:KEXPFCCOBSCENITYRATING'].text[0]
+                    release_id, track_num, disc_num, kexp_category, kexp_obscenity_rating =\
+                        get_mutagen_meta(raw_metadata, ext)
 
                     if release_id > '':
                     
@@ -187,11 +122,12 @@ def process_directory(source_dir, output_dir, input_meta, serializer, delete_pro
                             serializer.save_track(release, track_data, input_meta, track_meta_dir)
 
                             # Copy files to to success directory
-                            target = os.path.join(track_dir, track_data["item_code"] + ext)
-                            shutil.copy(file_name, target)
+                            # target = os.path.join(track_dir, track_data["item_code"] + ext)
+                            # shutil.copy(file_name, target)
 
                             # Make a backup of original file just in case
-                            copy_to_path = os.path.join(track_success_dir, path)
+                            if not generate:
+                                copy_to_path = os.path.join(track_success_dir, path)                            
                         
                             # Add any new artist to our unique artists list
                             for artist in track_data["artist-credit"]:
@@ -223,10 +159,16 @@ def process_directory(source_dir, output_dir, input_meta, serializer, delete_pro
                         log_file.close()
                     else:
                         print("Skipping " + ascii(file_name))
-                        copy_to_path = os.path.join(track_fail_dir, path)
+                        if not generate:
+                            copy_to_path = os.path.join(track_fail_dir, path)
 
                     # Move the file out of the source directory
                     if copy_to_path > '':
+                        # copy files to success directory
+                        target = os.path.join(track_dir, track_data["item_code"] + ext)
+                        shutil.copy(file_name, target)
+                    
+                        # make backup of original file just in case
                         if not os.path.exists(copy_to_path):
                             os.makedirs(copy_to_path)
                         target = os.path.join(copy_to_path, src_name)
@@ -237,7 +179,110 @@ def process_directory(source_dir, output_dir, input_meta, serializer, delete_pro
 
                     with open(hash_file, 'w+') as hash_file_d:
                         hash_file_d.write(ascii(file_name))
+                        
+                        
+def meta_directories(output_dir):
+    track_meta_dir = os.path.join(output_dir, 'track_meta')
+    if not os.path.exists(track_meta_dir):
+        os.makedirs(track_meta_dir)
+    artist_meta_dir = os.path.join(output_dir, 'artist_meta')
+    if not os.path.exists(artist_meta_dir):
+        os.makedirs(artist_meta_dir)
+    release_meta_dir = os.path.join(output_dir, 'release_meta')
+    if not os.path.exists(release_meta_dir):
+        os.makedirs(release_meta_dir)
+        
+    return track_meta_dir, artist_meta_dir, release_meta_dir
 
+
+def audio_directories(output_dir):
+    track_dir = os.path.join(output_dir, 'track')
+    if not os.path.exists(track_dir):
+        os.makedirs(track_dir)
+
+    track_success_dir = os.path.join(output_dir, 'found')
+    if not os.path.exists(track_success_dir):
+        os.makedirs(track_success_dir)
+    print("Track Success: ", track_success_dir)
+
+    track_fail_dir = os.path.join(output_dir, 'not_found')
+    if not os.path.exists(track_fail_dir):
+        os.makedirs(track_fail_dir)
+    print("Track Fail: ", track_fail_dir)
+    
+    return track_dir, track_success_dir, track_fail_dir
+    
+    
+def info_directories(output_dir):
+    # get directories where we put 'extra' info - i.e. log files & hash files
+    processed_hashes = os.path.join(output_dir, 'processed_hashes')
+    if not os.path.exists(processed_hashes):
+        os.makedirs(processed_hashes)
+        
+    log_dir = os.path.join(output_dir, 'session_logs')
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+    print("Logs: ", log_dir)
+    
+    return processed_hashes, log_dir
+
+    
+def get_mutagen_meta(raw_metadata, ext):
+    # get the relavent metadata from the raw metadata extracted by mutagen
+    release_id = ''
+    kexp_obscenity_rating = ''
+    kexp_category = ''
+    track_num, disc_num = 0, 0
+
+    if _file_types[ext] == "vorbis":
+        if "mbid" in raw_metadata:
+            release_id = raw_metadata["mbid"][0]
+            track_num = int(raw_metadata["tracknumber"][0]) - 1
+            disc_num = int(raw_metadata["discnumber"][0])
+        elif "musicbrainz_albumid" in raw_metadata:
+            release_id = raw_metadata["musicbrainz_albumid"][0]
+            track_num = int(raw_metadata["tracknumber"][0]) - 1
+            disc_num =  int(raw_metadata["discnumber"][0])
+        if "KEXPPRIMARYGENRE" in raw_metadata:
+            kexp_category = raw_metadata["KEXPPRIMARYGENRE"][0]
+        if "KEXPFCCOBSCENITYRATING" in raw_metadata:
+            kexp_obscenity_rating = raw_metadata["KEXPFCCOBSCENITYRATING"][0]
+
+    elif _file_types[ext] == "aac":
+        #raw_metadata.tags._DictProxy__dict['----:com.apple.iTunes:MBID']
+        raw_metadata = raw_metadata.tags._DictProxy__dict
+        if '----:com.apple.iTunes:MBID' in raw_metadata:
+            release_id = str(raw_metadata['----:com.apple.iTunes:MBID'][0])
+            track_num = int(raw_metadata['trkn'][0][0]) - 1
+            disc_num = int(raw_metadata['disk'][0][0])
+        elif '----:com.apple.iTunes:MusicBrainz Album Id' in raw_metadata:
+            release_id = str(raw_metadata['----:com.apple.iTunes:MusicBrainz Album Id'][0], encoding='UTF-8')
+            track_num = int(raw_metadata['trkn'][0][0]) - 1
+            disc_num = int(raw_metadata['disk'][0][0])
+        if '----:com.apple.iTunes:KEXPPRIMARYGENRE' in raw_metadata:
+            kexp_category = str(raw_metadata['----:com.apple.iTunes:KEXPPRIMARYGENRE'][0], encoding='UTF-8')
+        if '----:com.apple.iTunes:KEXPFCCOBSCENITYRATING' in raw_metadata:
+            kexp_obscenity_rating = str(raw_metadata['----:com.apple.iTunes:KEXPFCCOBSCENITYRATING'][0], encoding='UTF-8')
+
+
+    elif _file_types[ext] == "id3":
+        raw_metadata = raw_metadata.tags._DictProxy__dict
+        if 'TXXX:MBID' in raw_metadata:
+            release_id = raw_metadata['TXXX:MBID'].text[0]
+            track_num = int(raw_metadata['TRCK'].text[0].split('/')[0]) - 1
+            disc_num = int(raw_metadata['TPOS'].text[0].split('/')[0])
+        elif 'TXXX:MusicBrainz Album Id' in raw_metadata:
+            release_id = raw_metadata['TXXX:MusicBrainz Album Id'].text[0]
+            track_num = int(raw_metadata['TRCK'].text[0].split('/')[0]) - 1
+            disc_num = int(raw_metadata['TPOS'].text[0].split('/')[0])
+        if 'TXXX:KEXPPRIMARYGENRE' in raw_metadata:
+            kexp_category = raw_metadata['TXXX:KEXPPRIMARYGENRE'].text[0]
+        if 'TXXX:KEXPFCCOBSCENITYRATING' in raw_metadata:
+            kexp_obscenity_rating = raw_metadata['TXXX:KEXPFCCOBSCENITYRATING'].text[0]
+            
+    return release_id, track_num, disc_num, kexp_obscenity_rating, kexp_category
+    
+    
 def main():
     """
     Crawls the given directory for audio files, extracting raw metadata
@@ -258,10 +303,11 @@ def main():
     parser = argparse.ArgumentParser(description='Get metadata from files.')
     parser.add_argument('input_directory', help="Input audio file.")
     parser.add_argument('output_directory', help="Directory to store output files. MUST ALREADY EXIST for now.")
-    parser.add_argument('-d', '--delete', default=False, help="Delete audio files from input_directory after processing")
+    parser.add_argument('-d', '--delete', default=False, const=True, nargs='?', help="Delete audio files from input_directory after processing")
     parser.add_argument('-c', '--category', type=str.casefold, choices=["recent acquisitions", "acq", "electronic", "ele", "experimental", "exp", "hip hop", "hip", "jaz", "jazz", "live on kexp", "liv", "local", "reggae", "reg", "rock", "pop", "rock/pop", "roc", "roots", "roo", "rotation", "rot", "shows around town", "sho", "soundtracks", "sou", "world", "wor"], help="Category or genre of releases being filewalked")
     parser.add_argument('-s', '--source', type=str.casefold, choices=["cd library", "melly"], help="KEXPSource value - Melly or CD Library")
     parser.add_argument('-r', '--rotation', type=str.casefold, choices=["heavy", "library", "light", "medium", "r/n"], help="Rotation workflow value")
+    parser.add_argument('-g', '--generate', default=False, const=True, nargs='?')
     
     args = parser.parse_args()
         
@@ -270,7 +316,7 @@ def main():
     input_meta["rotation"] = options[args.rotation] if args.rotation != None else ""
     input_meta["source"] = options[args.source] if args.source != None else ""
         
-    process_directory(args.input_directory, args.output_directory, input_meta, DaletSerializer, args.delete)
+    process_directory(args.input_directory, args.output_directory, input_meta, args.generate, DaletSerializer, args.delete)
 
 
 main()
