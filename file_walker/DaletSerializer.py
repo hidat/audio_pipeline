@@ -64,6 +64,12 @@ def save_track(release_data, track_data, batch_meta, output_dir):
             with tag('KEXPArtistCredit'):
                 text(full_name)
 
+            if (len(batch_meta["rotation"]) > 0):
+                r_status = stringCleanup(batch_meta["rotation"])
+                secondary_category = "CATEGORIES/ROTATION-STAGING/" + r_status
+                with tag('secondary_category'):
+                    text(secondary_category)
+                
             primary_category = "/i/forgot"
             if sort_name.casefold() is "various artists":
                 primary_category = primary_category + track_data['various_artist_dist_rule']
@@ -199,9 +205,6 @@ def save_release(release, input_meta, output_dir):
                     
             if (len(input_meta["rotation"]) > 0):
                 r_status = stringCleanup(input_meta["rotation"])
-                secondary_category = "CATEGORIES/ROTATION/" + r_status
-                with tag('secondary_category'):
-                    text(secondary_category)
                 with tag('KEXPReleaseRotationStatus'):
                     text(input_meta["rotation"])
             if (len(input_meta["category"]) > 0):
