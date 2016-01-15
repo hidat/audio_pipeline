@@ -24,14 +24,18 @@ class AppFrame(tk.Frame):
         self.input_frame = InputFrame(master=self)
         self.input_frame.grid(row=self.input_location[0], column=self.input_location[1])
         
+        self.master.protocol("WM_DELETE_WINDOW", self.quit)
         self.grid()
 
     def display_meta(self, release_info, track_info):
-        if self.meta_display is not None:
-            self.meta_display.quit()
+        if self.meta_display:
+            self.meta_display.close_frame()
         
         self.meta_display = MetaFrame(release_info, track_info, self)
         self.meta_display.grid(row=self.meta_location[0], column=self.meta_location[1])
+        
+    def update_track(self, name, new_meta):
+        self.meta_display.update_track(name, new_meta)
         
     def allow_input(self, input_processor):
         self.input_frame.input_entry(input_processor)
@@ -39,32 +43,29 @@ class AppFrame(tk.Frame):
     def clear_input(self):
         self.input_frame.clear_input()
         
-    def complete_button(self, option="Quit?"):
-        self.input_frame.button(options=option)
+    def quit_command(self, option="Quit?"):
+        self.input_frame.labeled(options=option)
+        
+    def clear_label(self):
+        self.input_frame.clear_label()
         
     def get_input(self):
         if self.input_frame.entrybox is not None:
             contents = self.input_frame.input_value.get()
         return contents
         
-    def quit(self):
-        self.master.destroy()
-
-       
 class InputFrame(tk.Frame):
 
     def __init__(self, master=None):
         self.entrybox = None
-        self.complete_button = None
+        self.label = None
     
         tk.Frame.__init__(self, master, bg=bg_color)
         self.grid()
         
-    def input_entry(self, input_processor):
-        # use an entry box to get user input
-        if self.complete_button is not None:
-            self.complete_button.destroy()
         
+    def input_entry(self, input_processor):
+        # use an entry box to get user input        
         self.entrybox = tk.Entry(self, exportselection=0)
         self.entrybox.grid()
         
@@ -77,67 +78,25 @@ class InputFrame(tk.Frame):
         self.entrybox.bind('<Key-Return>', input_processor)
         
     def clear_input(self):
-        if self.entrybox is not None:
+        if self.entrybox:
             self.entrybox.delete(0, tk.END)
-          
-    def button(self, options="Quit?"):
-        if self.entrybox is not None:
-            self.entrybox.destroy()
-        self.complete_button = tk.Button(self, text=options, command=self.quit_all)
-        self.complete_button.grid()
-        
-        self.complete_button.bind('<Key-Return>', self.complete_button['command'])
-        self.complete_button.focus_set()
     
-    def quit(self):
+    def labeled(self, options):
+        self.label = tk.Label(self, bg=bg_color, fg=text_color, text=options)
+        self.label.grid(row=0, column=0)
+       
+    def clear_label(self):
+        if self.label:
+            self.label.destroy()
+        
+    def close_frame(self):
         self.destroy()
         
-    def quit_all(self):
-        self.master.quit()
         
-class EntryFrame(tk.Frame):
-    # Frame that keeps track of the input
-    def __init__(self, input_processor, master=None):
-        tk.Frame.__init__(self, master, bg=bg_color)
-
-        self.input = tk.Entry(self, exportselection=0)
-        self.input.grid()
-
-        self.input_value = tk.StringVar()
-        self.input_value.set("Input input here")
-        self.input["textvariable"] = self.input_value
-        self.input.focus_set()
-        self.input.select_range(0, tk.END)
-
-        self.input.bind('<Key-Return>', input_processor)
-        
-    def clear_input(self):
-        self.input.delete(0, tk.END)
-        
-    def quit(self):
-        self.destroy()
-
-        
-class OptionsFrame(tk.Frame):
-    # Frame with a 'quit' button
-    def __init__(self, options="Quit?", master=None):
-        tk.Frame.__init__(self, master, bg=bg_color)
-        
-        self.complete_button = tk.Button(self, text=options, command=self.quit_all)
-        
-        self.complete_button.grid()
-        
-    def quit(self):
-        self.destroy()
-        
-    def quit_all(self):
-        self.master.quit()
-
 class MetaFrame(tk.Frame):
 
     def __init__(self, release_info, track_info, master=None):
         tk.Frame.__init__(self, master, bg=bg_color)
-        self.current_tracks = {}
 
         self.release_frame = tk.Frame(self, bg=bg_color)
         self.track_frame = tk.Frame(self, bg=bg_color)
@@ -192,7 +151,6 @@ class MetaFrame(tk.Frame):
             colval += 1
 
     def display_tracks(self, track_info):
-        self.current_tracks.clear()
         self.track_attributes.clear()
 
         padding_label = tk.Label(self.track_frame, text="        ", bg=bg_color)
@@ -206,7 +164,6 @@ class MetaFrame(tk.Frame):
         colval = 1
         for name in keys:
             track = track_info[name]
-            self.current_tracks[track["track_num"]] = name
             self.track_attributes[name] = {}
 
             color = text_color
@@ -241,9 +198,6 @@ class MetaFrame(tk.Frame):
                 elif obscenity == "red dot":
                     color = red
                 self.track_attributes[name][key].config(fg=color)
-            
-    def quit(self):
+                
+    def close_frame(self):
         self.destroy()
-
-    def really_quit(self):
-        self.master.quit()
