@@ -27,13 +27,11 @@ class MetaController:
         
         if self.meta_model.has_next():
             releases, tracks = self.meta_model.get_next_meta()
-            print(releases)
-            for directory, release_info in releases.items():
-                print(directory)
-                self.base_frame.display_meta(release_info, tracks)
-                self.base_frame.mainloop()
+            directory, release_info = releases.popitem()
+            self.base_frame.display_meta(release_info, tracks)
+            self.base_frame.mainloop()
                 
-                
+                                
     def process_input(self, event):
         """
         Process the user-inputted metadata
@@ -59,13 +57,15 @@ class MetaController:
         When we have input we've determined is (probably) metadata,
         add it to the metadata of the specified track
         """
+        yellow_dot = re.compile("\s*y(ellow)?\s*(dot)?", flags=re.I)
+        red_dot = re.compile("\s*r(ed)?\s*(dot)?", flags=re.I)
         new_meta = None
         
         if track_num not in self.meta_model.current_tracks.keys():
            print("Invalid Track Number")
         else:
             file_name = self.meta_model.current_tracks[track_num]
-            if value == "y" or value == "yellow" or value == "yellow dot":
+            if yellow_dot.match(value):
                 new_meta = {kexp_tags["obscenity"]: kexp_values["y"]}
             elif value == "r" or value == "red" or value == "red dot":
                 new_meta = {kexp_tags["obscenity"]: kexp_values["r"]}
@@ -84,10 +84,12 @@ class MetaController:
         """
         
         # FIX THESE SO THEY ARE *SLIGHTLY* MORE SPECIFIC
-        yes_pattern = re.compile("\s*y.*")
-        no_pattern = re.compile("\s*n.*")
-        prev_pattern = re.compile("\s*p.*")
-        next_pattern = re.compile("\s*n.*")
+        yes_pattern = re.compile("\s*y+e*.*", flags=re.I)
+        no_pattern = re.compile("\s*n+o*", flags=re.I)
+        prev_pattern = re.compile("\s*p(rev)?.*", flags=re.I)
+        next_pattern = re.compile("\s*n(ext)?", flags=re.I)
+        done_pattern = re.compile("\s*d+(one)?", flags=re.I)
+        help_pattern = re.compile("\s*h(elp)?", flags=re.I)
         
         if self.quit_command:
             if yes_pattern.match(command):
@@ -108,6 +110,10 @@ class MetaController:
                     self.next_album(releases, tracks)
                 else:
                     self.last_album()
+            elif done_pattern.match(command):
+                self.last_album()
+            elif help_pattern.match(command):
+                self.base_frame.display_info(commands_list, example_list)
 
                 
     def next_album(self, releases, tracks):
@@ -133,6 +139,7 @@ def main():
         
         
     directory = sys.argv[1]
+        
     controller = MetaController(directory)
 
 main()

@@ -12,7 +12,7 @@ class AppFrame(tk.Frame):
 
     def __init__(self, input_processor, background="black", master=None):
         self.meta_display = None
-        self.button = None
+        self.info_frame = None
         
         self.meta_location = (1, 1)
         self.input_location = (2, 1)
@@ -34,6 +34,12 @@ class AppFrame(tk.Frame):
         self.meta_display = MetaFrame(release_info, track_info, self)
         self.meta_display.grid(row=self.meta_location[0], column=self.meta_location[1])
         
+    def display_info(self, command_list, display_list):
+        self.info_frame = InfoFrame(self)
+        self.info_frame.display_commands(command_list, display_list)
+        #self.info_frame.grid(row=self.meta_location[0], column=self.meta_location[1])
+        
+        
     def update_track(self, name, new_meta):
         self.meta_display.update_track(name, new_meta)
         
@@ -54,6 +60,44 @@ class AppFrame(tk.Frame):
             contents = self.input_frame.input_value.get()
         return contents
         
+        
+class InfoFrame(tk.Frame):
+    # the information frame should open in a new window, because some people might want to reference it?
+    
+    def __init__(self, display_commands, master=None):
+        
+    
+        tk.Frame.__init__(self, master, bg=bg_color)
+        self.grid()
+        
+        
+    def display_commands(self, command_list, example_list):
+        """
+        Displays a passed dictionary of command -> command effects onscreen
+        """
+        row_index = 0
+        col_index = 0
+        
+        description_label = tk.Label(self, text="Commands", bg=bg_color, fg=text_color, anchor="nw")
+        description_label.grid(row=row_index, column=col_index, padx=10, pady=5)
+        
+        row_index += 1
+        col_index += 1
+        
+        for command, description in command_list.items():
+            comm = tk.Label(self, text=command, bg=bg_color, fg=text_color, anchor="nw")
+            desc = tk.Label(self, text=description, bg=bg_color, fg=text_color, anchor="nw")
+            comm.grid(row=row_index, column=col_index, padx=10, pady=5)
+            col_index += 1
+            desc.grid(row=row_index, column=col_index, padx=10, pady=5)
+            row_index += 1
+            if command in example_list.keys():
+                print(example_list)
+                row_index += 1
+                example = tk.Label(self, text=example_list[command], bg=bg_color, fg=text_color, anchor="ne")
+                example.grid(row=row_index, column=col_index, padx=10, pady=5)
+            col_index -= 1
+            
 class InputFrame(tk.Frame):
 
     def __init__(self, master=None):
