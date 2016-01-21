@@ -69,7 +69,7 @@ def process_directory(source_dir, output_dir, input_meta, generate, serializer, 
                             copy_to_path = os.path.join(track_fail_dir, path)
                         ext = "ERROR_EXT"
                     
-                    release_id, track_num, disc_num, kexp_category, kexp_obscenity_rating =\
+                    release_id, track_num, disc_num, kexp_obscenity_rating, kexp_category =\
                         get_mutagen_meta(raw_metadata, ext)
 
                     if release_id > '':
