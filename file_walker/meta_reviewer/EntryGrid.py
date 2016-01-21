@@ -15,7 +15,7 @@ class MetaGrid(tk.Grid):
 r = tk.Tk()
 r.title("MetaReviewer")
 
-l = tk.Label(r, name="a_label")
+l = tk.Label(r, name="a_label", text="Track Metadata")
 l.pack()
 
 g = MetaGrid(r, name="metadata_grid", selectunit="cell")
@@ -26,9 +26,7 @@ y = 0
 for attribute in track_categories:
     g.set(x,y,text=str(track_mapping[attribute]))
     x += 1
-    
-print(g.entrycget(0,0))
-        
+            
 c = tk.Button(r, text="Close", command=r.destroy)
 c.pack()
 

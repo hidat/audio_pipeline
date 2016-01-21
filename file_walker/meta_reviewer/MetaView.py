@@ -15,14 +15,14 @@ class AppFrame(tk.Frame):
         self.info_frame = None
         
         self.meta_location = (1, 1)
-        self.input_location = (2, 1)
+        self.input_location = (1, 2)
     
         global bg_color
         bg_color = "black"
         tk.Frame.__init__(self, master, bg=bg_color)
 
         self.input_frame = InputFrame(master=self)
-        self.input_frame.grid(row=self.input_location[0], column=self.input_location[1])
+        self.input_frame.grid(row=self.input_location[1], column=self.input_location[0])
         
         self.master.protocol("WM_DELETE_WINDOW", self.quit)
         self.grid()
@@ -32,13 +32,12 @@ class AppFrame(tk.Frame):
             self.meta_display.close_frame()
         
         self.meta_display = MetaFrame(release_info, track_info, self)
-        self.meta_display.grid(row=self.meta_location[0], column=self.meta_location[1])
+        self.meta_display.grid(row=self.meta_location[1], column=self.meta_location[0])
         
     def display_info(self, command_list, display_list):
         self.info_frame = InfoFrame(self)
         self.info_frame.display_commands(command_list, display_list)
-        #self.info_frame.grid(row=self.meta_location[0], column=self.meta_location[1])
-        
+        #self.info_frame.grid(row=self.meta_location[1], column=self.meta_location[0])
         
     def update_track(self, name, new_meta):
         self.meta_display.update_track(name, new_meta)
@@ -78,25 +77,27 @@ class InfoFrame(tk.Frame):
         row_index = 0
         col_index = 0
         
-        description_label = tk.Label(self, text="Commands", bg=bg_color, fg=text_color, anchor="nw")
-        description_label.grid(row=row_index, column=col_index, padx=10, pady=5)
+        description_label = tk.Label(self, text="Commands", bg=bg_color, fg=text_color, anchor="nw", font=heading)
+        description_label.grid(row=row_index, column=col_index, padx=5, pady=3)
         
         row_index += 1
         col_index += 1
-        
+                        
         for command, description in command_list.items():
-            comm = tk.Label(self, text=command, bg=bg_color, fg=text_color, anchor="nw")
+            comm = tk.Label(self, text=command, bg=bg_color, fg=text_color, anchor="nw", font=heading)
             desc = tk.Label(self, text=description, bg=bg_color, fg=text_color, anchor="nw")
-            comm.grid(row=row_index, column=col_index, padx=10, pady=5)
+            comm.grid(row=row_index, column=col_index, sticky="w", padx=5, pady=3)
             col_index += 1
-            desc.grid(row=row_index, column=col_index, padx=10, pady=5)
+            desc.grid(row=row_index, column=col_index, sticky="w", padx=5, pady=3)
             row_index += 1
             if command in example_list.keys():
-                print(example_list)
+                example_title = tk.Label(self, text="Example:", bg=bg_color, fg=text_color, anchor="nw", font=heading)
+                example_title.grid(row=row_index, column=col_index, sticky="w", padx=2, pady=1)
                 row_index += 1
-                example = tk.Label(self, text=example_list[command], bg=bg_color, fg=text_color, anchor="ne")
-                example.grid(row=row_index, column=col_index, padx=10, pady=5)
-            col_index -= 1
+                example = tk.Label(self, text="\t" + example_list[command], bg=bg_color, fg=text_color, anchor="nw")
+                example.grid(row=row_index, column=col_index, sticky="w", padx=2, pady=2)
+                row_index += 1
+            col_index = 1
             
 class InputFrame(tk.Frame):
 

@@ -7,7 +7,7 @@ track_mapping = {"name": "Title", "artist": "Artist", "track_num": "Track Number
                  
 commands_list = {"<track_num><meta_command>": "Add the metadata specified by <meta_command> to track <track_num>", 
                  "done": "Close MetaReviewer. All metadata changes will be kept (~for now~)",
-                 "next": "Displays next album's metadata", "previous": "Displays previous album's metadata"}
+                 "next": "Display metadata of next album", "previous": "Display metadata of previous album"}
                  
 example_list = {"<track_num><meta_command>": "7y: Add YELLOW DOT obscenity rating to track 7 of the current album."}
 
