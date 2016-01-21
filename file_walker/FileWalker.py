@@ -16,7 +16,7 @@ import datetime
 _file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis", "ERROR_EXT": "ERROR_EXT"}
 
 
-def process_directory(source_dir, output_dir, input_meta, generate, serializer, delete_processed):
+def process_directory(source_dir, output_dir, batch_meta, generate, serializer, delete_processed):
     cached_mb_releases = {}
     unique_artists = {}
     unique_labels = set([])
@@ -89,7 +89,7 @@ def process_directory(source_dir, output_dir, input_meta, generate, serializer, 
                                 cached_mb_releases[release_id] = mb_release
                                 release = MetaProcessor.process_release(mb_release)
                                 # save release meta
-                                serializer.save_release(release, input_meta, release_meta_dir)
+                                serializer.save_release(release, batch_meta, release_meta_dir)
                                 # save release to log
                                 log_file.write(release["log_text"].encode("UTF-8"))
                                 for label in release["labels"]:
@@ -98,7 +98,7 @@ def process_directory(source_dir, output_dir, input_meta, generate, serializer, 
                                         log_file.write(label_log.encode("UTF-8"))
                             
                             # Pull metadata from MusicBrainz
-                            track_data = MetaProcessor.process_track(mb_release, disc_num, track_num)
+                            track_data = MetaProcessor.process_track(mb_release, batch_meta, disc_num, track_num)
 
                             # Add KEXP added metadata from tags
                             track_data['kexp_category'] = kexp_category
@@ -119,7 +119,7 @@ def process_directory(source_dir, output_dir, input_meta, generate, serializer, 
                             log_file.write(track_log.encode("UTF-8"))
                                 
                             # Save the track metadata
-                            serializer.save_track(release, track_data, input_meta, track_meta_dir)
+                            serializer.save_track(release, track_data, batch_meta, track_meta_dir)
 
                             # Copy files to to success directory
                             # target = os.path.join(track_dir, track_data["item_code"] + ext)
@@ -311,12 +311,12 @@ def main():
     
     args = parser.parse_args()
         
-    input_meta = {}
-    input_meta["category"] = options[args.category] if args.category != None else ""
-    input_meta["rotation"] = options[args.rotation] if args.rotation != None else ""
-    input_meta["source"] = options[args.source] if args.source != None else ""
+    batch_meta = {}
+    batch_meta["category"] = options[args.category] if args.category != None else ""
+    batch_meta["rotation"] = options[args.rotation] if args.rotation != None else ""
+    batch_meta["source"] = options[args.source] if args.source != None else ""
         
-    process_directory(args.input_directory, args.output_directory, input_meta, args.generate, DaletSerializer, args.delete)
+    process_directory(args.input_directory, args.output_directory, batch_meta, args.generate, DaletSerializer, args.delete)
 
 
 main()

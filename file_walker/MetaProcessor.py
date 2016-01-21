@@ -1,6 +1,9 @@
 __author = 'cephalopodblue'
 import unicodedata
 
+
+secondary_category = "CATEGORIES/ROTATION-STAGING"
+
 #####
 # == Process Artist
 # Pulls out the artist metadata that we are interested in from the raw MusicBrainz artist meta
@@ -142,8 +145,10 @@ def process_release(mb_release):
             if 'disambiguation' in artist['artist']:
                 dist_cat = dist_cat + ' (' + artist['artist']['disambiguation'] + ') '
         else:
-            dist_cat = artist
-            
+            dist_cat = dist_cat + artist
+        
+        print(dist_cat)
+        
     dist_cat = stringCleanup(dist_cat)
     release_info['distribution_category'] = dist_cat
     
@@ -152,15 +157,14 @@ def process_release(mb_release):
 
     return release_info
 
-def process_track(mb_release, discnum, tracknum):
+def process_track(mb_release, batch_meta, discnum, tracknum):
     """
-    Queries musicbrainz for metadata about track and release
+    Get the track metadata we're interested in
 
-    :param mbid: Musicbrainz id of the album
+    :param mb_release: Release metadata
     :param tracknum: The track number
     :param discnum: The disc number of the track
-    :param cached_releases: A little cache thing so that we only query once for each release
-    :return: (curr, release_info, track_info) : the cache, the release metadata, the track metadata
+    :return: This track's metadata
     """
 
     disc_index = discnum - 1
@@ -182,6 +186,21 @@ def process_track(mb_release, discnum, tracknum):
     for artist in mb_release['artist-credit']:
         if 'artist' in artist:
             track_info['sort_name'] = artist['artist']['sort-name']
+            
+    if "rotation" in batch_meta:
+        cat = ""
+        for artist in track["artist-credit"]:
+            if 'artist' in artist:
+                cat += artist['artist']['name']
+            else:
+                cat += artist
+                
+        cat += " - " + mb_release['title']
+        
+        cat = stringCleanup(cat)
+        
+        cat = secondary_category + "/" + batch_meta["rotation"] + "/" + cat
+        track_info["secondary_category"] = cat
     
     track_info["artist_dist_rule"] = distRuleCleanup(track_info['sort_name'][:1])
     track_info["various_artist_dist_rule"] = distRuleCleanup(mb_release['title'][:1])

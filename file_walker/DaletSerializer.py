@@ -64,21 +64,19 @@ def save_track(release_data, track_data, batch_meta, output_dir):
             with tag('KEXPArtistCredit'):
                 text(full_name)
 
-            if (len(batch_meta["rotation"]) > 0):
-                r_status = stringCleanup(batch_meta["rotation"])
-                secondary_category = "CATEGORIES/ROTATION-STAGING/" + r_status
+            if 'secondary_category' in track_data:
                 with tag('secondary_category'):
-                    text(secondary_category)
+                    text(track_data['secondary_category'])
                 
-            primary_category = "/i/forgot"
-            if sort_name.casefold() is "various artists":
-                primary_category = primary_category + track_data['various_artist_dist_rule']
-            else:
-                primary_category = primary_category + track_data['artist_dist_rule']
-            primary_category = primary_category + sort_name + "/what"
+            # primary_category = "/i/forgot"
+            # if sort_name.casefold() is "various artists":
+                # primary_category = primary_category + track_data['various_artist_dist_rule']
+            # else:
+                # primary_category = primary_category + track_data['artist_dist_rule']
+            # primary_category = primary_category + sort_name + "/what"
 
-            with tag('primary_category'):
-                text(primary_category)
+            # with tag('primary_category'):
+                # text(primary_category)
             with tag('KEXPReleaseArtistDistributionRule'):
                 text(track_data['artist_dist_rule'])
             with tag('KEXPVariousArtistReleaseTitleDistributionRule'):
@@ -94,12 +92,12 @@ def save_track(release_data, track_data, batch_meta, output_dir):
     with open(output_file, "wb") as f:
         f.write(formatted_data.encode("UTF-8"))
 
-def save_release(release, input_meta, output_dir):
+def save_release(release, batch_meta, output_dir):
     """
     Create an XML file of release metadata that Dalet will be happy with
     
     :param release: Processed release metadata from MusicBrainz
-    :param input_meta: Batch metadata from the command line
+    :param batch_meta: Batch metadata from the command line
     :param output_dir: Output directory to write XML file to
 		<KEXPMBID>release-xxxx-xxxx-xxxxx-xxxxxxx</KEXPMBID>
 		<KEXPReleaseGroupMBID>releasegroup MBID</KEXPReleaseGroupMBID>
@@ -203,13 +201,13 @@ def save_release(release, input_meta, output_dir):
                 with tag('KEXPTag'):
                     text(release["tag"]["name"])
                     
-            if (len(input_meta["rotation"]) > 0):
-                r_status = stringCleanup(input_meta["rotation"])
+            if (len(batch_meta["rotation"]) > 0):
+                r_status = stringCleanup(batch_meta["rotation"])
                 with tag('KEXPReleaseRotationStatus'):
-                    text(input_meta["rotation"])
-            if (len(input_meta["category"]) > 0):
+                    text(batch_meta["rotation"])
+            if (len(batch_meta["category"]) > 0):
                 with tag('KEXPPrimaryGenre'):
-                    text(input_meta["category"])
+                    text(batch_meta["category"])
             #with tag('KEXPLength'):
             #    text(release[""])
             #for item in release["links"]:
