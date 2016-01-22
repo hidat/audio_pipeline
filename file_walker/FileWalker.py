@@ -73,7 +73,7 @@ def process_directory(source_dir, output_dir, batch_meta, generate, serializer, 
                         get_mutagen_meta(raw_metadata, ext)
 
                     if release_id > '':
-                    
+                                        
                         # open log file for writing log data
                         # currently the log file will be littered with duplicate tracks
                         log_file = open(log_file_name, 'ab')
@@ -83,6 +83,7 @@ def process_directory(source_dir, output_dir, batch_meta, generate, serializer, 
                             #See if we have already cached the release, or we need to pull if from MusicBrainz
                             if release_id in cached_mb_releases:
                                 mb_release = cached_mb_releases[release_id]
+                                release = MetaProcessor.process_release(mb_release)
                             else:
                                 # pull and cache release metadata
                                 mb_release = MBInfo.get_release(release_id)
@@ -99,7 +100,7 @@ def process_directory(source_dir, output_dir, batch_meta, generate, serializer, 
                             
                             # Pull metadata from MusicBrainz
                             track_data = MetaProcessor.process_track(mb_release, batch_meta, disc_num, track_num)
-
+                            
                             # Add KEXP added metadata from tags
                             track_data['kexp_category'] = kexp_category
                             track_data['kexp_obscenity_rating'] = kexp_obscenity_rating
