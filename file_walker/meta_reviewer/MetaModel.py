@@ -166,7 +166,26 @@ class process_directory:
             # check if this tag is already in the metadata
             # if it is, just overwrite it?
             audio[str(tag_name)] = tag_value
+            self.current_track_attributes[file_name][tag_name] = tag_value
             audio.save()
+            
+    def delete_metadata(self, file_name, tagnames):
+        # delete the specified tag of metadata from the audio
+        audio = mutagen.File(file_name)
+        format = os.path.splitext(file_name)[1]
+        if format in file_types:
+            for tag in tagnames:
+                tag_name = convert_tag(file_types[format], tag)
+                if tag_name in audio.keys():
+                    audio.pop(tag_name)
+                    if tag in self.current_track_attributes[file_name].keys():
+                        self.current_track_attributes[file_name].pop(tag)
+                
+        audio.save()
+        
+    def get_track_meta(self, file_name):
+        if file_name in self.current_track_attributes.keys():
+            return self.current_track_attributes[file_name]
         
     def has_next(self):
         if self.cur_release is None:
@@ -187,3 +206,13 @@ class process_directory:
             next = True
             
         return next
+        
+def convert_tag(format, tag):
+    if format is "vorbis":
+        tag_name = tag.lower()
+    elif format is "aac":
+        tag_name = "----:com.apple.iTunes:" + tag
+    else:
+        tag_name = str(tag)
+        
+    return(tag_name)

@@ -59,23 +59,31 @@ class MetaController:
         """
         yellow_dot = re.compile("\s*y(ellow)?\s*(dot)?", flags=re.I)
         red_dot = re.compile("\s*r(ed)?\s*(dot)?", flags=re.I)
+        rm_rating = re.compile("\s*-\s*((y(ellow)?\s*(dot)?)|(r(ed)?\s*(dot)?))", flags=re.I)
         new_meta = None
         
         if track_num not in self.meta_model.current_tracks.keys():
            print("Invalid Track Number")
         else:
             file_name = self.meta_model.current_tracks[track_num]
-            if yellow_dot.match(value):
+            print(value)
+            if rm_rating.match(value):
+                self.meta_model.delete_metadata(file_name, [kexp_tags["obscenity"]])
+            elif yellow_dot.match(value):
                 new_meta = {kexp_tags["obscenity"]: kexp_values["y"]}
-            elif value == "r" or value == "red" or value == "red dot":
+            elif red_dot.match(value):
                 new_meta = {kexp_tags["obscenity"]: kexp_values["r"]}
             else:
                 print("Invalid Input")      
         
         if new_meta:
             self.meta_model.update_metadata(file_name, new_meta)
-            self.base_frame.update_track(file_name, new_meta)
             self.base_frame.clear_input()
+        
+        if file_name:
+            meta = self.meta_model.get_track_meta(file_name)
+            self.base_frame.update_track(file_name, meta)
+
             
     def change_displayed_album(self, command):
         """

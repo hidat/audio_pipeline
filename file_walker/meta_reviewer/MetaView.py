@@ -1,4 +1,4 @@
-import tkinter as tk
+import tkinter.tix as tk
 from Util import *
 
 bg_color = "black"
@@ -230,19 +230,23 @@ class MetaFrame(tk.Frame):
             rowval += 1
             colval = 1
 
-    def update_track(self, name, new_meta):
+    def update_track(self, name, meta):
         for key in track_categories:
             value=""
-            if key in new_meta.keys():
-                value = str(new_meta[key])
+            if key in meta.keys():
+                value = str(meta[key])
                 self.track_attributes[name][key].config(text=value)
-            if "KEXPFCCOBSCENITYRATING" in new_meta.keys():
-                obscenity = new_meta["KEXPFCCOBSCENITYRATING"].casefold()
+            elif key in self.track_attributes[name].keys():
+                self.track_attributes[name][key].config(text="")
+            if "KEXPFCCOBSCENITYRATING" in meta.keys():
+                obscenity = meta["KEXPFCCOBSCENITYRATING"].casefold()
                 if obscenity == "yellow dot":
                     color = yellow
                 elif obscenity == "red dot":
                     color = red
                 self.track_attributes[name][key].config(fg=color)
+            else:
+                self.track_attributes[name][key].config(fg=text_color)
                 
     def close_frame(self):
         self.destroy()
