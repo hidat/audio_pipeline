@@ -13,9 +13,11 @@ class AppFrame(tk.Frame):
     def __init__(self, input_processor, background="black", master=None):
         self.meta_display = None
         self.info_frame = None
+        self.info_popup = None
         
         self.meta_location = (1, 1)
         self.input_location = (1, 2)
+        self.help_button_location = (2, 2)
     
         global bg_color
         bg_color = "black"
@@ -23,9 +25,16 @@ class AppFrame(tk.Frame):
 
         self.input_frame = InputFrame(master=self)
         self.input_frame.grid(row=self.input_location[1], column=self.input_location[0])
+        self.help_button()
         
         self.master.protocol("WM_DELETE_WINDOW", self.quit)
         self.grid()
+        
+    def help_button(self):
+        button = tk.Button(self, text="Help", command=(lambda: self.display_info(commands_list, example_list)))
+        
+        button.grid(row=self.help_button_location[1], column=self.help_button_location[0],
+                        padx=10, pady=10)
 
     def display_meta(self, release_info, track_info):
         if self.meta_display:
@@ -35,8 +44,10 @@ class AppFrame(tk.Frame):
         self.meta_display.grid(row=self.meta_location[1], column=self.meta_location[0])
         
     def display_info(self, command_list, display_list):
-        self.info_frame = InfoFrame(self)
+        self.info_popup = tk.PopupMenu(self, state="normal", spring="false")
+        self.info_frame = InfoFrame(self.info_popup)
         self.info_frame.display_commands(command_list, display_list)
+        #self.info_popup.grid()
         #self.info_frame.grid(row=self.meta_location[1], column=self.meta_location[0])
         
     def update_track(self, name, new_meta):
@@ -48,6 +59,9 @@ class AppFrame(tk.Frame):
     def clear_input(self):
         self.input_frame.clear_input()
         
+    def select_input(self):
+        self.input_frame.select_input()
+        
     def quit_command(self, option="Quit?"):
         self.input_frame.labeled(options=option)
         
@@ -58,17 +72,14 @@ class AppFrame(tk.Frame):
         if self.input_frame.entrybox is not None:
             contents = self.input_frame.input_value.get()
         return contents
-        
-        
+
+
 class InfoFrame(tk.Frame):
     # the information frame should open in a new window, because some people might want to reference it?
     
     def __init__(self, display_commands, master=None):
-        
-    
         tk.Frame.__init__(self, master, bg=bg_color)
         self.grid()
-        
         
     def display_commands(self, command_list, example_list):
         """
@@ -98,7 +109,8 @@ class InfoFrame(tk.Frame):
                 example.grid(row=row_index, column=col_index, sticky="w", padx=2, pady=2)
                 row_index += 1
             col_index = 1
-            
+
+
 class InputFrame(tk.Frame):
 
     def __init__(self, master=None):
@@ -121,6 +133,10 @@ class InputFrame(tk.Frame):
         self.entrybox.select_range(0, tk.END)
         
         self.entrybox.bind('<Key-Return>', input_processor)
+        
+    def select_input(self):
+        if self.entrybox:
+            self.entrybox.select_range(0, tk.END)
         
     def clear_input(self):
         if self.entrybox:

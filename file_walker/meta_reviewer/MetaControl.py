@@ -8,7 +8,7 @@ tracknum_acc = "track_num"
 meta_acc = "meta"
 command_acc = "command"
 
-track_meta_pattern = re.compile('(?P<' + tracknum_acc + '>\d+)\s*(?P<' + meta_acc + '>.+)')
+track_meta_pattern = re.compile('(?P<' + tracknum_acc + '>(((\d+((,)|(\s))*)+)|(\s*all)))\s*(?P<' + meta_acc + '>.+)')
 command_pattern = re.compile('(?P<' + command_acc + '>.+)')
 
 class MetaController:
@@ -42,9 +42,14 @@ class MetaController:
             # we (probably) have a track metadata match (currently only RED DOT, YELLOW DOT)
             # process it accordingly
             try:
-                track_num = int(match.group(tracknum_acc))
+                track_nums = match.group(tracknum_acc)
+                if re.search("all", track_nums):
+                    track_nums = self.meta_model.current_tracks.keys()
+                else:
+                    track_nums = re.findall("\d+", track_nums)
+                    track_nums = [int(track_num) for track_num in track_nums]
                 value = match.group(meta_acc)
-                self.new_meta_input(track_num, value)
+                self.new_meta_input(track_nums, value)
             except ValueError:
                 print("Invalid Input")
         else:
@@ -52,38 +57,39 @@ class MetaController:
             self.change_displayed_album(command)
 
 
-    def new_meta_input(self, track_num, value):
+    def new_meta_input(self, track_nums, value):
         """
         When we have input we've determined is (probably) metadata,
         add it to the metadata of the specified track
         """
         yellow_dot = re.compile("\s*y(ellow)?\s*(dot)?", flags=re.I)
         red_dot = re.compile("\s*r(ed)?\s*(dot)?", flags=re.I)
-        rm_rating = re.compile("\s*-\s*((y(ellow)?\s*(dot)?)|(r(ed)?\s*(dot)?))", flags=re.I)
-        new_meta = None
+        rm_rating = re.compile("\s*c(lear)?", flags=re.I)
         
-        if track_num not in self.meta_model.current_tracks.keys():
-           print("Invalid Track Number")
-        else:
-            file_name = self.meta_model.current_tracks[track_num]
-            print(value)
-            if rm_rating.match(value):
-                self.meta_model.delete_metadata(file_name, [kexp_tags["obscenity"]])
-            elif yellow_dot.match(value):
-                new_meta = {kexp_tags["obscenity"]: kexp_values["y"]}
-            elif red_dot.match(value):
-                new_meta = {kexp_tags["obscenity"]: kexp_values["r"]}
+        for track_num in track_nums:
+            new_meta = None
+            if track_num not in self.meta_model.current_tracks.keys():
+               print("Invalid Track Number: " + track_num)
             else:
-                print("Invalid Input")      
-        
-        if new_meta:
-            self.meta_model.update_metadata(file_name, new_meta)
-            self.base_frame.clear_input()
-        
-        if file_name:
-            meta = self.meta_model.get_track_meta(file_name)
-            self.base_frame.update_track(file_name, meta)
-
+                file_name = self.meta_model.current_tracks[track_num]
+                print(value)
+                if rm_rating.match(value):
+                    self.meta_model.delete_metadata(file_name, [kexp_tags["obscenity"]])
+                elif yellow_dot.match(value):
+                    new_meta = {kexp_tags["obscenity"]: kexp_values["y"]}
+                elif red_dot.match(value):
+                    new_meta = {kexp_tags["obscenity"]: kexp_values["r"]}
+                else:
+                    print("Invalid Input " + value)   
+            
+            if new_meta:
+                self.meta_model.update_metadata(file_name, new_meta)
+            
+            if file_name:
+                meta = self.meta_model.get_track_meta(file_name)
+                self.base_frame.update_track(file_name, meta)
+            
+        self.base_frame.clear_input()
             
     def change_displayed_album(self, command):
         """
@@ -122,6 +128,8 @@ class MetaController:
                 self.last_album()
             elif help_pattern.match(command):
                 self.base_frame.display_info(commands_list, example_list)
+                
+        self.base_frame.select_input()
 
                 
     def next_album(self, releases, tracks):
