@@ -18,17 +18,22 @@ class MetaController:
         MetaController is in charge of sending commands to the view and getting information from the model.
         
         """
-        self.meta_model = MetaModel.process_directory(root_dir)
-        self.root_dir = root_dir
-
         self.quit_command = False
-        self.base_frame = MetaView.AppFrame(self.process_input)
-        self.base_frame.allow_input(self.process_input)
+        self.base_frame = MetaView.AppFrame(self.process_input, self.choose_dir)
         
-        if self.meta_model.has_next():
-            releases, tracks = self.meta_model.get_next_meta()
-            directory, release_info = releases.popitem()
-            self.base_frame.display_meta(release_info, tracks)
+        if root_dir:
+            self.meta_model = MetaModel.process_directory(root_dir)
+            self.root_dir = root_dir
+
+            if self.meta_model.has_next():
+                releases, tracks = self.meta_model.get_next_meta()
+                directory, release_info = releases.popitem()
+                self.base_frame.display_meta(release_info, tracks)
+                self.base_frame.allow_input()
+                self.base_frame.mainloop()
+        else:
+            self.base_frame.choose_dir()
+            self.base_frame.allow_input()
             self.base_frame.mainloop()
                 
                                 
@@ -72,7 +77,6 @@ class MetaController:
                print("Invalid Track Number: " + track_num)
             else:
                 file_name = self.meta_model.current_tracks[track_num]
-                print(value)
                 if rm_rating.match(value):
                     self.meta_model.delete_metadata(file_name, [kexp_tags["obscenity"]])
                 elif yellow_dot.match(value):
@@ -147,14 +151,23 @@ class MetaController:
         self.quit_command = True
         self.base_frame.quit_command()
         
+    def choose_dir(self, root_dir):
+        if root_dir > "":
+            self.meta_model = MetaModel.process_directory(root_dir)
+            self.root_dir = root_dir
+            if self.meta_model.has_next():
+                releases, tracks = self.meta_model.get_next_meta()
+                directory, release_info = releases.popitem()
+                self.base_frame.display_meta(release_info, tracks)
+            else:
+                MetaView.err_message("Please select a valid directory.", self.base_frame.choose_dir, self.base_frame)
+        else:
+            MetaView.err_message("Please select a valid directory.", self.base_frame.choose_dir, self.base_frame)
   
 def main():
-    if len(sys.argv) < 2:
-        print('asdkj')
-        exit(2)
-        
-        
-    directory = sys.argv[1]
+    directory = None
+    if len(sys.argv) >= 2:
+        directory = sys.argv[1]
         
     controller = MetaController(directory)
 

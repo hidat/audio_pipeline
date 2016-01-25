@@ -5,9 +5,12 @@ release_mapping = {"name": "Album", "album_artist": "Album Artist", "disc_num": 
 track_mapping = {"name": "Title", "artist": "Artist", "track_num": "Track Number", "length": "Length",
                  "KEXPFCCOBSCENITYRATING": "KEXPFCCOBSCENITYRATING"}
                  
-commands_list = {"<track_num><meta_command>": "Add the metadata specified by <meta_command> to track <track_num>", 
-                 "done": "Close MetaReviewer. All metadata changes will be kept (~for now~)",
-                 "next": "Display metadata of next album", "previous": "Display metadata of previous album"}
+commands_list = {"<track_num>[[,][ ]<track_num>...][ ]<meta_command>": "Add the metadata specified by <meta_command> to track <track_num>. <meta_command> is not case-sensitive.\n\
+                  Multiple <track_nums> may be specified, separated by \",\" and/or \" \"\
+                  Valid <meta_command>s:\n\tr[ed[ dot]]: RED DOT obscenity rating\n\t\
+                  y[ellow[ dot]]: YELLOW DOT obscenity rating\n\tc[lear]: Remove obscenity rating", 
+                 "d[one]": "Close this application.",
+                 "n[ext]": "Display metadata of next album", "p[[rev]ious]": "Display metadata of previous album"}
                  
 example_list = {"<track_num><meta_command>": "7y: Add YELLOW DOT obscenity rating to track 7 of the current album."}
 
@@ -30,3 +33,28 @@ def minutes_seconds(length):
         seconds = "0" + str(seconds)
     final = str(minutes) + ":" + str(seconds)
     return final
+    
+    
+class MetaAttributes():
+    def __init__():
+        self.mbid = FormatMeta("mbid", '----:com.apple.iTunes:MBID', 'TXXX:MBID')
+        self.pmbid = FormatMeta("musicbrainz_albumid", '----:com.apple.iTunes:MusicBrainz Album Id', 'TXXX:MusicBrainz Album Id')
+        self.kexp_genre = FormatMeta("KEXPPRIMARYGENRE", '----:com.apple.iTunes:KEXPPRIMARYGENRE',  'TXXX:KEXPPRIMARYGENRE')
+        self.obscenity_rating = FormatMeta("KEXPFCCOBSCENITYRATING", '----:com.apple.iTunes:KEXPFCCOBSCENITYRATING', 'TXXX:KEXPFCCOBSCENITYRATING')
+        self.album = FormatMeta("album", "\xa9alb", 'ALBUM')
+        self.albumartist = FormatMeta("albumartist", "\aART", "TPE1")
+        self.tracknumber = FormatMeta("tracknumber", 'trkn', 'TRCK')
+        self.discnumber = FormatMeta("discnumber", "disk", "TPOS")
+        self.title = FormatMeta("title", '\xa9nam', 'TIT2')
+        self.trackartist = FormatMeta("artist", '\xa9ART', 'TPE2')
+    
+    def add_tag(tag_name, vorbis, aac, id3):
+        self.tag_name = FormatMeta(vorbis, aac, id3)
+        
+        
+class FormatMeta():
+    
+    def __init__(vorbis, aac, id3):
+        self.vorbis = vorbis
+        self.aac = aac
+        self.id3 = id3

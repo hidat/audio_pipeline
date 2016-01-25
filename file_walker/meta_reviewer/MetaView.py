@@ -1,4 +1,5 @@
-import tkinter.tix as tk
+import tkinter as tk
+import tkinter.filedialog as filedialog
 from Util import *
 
 bg_color = "black"
@@ -8,12 +9,19 @@ red = "red"
 heading = ('Helvetica', '10', 'bold')
 standard = ('Ariel', '10')
 
+initial_size = (500, 500)
+
+
 class AppFrame(tk.Frame):
 
-    def __init__(self, input_processor, background="black", master=None):
-        self.meta_display = None
+
+    def __init__(self, input_processor, directory_selector, background="black", master=None):
+        self.body_display = None
         self.info_frame = None
         self.info_popup = None
+        
+        self.input_processor = input_processor
+        self.directory_selector = directory_selector
         
         self.meta_location = (1, 1)
         self.input_location = (1, 2)
@@ -21,46 +29,66 @@ class AppFrame(tk.Frame):
     
         global bg_color
         bg_color = "black"
-        tk.Frame.__init__(self, master, bg=bg_color)
+        tk.Frame.__init__(self, master, bg=bg_color, width=initial_size[0], height=initial_size[1])
+        self.master["bg"] = bg_color
 
         self.input_frame = InputFrame(master=self)
         self.input_frame.grid(row=self.input_location[1], column=self.input_location[0])
-        self.help_button()
+        self.menubar = tk.Menu(self)
+        self.menubar.add_command(label="Change Directory", command=self.choose_dir)
+        self.menubar.add_command(label="Help", command=lambda: self.display_info(commands_list, example_list))
         
         self.master.protocol("WM_DELETE_WINDOW", self.quit)
+        self.master.config(menu=self.menubar)
+        
+        #self.allow_input()
         self.grid()
         
+    def choose_dir(self):
+        """
+        Choose a directory containing release directories to display metadata from
+        """
+        choose_dir(self.directory_selector, parent=self)
+        
     def help_button(self):
+        """
+        A button that opens a new window of help with commands
+        """
         button = tk.Button(self, text="Help", command=(lambda: self.display_info(commands_list, example_list)))
         
         button.grid(row=self.help_button_location[1], column=self.help_button_location[0],
                         padx=10, pady=10)
+                        
 
     def display_meta(self, release_info, track_info):
-        if self.meta_display:
-            self.meta_display.close_frame()
+        """
+        Display the current album's metadata
+        """
+        if self.body_display:
+            self.body_display.close_frame()
+            self.body_display = None
         
-        self.meta_display = MetaFrame(release_info, track_info, self)
-        self.meta_display.grid(row=self.meta_location[1], column=self.meta_location[0])
+        self.body_display = MetaFrame(release_info, track_info, self)
+        self.body_display.grid(row=self.meta_location[1], column=self.meta_location[0])
+        
+    #####
+    # HELP / INFORMATION DISPLAY COMMANDS
+    #####
         
     def display_info(self, command_list, display_list):
-        self.info_popup = tk.PopupMenu(self, state="normal", spring="false")
-        self.info_frame = InfoFrame(self.info_popup)
-        self.info_frame.display_commands(command_list, display_list)
-        #self.info_popup.grid()
-        #self.info_frame.grid(row=self.meta_location[1], column=self.meta_location[0])
-        
+        """
+        Open a new window to display metadata about 
+        """
+        if self.info_popup:
+            self.info_popup.focus_set()
+        else:
+            self.info_popup = tk.Toplevel(bg=bg_color)
+            self.info_popup.title("Help")
+            self.info_frame = InfoFrame(self.cancel_info, master=self.info_popup)
+            self.info_frame.display_commands(command_list, display_list)
+                    
     def update_track(self, name, new_meta):
-        self.meta_display.update_track(name, new_meta)
-        
-    def allow_input(self, input_processor):
-        self.input_frame.input_entry(input_processor)
-        
-    def clear_input(self):
-        self.input_frame.clear_input()
-        
-    def select_input(self):
-        self.input_frame.select_input()
+        self.body_display.update_track(name, new_meta)        
         
     def quit_command(self, option="Quit?"):
         self.input_frame.labeled(options=option)
@@ -68,17 +96,42 @@ class AppFrame(tk.Frame):
     def clear_label(self):
         self.input_frame.clear_label()
         
+    #####
+    # INPUT CONTROL METHODS
+    #####
+    def allow_input(self):
+        self.input_frame.input_entry(self.input_processor)
+        
+    def clear_input(self):
+        self.input_frame.clear_input()
+        
+    def select_input(self):
+        self.input_frame.select_input()
+        
     def get_input(self):
         if self.input_frame.entrybox is not None:
             contents = self.input_frame.input_value.get()
         return contents
+        
+        
+    #####
+    # UTILITY FUNCTIONS
+    #####
+    
+    def cancel_info(self):
+        """
+        Cleanly close the help popup, so that it can be reopened properly
+        """
+        self.info_popup.destroy()
+        self.info_popup = None
 
 
 class InfoFrame(tk.Frame):
     # the information frame should open in a new window, because some people might want to reference it?
     
-    def __init__(self, display_commands, master=None):
+    def __init__(self, close_command, master=None):
         tk.Frame.__init__(self, master, bg=bg_color)
+        self.master.protocol("WM_DELETE_WINDOW", close_command)
         self.grid()
         
     def display_commands(self, command_list, example_list):
@@ -109,6 +162,12 @@ class InfoFrame(tk.Frame):
                 example.grid(row=row_index, column=col_index, sticky="w", padx=2, pady=2)
                 row_index += 1
             col_index = 1
+            
+    def cancel(self):
+        if master:
+            self.master.focus_set()
+        self.destroy()
+        return None    
 
 
 class InputFrame(tk.Frame):
@@ -266,3 +325,68 @@ class MetaFrame(tk.Frame):
                 
     def close_frame(self):
         self.destroy()
+        
+class DialogBox(tk.Toplevel):
+
+    def __init__(self, message, buttons=None, dimensions=(100,75), cancel=False, title=None, master=None):
+        """
+        Create a dialog popup box containing the specified message string and button options.
+        
+        :param message: string message to display in popup
+        :param buttons: List of button directories; each button directory must contain
+                        {"name": name, "command": command}
+        """
+        tk.Toplevel.__init__(self, master, width=dimensions[0], height=dimensions[1])
+        if master:
+            self.master = master
+            self.transient(master)
+            location = "+" + str(self.master.winfo_rootx() + 50) +\
+                       "+" + str(self.master.winfo_rooty() + 50)
+            self.geometry(location)
+            
+        if title:
+            self.title(title)
+            
+        self.text(message)
+        if buttons:
+            self.button_box(buttons)
+            
+        self.protocol("WM_DELETE_WINDOW", self.cancel)
+        
+    def text(self, message):
+        label = tk.Label(self, text=message)
+        label.pack()
+        
+    def button_box(self, buttons):
+        box = tk.Frame(self)
+        
+        for i in range(0, len(buttons)):
+            button = buttons[i]
+            if not "command" in button.keys() or not button["command"]:
+                button["command"] = self.cancel
+            but = tk.Button(box, text=button["name"], command=lambda x=button["command"]: self.apply(x))
+            if i == 0:
+                but.focus_set()
+                
+            but.bind("<Return>", but['command'])
+            but.pack(side=tk.LEFT, padx=5,pady=5)
+
+        box.pack()
+        self.wait_window(self)
+    
+    def apply(self, command):
+        command()
+        self.cancel()
+    
+    def cancel(self):
+        self.destroy()
+        
+def choose_dir(directory_selector, parent=None, initial_dir="\\"):
+    directory_name = filedialog.askdirectory(title="fialog", initialdir=initial_dir, master=parent)
+    directory_selector(directory_name)
+    
+    
+def err_message(message, ok_command, parent=None):
+    err_display = DialogBox(message, master=parent)
+    buttons = [{"name": "OK", "command": ok_command}, {"name": "Quit", "command": err_display.cancel}]
+    err_display.button_box(buttons)

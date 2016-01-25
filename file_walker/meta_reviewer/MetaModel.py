@@ -22,7 +22,6 @@ class process_directory:
                 self.releases.append(item)
         
         self.releases.sort()
-        self.releases.reverse()
         
         self.current_release_attributes = {}
         self.current_tracks = {}
@@ -136,15 +135,14 @@ class process_directory:
                         if '\xa9ART' in raw_metadata:
                             track["artist"] = str(raw_metadata['\xa9ART'][0])
 
-                    # id3 is currently not supported by meta_reviewer
                     elif file_types[ext] == "id3":
                         raw_metadata = raw_metadata.tags
                         if 'TXXX:MBID' in raw_metadata:
-                            release_id = raw_metadata['TXXX:MBID'].text[0]
+                            release['release_id'] = raw_metadata['TXXX:MBID'].text[0]
                             track_num = int(raw_metadata['TRCK'].text[0].split('/')[0]) - 1
                             disc_num = int(raw_metadata['TPOS'].text[0].split('/')[0])
                         elif 'TXXX:MusicBrainz Album Id' in raw_metadata:
-                            release_id = raw_metadata['TXXX:MusicBrainz Album Id'].text[0]
+                            release['release_id'] = raw_metadata['TXXX:MusicBrainz Album Id'].text[0]
                             track_num = int(raw_metadata['TRCK'].text[0].split('/')[0]) - 1
                             disc_num = int(raw_metadata['TPOS'].text[0].split('/')[0])
                         if 'TXXX:KEXPPRIMARYGENRE' in raw_metadata:
@@ -152,6 +150,19 @@ class process_directory:
                         if 'TXXX:KEXPFCCOBSCENITYRATING' in raw_metadata:
                             track["KEXPFCCOBSCENITYRATING"] = raw_metadata['TXXX:KEXPFCCOBSCENITYRATING'].text[0]
                             
+                        if 'ALBUM' in raw_metadata:
+                            release['name'] = raw_metadata['ALBUM'].text[0].split('/')[0]
+                        if "TPE1" in raw_metadata:
+                            release["album_artist"] = raw_metadata["TPE1"].text[0].split('/')[0]
+                        if "TPOS" in raw_metadata:
+                            release["disc_num"] = int(raw_metadata['TPOS'].text[0].split('/')[0])
+                        if 'TRCK' in raw_metadata:
+                            track["track_num"] = int(raw_metadata['TRCK'].text[0].split('/')[0]) - 1
+                        if 'TIT2' in raw_metadata:
+                            track["name"] = raw_metadata['TIT2'].text[0].split('/')[0]
+                        if 'TPE2' in raw_metadata:
+                            track["artist"] = raw_metadata['TPE2'].text[0].split('/')[0]
+
                     self.current_track_attributes[track_path] = track
                     self.current_release_attributes[release_dir] = release
                     self.current_tracks[track["track_num"]] = track_path
@@ -188,22 +199,34 @@ class process_directory:
             return self.current_track_attributes[file_name]
         
     def has_next(self):
-        if self.cur_release is None:
-            next = False
-        elif (self.cur_release + 1) >= len(self.releases):
-            next = False
-        else:
-            next = True
-            
+        next = False
+        if self.cur_release is not None and ((self.cur_release + 1) < len(self.releases)):
+            for i in range(self.cur_release+1, len(self.releases)):
+                files = os.listdir(self.releases[i])
+                file_exts = [os.path.splitext(item)[1] for item in files]
+                for ext in file_types.keys():
+                    self.cur_release = i - 1
+                    if ext in file_exts:
+                        next = True
+                        break
+                if next:
+                    break
+                
         return next
         
     def has_prev(self):
-        if self.cur_release is None:
-            next = False
-        elif (self.cur_release - 1) < 0:
-            next = False
-        else:
-            next = True
+        next = False
+        if self.cur_release is not None and ((self.cur_release - 1) >= 0):
+            for i in reversed(range(0, self.cur_release)):
+                files = os.listdir(self.releases[i])
+                file_exts = [os.path.splitext(item)[1] for item in files]
+                for ext in file_types.keys():
+                    if ext in file_exts:
+                        self.cur_release = i + 1
+                        next = True
+                        break
+                if next:
+                    break
             
         return next
         
@@ -212,6 +235,8 @@ def convert_tag(format, tag):
         tag_name = tag.lower()
     elif format is "aac":
         tag_name = "----:com.apple.iTunes:" + tag
+    elif format is 'id3':
+        tag_name = "TXXX:" + tag
     else:
         tag_name = str(tag)
         
