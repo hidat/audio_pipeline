@@ -28,7 +28,7 @@ Walks a directory structure of audio files and does the following:
         Log format: <Item Type>   <ItemCode OR Item MBID (labels only)>    <Item Name>
    * XML files are named according to their ItemCode. Release and Artist XML filenames are given prefix 'r'.
    * Currently files can only be written as Dalet-compatible XML
-
+   
 ######Options:
 
  * *--source, -s*  
@@ -66,6 +66,9 @@ Walks a directory structure of audio files and does the following:
     - Light  
     - Medium  
     - R/N
+    
+  * *--generate, -g*
+    Generate metadata only, without copying audio files
       
 ######To Run
 
