@@ -36,7 +36,8 @@ def minutes_seconds(length):
     
     
 class MetaAttributes():
-    def __init__():
+    # TODO: Make this a properly subscriptable class, instead of... whatever's going on here
+    def __init__(self):
         self.mbid = FormatMeta("mbid", '----:com.apple.iTunes:MBID', 'TXXX:MBID')
         self.pmbid = FormatMeta("musicbrainz_albumid", '----:com.apple.iTunes:MusicBrainz Album Id', 'TXXX:MusicBrainz Album Id')
         self.kexp_genre = FormatMeta("KEXPPRIMARYGENRE", '----:com.apple.iTunes:KEXPPRIMARYGENRE',  'TXXX:KEXPPRIMARYGENRE')
@@ -47,14 +48,18 @@ class MetaAttributes():
         self.discnumber = FormatMeta("discnumber", "disk", "TPOS")
         self.title = FormatMeta("title", '\xa9nam', 'TIT2')
         self.trackartist = FormatMeta("artist", '\xa9ART', 'TPE2')
-    
-    def add_tag(tag_name, vorbis, aac, id3):
+        
+        self.album_attributes = [self.mbid, self.pmbid, self.album, self.albumartist]
+        self.track_attributes = [self.tracknumber, self.discnumber, \
+                                 self.title, self.trackartist, self.kexp_genre]
+                                 
+    def add_tag(self, tag_name, vorbis, aac, id3):
         self.tag_name = FormatMeta(vorbis, aac, id3)
         
         
 class FormatMeta():
     
-    def __init__(vorbis, aac, id3):
+    def __init__(self, vorbis, aac, id3):
         self.vorbis = vorbis
         self.aac = aac
         self.id3 = id3

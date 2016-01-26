@@ -16,6 +16,8 @@ class AppFrame(tk.Frame):
 
 
     def __init__(self, input_processor, directory_selector, background="black", master=None):
+        global bg_color
+        bg_color = background
         self.body_display = None
         self.info_frame = None
         self.info_popup = None
@@ -25,21 +27,19 @@ class AppFrame(tk.Frame):
         
         self.meta_location = (1, 1)
         self.input_location = (1, 2)
-        self.help_button_location = (2, 2)
     
-        global bg_color
-        bg_color = "black"
         tk.Frame.__init__(self, master, bg=bg_color, width=initial_size[0], height=initial_size[1])
         self.master["bg"] = bg_color
-
-        self.input_frame = InputFrame(master=self)
-        self.input_frame.grid(row=self.input_location[1], column=self.input_location[0])
+        
         self.menubar = tk.Menu(self)
         self.menubar.add_command(label="Change Directory", command=self.choose_dir)
         self.menubar.add_command(label="Help", command=lambda: self.display_info(commands_list, example_list))
         
         self.master.protocol("WM_DELETE_WINDOW", self.quit)
         self.master.config(menu=self.menubar)
+
+        self.input_frame = InputFrame(master=self)
+        self.input_frame.grid(row=self.input_location[1], column=self.input_location[0])
         
         #self.allow_input()
         self.grid()
@@ -48,18 +48,8 @@ class AppFrame(tk.Frame):
         """
         Choose a directory containing release directories to display metadata from
         """
-        choose_dir(self.directory_selector, parent=self)
+        choose_dir(self.directory_selector)
         
-    def help_button(self):
-        """
-        A button that opens a new window of help with commands
-        """
-        button = tk.Button(self, text="Help", command=(lambda: self.display_info(commands_list, example_list)))
-        
-        button.grid(row=self.help_button_location[1], column=self.help_button_location[0],
-                        padx=10, pady=10)
-                        
-
     def display_meta(self, release_info, track_info):
         """
         Display the current album's metadata
@@ -381,8 +371,8 @@ class DialogBox(tk.Toplevel):
     def cancel(self):
         self.destroy()
         
-def choose_dir(directory_selector, parent=None, initial_dir="\\"):
-    directory_name = filedialog.askdirectory(title="fialog", initialdir=initial_dir, master=parent)
+def choose_dir(directory_selector, initial_dir="\\"):
+    directory_name = filedialog.askdirectory(title="fialog", initialdir=initial_dir)
     directory_selector(directory_name)
     
     

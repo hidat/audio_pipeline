@@ -6,6 +6,7 @@ from Util import *
 
 
 class process_directory:
+    # TODO: Make this an iterable class, instead of a weird hacky iterable class, ya goof
 
     def __init__(self, src_dir):
         # Create a new process_directory item, which finds all directories
@@ -26,6 +27,8 @@ class process_directory:
         self.current_release_attributes = {}
         self.current_tracks = {}
         self.current_track_attributes = {}
+        
+        self.tag_normalize = MetaAttributes()
         
         if len(self.releases) > 0:
             self.cur_release = -1
@@ -73,12 +76,16 @@ class process_directory:
                 # filter down to audio files we can process
                 ext = os.path.splitext(item)[1]
                 if ext in file_types:
-                    track_path = os.path.join(release_dir, item)
-                    
-                    raw_metadata = mutagen.File(track_path)
-                                            
                     release = {}
                     track = {}
+                    track_path = os.path.join(release_dir, item)
+                    
+                    try:
+                        raw_metadata = mutagen.File(track_path)
+                    except:
+                        # failed to get metadata from file -> let through incorrect filetype, file may be corrupted, whatever
+                        # for now, just skip this file and continue to the next 
+                        continue
                     
                     raw_length = raw_metadata.info.length
                     

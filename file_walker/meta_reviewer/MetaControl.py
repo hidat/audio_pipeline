@@ -30,11 +30,10 @@ class MetaController:
                 directory, release_info = releases.popitem()
                 self.base_frame.display_meta(release_info, tracks)
                 self.base_frame.allow_input()
-                self.base_frame.mainloop()
         else:
             self.base_frame.choose_dir()
+            print("Allowing input")
             self.base_frame.allow_input()
-            self.base_frame.mainloop()
                 
                                 
     def process_input(self, event):
@@ -168,7 +167,9 @@ def main():
     directory = None
     if len(sys.argv) >= 2:
         directory = sys.argv[1]
-        
+                
     controller = MetaController(directory)
+    print("Starting main loop")
+    controller.base_frame.mainloop()
 
 main()
