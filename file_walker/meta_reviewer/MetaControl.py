@@ -3,6 +3,7 @@ import MetaView
 import sys
 from Util import *
 import re
+import threading
 
 tracknum_acc = "track_num"
 meta_acc = "meta"
@@ -20,7 +21,7 @@ class MetaController:
         """
         self.quit_command = False
         self.base_frame = MetaView.AppFrame(self.process_input, self.choose_dir)
-        
+
         if root_dir:
             self.meta_model = MetaModel.process_directory(root_dir)
             self.root_dir = root_dir
@@ -29,12 +30,10 @@ class MetaController:
                 releases, tracks = self.meta_model.get_next_meta()
                 directory, release_info = releases.popitem()
                 self.base_frame.display_meta(release_info, tracks)
-                self.base_frame.allow_input()
+                # self.base_frame.allow_input()
         else:
-            self.base_frame.choose_dir()
-            print("Allowing input")
-            self.base_frame.allow_input()
-                
+            self.base_frame.after(0, self.base_frame.choose_dir())
+
                                 
     def process_input(self, event):
         """
@@ -162,7 +161,7 @@ class MetaController:
                 MetaView.err_message("Please select a valid directory.", self.base_frame.choose_dir, self.base_frame)
         else:
             MetaView.err_message("Please select a valid directory.", self.base_frame.choose_dir, self.base_frame)
-  
+
 def main():
     directory = None
     if len(sys.argv) >= 2:

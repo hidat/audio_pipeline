@@ -41,14 +41,14 @@ class AppFrame(tk.Frame):
         self.input_frame = InputFrame(master=self)
         self.input_frame.grid(row=self.input_location[1], column=self.input_location[0])
         
-        #self.allow_input()
+        self.allow_input()
         self.grid()
-        
+
     def choose_dir(self):
         """
         Choose a directory containing release directories to display metadata from
         """
-        choose_dir(self.directory_selector)
+        choose_dir(self.directory_selector, master=self.info_frame)
         
     def display_meta(self, release_info, track_info):
         """
@@ -365,14 +365,15 @@ class DialogBox(tk.Toplevel):
         self.wait_window(self)
     
     def apply(self, command):
-        command()
         self.cancel()
-    
+        command()
+
     def cancel(self):
         self.destroy()
         
-def choose_dir(directory_selector, initial_dir="\\"):
-    directory_name = filedialog.askdirectory(title="fialog", initialdir=initial_dir)
+def choose_dir(directory_selector, master=None, initial_dir="\\"):
+    directory_name = filedialog.askdirectory(title="fialog", parent=master, initialdir=initial_dir)
+    # if
     directory_selector(directory_name)
     
     

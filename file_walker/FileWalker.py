@@ -186,12 +186,15 @@ def meta_directories(output_dir):
     track_meta_dir = os.path.join(output_dir, 'track_meta')
     if not os.path.exists(track_meta_dir):
         os.makedirs(track_meta_dir)
+    print("Track meta: ", track_meta_dir)
     artist_meta_dir = os.path.join(output_dir, 'artist_meta')
     if not os.path.exists(artist_meta_dir):
         os.makedirs(artist_meta_dir)
+    print("Artist meta: ", artist_meta_dir)
     release_meta_dir = os.path.join(output_dir, 'release_meta')
     if not os.path.exists(release_meta_dir):
         os.makedirs(release_meta_dir)
+    print("Release meta: ", release_meta_dir)
         
     return track_meta_dir, artist_meta_dir, release_meta_dir
 
