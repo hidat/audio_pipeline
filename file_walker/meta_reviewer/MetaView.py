@@ -16,6 +16,8 @@ class AppFrame(tk.Frame):
 
 
     def __init__(self, input_processor, directory_selector, background="black", master=None):
+        if not master:
+            master = tk.Tk()
         global bg_color
         bg_color = background
         self.body_display = None
@@ -48,7 +50,7 @@ class AppFrame(tk.Frame):
         """
         Choose a directory containing release directories to display metadata from
         """
-        choose_dir(self.directory_selector, master=self.info_frame)
+        choose_dir(self.directory_selector)
         
     def display_meta(self, release_info, track_info):
         """
@@ -371,13 +373,17 @@ class DialogBox(tk.Toplevel):
     def cancel(self):
         self.destroy()
         
-def choose_dir(directory_selector, master=None, initial_dir="\\"):
-    directory_name = filedialog.askdirectory(title="fialog", parent=master, initialdir=initial_dir)
+def choose_dir(directory_selector, master=None, initial_dir="\\", withdraw=True):
+    if withdraw:
+        tk.Tk().withdraw()
+    directory_name = filedialog.askdirectory(title="fialog", parent=master, initialdir=initial_dir, mustexist=True)
     # if
     directory_selector(directory_name)
     
     
-def err_message(message, ok_command, parent=None):
+def err_message(message, ok_command, parent=None, quit=False):
     err_display = DialogBox(message, master=parent)
-    buttons = [{"name": "OK", "command": ok_command}, {"name": "Quit", "command": err_display.cancel}]
+    buttons = [{"name": "OK", "command": ok_command}]
+    if quit:
+        buttons.append({"name": "Quit", "command": err_display.cancel})
     err_display.button_box(buttons)

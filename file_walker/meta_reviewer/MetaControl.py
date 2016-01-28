@@ -20,20 +20,17 @@ class MetaController:
         
         """
         self.quit_command = False
+        self.meta_model = None
         self.base_frame = MetaView.AppFrame(self.process_input, self.choose_dir)
 
         if root_dir:
             self.meta_model = MetaModel.process_directory(root_dir)
             self.root_dir = root_dir
-
             if self.meta_model.has_next():
-                releases, tracks = self.meta_model.get_next_meta()
-                directory, release_info = releases.popitem()
-                self.base_frame.display_meta(release_info, tracks)
-                # self.base_frame.allow_input()
+                self.next_album()
         else:
-            self.base_frame.after(0, self.base_frame.choose_dir())
-
+            self.base_frame.choose_dir()
+            self.base_frame.input_frame.entrybox.focus_set()
                                 
     def process_input(self, event):
         """
@@ -54,7 +51,7 @@ class MetaController:
                 value = match.group(meta_acc)
                 self.new_meta_input(track_nums, value)
             except ValueError:
-                print("Invalid Input")
+                MetaView.err_message("Invalid input", None, parent=self.base_frame)
         else:
             command = input_string.split()[0]
             self.change_displayed_album(command)
@@ -72,7 +69,9 @@ class MetaController:
         for track_num in track_nums:
             new_meta = None
             if track_num not in self.meta_model.current_tracks.keys():
-               print("Invalid Track Number: " + track_num)
+               file_name = None
+               err_msg = "Invalid Track Number: " + str(track_num)
+               MetaView.err_message(err_msg, None, parent=self.base_frame)
             else:
                 file_name = self.meta_model.current_tracks[track_num]
                 if rm_rating.match(value):
@@ -82,7 +81,8 @@ class MetaController:
                 elif red_dot.match(value):
                     new_meta = {kexp_tags["obscenity"]: kexp_values["r"]}
                 else:
-                    print("Invalid Input " + value)   
+                    err_msg = "Invalid Input " + str(value)
+                    MetaView.err_message(err_msg, None, parent=self.base_frame)
             
             if new_meta:
                 self.meta_model.update_metadata(file_name, new_meta)
@@ -116,14 +116,12 @@ class MetaController:
         else:
             if next_pattern.match(command):
                 if self.meta_model.has_next():
-                    releases, tracks = self.meta_model.get_next_meta()
-                    self.next_album(releases, tracks)
+                    self.next_album()
                 else:
                     self.last_album()
             elif prev_pattern.match(command):
                 if self.meta_model.has_prev():
-                    releases, tracks = self.meta_model.get_previous_meta()
-                    self.next_album(releases, tracks)
+                    self.prev_album()
                 else:
                     self.last_album()
             elif done_pattern.match(command):
@@ -134,10 +132,16 @@ class MetaController:
         self.base_frame.select_input()
 
                 
-    def next_album(self, releases, tracks):
+    def next_album(self):
         """
         Display the next directory / album
         """
+        releases, tracks = self.meta_model.get_next_meta()
+        for directory, release_info in releases.items():
+            self.base_frame.display_meta(release_info, tracks)
+            
+    def prev_album(self):
+        releases, tracks = self.meta_model.get_previous_meta()
         for directory, release_info in releases.items():
             self.base_frame.display_meta(release_info, tracks)
 
@@ -154,13 +158,11 @@ class MetaController:
             self.meta_model = MetaModel.process_directory(root_dir)
             self.root_dir = root_dir
             if self.meta_model.has_next():
-                releases, tracks = self.meta_model.get_next_meta()
-                directory, release_info = releases.popitem()
-                self.base_frame.display_meta(release_info, tracks)
+                self.next_album()
             else:
-                MetaView.err_message("Please select a valid directory.", self.base_frame.choose_dir, self.base_frame)
+                MetaView.err_message("Please select a valid directory.", self.base_frame.choose_dir, quit=True)
         else:
-            MetaView.err_message("Please select a valid directory.", self.base_frame.choose_dir, self.base_frame)
+            MetaView.err_message("Please select a valid directory.", self.base_frame.choose_dir, quit=True)
 
 def main():
     directory = None
