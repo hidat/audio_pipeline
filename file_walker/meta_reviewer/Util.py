@@ -5,10 +5,10 @@ release_mapping = {"name": "Album", "album_artist": "Album Artist", "disc_num": 
 track_mapping = {"name": "Title", "artist": "Artist", "track_num": "Track Number", "length": "Length",
                  "KEXPFCCOBSCENITYRATING": "KEXPFCCOBSCENITYRATING"}
                  
-commands_list = {"<track_num>[[,][ ]<track_num>...][ ]<meta_command>": "Add the metadata specified by <meta_command> to track <track_num>. <meta_command> is not case-sensitive.\n\
-                  Multiple <track_nums> may be specified, separated by \",\" and/or \" \"\
-                  Valid <meta_command>s:\n\tr[ed[ dot]]: RED DOT obscenity rating\n\t\
-                  y[ellow[ dot]]: YELLOW DOT obscenity rating\n\tc[lear]: Remove obscenity rating", 
+commands_list = {"<track_num>[[,][ ]<track_num>...][ ]<meta_command>": "Add the metadata specified by <meta_command> to track <track_num>. <meta_command> is not case-sensitive.\
+                  \nMultiple <track_nums> may be specified, separated by \",\" and/or \" \"\
+                  \nValid <meta_command>s:\n\tr[ed[ dot]]: RED DOT obscenity rating\
+                  \n\ty[ellow[ dot]]: YELLOW DOT obscenity rating\n\tc[lear]: Remove obscenity rating", 
                  "d[one]": "Close this application.",
                  "n[ext]": "Display metadata of next album", "p[[rev]ious]": "Display metadata of previous album"}
                  

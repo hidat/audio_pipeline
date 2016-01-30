@@ -83,7 +83,7 @@ class AppFrame(tk.Frame):
         self.body_display.update_track(name, new_meta)        
         
     def quit_command(self, option="Quit?"):
-        self.input_frame.labeled(options=option)
+        quit_message("Close Meta Reviewer?", self.quit, self)
         
     def clear_label(self):
         self.input_frame.clear_label()
@@ -140,20 +140,22 @@ class InfoFrame(tk.Frame):
         col_index += 1
                         
         for command, description in command_list.items():
-            comm = tk.Label(self, text=command, bg=bg_color, fg=text_color, anchor="nw", font=heading)
-            desc = tk.Label(self, text=description, bg=bg_color, fg=text_color, anchor="nw")
-            comm.grid(row=row_index, column=col_index, sticky="w", padx=5, pady=3)
+            comm = tk.Label(self, text=command, bg=bg_color, fg=text_color, anchor="nw", font=heading, justify="left")
+            desc = tk.Label(self, text=description, bg=bg_color, fg=text_color, anchor="nw", justify="left")
+            comm.grid(row=row_index, column=col_index, sticky="nw", padx=5, pady=3)
             col_index += 1
-            desc.grid(row=row_index, column=col_index, sticky="w", padx=5, pady=3)
+            desc.grid(row=row_index, column=col_index, sticky="nw", padx=5, pady=3)
             row_index += 1
             if command in example_list.keys():
-                example_title = tk.Label(self, text="Example:", bg=bg_color, fg=text_color, anchor="nw", font=heading)
+                example_title = tk.Label(self, text="Example:", bg=bg_color, fg=text_color, anchor="nw", font=heading, justify="left")
                 example_title.grid(row=row_index, column=col_index, sticky="w", padx=2, pady=1)
                 row_index += 1
-                example = tk.Label(self, text="\t" + example_list[command], bg=bg_color, fg=text_color, anchor="nw")
+                example = tk.Label(self, text="\t" + example_list[command], bg=bg_color, fg=text_color, anchor="nw", justify="left")
                 example.grid(row=row_index, column=col_index, sticky="w", padx=2, pady=2)
                 row_index += 1
             col_index = 1
+        
+        self.focus_set()
             
     def cancel(self):
         if master:
@@ -256,7 +258,6 @@ class MetaFrame(tk.Frame):
                 value = str(release_info[key])
             else:
                 value = ""
-            index = release_categories.index(key)
             self.release_attributes[key] = tk.Label(self.release_frame, text=value, anchor="nw",
                                                     bg=bg_color, fg=text_color)
             self.release_attributes[key].grid(row=rowval, column=colval, sticky="w", padx=10, pady=5)
@@ -288,7 +289,6 @@ class MetaFrame(tk.Frame):
 
             for key in track_categories:
                 value = ""
-                index = track_categories.index(key)
                 if key in track.keys():
                     value = str(track[key])
                 self.track_attributes[name][key] = tk.Label(self.track_frame, text=value, anchor="nw", fg=color, bg=bg_color)
@@ -380,6 +380,10 @@ def choose_dir(directory_selector, master=None, initial_dir="\\", withdraw=True)
     # if
     directory_selector(directory_name)
     
+def quit_message(message, quit_command, parent=None):
+    quit_display = DialogBox(message, master=parent)
+    buttons = [{"name": "Close", "command": quit_command}, {"name": "Cancel", "command": quit_display.cancel}]
+    quit_display.button_box(buttons)
     
 def err_message(message, ok_command, parent=None, quit=False):
     err_display = DialogBox(message, master=parent)

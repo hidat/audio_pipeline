@@ -6,28 +6,26 @@ class MetaGrid(tk.Grid):
     def __init__(self, *args, **kwargs):
         kwargs['editnotify'] = self.editnotify
         tk.Grid.__init__(self, *args, **kwargs)
+        self.grid_rowconfigure(0, minsize=150, weight=200, pad=5)
         
     def editnotify(self, x, y):
         # make a map of position -> (track, metadata) for use here
         print((x, y))
         return True
         
-r = tk.Tk()
-r.title("MetaReviewer")
+        
+class MetaEntry(tk.Toplevel):
+    def __init__(self, release_meta, track_meta, *args, **kwargs):
+        tk.Toplevel.__init__(self, *args, **kwargs)
+        self.release_meta = release_meta
+        self.track_meta = track_meta
+        
+        release_grid = MetaGrid(r, name="release_grid", width=500, selectunit="cell")
 
-l = tk.Label(r, name="a_label", text="Track Metadata")
-l.pack()
-
-g = MetaGrid(r, name="metadata_grid", selectunit="cell")
-g.pack(fill=tk.BOTH)
-
-x = 0
-y = 0
-for attribute in track_categories:
-    g.set(x,y,text=str(track_mapping[attribute]))
-    x += 1
-            
-c = tk.Button(r, text="Close", command=r.destroy)
-c.pack()
-
-tk.mainloop()
+        for key in release_categories:
+            if key in release_meta.keys():
+                meta = str(release_meta[key])
+            else:
+                meta = ""
+            index = release_categories.index(key)
+            release_grid.set(index, 0, meta)

@@ -19,19 +19,20 @@ class MetaController:
         MetaController is in charge of sending commands to the view and getting information from the model.
         
         """
-        self.quit_command = False
         self.meta_model = None
         self.base_frame = MetaView.AppFrame(self.process_input, self.choose_dir)
 
+        print(self.base_frame)
+        print(self.meta_model)
+        
         if root_dir:
             self.meta_model = MetaModel.process_directory(root_dir)
             self.root_dir = root_dir
             if self.meta_model.has_next():
                 self.next_album()
         else:
-            self.base_frame.choose_dir()
-            self.base_frame.input_frame.entrybox.focus_set()
-                                
+            self.base_frame.after_idle(func=self.base_frame.choose_dir)
+            
     def process_input(self, event):
         """
         Process the user-inputted metadata
@@ -100,34 +101,25 @@ class MetaController:
         """
         
         # FIX THESE SO THEY ARE *SLIGHTLY* MORE SPECIFIC
-        yes_pattern = re.compile("\s*y+e*.*", flags=re.I)
-        no_pattern = re.compile("\s*n+o*", flags=re.I)
         prev_pattern = re.compile("\s*p(rev)?.*", flags=re.I)
         next_pattern = re.compile("\s*n(ext)?", flags=re.I)
         done_pattern = re.compile("\s*d+(one)?", flags=re.I)
         help_pattern = re.compile("\s*h(elp)?", flags=re.I)
         
-        if self.quit_command:
-            if yes_pattern.match(command):
-                self.base_frame.quit()
-            elif no_pattern.match(command):
-                self.base_frame.clear_label()
-                self.quit_command = False
-        else:
-            if next_pattern.match(command):
-                if self.meta_model.has_next():
-                    self.next_album()
-                else:
-                    self.last_album()
-            elif prev_pattern.match(command):
-                if self.meta_model.has_prev():
-                    self.prev_album()
-                else:
-                    self.last_album()
-            elif done_pattern.match(command):
+        if next_pattern.match(command):
+            if self.meta_model.has_next():
+                self.next_album()
+            else:
                 self.last_album()
-            elif help_pattern.match(command):
-                self.base_frame.display_info(commands_list, example_list)
+        elif prev_pattern.match(command):
+            if self.meta_model.has_prev():
+                self.prev_album()
+            else:
+                self.last_album()
+        elif done_pattern.match(command):
+            self.last_album()
+        elif help_pattern.match(command):
+            self.base_frame.display_info(commands_list, example_list)
                 
         self.base_frame.select_input()
 
@@ -150,7 +142,6 @@ class MetaController:
         """
         There are no more albums in this direction - display the quit button
         """
-        self.quit_command = True
         self.base_frame.quit_command()
         
     def choose_dir(self, root_dir):
@@ -160,17 +151,18 @@ class MetaController:
             if self.meta_model.has_next():
                 self.next_album()
             else:
-                MetaView.err_message("Please select a valid directory.", self.base_frame.choose_dir, quit=True)
+                MetaView.err_message("Please select a valid directory.", self.base_frame.choose_dir, parent=self.base_frame, quit=True)
         else:
-            MetaView.err_message("Please select a valid directory.", self.base_frame.choose_dir, quit=True)
-
+            MetaView.err_message("Please select a valid directory.", self.base_frame.choose_dir, parent=self.base_frame, quit=True)
+        
+            
 def main():
     directory = None
     if len(sys.argv) >= 2:
         directory = sys.argv[1]
                 
     controller = MetaController(directory)
-    print("Starting main loop")
+    
     controller.base_frame.mainloop()
 
 main()
