@@ -180,12 +180,23 @@ class process_directory:
         # saves the key: value tags contained in new_meta
         # as metadata tags of the audio file
         audio = mutagen.File(file_name)
-        for tag_name, tag_value in new_meta.items():
-            # check if this tag is already in the metadata
-            # if it is, just overwrite it?
-            audio[str(tag_name)] = tag_value
-            self.current_track_attributes[file_name][tag_name] = tag_value
-            audio.save()
+        format = os.path.splitext(file_name)[1]
+        if format in file_types:
+            for tag_name, tag_value in new_meta.items():
+                # check if this tag is already in the metadata
+                # if it is, just overwrite it?
+                tag_name = self.tag_normalize[tag_name]
+                if tag_name:
+                    if format in ['.mp4', 'aac']:
+                        tag_value = mutagen.mp4.MP4FreeForm(tag_value)
+                    audio[tag_name[format]] = tag_value
+                    for item in audio.keys():
+                        print(tag_value)
+                        print(ascii(item))
+                        if item == tag_value:
+                            print(ascii(audio[item]))
+                    self.current_track_attributes[file_name][tag_name] = tag_value
+                    audio.save()
             
     def delete_metadata(self, file_name, tagnames):
         # delete the specified tag of metadata from the audio

@@ -22,9 +22,6 @@ class MetaController:
         self.meta_model = None
         self.base_frame = MetaView.AppFrame(self.process_input, self.choose_dir)
 
-        print(self.base_frame)
-        print(self.meta_model)
-        
         if root_dir:
             self.meta_model = MetaModel.process_directory(root_dir)
             self.root_dir = root_dir
@@ -42,17 +39,17 @@ class MetaController:
         if match:
             # we (probably) have a track metadata match (currently only RED DOT, YELLOW DOT)
             # process it accordingly
-            try:
-                track_nums = match.group(tracknum_acc)
-                if re.search("all", track_nums):
-                    track_nums = self.meta_model.current_tracks.keys()
-                else:
-                    track_nums = re.findall("\d+", track_nums)
-                    track_nums = [int(track_num) for track_num in track_nums]
-                value = match.group(meta_acc)
-                self.new_meta_input(track_nums, value)
-            except ValueError:
-                MetaView.err_message("Invalid input", None, parent=self.base_frame)
+            # try:
+            track_nums = match.group(tracknum_acc)
+            if re.search("all", track_nums):
+                track_nums = self.meta_model.current_tracks.keys()
+            else:
+                track_nums = re.findall("\d+", track_nums)
+                track_nums = [int(track_num) for track_num in track_nums]
+            value = match.group(meta_acc)
+            self.new_meta_input(track_nums, value)
+            # except ValueError:
+            #     MetaView.err_message("Invalid input", None, parent=self.base_frame)
         else:
             command = input_string.split()[0]
             self.change_displayed_album(command)
@@ -68,6 +65,7 @@ class MetaController:
         rm_rating = re.compile("\s*c(lear)?", flags=re.I)
         
         for track_num in track_nums:
+            print(track_num)
             new_meta = None
             if track_num not in self.meta_model.current_tracks.keys():
                file_name = None
