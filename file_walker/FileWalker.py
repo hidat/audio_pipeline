@@ -16,7 +16,7 @@ import datetime
 _file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis", "ERROR_EXT": "ERROR_EXT"}
 
 
-def process_directory(source_dir, output_dir, batch_meta, generate, serializer, delete_processed):
+def process_directory(source_dir, output_dir, batch_meta, generate, server, serializer, delete_processed):
     cached_mb_releases = {}
     unique_artists = {}
     unique_labels = set([])
@@ -38,6 +38,9 @@ def process_directory(source_dir, output_dir, batch_meta, generate, serializer, 
     ts = date_time.now()
     # create & open log file
     log_file_name = os.path.join(log_dir, ts.strftime("filewalker_log_%d-%m-%y-%H%M%S%f.txt"))
+    
+    # create a MBInfo object to get MusicBrainz metadata
+    mbinfo = MBInfo.MBInfo(server)
     
     path_start = len(source_dir) + 1
     for root, dir, files in os.walk(source_dir):
@@ -86,7 +89,7 @@ def process_directory(source_dir, output_dir, batch_meta, generate, serializer, 
                                 release = MetaProcessor.process_release(mb_release)
                             else:
                                 # pull and cache release metadata
-                                mb_release = MBInfo.get_release(release_id)
+                                mb_release = mbinfo.get_release(release_id)
                                 cached_mb_releases[release_id] = mb_release
                                 release = MetaProcessor.process_release(mb_release)
                                 # save release meta
@@ -136,7 +139,7 @@ def process_directory(source_dir, output_dir, batch_meta, generate, serializer, 
                                     a = artist['artist']
                                     artist_id = a['id']
                                     if not (artist_id in unique_artists):
-                                        artist_meta = MBInfo.get_artist(artist_id)
+                                        artist_meta = mbinfo.get_artist(artist_id)
                                         unique_artists[artist_id] = artist_meta['title']
                                         artist_members = []
                                         if "artist-relation-list" in artist_meta:
@@ -146,7 +149,7 @@ def process_directory(source_dir, output_dir, batch_meta, generate, serializer, 
                                                     if member["type"] == 'member of band' and 'direction' in member \
                                                             and member["direction"] == "backward":
                                                         unique_artists[member_id] = member["artist"]["name"]
-                                                        artist_members.append(MBInfo.get_artist(member_id))
+                                                        artist_members.append(mbinfo.get_artist(member_id))
                                         
                                         # add artist to log file
                                         log = artist_meta["log_text"]
@@ -311,16 +314,21 @@ def main():
     parser.add_argument('-c', '--category', type=str.casefold, choices=["recent acquisitions", "acq", "electronic", "ele", "experimental", "exp", "hip hop", "hip", "jaz", "jazz", "live on kexp", "liv", "local", "reggae", "reg", "rock", "pop", "rock/pop", "roc", "roots", "roo", "rotation", "rot", "shows around town", "sho", "soundtracks", "sou", "world", "wor"], help="Category or genre of releases being filewalked")
     parser.add_argument('-s', '--source', type=str.casefold, choices=["cd library", "melly"], help="KEXPSource value - Melly or CD Library")
     parser.add_argument('-r', '--rotation', type=str.casefold, choices=["heavy", "library", "light", "medium", "r/n"], help="Rotation workflow value")
+    parser.add_argument('--server', default='musicbrainz.org', const='musicbrainz.kexp.org:5000', type=str.casefold, \
+                        help="Specify the server to retrieve MusicBrainz data from. Default is musicbrainz.org; default --server option is http://musicbrainz.kexp.org:5000/; another server can be manually specified", \
+                        nargs='?')
     parser.add_argument('-g', '--generate', default=False, const=True, nargs='?')
     
     args = parser.parse_args()
+        
+    print(args.server)
         
     batch_meta = {}
     batch_meta["category"] = options[args.category] if args.category != None else ""
     batch_meta["rotation"] = options[args.rotation] if args.rotation != None else ""
     batch_meta["source"] = options[args.source] if args.source != None else ""
         
-    process_directory(args.input_directory, args.output_directory, batch_meta, args.generate, DaletSerializer, args.delete)
+    process_directory(args.input_directory, args.output_directory, batch_meta, args.generate, args.server, DaletSerializer, args.delete)
 
 
 main()
