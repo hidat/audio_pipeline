@@ -1,4 +1,8 @@
 import re
+import mutagen
+import mutagen.MP4
+import mutagen.ID3
+
 file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis", "ERROR_EXT": "ERROR_EXT"}
 
 
@@ -76,7 +80,8 @@ class MetaAttributes():
         
 class FormatMeta():
     
-    def __init__(self, tag, vorbis, aac, id3):
+    def __init__(self, tag, vorbis, aac, id3, aac_type, id3_frame):
+        
         self.tag = tag
         self.vorbis = vorbis
         self.aac = aac

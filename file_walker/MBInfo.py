@@ -14,7 +14,6 @@ class MBInfo():
         
         if server != default_server:
             ngs.set_hostname(server)
-        print(ngs.hostname)
         
         ngs.set_useragent(useragent[0], useragent[1])
 

@@ -68,7 +68,13 @@ Walks a directory structure of audio files and does the following:
     - R/N
     
   * *--generate, -g*
-    Generate metadata only, without copying audio files
+    Generate metadata only, without copying audio 
+    
+  * *--local, -l*
+    Use the local KEXP MusicBrainz server instead of musicbrainz.org
+    
+  * *--mbhost*
+    Specify a host server other than musicbrainz.org
       
 ######To Run
 
@@ -76,3 +82,11 @@ Walks a directory structure of audio files and does the following:
 2. run `FileWalker.py source_directory destination_directory options`
 
 IMPORTANT: Audio files must have release MBID, as well as track number and disc number associated with that MBID, for FileWalker to succeed. 
+
+   
+#### Meta Reviewer (working title)
+A program to assist in reviewing the metadata of ripped audio discs
+ * Pulls relevent metadata - release name, artist, and disc number, and track name, artist, number, length, and KEXPFCCOBSCENITYRATING - from the audio file
+ * Displays this metadata onscreen in an easily human-readable format for review
+ * Current metadata entry options:
+   * KEXPFCCOBSCENITYRATING can be set to YELLOW DOT or RED DOT directly

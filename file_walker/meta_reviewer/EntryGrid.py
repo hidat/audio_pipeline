@@ -6,7 +6,6 @@ class MetaGrid(tk.Grid):
     def __init__(self, *args, **kwargs):
         kwargs['editnotify'] = self.editnotify
         tk.Grid.__init__(self, *args, **kwargs)
-        self.grid_rowconfigure(0, minsize=150, weight=200, pad=5)
         
     def editnotify(self, x, y):
         # make a map of position -> (track, metadata) for use here
