@@ -21,6 +21,9 @@ class MetaController:
         """
         self.meta_model = None
         self.base_frame = MetaView.AppFrame(self.process_input, self.choose_dir)
+        
+        print(self.base_frame)
+        print(self.meta_model)
 
         if root_dir:
             self.meta_model = MetaModel.process_directory(root_dir)
@@ -39,17 +42,17 @@ class MetaController:
         if match:
             # we (probably) have a track metadata match (currently only RED DOT, YELLOW DOT)
             # process it accordingly
-            # try:
-            track_nums = match.group(tracknum_acc)
-            if re.search("all", track_nums):
-                track_nums = self.meta_model.current_tracks.keys()
-            else:
-                track_nums = re.findall("\d+", track_nums)
-                track_nums = [int(track_num) for track_num in track_nums]
-            value = match.group(meta_acc)
-            self.new_meta_input(track_nums, value)
-            # except ValueError:
-            #     MetaView.err_message("Invalid input", None, parent=self.base_frame)
+            try:
+                track_nums = match.group(tracknum_acc)
+                if re.search("all", track_nums):
+                    track_nums = self.meta_model.current_tracks.keys()
+                else:
+                    track_nums = re.findall("\d+", track_nums)
+                    track_nums = [int(track_num) for track_num in track_nums]
+                value = match.group(meta_acc)
+                self.new_meta_input(track_nums, value)
+            except ValueError:
+                MetaView.err_message("Invalid input", None, parent=self.base_frame)
         else:
             command = input_string.split()[0]
             self.change_displayed_album(command)
@@ -98,7 +101,6 @@ class MetaController:
         depending on the command that is passed in.
         """
         
-        # FIX THESE SO THEY ARE *SLIGHTLY* MORE SPECIFIC
         prev_pattern = re.compile("\s*p(rev)?.*", flags=re.I)
         next_pattern = re.compile("\s*n(ext)?", flags=re.I)
         done_pattern = re.compile("\s*d+(one)?", flags=re.I)
@@ -144,14 +146,15 @@ class MetaController:
         
     def choose_dir(self, root_dir):
         if root_dir > "":
-            self.meta_model = MetaModel.process_directory(root_dir)
-            self.root_dir = root_dir
-            if self.meta_model.has_next():
+            new_model = MetaModel.process_directory(root_dir)
+            if new_model.has_next():
+                self.root_dir = root_dir
+                self.meta_model = new_model
                 self.next_album()
             else:
-                MetaView.err_message("Please select a valid directory.", self.base_frame.choose_dir, parent=self.base_frame, quit=True)
+                MetaView.err_message("Please select a valid directory.", self.base_frame.choose_dir, quit=True)
         else:
-            MetaView.err_message("Please select a valid directory.", self.base_frame.choose_dir, parent=self.base_frame, quit=True)
+            MetaView.err_message("Please select a valid directory.", self.base_frame.choose_dir, quit=True)
         
             
 def main():

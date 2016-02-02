@@ -50,7 +50,7 @@ class AppFrame(tk.Frame):
         """
         Choose a directory containing release directories to display metadata from
         """
-        choose_dir(self.directory_selector)
+        choose_dir(self.directory_selector, master=self)
         
     def display_meta(self, release_info, track_info):
         """
@@ -373,11 +373,8 @@ class DialogBox(tk.Toplevel):
     def cancel(self):
         self.destroy()
         
-def choose_dir(directory_selector, master=None, initial_dir="\\", withdraw=True):
-    if withdraw:
-        tk.Tk().withdraw()
+def choose_dir(directory_selector, master=None, initial_dir="\\"):
     directory_name = filedialog.askdirectory(title="fialog", parent=master, initialdir=initial_dir, mustexist=True)
-    # if
     directory_selector(directory_name)
     
 def quit_message(message, quit_command, parent=None):
