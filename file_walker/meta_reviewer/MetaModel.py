@@ -157,18 +157,18 @@ class process_directory:
                         if 'TXXX:KEXPFCCOBSCENITYRATING' in raw_metadata:
                             track["KEXPFCCOBSCENITYRATING"] = raw_metadata['TXXX:KEXPFCCOBSCENITYRATING'].text[0]
                             
-                        if 'ALBUM' in raw_metadata:
-                            release['name'] = raw_metadata['ALBUM'].text[0].split('/')[0]
+                        if 'TALB' in raw_metadata:
+                            release['name'] = raw_metadata['TALB'].text[0]
                         if "TPE1" in raw_metadata:
-                            release["album_artist"] = raw_metadata["TPE1"].text[0].split('/')[0]
+                            release["album_artist"] = raw_metadata["TPE1"].text[0]
                         if "TPOS" in raw_metadata:
                             release["disc_num"] = int(raw_metadata['TPOS'].text[0].split('/')[0])
                         if 'TRCK' in raw_metadata:
-                            track["track_num"] = int(raw_metadata['TRCK'].text[0].split('/')[0]) - 1
+                            track["track_num"] = int(raw_metadata['TRCK'].text[0].split('/')[0])
                         if 'TIT2' in raw_metadata:
-                            track["name"] = raw_metadata['TIT2'].text[0].split('/')[0]
+                            track["name"] = raw_metadata['TIT2'].text[0]
                         if 'TPE2' in raw_metadata:
-                            track["artist"] = raw_metadata['TPE2'].text[0].split('/')[0]
+                            track["artist"] = raw_metadata['TPE2'].text[0]
 
                     self.current_track_attributes[track_path] = track
                     self.current_release_attributes[release_dir] = release
@@ -176,6 +176,14 @@ class process_directory:
 
         return self.current_release_attributes, self.current_track_attributes
 
+        
+    # NEED TO ADD TAG ENCODING FOR AAC:
+    #   tag_value.encode('utf-8')
+    #   tag_value = mp4.MP4FreeForm(tag_value, mp4.AtomDataType.UTF8)
+    #   then throw it dramatically over the wall
+    
+    #   also look at encoding of tag names???
+        
     def update_metadata(self, file_name, new_meta):
         # saves the key: value tags contained in new_meta
         # as metadata tags of the audio file
@@ -185,16 +193,16 @@ class process_directory:
             for tag_name, tag_value in new_meta.items():
                 # check if this tag is already in the metadata
                 # if it is, just overwrite it?
-                tag_name = self.tag_normalize[tag_name]
+                tag_name = self.tag_normalize[tag_name][format]
                 if tag_name:
+                    print(tag_name)
                     if format in ['.mp4', 'aac']:
-                        tag_value = mutagen.mp4.MP4FreeForm(tag_value)
-                    audio[tag_name[format]] = tag_value
+                        tag_value = tag_value.encode('utf-8')
+                    elif format in ['id3', '.mp3']:
+                        tag_value = self.tag_normalize[tag_name]['id3_frame']
+                    audio[tag_name] = tag_value
                     for item in audio.keys():
-                        print(tag_value)
                         print(ascii(item))
-                        if item == tag_value:
-                            print(ascii(audio[item]))
                     self.current_track_attributes[file_name][tag_name] = tag_value
                     audio.save()
             

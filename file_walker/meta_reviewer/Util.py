@@ -1,7 +1,7 @@
 import re
 import mutagen
-import mutagen.MP4
-import mutagen.ID3
+import mutagen.mp4 as mp4
+import mutagen.id3 as id3
 
 file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis", "ERROR_EXT": "ERROR_EXT"}
 
@@ -43,16 +43,16 @@ def minutes_seconds(length):
 class MetaAttributes():
     # TODO: Make this a properly subscriptable class, instead of... whatever's going on here
     def __init__(self):
-        mbid = FormatMeta("mbid", "mbid", '----:com.apple.iTunes:MBID', 'TXXX:MBID')
-        pmbid = FormatMeta("mbid", "musicbrainz_albumid", '----:com.apple.iTunes:MusicBrainz Album Id', 'TXXX:MusicBrainz Album Id')
-        kexp_genre = FormatMeta("kexp_genre", "KEXPPRIMARYGENRE", '----:com.apple.iTunes:KEXPPRIMARYGENRE',  'TXXX:KEXPPRIMARYGENRE')
-        obscenity_rating = FormatMeta("obscenity_rating", "KEXPFCCOBSCENITYRATING", '----:com.apple.iTunes:KEXPFCCOBSCENITYRATING', 'TXXX:KEXPFCCOBSCENITYRATING')
-        album = FormatMeta("album", "album", "\xa9alb", 'ALBUM')
-        albumartist = FormatMeta("album_artist", "albumartist", "\aART", "TPE1")
-        tracknumber = FormatMeta("track_num", "tracknumber", 'trkn', 'TRCK')
-        discnumber = FormatMeta("disc_num", "discnumber", "disk", "TPOS")
-        title = FormatMeta("title", "title", '\xa9nam', 'TIT2')
-        trackartist = FormatMeta("artist", "artist", '\xa9ART', 'TPE2')
+        mbid = FormatMeta("mbid", "mbid", '----:com.apple.iTunes:MBID', 'TXXX:MBID', id3.TXXX(encoding=3, desc='MBID'))
+        pmbid = FormatMeta("mbid", "musicbrainz_albumid", '----:com.apple.iTunes:MusicBrainz Album Id', 'TXXX:MusicBrainz Album Id', id3.TXXX(encoding=3, desc='MBID'))
+        kexp_genre = FormatMeta("kexp_genre", "KEXPPRIMARYGENRE", '----:com.apple.iTunes:KEXPPRIMARYGENRE',  'TXXX:KEXPPRIMARYGENRE', id3.TXXX(encoding=3, desc='KEXPPRIMARYGENRE'))
+        obscenity_rating = FormatMeta("obscenity_rating", "KEXPFCCOBSCENITYRATING", '----:com.apple.iTunes:KEXPFCCOBSCENITYRATING', 'TXXX:KEXPFCCOBSCENITYRATING', id3.TXXX(encoding=3, desc='KEXPFCCOBSCENITYRATING'))
+        album = FormatMeta("album", "album", "\xa9alb", 'TALB', id3.TALB(encoding=3))
+        albumartist = FormatMeta("album_artist", "albumartist", "\aART", "TPE1", id3.TPE1(encoding=3))
+        tracknumber = FormatMeta("track_num", "tracknumber", 'trkn', 'TRCK', id3.TRCK(encoding=3))
+        discnumber = FormatMeta("disc_num", "discnumber", "disk", "TPOS", id3.TPOS(encoding=3))
+        title = FormatMeta("title", "title", '\xa9nam', 'TIT2', id3.TIT2(encoding=3))
+        trackartist = FormatMeta("artist", "artist", '\xa9ART', 'TPE2', id3.TPE2(encoding=3))
         
         self.attributes = {'mbid': mbid, 'pmbid': pmbid, 'album': album, 'albumartist': albumartist, \
                            'tracknum': tracknumber, 'discnum': discnumber, \
@@ -80,7 +80,7 @@ class MetaAttributes():
         
 class FormatMeta():
     
-    def __init__(self, tag, vorbis, aac, id3, aac_type, id3_frame):
+    def __init__(self, tag, vorbis, aac, id3, id3_frame):
         
         self.tag = tag
         self.vorbis = vorbis
@@ -96,3 +96,5 @@ class FormatMeta():
             return self.vorbis
         elif item.casefold() in ['tag', 'tag_name', 'tagname', 'value']:
             return self.tag
+        elif item.casefold in ['id3_frame', 'frame']:
+            return self.id3_frame
