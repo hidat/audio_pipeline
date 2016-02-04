@@ -122,24 +122,25 @@ class ProcessMeta():
         if ("isrc-list" in track["recording"]):
             track_info["isrcs"] = track["recording"]["isrc-list"]
         track_info["artist-credit"] = track["artist-credit"]
+
+        cat = None
+        if "rotation" in self.batch_meta:
+            cat = ""
         
         for artist in self.mb_release['artist-credit']:
             if 'artist' in artist:
                 track_info['sort_name'] = artist['artist']['sort-name']
-                
-        if "rotation" in self.batch_meta:
-            cat = ""
-            for artist in track["artist-credit"]:
-                if 'artist' in artist:
+                if cat is not None:
                     cat += artist['artist']['name']
-                else:
-                    cat += artist
-                    
+            elif cat is not None:
+                cat += artist
+
+        if cat:
             cat += " - " + self.mb_release['title']
             
             cat = stringCleanup(cat)
             
-            cat = secondary_category + "/" + self.batch_meta["rotation"] + "/" + cat
+            cat = secondary_category + "/" + stringCleanup(self.batch_meta["rotation"]) + "/" + cat
             track_info["secondary_category"] = cat
         
         track_info["artist_dist_rule"] = distRuleCleanup(track_info['sort_name'][:1])
@@ -231,12 +232,10 @@ def process_artist(mb_artist):
 # Pulls out the release information that we are interested in from the raw MusicBrainz release
 #####
 def process_release(mb_release):
-#    disc_index = discnum - 1
         
     release_info = {}
     release_info["item_code"] = mb_release['id']
     release_info["release_id"] = mb_release['id']
-#    release_info["disc_num"] = discnum
     release_info["disc_count"] = len(mb_release["medium-list"])
     release_info["release_title"] = mb_release['title']
     rg = mb_release['release-group']
@@ -328,23 +327,24 @@ def process_track(mb_release, batch_meta, discnum, tracknum):
         track_info["isrcs"] = track["recording"]["isrc-list"]
     track_info["artist-credit"] = track["artist-credit"]
     
+    cat = None
+    if "rotation" in batch_meta:
+        cat = ""
+        
     for artist in mb_release['artist-credit']:
         if 'artist' in artist:
             track_info['sort_name'] = artist['artist']['sort-name']
-            
-    if "rotation" in batch_meta:
-        cat = ""
-        for artist in track["artist-credit"]:
-            if 'artist' in artist:
+            if cat is not None:
                 cat += artist['artist']['name']
-            else:
-                cat += artist
-                
+        elif cat is not None:
+            cat += artist
+            
+    if cat:
         cat += " - " + mb_release['title']
         
         cat = stringCleanup(cat)
         
-        cat = secondary_category + "/" + batch_meta["rotation"] + "/" + cat
+        cat = secondary_category + "/" + stringCleanup(batch_meta["rotation"]) + "/" + cat
         track_info["secondary_category"] = cat
     
     track_info["artist_dist_rule"] = distRuleCleanup(track_info['sort_name'][:1])
