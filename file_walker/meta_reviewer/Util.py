@@ -1,7 +1,6 @@
 import re
-import mutagen
 import mutagen.mp4 as mp4
-import mutagen.id3 as id3
+import mutagen.id3
 
 file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis", "ERROR_EXT": "ERROR_EXT"}
 
@@ -40,19 +39,28 @@ def minutes_seconds(length):
     return final
     
     
-class MetaAttributes():
-    # TODO: Make this a properly subscriptable class, instead of... whatever's going on here
-    def __init__(self):
-        mbid = FormatMeta("mbid", "mbid", '----:com.apple.iTunes:MBID', 'TXXX:MBID', id3.TXXX(encoding=3, desc='MBID'))
-        pmbid = FormatMeta("mbid", "musicbrainz_albumid", '----:com.apple.iTunes:MusicBrainz Album Id', 'TXXX:MusicBrainz Album Id', id3.TXXX(encoding=3, desc='MBID'))
-        kexp_genre = FormatMeta("kexp_genre", "KEXPPRIMARYGENRE", '----:com.apple.iTunes:KEXPPRIMARYGENRE',  'TXXX:KEXPPRIMARYGENRE', id3.TXXX(encoding=3, desc='KEXPPRIMARYGENRE'))
-        obscenity_rating = FormatMeta("obscenity_rating", "KEXPFCCOBSCENITYRATING", '----:com.apple.iTunes:KEXPFCCOBSCENITYRATING', 'TXXX:KEXPFCCOBSCENITYRATING', id3.TXXX(encoding=3, desc='KEXPFCCOBSCENITYRATING'))
-        album = FormatMeta("album", "album", "\xa9alb", 'TALB', id3.TALB(encoding=3))
-        albumartist = FormatMeta("album_artist", "albumartist", "\aART", "TPE1", id3.TPE1(encoding=3))
-        tracknumber = FormatMeta("track_num", "tracknumber", 'trkn', 'TRCK', id3.TRCK(encoding=3))
-        discnumber = FormatMeta("disc_num", "discnumber", "disk", "TPOS", id3.TPOS(encoding=3))
-        title = FormatMeta("title", "title", '\xa9nam', 'TIT2', id3.TIT2(encoding=3))
-        trackartist = FormatMeta("artist", "artist", '\xa9ART', 'TPE2', id3.TPE2(encoding=3))
+class MetaAttributes:
+    def __init__(self, name):
+        self.name = name
+        txxx = mutagen.id3.TXXX(encoding=3)
+        txxx.desc = 'mbid'
+        mbid = FormatMeta("mbid", "mbid", '----:com.apple.iTunes:MBID', 'TXXX:MBID', txxx)
+        pmbid = FormatMeta("mbid", "musicbrainz_albumid", '----:com.apple.iTunes:MusicBrainz Album Id', 'TXXX:MusicBrainz Album Id', txxx)
+        kexp_genre = FormatMeta("kexp_genre", "KEXPPRIMARYGENRE", '----:com.apple.iTunes:KEXPPRIMARYGENRE',  'TXXX:KEXPPRIMARYGENRE', txxx)
+        txxx.desc = "KEXPFCCOBSCENITYRATING"
+        obscenity_rating = FormatMeta("obscenity_rating", "KEXPFCCOBSCENITYRATING", '----:com.apple.iTunes:KEXPFCCOBSCENITYRATING', 'TXXX:KEXPFCCOBSCENITYRATING', txxx)
+        talb = mutagen.id3.TALB(encoding=3)
+        album = FormatMeta("album", "album", '\xa9alb', 'TALB', talb)
+        tpe1 = mutagen.id3.TPE1(encoding=3)
+        albumartist = FormatMeta("album_artist", "albumartist", '\aART', "TPE1", tpe1)
+        trck = mutagen.id3.TRCK(encoding=3)
+        tracknumber = FormatMeta("track_num", "tracknumber", 'trkn', 'TRCK', trck)
+        tpos = mutagen.id3.TPOS(encoding=3)
+        discnumber = FormatMeta("disc_num", "discnumber", "disk", 'TPOS', tpos)
+        tit2 = mutagen.id3.TIT2(encoding=3)
+        title = FormatMeta("title", "title", '\xa9nam', 'TIT2', tit2)
+        tpe2 = mutagen.id3.TPE2(encoding=3)
+        trackartist = FormatMeta("artist", "artist", '\xa9ART', 'TPE2', tpe2)
         
         self.attributes = {'mbid': mbid, 'pmbid': pmbid, 'album': album, 'albumartist': albumartist, \
                            'tracknum': tracknumber, 'discnum': discnumber, \
@@ -78,20 +86,22 @@ class MetaAttributes():
             return(self.attributes[item])
 
         
-class FormatMeta():
+class FormatMeta:
     
-    def __init__(self, tag, vorbis, aac, id3, id3_frame):
-        
+    def __init__(self, tag, vorbis, aac, id3_tag, id3_frame):
+        txxx = mutagen.id3.TXXX(encoding=3)
+        print(txxx)
         self.tag = tag
         self.vorbis = vorbis
         self.aac = aac
-        self.id3 = id3
+        self.id3_tag = id3_tag
+        self.id3_frame = id3_frame
 
     def __getitem__(self, item):
         if item.casefold() in ['aac', '.m4a']:
             return self.aac
         elif item.casefold() in ['id3', '.mp3']:
-            return self.id3
+            return self.id3_tag
         elif item.casefold() in ['.flac', 'vorbis']:
             return self.vorbis
         elif item.casefold() in ['tag', 'tag_name', 'tagname', 'value']:

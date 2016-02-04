@@ -28,7 +28,7 @@ class process_directory:
         self.current_tracks = {}
         self.current_track_attributes = {}
         
-        self.tag_normalize = MetaAttributes()
+        self.tag_normalize = MetaAttributes('attributes')
         
         if len(self.releases) > 0:
             self.cur_release = -1
@@ -193,17 +193,22 @@ class process_directory:
             for tag_name, tag_value in new_meta.items():
                 # check if this tag is already in the metadata
                 # if it is, just overwrite it?
-                tag_name = self.tag_normalize[tag_name][format]
-                if tag_name:
-                    print(tag_name)
+                formatted_tag = self.tag_normalize[tag_name][format]
+                if formatted_tag:
+                    print(formatted_tag)
                     if format in ['.mp4', 'aac']:
                         tag_value = tag_value.encode('utf-8')
                     elif format in ['id3', '.mp3']:
-                        tag_value = self.tag_normalize[tag_name]['id3_frame']
-                    audio[tag_name] = tag_value
+                        tag_frame = self.tag_normalize[tag_name]['id3_frame']
+                        print(tag_frame)
+                        tag_frame.text = tag_value
+                        tag_value = tag_frame
+                    audio[formatted_tag] = tag_value
                     for item in audio.keys():
                         print(ascii(item))
-                    self.current_track_attributes[file_name][tag_name] = tag_value
+                        if item == formatted_tag:
+                            print(ascii(audio[formatted_tag]))
+                    self.current_track_attributes[file_name][formatted_tag] = tag_value
                     audio.save()
             
     def delete_metadata(self, file_name, tagnames):

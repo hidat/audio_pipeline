@@ -3,7 +3,6 @@ import MetaView
 import sys
 from Util import *
 import re
-import threading
 
 tracknum_acc = "track_num"
 meta_acc = "meta"
@@ -22,9 +21,6 @@ class MetaController:
         self.meta_model = None
         self.base_frame = MetaView.AppFrame(self.process_input, self.choose_dir)
         
-        print(self.base_frame)
-        print(self.meta_model)
-
         if root_dir:
             self.meta_model = MetaModel.process_directory(root_dir)
             self.root_dir = root_dir
