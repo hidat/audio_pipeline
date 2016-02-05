@@ -185,32 +185,35 @@ class process_directory:
     #   also look at encoding of tag names???
         
     def update_metadata(self, file_name, new_meta):
-        # saves the key: value tags contained in new_meta
-        # as metadata tags of the audio file
-        audio = mutagen.File(file_name)
+        # Saves the key: value tags contained in new_meta
+        # As (appropriately-formatted) metadata tags of the audio file specified
+        try:
+            audio = mutagen.File(file_name)
+        except mutagen.MutagenError:
+            print("Error opening " + file_name + ", tag " + new_meta + " not written.")
+            return
+            
         format = os.path.splitext(file_name)[1]
         if format in file_types:
             for tag_name, tag_value in new_meta.items():
-                # check if this tag is already in the metadata
-                # if it is, just overwrite it?
+                # Format the tag name for the file type / tag type
                 formatted_tag = self.tag_normalize[tag_name][format]
                 if formatted_tag:
-                    print(formatted_tag)
-                    if format in ['.mp4', 'aac']:
-                        tag_value = tag_value.encode('utf-8')
+                    if format in ['.m4a', '.mp4', 'aac']:
+                        # (itunes-style) AAC tags must be utf-8 encoded byte strings
+                        formatted_value = tag_value.encode('utf-8')
                     elif format in ['id3', '.mp3']:
-                        tag_frame = self.tag_normalize[tag_name]['id3_frame']
-                        print(tag_frame)
-                        tag_frame.text = tag_value
-                        tag_value = tag_frame
-                    audio[formatted_tag] = tag_value
-                    for item in audio.keys():
-                        print(ascii(item))
-                        if item == formatted_tag:
-                            print(ascii(audio[formatted_tag]))
-                    self.current_track_attributes[file_name][formatted_tag] = tag_value
+                        # ID3v2.4 tags have a very specific frame structure
+                        formatted_value = self.tag_normalize[tag_name]['id3_frame']
+                        formatted_value.text = [tag_value]
+                    else:
+                        # Other tags (vorbis) are just strings
+                        formatted_value = tag_value
+                        
+                    audio[formatted_tag] = formatted_value
+                    self.current_track_attributes[file_name][tag_name] = tag_value
                     audio.save()
-            
+
     def delete_metadata(self, file_name, tagnames):
         # delete the specified tag of metadata from the audio
         audio = mutagen.File(file_name)

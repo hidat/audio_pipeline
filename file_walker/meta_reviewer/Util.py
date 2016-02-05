@@ -43,7 +43,6 @@ class MetaAttributes:
     def __init__(self, name):
         self.name = name
         txxx = mutagen.id3.TXXX(encoding=3)
-        txxx.desc = 'mbid'
         mbid = FormatMeta("mbid", "mbid", '----:com.apple.iTunes:MBID', 'TXXX:MBID', txxx)
         pmbid = FormatMeta("mbid", "musicbrainz_albumid", '----:com.apple.iTunes:MusicBrainz Album Id', 'TXXX:MusicBrainz Album Id', txxx)
         kexp_genre = FormatMeta("kexp_genre", "KEXPPRIMARYGENRE", '----:com.apple.iTunes:KEXPPRIMARYGENRE',  'TXXX:KEXPPRIMARYGENRE', txxx)
@@ -89,8 +88,6 @@ class MetaAttributes:
 class FormatMeta:
     
     def __init__(self, tag, vorbis, aac, id3_tag, id3_frame):
-        txxx = mutagen.id3.TXXX(encoding=3)
-        print(txxx)
         self.tag = tag
         self.vorbis = vorbis
         self.aac = aac
@@ -106,5 +103,5 @@ class FormatMeta:
             return self.vorbis
         elif item.casefold() in ['tag', 'tag_name', 'tagname', 'value']:
             return self.tag
-        elif item.casefold in ['id3_frame', 'frame']:
+        elif item.casefold() in ['id3_frame', 'frame']:
             return self.id3_frame
