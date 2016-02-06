@@ -5,7 +5,7 @@ import mutagen.id3
 file_types = {".wma": "wma", ".m4a": "aac", ".mp3": "id3", ".flac": "vorbis", "ERROR_EXT": "ERROR_EXT"}
 
 
-release_mapping = {"name": "Album", "album_artist": "Album Artist", "disc_num": "Disc"}
+release_mapping = {"name": "Album", "album_artist": "Album Artist", "disc_num": "Disc", "release_year": "Release Year"}
 track_mapping = {"name": "Title", "artist": "Artist", "track_num": "Track Number", "length": "Length",
                  "KEXPFCCOBSCENITYRATING": "KEXPFCCOBSCENITYRATING"}
                  
@@ -20,7 +20,7 @@ example_list = {"<track_num><meta_command>": "7y: Add YELLOW DOT obscenity ratin
 
 # List of the names of track and release data elements, in the order I want them displayed
 track_categories = ["track_num", "name", "artist", "length", "KEXPFCCOBSCENITYRATING"]
-release_categories = ["name", "album_artist", "disc_num"]
+release_categories = ["name", "album_artist", "disc_num", "release_year"]
 
 
 kexp_tags = {"obscenity": "KEXPFCCOBSCENITYRATING", "genre": "KEXPPRIMARYGENRE"}
