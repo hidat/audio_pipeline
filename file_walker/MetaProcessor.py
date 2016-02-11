@@ -1,31 +1,26 @@
 __author = 'cephalopodblue'
 import unicodedata
 import musicbrainzngs as ngs
+import uuid as UUID
 
 
 secondary_category = "CATEGORIES/ROTATION-STAGING"
 
 class ProcessMeta():
 
-    def __init__(release_id, batch_meta):
+    def __init__(self, mb_release, batch_meta):
         """
-        Set up a MetaProcessor object - get raw MusicBrainz metadata & store common data.
-        
+        Set up a ProcessMeta object - Store raw MusicBrainz metadata & common data
         """
         self.batch_meta = batch_meta
+        self.mb_release = mb_release
         self.processed_release = None
         
-        
-        ngs.set_useragent("hidat_audio_pipeline", "0.1")
-        include=["artist-credits", "recordings", "isrcs", "media", "release-groups", "labels", "artists"]
-        self.mb_release = ngs.get_release_by_id(release_id, includes=include)['release']
-
-
     def process_release(self):
         """
         Extract the release metadata that we care about from the raw metadata
         """
-        if not processed_release:
+        if not self.processed_release:
             release_info = {}
             release_info["item_code"] = self.mb_release['id']
             release_info["release_id"] = self.mb_release['id']
@@ -89,23 +84,28 @@ class ProcessMeta():
             release_info["log_text"] = log_text
 
             self.processed_release = release_info
-        
-        return processed_release
-        
-    
-    def process_track(self, discnum, tracknum):
-        """
-        Get the track metadata we're interested in
 
-        :param mb_release: Release metadata
-        :param tracknum: The track number
-        :param discnum: The disc number of the track
-        :return: This track's metadata
+    def get_release(self):
         """
-
-        disc_index = discnum - 1
+        Get the metadata of the release stored in this ProcessMeta object
+        """
+        if self.processed_release:
+            meta = self.processed_release
+        else:
+            self.process_release()
+            meta = self.processed_release
+            
+        return meta
         
-        track = self.mb_release["medium-list"][disc_index]["track-list"][tracknum]
+    def process_track(self, mutagen_meta):
+        """
+        Extract the track metadata that we care about from the raw metadata
+        """
+        
+        disc_index = mutagen_meta['disc_num'] - 1
+        track_index = mutagen_meta['track_num'] - 1
+        
+        track = self.mb_release["medium-list"][disc_index]["track-list"][track_index]
         track_info = {}
         
         track_info["release_id"] = self.mb_release['id']
@@ -113,8 +113,6 @@ class ProcessMeta():
         track_info["artist_credit"] = self.mb_release["artist-credit"]
         track_info["release_track_id"] = track["id"]
         track_info["track_id"] = track["recording"]["id"]    
-        track_info["disc_num"] = discnum
-        track_info["track_num"] = tracknum + 1 # change track numbers back to 1-index
         track_info["track_count"] = len(self.mb_release["medium-list"][disc_index]["track-list"])
         track_info["title"] = track["recording"]["title"]
         if "length" in track["recording"]:
@@ -145,6 +143,28 @@ class ProcessMeta():
         
         track_info["artist_dist_rule"] = distRuleCleanup(track_info['sort_name'][:1])
         track_info["various_artist_dist_rule"] = distRuleCleanup(self.mb_release['title'][:1])
+        
+        track_info.update(mutagen_meta)
+        
+        # Get item code - if this track is a radio edit, 
+        # assign a unique track id so that we can also have a non-radio edit version w/ MBID as item code
+        if track_info['kexp_obscenity_rating'].upper() == 'RADIO EDIT':
+            item_code = str(UUID.uuid4())
+            track_type = str("track-with-filewalker-GUID")
+        else:
+            item_code = track_info['release_track_id']
+            track_type = str("track")
+            
+        track_info['item_code'] = item_code
+
+        track_log = track_type + "\t" + str(track_info["item_code"]) + "\t" + str(track_info["title"]) + "\r\n"
+
+        track_info['log'] = track_log
+        
+        return track_info
+        
+    def get_track(self, mutagen_meta):
+        track_info = self.process_track(mutagen_meta)
         return track_info
 
     

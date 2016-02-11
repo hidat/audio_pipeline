@@ -1,4 +1,3 @@
-__author__ = 'cephalopodblue'
 import os
 import MBInfo
 import MetaProcessor
@@ -32,13 +31,13 @@ def process_directory(source_dir, output_dir, batch_meta, generate, server, seri
     
     # Get directories for log files & processed hashes
     processed_hashes, log_dir = info_directories(output_dir)
-
+    
     # set up current log file
     date_time = datetime.datetime
     ts = date_time.now()
     # create & open log file
     log_file_name = os.path.join(log_dir, ts.strftime("filewalker_log_%d-%m-%y-%H%M%S%f.txt"))
-    
+
     # create a MBInfo object to get MusicBrainz metadata
     mbinfo = MBInfo.MBInfo(server)
     
@@ -72,8 +71,7 @@ def process_directory(source_dir, output_dir, batch_meta, generate, server, seri
                             copy_to_path = os.path.join(track_fail_dir, path)
                         ext = "ERROR_EXT"
                     
-                    release_id, track_num, disc_num, kexp_obscenity_rating, kexp_category =\
-                        get_mutagen_meta(raw_metadata, ext)
+                    release_id, mutagen_meta = get_mutagen_meta(raw_metadata, ext)
 
                     if release_id > '':
                                         
@@ -85,53 +83,26 @@ def process_directory(source_dir, output_dir, batch_meta, generate, server, seri
                         try:
                             #See if we have already cached the release, or we need to pull if from MusicBrainz
                             if release_id in cached_mb_releases:
-                                mb_release = cached_mb_releases[release_id]
-                                release = MetaProcessor.process_release(mb_release)
+                                meta = cached_mb_releases[release_id]
+                                mb_release = meta.mb_release
+                                release = meta.get_release()
                             else:
                                 # pull and cache release metadata
                                 mb_release = mbinfo.get_release(release_id)
-                                cached_mb_releases[release_id] = mb_release
-                                release = MetaProcessor.process_release(mb_release)
+                                meta = MetaProcessor.ProcessMeta(mb_release, batch_meta)
+                                cached_mb_releases[release_id] = meta
+                                release = meta.get_release()
                                 # save release meta
-                                serializer.save_release(release, batch_meta, release_meta_dir)
-                                # save release to log
-                                log_file.write(release["log_text"].encode("UTF-8"))
-                                for label in release["labels"]:
-                                    if 'label' in label:
-                                        label_log = "label\t" + str(label['label']['id']) + "\t" + str(label['label']['name']) + "\r\n"
-                                        log_file.write(label_log.encode("UTF-8"))
-                            
-                            # Pull metadata from MusicBrainz
-                            track_data = MetaProcessor.process_track(mb_release, batch_meta, disc_num, track_num)
-                            
-                            # Add KEXP added metadata from tags
-                            track_data['kexp_category'] = kexp_category
-                            track_data['kexp_obscenity_rating'] = kexp_obscenity_rating
-                            
-                            # If this is a radio edit, assign a unique track id so we can also have a non-radio edit with the same MBID
-                            if kexp_obscenity_rating.upper() == "RADIO EDIT":
-                                item_code = str(UUID.uuid4())
-                                track_type = str("track-with-filewalker-GUID")
-                            else:
-                                item_code = track_data["release_track_id"]
-                                track_type = str("track")
-
-                            track_data["item_code"] = item_code
-
-                            # Save track info to log file
-                            track_log = track_type + "\t" + str(track_data["item_code"]) + "\t" + str(track_data["title"]) + "\r\n"
-                            log_file.write(track_log.encode("UTF-8"))
+                                serializer.save_release(meta)
                                 
                             # Save the track metadata
-                            serializer.save_track(release, track_data, batch_meta, track_meta_dir)
-
-                            # Copy files to to success directory
-                            # target = os.path.join(track_dir, track_data["item_code"] + ext)
-                            # shutil.copy(file_name, target)
+                            serializer.save_track(meta, mutagen_meta)
 
                             # Make a backup of original file just in case
                             if not generate:
                                 copy_to_path = os.path.join(track_success_dir, path)                            
+                        
+                            track_data = meta.get_track(mutagen_meta)
                         
                             # Add any new artist to our unique artists list
                             for artist in track_data["artist-credit"]:
@@ -152,11 +123,12 @@ def process_directory(source_dir, output_dir, batch_meta, generate, server, seri
                                                         artist_members.append(mbinfo.get_artist(member_id))
                                         
                                         # add artist to log file
-                                        log = artist_meta["log_text"]
-                                        log_file.write(log.encode("UTF-8"))
-                                        for member in artist_members:
-                                            log_file.write(member["log_text"].encode("UTF-8"))
-                                        serializer.save_artist(artist_meta, artist_members, artist_meta_dir)
+                                        with open(log_file_name, 'ab') as log_file:
+                                            log = artist_meta["log_text"]
+                                            log_file.write(log.encode("UTF-8"))
+                                            for member in artist_members:
+                                                log_file.write(member["log_text"].encode("UTF-8"))
+                                        DaletSerializer.save_artist(artist_meta, artist_members, artist_meta_dir)
 
                         except UnicodeDecodeError:
                             print("    ERROR: Invalid characters!")
@@ -230,7 +202,7 @@ def info_directories(output_dir):
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
     print("Logs: ", log_dir)
-    
+
     return processed_hashes, log_dir
 
     
@@ -244,11 +216,11 @@ def get_mutagen_meta(raw_metadata, ext):
     if _file_types[ext] == "vorbis":
         if "mbid" in raw_metadata:
             release_id = raw_metadata["mbid"][0]
-            track_num = int(raw_metadata["tracknumber"][0]) - 1
+            track_num = int(raw_metadata["tracknumber"][0])
             disc_num = int(raw_metadata["discnumber"][0])
         elif "musicbrainz_albumid" in raw_metadata:
             release_id = raw_metadata["musicbrainz_albumid"][0]
-            track_num = int(raw_metadata["tracknumber"][0]) - 1
+            track_num = int(raw_metadata["tracknumber"][0])
             disc_num =  int(raw_metadata["discnumber"][0])
         if "KEXPPRIMARYGENRE" in raw_metadata:
             kexp_category = raw_metadata["KEXPPRIMARYGENRE"][0]
@@ -260,11 +232,11 @@ def get_mutagen_meta(raw_metadata, ext):
         raw_metadata = raw_metadata.tags._DictProxy__dict
         if '----:com.apple.iTunes:MBID' in raw_metadata:
             release_id = str(raw_metadata['----:com.apple.iTunes:MBID'][0])
-            track_num = int(raw_metadata['trkn'][0][0]) - 1
+            track_num = int(raw_metadata['trkn'][0][0])
             disc_num = int(raw_metadata['disk'][0][0])
         elif '----:com.apple.iTunes:MusicBrainz Album Id' in raw_metadata:
             release_id = str(raw_metadata['----:com.apple.iTunes:MusicBrainz Album Id'][0], encoding='UTF-8')
-            track_num = int(raw_metadata['trkn'][0][0]) - 1
+            track_num = int(raw_metadata['trkn'][0][0])
             disc_num = int(raw_metadata['disk'][0][0])
         if '----:com.apple.iTunes:KEXPPRIMARYGENRE' in raw_metadata:
             kexp_category = str(raw_metadata['----:com.apple.iTunes:KEXPPRIMARYGENRE'][0], encoding='UTF-8')
@@ -276,18 +248,20 @@ def get_mutagen_meta(raw_metadata, ext):
         raw_metadata = raw_metadata.tags._DictProxy__dict
         if 'TXXX:MBID' in raw_metadata:
             release_id = raw_metadata['TXXX:MBID'].text[0]
-            track_num = int(raw_metadata['TRCK'].text[0].split('/')[0]) - 1
+            track_num = int(raw_metadata['TRCK'].text[0].split('/')[0])
             disc_num = int(raw_metadata['TPOS'].text[0].split('/')[0])
         elif 'TXXX:MusicBrainz Album Id' in raw_metadata:
             release_id = raw_metadata['TXXX:MusicBrainz Album Id'].text[0]
-            track_num = int(raw_metadata['TRCK'].text[0].split('/')[0]) - 1
+            track_num = int(raw_metadata['TRCK'].text[0].split('/')[0])
             disc_num = int(raw_metadata['TPOS'].text[0].split('/')[0])
         if 'TXXX:KEXPPRIMARYGENRE' in raw_metadata:
             kexp_category = raw_metadata['TXXX:KEXPPRIMARYGENRE'].text[0]
         if 'TXXX:KEXPFCCOBSCENITYRATING' in raw_metadata:
             kexp_obscenity_rating = raw_metadata['TXXX:KEXPFCCOBSCENITYRATING'].text[0]
             
-    return release_id, track_num, disc_num, kexp_obscenity_rating, kexp_category
+    mutagen_meta = {'track_num': track_num, 'disc_num': disc_num,
+                    'kexp_obscenity_rating': kexp_obscenity_rating, 'kexp_category': kexp_category}
+    return release_id, mutagen_meta
     
     
 def main():
@@ -329,8 +303,11 @@ def main():
     batch_meta["category"] = options[args.category] if args.category != None else ""
     batch_meta["rotation"] = options[args.rotation] if args.rotation != None else ""
     batch_meta["source"] = options[args.source] if args.source != None else ""
+    
+    # Right now, create serializer object in main and pass to filewalker
+    serializer = DaletSerializer.DaletSerializer(args.output_directory)
         
-    process_directory(args.input_directory, args.output_directory, batch_meta, args.generate, server, DaletSerializer, args.delete)
+    process_directory(args.input_directory, args.output_directory, batch_meta, args.generate, server, serializer, args.delete)
 
 
 main()
