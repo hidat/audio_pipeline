@@ -19,15 +19,15 @@ class MetaGrid(tk.Grid):
     def editnotify(self, x, y):
         # make a map of position -> (track, metadata) for use here
         self.curr_pos = (int(x), int(y))
+        print(self.configure())
         print(self.curr_pos)
-        print(self.entryconfigure(int(x), int(y)))
-        if self.no_edit_row:
+        if self.no_edit_row == int(y):
             return False
         else:
             return True
             
     def tab_press(self, event):
-        print(self)
+        print(event.widget)
         print(self.curr_pos)
         if self.curr_pos == self.final:
             # call a passed method
@@ -35,13 +35,15 @@ class MetaGrid(tk.Grid):
         elif self.curr_pos[1] == int(self['height']) - 1:
             # loop to the start of the next column
             self.curr_pos = (self.curr_pos[0] + 1, self.start[1])
+            self.anchor_set(self.curr_pos[0], self.curr_pos[1])
             self.edit_set(self.curr_pos[0], self.curr_pos[1])
         else:
             # not at the end of the grid or the end of the column - just move down one row
             self.curr_pos = (self.curr_pos[0], self.curr_pos[1] + 1)
+            self.anchor_set(self.curr_pos[0], self.curr_pos[1])
             self.edit_set(self.curr_pos[0], self.curr_pos[1])
             
-        # don't call any higher-level resonse to the tab-press
+        # don't call any higher-level resp onse to the tab-press
         return "break"
             
         

@@ -146,11 +146,11 @@ class process_directory:
                         raw_metadata = raw_metadata.tags
                         if 'TXXX:MBID' in raw_metadata:
                             release['release_id'] = raw_metadata['TXXX:MBID'].text[0]
-                            track_num = int(raw_metadata['TRCK'].text[0].split('/')[0]) - 1
+                            track_num = int(raw_metadata['TRCK'].text[0].split('/')[0])
                             disc_num = int(raw_metadata['TPOS'].text[0].split('/')[0])
                         elif 'TXXX:MusicBrainz Album Id' in raw_metadata:
                             release['release_id'] = raw_metadata['TXXX:MusicBrainz Album Id'].text[0]
-                            track_num = int(raw_metadata['TRCK'].text[0].split('/')[0]) - 1
+                            track_num = int(raw_metadata['TRCK'].text[0].split('/')[0])
                             disc_num = int(raw_metadata['TPOS'].text[0].split('/')[0])
                         if 'TXXX:KEXPPRIMARYGENRE' in raw_metadata:
                             track["KEXPPRIMARYGENRE"] = raw_metadata['TXXX:KEXPPRIMARYGENRE'].text[0]
