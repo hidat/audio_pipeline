@@ -36,7 +36,7 @@ class DaletSerializer:
         self.log_file_name = os.path.join(self.log_dir, ts.strftime("filewalker_log_%d-%m-%y-%H%M%S%f.txt"))
 
 
-    def save_track(self, meta_processor, mutagen_meta):
+    def save_track(self, meta_processor, disc_num, track_num):
         """
         Create an XML file of track metadata that Dalet will be happy with
 
@@ -48,7 +48,7 @@ class DaletSerializer:
         doc, tag, text = Doc().tagtext()
         
         release_data = meta_processor.get_release()
-        track_data = meta_processor.get_track(mutagen_meta)
+        track_data = meta_processor.get_track(disc_num, track_num)
         output_dir = self.track_meta_dir
         
         with open(self.log_file_name, 'ab') as log_file:
@@ -170,7 +170,6 @@ class DaletSerializer:
         
         doc, tag, text = Doc().tagtext()
                 
-        # glossary_title = release['release_title'] + release['artist-credit'] + release['date'] + release['country'] + release['labels'] + release['format'] + release['catalog-number']
         glossary_title = release['release_title']
         
         doc.asis('<?xml version="1.0" encoding="UTF-8"?>')
@@ -263,135 +262,141 @@ class DaletSerializer:
         with open(output_file, "wb") as f:
             f.write(formatted_data.encode("UTF-8"))
 
+    def save_artist(self, artist, artist_members):
+        """
+        Create an XML file of artist metadata that Dalet will be happy with.
+        
+        If the artist is a group that has multiple members, not an individual, 
+        all member metadata (for artists new to this batch) will also be generated.
+        
+        :param artist: Processed metadata from MusicBrainz for 'main' artist
+        :param artist_members: Processed artist metadata from MusicBrainz for any members of 'artist'
+        :param output_dir: Output directory to write XML file to
+        """
 
-def save_artist(artist, artist_members, output_dir):
-    """
-    Create an XML file of artist metadata that Dalet will be happy with.
-    
-    If the artist is a group that has multiple members, not an individual, 
-    all member metadata (for artists new to this batch) will also be generated.
-    
-    :param artist: Processed metadata from MusicBrainz for 'main' artist
-    :param artist_members: Processed artist metadata from MusicBrainz for any members of 'artist'
-    :param output_dir: Output directory to write XML file to
-    """
+        output_dir = self.artist_meta_dir
+        with open(self.log_file_name, 'ab') as log_file:
+            log = artist["log_text"]
+            log_file.write(log.encode("UTF-8"))
+            for member in artist_members:
+                log_file.write(member["log_text"].encode("UTF-8"))
+        
+        doc, tag, text = Doc().tagtext()
 
-    doc, tag, text = Doc().tagtext()
+        doc.asis('<?xml version="1.0" encoding="UTF-8"?>')
+        with tag('Titles'):
+            for member in artist_members:
+                with tag('GlossaryValue'):
+                    self.save_one_artist(member, tag, text)
 
-    doc.asis('<?xml version="1.0" encoding="UTF-8"?>')
-    with tag('Titles'):
-        for member in artist_members:
             with tag('GlossaryValue'):
-                save_one_artist(member, tag, text)
+                self.save_one_artist(artist, tag, text)
 
-        with tag('GlossaryValue'):
-            save_one_artist(artist, tag, text)
+                if "artist-relation-list" in artist:
+                    for member in artist["artist-relation-list"]:
+                        if member["type"] == 'member of band' and "direction" in member \
+                                and member["direction"] == "backward":
+                            with tag('KEXPMember'):
+                                text(member["artist"]["id"])
 
-            if "artist-relation-list" in artist:
-                for member in artist["artist-relation-list"]:
-                    if member["type"] == 'member of band' and "direction" in member \
-                            and member["direction"] == "backward":
-                        with tag('KEXPMember'):
-                            text(member["artist"]["id"])
+        formatted_data = indent(doc.getvalue())
 
-    formatted_data = indent(doc.getvalue())
-
-    output_file = path.join(output_dir, 'a' + artist["id"] + ".xml")
-    with open(output_file, "wb") as f:
-        f.write(formatted_data.encode("UTF-8"))
+        output_file = path.join(output_dir, 'a' + artist["id"] + ".xml")
+        with open(output_file, "wb") as f:
+            f.write(formatted_data.encode("UTF-8"))
 
 
-def save_one_artist(artist, tag, text):
-    """
-    Save the metadata for one artist
+    def save_one_artist(self, artist, tag, text):
+        """
+        Save the metadata for one artist
 
-    :param artist: Processed artist metadata from MusicBrainz
-    :param tag: Yattag 'tag' 
-    :param text: Yattag 'text'
-    """
-    # mandatory fields
-    with tag('Key1'):
-        text(artist["item_code"])
-    with tag('ItemCode'):
-        text(artist["item_code"])
-    with tag('title'):
-        text(artist["title"])
-    with tag('GlossaryType'):
-        text('Artist')
-    with tag('KEXPName'):
-        text(artist["name"])
-    with tag('KEXPSortName'):
-        text(artist["sort-name"])
-    with tag('KEXPMBID'):
-        text(artist["id"])
+        :param artist: Processed artist metadata from MusicBrainz
+        :param tag: Yattag 'tag' 
+        :param text: Yattag 'text'
+        """
+        # mandatory fields
+        with tag('Key1'):
+            text(artist["item_code"])
+        with tag('ItemCode'):
+            text(artist["item_code"])
+        with tag('title'):
+            text(artist["title"])
+        with tag('GlossaryType'):
+            text('Artist')
+        with tag('KEXPName'):
+            text(artist["name"])
+        with tag('KEXPSortName'):
+            text(artist["sort-name"])
+        with tag('KEXPMBID'):
+            text(artist["id"])
 
-    # optional fields
+        # optional fields
 
-    if "alias-list" in artist:
-        for alias in artist["alias-list"]:
-            if 'alias' in alias:
-                with tag('KEXPAlias'):
-                    text(alias['alias'])
+        if "alias-list" in artist:
+            for alias in artist["alias-list"]:
+                if 'alias' in alias:
+                    with tag('KEXPAlias'):
+                        text(alias['alias'])
 
-    if "annotation" in artist:
-        if "annotation" in artist["annotation"]:
-            with tag('KEXPAnnotation'):
-                text(artist["annotation"]["text"])
+        if "annotation" in artist:
+            if "annotation" in artist["annotation"]:
+                with tag('KEXPAnnotation'):
+                    text(artist["annotation"]["text"])
 
-    if "disambiguation" in artist:
-        with tag('KEXPDisambiguation'):
-            text(artist["disambiguation"])
+        if "disambiguation" in artist:
+            with tag('KEXPDisambiguation'):
+                text(artist["disambiguation"])
 
-    if "type" in artist:
-        with tag('KEXPArtistType'):
-            text(artist["type"])
-    if "begin-area" in artist:
-        with tag('KEXPBeginArea'):
-            text(artist["begin-area"]["name"])
-        with tag('KEXPBeginAreaMBID'):
-            text(artist["begin-area"]["id"])
+        if "type" in artist:
+            with tag('KEXPArtistType'):
+                text(artist["type"])
+        if "begin-area" in artist:
+            with tag('KEXPBeginArea'):
+                text(artist["begin-area"]["name"])
+            with tag('KEXPBeginAreaMBID'):
+                text(artist["begin-area"]["id"])
 
-    if "life-span" in artist:
-        if "begin" in artist["life-span"]:
-            with tag('KEXPBeginDate'):
-                text(artist["life-span"]["begin"])
-        if "end" in artist["life-span"]:
-            with tag('KEXPEndDate'):
-                text(artist["life-span"]["end"])
-            if 'ended' in artist["life-span"]:
-                if artist["life-span"]["ended"].lower() == "true":
-                    with tag('KEXPEnded'):
-                        text("1")
-                else:
-                    with tag('KEXPEnded'):
-                        text("0")
+        if "life-span" in artist:
+            if "begin" in artist["life-span"]:
+                with tag('KEXPBeginDate'):
+                    text(artist["life-span"]["begin"])
+            if "end" in artist["life-span"]:
+                with tag('KEXPEndDate'):
+                    text(artist["life-span"]["end"])
+                if 'ended' in artist["life-span"]:
+                    if artist["life-span"]["ended"].lower() == "true":
+                        with tag('KEXPEnded'):
+                            text("1")
+                    else:
+                        with tag('KEXPEnded'):
+                            text("0")
 
-    if "country" in artist:
-        with tag('KEXPCountry'):
-            text(artist["area"]["name"])
-        with tag('KEXPCountryMBID'):
-            text(artist["area"]["id"])
-    if "end-area" in artist:
-        with tag('KEXPEndArea'):
-            text(artist["end-area"]["name"])
-        with tag('KEXPEndAreaMBID'):
-            text(artist["end-area"]["id"])
+        if "country" in artist:
+            with tag('KEXPCountry'):
+                text(artist["area"]["name"])
+            with tag('KEXPCountryMBID'):
+                text(artist["area"]["id"])
+        if "end-area" in artist:
+            with tag('KEXPEndArea'):
+                text(artist["end-area"]["name"])
+            with tag('KEXPEndAreaMBID'):
+                text(artist["end-area"]["id"])
 
-    if "ipi-list" in artist:
-        for code in artist["ipi-list"]:
-            with tag('KEXPIPICode'):
-                text(code)
+        if "ipi-list" in artist:
+            for code in artist["ipi-list"]:
+                with tag('KEXPIPICode'):
+                    text(code)
 
-    if "isni-list" in artist:
-        for code in artist["isni-list"]:
-            with tag('KEXPISNICode'):
-                text(code)
+        if "isni-list" in artist:
+            for code in artist["isni-list"]:
+                with tag('KEXPISNICode'):
+                    text(code)
 
-    if "url-relation-list" in artist:
-        for link in artist["url-relation-list"]:
-            if 'target' in link:
-                with tag('KEXPLink'):
-                    text(link['target'])
+        if "url-relation-list" in artist:
+            for link in artist["url-relation-list"]:
+                if 'target' in link:
+                    with tag('KEXPLink'):
+                        text(link['target'])
                     
 def stringCleanup(text):
     clean = {'\\': '-', '/': '-', '\"': '\''}

@@ -97,13 +97,13 @@ class ProcessMeta():
             
         return meta
         
-    def process_track(self, mutagen_meta):
+    def process_track(self, disc_num, track_)num):
         """
         Extract the track metadata that we care about from the raw metadata
         """
         
-        disc_index = mutagen_meta['disc_num'] - 1
-        track_index = mutagen_meta['track_num'] - 1
+        disc_index = disc_num - 1
+        track_index = track_num - 1
         
         track = self.mb_release["medium-list"][disc_index]["track-list"][track_index]
         track_info = {}
@@ -246,130 +246,6 @@ def process_artist(mb_artist):
             if 'target' in link:
                 artist_info['url_list'].append(link['target'])
     return artist_info
-
-#####
-# == Process Release
-# Pulls out the release information that we are interested in from the raw MusicBrainz release
-#####
-def process_release(mb_release):
-        
-    release_info = {}
-    release_info["item_code"] = mb_release['id']
-    release_info["release_id"] = mb_release['id']
-    release_info["disc_count"] = len(mb_release["medium-list"])
-    release_info["release_title"] = mb_release['title']
-    rg = mb_release['release-group']
-    release_info["release_group_id"] = rg['id']
-    release_info["first_release_date"] = rg['first-release-date']
-    if 'tag-list' in rg:
-        release_info['tags'] = rg['tag-list']
-    else:
-        release_info['tags'] = []
-    
-    release_info['format'] = set([])
-    for disc in mb_release["medium-list"]:
-        if 'format' in disc:
-            release_info['format'].add(disc['format'])
-                    
-    release_info["artist-credit"] = mb_release['artist-credit']
-    if ("disambiguation" in mb_release):
-        release_info["disambiguation"] = mb_release['disambiguation']
-    else:
-        release_info["disambiguation"] = ''
-    if ("label-info-list" in mb_release):
-        release_info["labels"] = mb_release["label-info-list"]
-    if ("date" in mb_release):
-        release_info["date"] = mb_release['date']
-    else:
-        release_info["date"] = ""
-    if ("country" in mb_release):
-        release_info["country"] = mb_release['country']
-    else:
-        release_info["country"] = ""
-    if ("barcode" in mb_release):
-        release_info["barcode"] = mb_release['barcode']
-    else:
-        release_info["barcode"] = ""
-    if ("asin" in mb_release):
-        release_info["asin"] = mb_release['asin']
-    else:
-        release_info["asin"] = ""
-    if ("packaging" in mb_release):
-        release_info["packaging"] = mb_release['packaging']
-    else:
-        release_info["packaging"] = ""
-    
-    dist_cat = ''
-    for artist in mb_release["artist-credit"]:
-        if 'artist' in artist:
-            dist_cat = dist_cat + artist['artist']['sort-name']
-            
-            if 'disambiguation' in artist['artist']:
-                dist_cat = dist_cat + ' (' + artist['artist']['disambiguation'] + ') '
-        else:
-            dist_cat = dist_cat + artist
-                
-    dist_cat = stringCleanup(dist_cat)
-    release_info['distribution_category'] = dist_cat
-    
-    log_text = "release\t" + release_info['item_code'] + "\t" + release_info["release_title"] + "\r\n"
-    release_info["log_text"] = log_text
-
-    return release_info
-
-def process_track(mb_release, batch_meta, discnum, tracknum):
-    """
-    Get the track metadata we're interested in
-
-    :param mb_release: Release metadata
-    :param tracknum: The track number
-    :param discnum: The disc number of the track
-    :return: This track's metadata
-    """
-
-    disc_index = discnum - 1
-    
-    track = mb_release["medium-list"][disc_index]["track-list"][tracknum]
-    track_info = {}
-    
-    track_info["release_id"] = mb_release['id']
-    track_info["disc_count"] = len(mb_release["medium-list"])
-    track_info["artist_credit"] = mb_release["artist-credit"]
-    track_info["release_track_id"] = track["id"]
-    track_info["track_id"] = track["recording"]["id"]    
-    track_info["disc_num"] = discnum
-    track_info["track_num"] = tracknum + 1 # change track numbers back to 1-index
-    track_info["track_count"] = len(mb_release["medium-list"][disc_index]["track-list"])
-    track_info["title"] = track["recording"]["title"]
-    if "length" in track["recording"]:
-        track_info["length"] = track["recording"]["length"]
-    if ("isrc-list" in track["recording"]):
-        track_info["isrcs"] = track["recording"]["isrc-list"]
-    track_info["artist-credit"] = track["artist-credit"]
-    
-    cat = None
-    if "rotation" in batch_meta:
-        cat = ""
-        
-    for artist in mb_release['artist-credit']:
-        if 'artist' in artist:
-            track_info['sort_name'] = artist['artist']['sort-name']
-            if cat is not None:
-                cat += artist['artist']['name']
-        elif cat is not None:
-            cat += artist
-            
-    if cat:
-        cat += " - " + mb_release['title']
-        
-        cat = stringCleanup(cat)
-        
-        cat = secondary_category + "/" + stringCleanup(batch_meta["rotation"]) + "/" + cat
-        track_info["secondary_category"] = cat
-    
-    track_info["artist_dist_rule"] = distRuleCleanup(track_info['sort_name'][:1])
-    track_info["various_artist_dist_rule"] = distRuleCleanup(mb_release['title'][:1])
-    return track_info
     
 def distRuleCleanup(rule):
     cleanRule = rule

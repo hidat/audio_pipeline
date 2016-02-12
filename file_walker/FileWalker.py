@@ -91,12 +91,11 @@ def process_directory(source_dir, output_dir, batch_meta, generate, server, seri
                                 mb_release = mbinfo.get_release(release_id)
                                 meta = MetaProcessor.ProcessMeta(mb_release, batch_meta)
                                 cached_mb_releases[release_id] = meta
-                                release = meta.get_release()
                                 # save release meta
                                 serializer.save_release(meta)
                                 
                             # Save the track metadata
-                            serializer.save_track(meta, mutagen_meta)
+                            serializer.save_track(meta, mutagen_meta['disc_num'], mutagen_meta['track_num'])
 
                             # Make a backup of original file just in case
                             if not generate:
@@ -122,13 +121,7 @@ def process_directory(source_dir, output_dir, batch_meta, generate, server, seri
                                                         unique_artists[member_id] = member["artist"]["name"]
                                                         artist_members.append(mbinfo.get_artist(member_id))
                                         
-                                        # add artist to log file
-                                        with open(log_file_name, 'ab') as log_file:
-                                            log = artist_meta["log_text"]
-                                            log_file.write(log.encode("UTF-8"))
-                                            for member in artist_members:
-                                                log_file.write(member["log_text"].encode("UTF-8"))
-                                        DaletSerializer.save_artist(artist_meta, artist_members, artist_meta_dir)
+                                        serializer.save_artist(artist_meta, artist_members)
 
                         except UnicodeDecodeError:
                             print("    ERROR: Invalid characters!")
