@@ -3,35 +3,42 @@ from Util import *
 import MetaModel
 
 class MetaGrid(tk.Grid):
-    no_edit_row = 0
 
-    def __init__(self, last_command, *args, **kwargs):
+    def __init__(self, last_command, start_index, forbidden_rows, forbidden_columns, *args, **kwargs):
         kwargs['editnotify'] = self.editnotify
         tk.Grid.__init__(self, *args, **kwargs)
         self.last_command = last_command
         if 'width' in kwargs and 'height' in kwargs:
-            self.start = (1, 1)
+            self.start =  start_index
             self.final = (int(self['width']) - 1, int(self['height']) - 1)
             
-        self.bind("<Tab>", self.tab_press)
+        self.forbidden_rows = forbidden_rows
+        self.forbidden_columns = forbidden_columns
         self.curr_pos = self.start
         
     def editnotify(self, x, y):
         # make a map of position -> (track, metadata) for use here
+        self.bind_class("Entry", "<Tab>", self.tab_press)
         self.curr_pos = (int(x), int(y))
-        print(self.configure())
-        print(self.curr_pos)
-        if self.no_edit_row == int(y):
+        if int(y) in self.forbidden_rows:
+            return False
+        elif int(x) in self.forbidden_columns:
             return False
         else:
             return True
             
     def tab_press(self, event):
-        print(event.widget)
-        print(self.curr_pos)
+        self.tab_press_innards()
+        while self.curr_pos and (int(self.curr_pos[0]) in self.forbidden_columns \
+            or int(self.curr_pos[1]) in self.forbidden_rows):
+            self.tab_press_innards()
+            
+        return "break"
+        
+    def tab_press_innards(self):
         if self.curr_pos == self.final:
             # call a passed method
-            self.last_command
+            self.last_command()
         elif self.curr_pos[1] == int(self['height']) - 1:
             # loop to the start of the next column
             self.curr_pos = (self.curr_pos[0] + 1, self.start[1])
@@ -42,9 +49,7 @@ class MetaGrid(tk.Grid):
             self.curr_pos = (self.curr_pos[0], self.curr_pos[1] + 1)
             self.anchor_set(self.curr_pos[0], self.curr_pos[1])
             self.edit_set(self.curr_pos[0], self.curr_pos[1])
-            
-        # don't call any higher-level resp onse to the tab-press
-        return "break"
+
             
         
 class MetaEntry():
@@ -62,7 +67,8 @@ class MetaEntry():
         self.track_meta = track_meta
         
         # set up the release grid
-        self.release_grid = MetaGrid(last_command=self.release_end, master=master, 
+        self.release_grid = MetaGrid(last_command=self.release_end, start_index=(0, 1),
+                                    forbidden_rows = [0], forbidden_columns=[], master=master, 
                                     name="release_grid", width=len(release_categories),
                                     height=2, selectunit="cell")
         
@@ -83,7 +89,8 @@ class MetaEntry():
                 self.release_grid.set(col, 1, text=(str(release_meta[item])))
             
         # set up the track grid
-        self.track_grid = MetaGrid(last_command=self.track_end, master=master,
+        self.track_grid = MetaGrid(last_command=self.track_end, start_index=(1,1),
+                                    forbidden_rows = [0], forbidden_columns = [0, 3], master=master,
                                     name="track_grid", width=len(track_categories), height=len(self.track_meta), 
                                     selectunit="cell")
         
@@ -121,18 +128,26 @@ class MetaEntry():
         self.release_grid.pack()
         l.pack()
         self.track_grid.pack()
+        self.release_grid.after(10, func=self.startup)
+        
         
     def track_end(self):
         # right now we're just looping, but should move down to the 'save and quit' button in reality
         self.track_grid.curr_pos = None
         self.release_grid.curr_pos = self.release_grid.start
+        self.release_grid.anchor_set(self.release_grid.curr_pos[0], self.release_grid.curr_pos[1])
         self.release_grid.edit_set(self.release_grid.curr_pos[0], self.release_grid.curr_pos[1])
         
     def release_end(self):
         # called when tab / return is pressed in the last cell of the release meta grid
         self.release_grid.curr_pos = None
         self.track_grid.curr_pos = self.track_grid.start
-        self.track_grid.edit_set(self.track_grid.curr_pos[0], self.track_grid.curr_pow[1])
+        self.track_grid.anchor_set(self.track_grid.curr_pos[0], self.track_grid.curr_pos[1])
+        self.track_grid.edit_set(self.track_grid.curr_pos[0], self.track_grid.curr_pos[1])
+        
+    def startup(self):
+        self.release_grid.anchor_set(self.release_grid.start[0], self.release_grid.start[1])
+        self.release_grid.edit_set(self.release_grid.start[0], self.release_grid.start[1])
 
         
 def main():
@@ -141,7 +156,6 @@ def main():
     
     if meta_model.has_next():
         releases, tracks = meta_model.get_next_meta()
-        print(tracks)
         for directory, release_meta in releases.items():
             directory = directory
             release_meta = release_meta
