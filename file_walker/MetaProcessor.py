@@ -6,6 +6,53 @@ import uuid as UUID
 
 secondary_category = "CATEGORIES/ROTATION-STAGING"
 
+class Release():
+
+    def __init__(self, item_code):
+        """
+        Holds release metadata
+        """
+        
+        self.item_code = ""
+        
+        self.release_id = ""
+        self.disc_count = None
+        self.title = ""
+        self.release_group_id = ""
+        self.first_release_date = ""
+        self.tags = []
+        self.format = []
+        self.artist_credit = {}
+        self.disambiguation = ""
+        self.labels = []
+        self.date = ""
+        self.country = ""
+        self.barcode = ""
+        self.asin = ""
+        self.packaging = ""
+        self.distribution_category = ""
+        
+class Track():
+    
+    def __init__(self, item_code):
+        """
+        Holds track metadata
+        """
+        
+        self.release_id = ""
+        self.disc_count = None
+        self.artist_credit = []
+        self.release_track_id = ""
+        self.recording_id = ""
+        self.track_id = ""
+        self.title = ""
+        self.length = Noneself.isrcs = []
+        self.secondary_category = ""
+        self.artist_dist_rule =""
+        self.various_artist_dist_rule = ""
+        self.item_code = ""
+
+
 class ProcessMeta():
 
     def __init__(self, mb_release, batch_meta):
@@ -21,12 +68,64 @@ class ProcessMeta():
         Extract the release metadata that we care about from the raw metadata
         """
         if not self.processed_release:
+            # get the item code
             release_info = {}
+                        
+            rg = self.mb_release['release-group']
+
+            release = Release(self.mb_release['id'])
+            release.release_id = self.mb_release['id']
+            release.disc_count = len(self.mb_release['medium-list'])
+            release.title = self.mb_release['title']
+            release.release_group_id = rg['id']
+            release.first_release_date = rg['first-release-date']
+            
+            if 'tag-list' in rg:
+                release['tags'] = rg['tag-list']
+                
+            for disc in self.mb_release['medium-list']:
+                if 'format' in disc:
+                    release.format.append(disc['format'])
+                    
+            release.artist_credit = self.mb_release['artist-credit']
+            
+            if ('disambiguation' in self.mb_release):
+                release_info['disambiguation'] = self.mb_release['disambiguation']
+                
+            if 'label-info-list' in self.mb_release:
+                release.labels = self.mb_release['label-info-list']
+                
+            if 'date' in self.mb_release:
+                release.date = self.mb_release['date']
+                
+            if 'country' in self.mb_release:
+                release.country = self.mb_release['coutry']
+                
+            if 'barcode' in self.mb_release:
+                release.barcode = self.mb_release['barcode']
+                
+            if 'asin' in self.mb_release:
+                release.asin = self.mb_release['asin']
+                
+            if 'packaging' in self.mb_release:
+                release.packaging = self.mb_release['packaging']
+                
+            dist_cat = ''
+            for artist in self.mb_release["artist-credit"]:
+                if 'artist' in artist:
+                    dist_cat = dist_cat + artist['artist']['sort-name']
+                    if 'disambiguation' in artist['artist']:
+                        dist_cat = dist_cat + ' (' + artist['artist']['disambiguation'] + ') '
+                else:
+                    dist_cat = dist_cat + artist
+                
+            dist_cat = stringCleanup(dist_cat)
+            release.distribution_category = dist_cat
+
             release_info["item_code"] = self.mb_release['id']
             release_info["release_id"] = self.mb_release['id']
             release_info["disc_count"] = len(self.mb_release["medium-list"])
             release_info["release_title"] = self.mb_release['title']
-            rg = self.mb_release['release-group']
             release_info["release_group_id"] = rg['id']
             release_info["first_release_date"] = rg['first-release-date']
             
@@ -68,18 +167,9 @@ class ProcessMeta():
             else:
                 release_info["packaging"] = ""
             
-            dist_cat = ''
-            for artist in self.mb_release["artist-credit"]:
-                if 'artist' in artist:
-                    dist_cat = dist_cat + artist['artist']['sort-name']
-                    if 'disambiguation' in artist['artist']:
-                        dist_cat = dist_cat + ' (' + artist['artist']['disambiguation'] + ') '
-                else:
-                    dist_cat = dist_cat + artist
-                
-            dist_cat = stringCleanup(dist_cat)
             release_info['distribution_category'] = dist_cat
             
+            # Log text will be removed from release and processed in a separate object
             log_text = "release\t" + release_info['item_code'] + "\t" + release_info["release_title"] + "\r\n"
             release_info["log_text"] = log_text
 
