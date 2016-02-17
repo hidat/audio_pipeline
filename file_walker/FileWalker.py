@@ -302,5 +302,5 @@ def main():
         
     process_directory(args.input_directory, args.output_directory, batch_meta, args.generate, server, serializer, args.delete)
 
-
-main()
+if __name__ == "__main__":
+    main()

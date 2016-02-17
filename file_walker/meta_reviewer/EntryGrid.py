@@ -164,5 +164,5 @@ def main():
     enter_meta = MetaEntry(release_meta, tracks, master=r)
     r.mainloop()
     
-    
-main()
+if __name__ == "__main__":
+    main()
