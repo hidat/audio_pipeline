@@ -187,7 +187,7 @@ class ProcessMeta():
             
         return meta
         
-    def process_track(self, disc_num, track_)num):
+    def process_track(self, disc_num, track_num):
         """
         Extract the track metadata that we care about from the raw metadata
         """
