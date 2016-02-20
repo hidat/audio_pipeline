@@ -37,19 +37,140 @@ class Formats(BaseFormats):
     
     __ext_mapping__ = {mp4: aac, m4a: aac, mp3: id3, flac: vorbis}
 
-
+    
 class Tag(object):
     # currently only keeps track of a tag name
     # but should keep track of type & format of value in the future
     
-    def __init__(self, name):
+    def __init__(self, name, formatter=None):
+        """
+        Stores tag information for a specific metadata format.
+        
+        :param name: Formatted tag name
+        :param formatter: Callback method to format a tag value. Method should have form
+                            formatter(tag_value, tag_name)
+        """
         self.name = name
     
-    def get_name(self):
+    def name(self):
         return self.name
         
-    
+    def format_value(self, tag_value):
+        if self.formatter:
+            val = self.formatter(tag_value, self.name)
+        else:
+            val = str(tag_value)
+            
+            
+class AAC(object):
+    def __init__(self, KEXP=False):
+        self.mbid = Tag('----:com.apple.iTunes:MBID', self.format)
+        self.mbid_p = Tag('----:com.apple.iTunes:MusicBrainz Album Id', self.format)
+        self.album = Tag('\xa9alb', self.format)
+        self.album_artist = Tag('\aART', self.format)
+        self.release_date = Tag('\xa9day', self.format)
 
+        self.disc_num = Tag('disk', self.format)
+        self.track_num = Tag('trkn', self.format)
+        self.title = Tag('xa9nam', self.format)
+        self.artist = Tag('xa9ART', self.format)
+        
+        if KEXP:
+            self.kexp_genre = Tag('----:com.apple.iTunes:KEXPPRIMARYGENRE', self.format)
+            self.kexp_obscenity = Tag('KEXPFCCOBSCENITYRATING', self.format)
+
+    @staticmethod
+    def format( tag_value, tag_name):
+        formatted = tag_value.encode('utf-8')
+        return formatted
+
+        
+class ID3(object):
+    def __init__(self, KEXP=False):
+        self.mbid = Tag('TXXX:MBID', self.format_txxx)
+        self.mbid_p = Tag('TXXX:MusicBrainz Album Id', self.format_txxx)
+        self.album = Tag('TALB', self.format_talb)
+        self.album_artist = Tag('TPE1', self.format_tpe1)
+        self.release_date = Tag('TDRC', self.format_tdrc)
+
+        self.disc_num = Tag('TPOS', self.format_tpos)
+        self.track_num = Tag('TRCK', self.format_trck)
+        self.title = Tag('TIT2', self.format_tit2)
+        self.artist = Tag('TPE2', self.format_tpe2)
+        
+        if KEXP:
+            self.kexp_genre = Tag('TXXX:KEXPPRIMARYGENRE', self.format_txxx)
+            self.kexp_obscenity = Tag('TXXX:KEXPFCCOBSCENITYRATING', self.format_txxx)
+
+    @staticmethod
+    def format_txxx(tag_value, tag_name):
+        name = re.match('(?<=TXXX:)\w+', tag_name)
+        if name:
+            name = name.group(0)
+            frame = mutagen.id3.TXXX(encoding=3, desc=name, text=tag_value)
+        else:
+            frame = mutagen.id3.TXXX(encoding=3, desc=tag_name, text=tag_value)
+
+        return frame
+        
+    @staticmethod
+    def format_talb(tag_value, tag_name):
+        frame = mutagen.id3.TALB(encoding=3, text=tag_value)
+        return frame
+        
+    @staticmethod
+    def format_tpe1(tag_value, tag_name):
+        frame = mutagen.id3.TPE1(encoding=3, text=tag_value)
+        return frame
+
+    @staticmethod
+    def format_trck(tag_value, tag_name):
+        frame = mutagen.id3.TRCK(encoding=3, text=tag_value)
+        return frame
+
+    @staticmethod
+    def format_tpos(tag_value, tag_name):
+        frame = mutagen.id3.TPOS(encoding=3, text=tag_value)
+        return frame
+
+    @staticmethod
+    def format_tit2(tag_value, tag_name):
+        frame = mutagen.id3.TIT2(encoding=3, text=tag_value)
+        return frame
+
+    @staticmethod
+    def format_tpe2(tag_value, tag_name):
+        frame = mutagen.id3.TPE2(encoding=3, text=tag_value)
+        return frame
+        
+    @staticmethod
+    def format_tdrc(tag_value, tag_ame):
+        frame = mutagen.id3.TDRC(encoding=3, text=tag_value)
+
+        
+class Vorbis(object):
+    def __init__(self, KEXP=False):
+        self.mbid = Tag('mbid', self.format)
+        self.mbid_p = Tag('musicbrainz_albumid', self.format)
+        self.album = Tag('album', self.format)
+        self.album_artist = Tag('albumartist', self.format)
+        self.release_date = Tag('date', self.format)
+
+        self.disc_num = Tag('discnumber', self.format)
+        self.track_num = Tag('tracknumber', self.format)
+        self.title = Tag('title', self.format)
+        self.artist = Tag('artist', self.format)
+        
+        if KEXP:
+            self.kexp_genre = Tag('KEXPPRIMARYGENRE', self.format)
+            self.kexp_obscenity = Tag('KEXPFCCOBSCENITYRATING', self.format)
+
+    @staticmethod
+    def format(tag_value, tag_name):
+        formatted = str(tag_value)
+        return formatted
+
+        
 class SimpleTags:
 
     def __init__(self, add_attr = {}):
