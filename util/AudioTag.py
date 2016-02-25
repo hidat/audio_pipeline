@@ -51,24 +51,26 @@ class Tag(object):
         return formatted
         
     @classmethod
-    def extract(self, raw_value):
+    def extract_str(self, raw_value):
         """
         Extract a tag value from a formatted tag value string
         
         :param raw_value: Raw tag value
         :return: Plain utf-8 string tag value
         """
-        return raw_value
-
-##############
-#   Vorbis Tags
-##############
-
-class TagVorbis(Tag):
-    @classmethod
-    def extract(self, raw_value):
         val = raw_value[0]
         return val
+        
+    @classmethod
+    def extract_int(self, raw_value):
+        """
+        Extract an integer tag value from a formatted tag value
+        
+        :param raw_value: Raw tag value
+        :return: Integer value of tag
+        """
+        val = raw_value[0]
+        return int(val)
 
 ##############
 #   AAC Tags
@@ -80,15 +82,13 @@ class TagAAC(Tag):
         return formatted
         
     @classmethod
-    def extract(self, raw_value):
+    def extract_str(self, raw_value):
         val = str(raw_value[0])
         return val
         
-        
-class TagAACNum(TagAAC):
     @classmethod
-    def extract(self, raw_value):
-        val = raw_value[0][0]
+    def extract_int(self, raw_value):
+        val = int(raw_value[0][0])
         return val
         
         
@@ -98,18 +98,16 @@ class TagAACNum(TagAAC):
         
 class TagID3(Tag):
     @classmethod
-    def extract(self, raw_value):
+    def extract_str(self, raw_value):
         val = raw_value.text[0]
         return val
         
-        
-class TagID3Num(Tag):
     @classmethod
-    def extract(self, raw_value):
-        val = raw_value.text[0].split('/')[0]
+    def extract_int(self, raw_value):
+        val = int(raw_value.text[0].split('/')[0])
         return val
         
-
+        
 class TagID3Text(TagID3):
     def format(self, tag_value):
         name = re.match('(?<=TXXX:)\w+', self.name)
@@ -134,13 +132,13 @@ class TagID3AlbumArtist(TagID3):
         return frame
 
 
-class TagID3TrackNum(TagID3Num):
+class TagID3TrackNum(TagID3):
     def format(self, tag_value):
         frame = mutagen.id3.TRCK(encoding=3, text=tag_value)
         return frame
 
 
-class TagID3DiscNum(TagID3Num):
+class TagID3DiscNum(TagID3):
     def format(self, tag_value):
         frame = mutagen.id3.TPOS(encoding=3, text=tag_value)
         return frame
@@ -162,28 +160,42 @@ class TagID3Releasedate(TagID3):
     def format(self, tag_value):
         frame = mutagen.id3.TDRC(encoding=3, text=tag_value)
         return frame
+        
+        
+############
+#   KEXP Metadata
+############
+class KEXP(object):
+    def __init__(self):
+        self.primary_genre = None
+        self.obscenity = None
 
 
 class AAC(object):
     def __init__(self, kexp=False):
+        self.kexp = None
+    
         self.mbid = TagAAC('----:com.apple.iTunes:MBID')
         self.mbid_p = TagAAC('----:com.apple.iTunes:MusicBrainz Album Id')
         self.album = TagAAC('\xa9alb')
         self.album_artist = TagAAC('\xa9ART')
         self.release_date = TagAAC('aART')
 
-        self.disc_num = TagAACNum('disk')
-        self.track_num = TagAACNum('trkn')
+        self.disc_num = TagAAC('disk')
+        self.track_num = TagAAC('trkn')
         self.title = TagAAC('\xa9nam')
         self.artist = TagAAC('\xa9ART')
         
         if kexp:
-            self.kexp_genre = TagAAC('----:com.apple.iTunes:KEXPPRIMARYGENRE')
-            self.kexp_obscenity = TagAAC('KEXPFCCOBSCENITYRATING')
+            self.kexp = KEXP()
+            self.kexp.primary_genre = TagAAC('----:com.apple.iTunes:KEXPPRIMARYGENRE')
+            self.kexp.obscenity = TagAAC('KEXPFCCOBSCENITYRATING')
 
         
 class ID3(object):
     def __init__(self, kexp=False):
+        self.kexp = None
+
         self.mbid = TagID3Text('TXXX:MBID')
         self.mbid_p = TagID3Text('TXXX:MusicBrainz Album Id')
         self.album = TagID3AlbumName('TALB')
@@ -196,23 +208,27 @@ class ID3(object):
         self.artist = TagID3TrackArtist('TPE2')
         
         if kexp:
-            self.kexp_genre = TagID3Text('TXXX:KEXPPRIMARYGENRE')
-            self.kexp_obscenity = TagID3Text('TXXX:KEXPFCCOBSCENITYRATING')
+            self.kexp = KEXP()
+            self.kexp.primary_genre = TagID3Text('TXXX:KEXPPRIMARYGENRE')
+            self.kexp.obscenity = TagID3Text('TXXX:KEXPFCCOBSCENITYRATING')
 
         
 class Vorbis(object):
     def __init__(self, kexp=False):
-        self.mbid = TagVorbis('mbid')
-        self.mbid_p = TagVorbis('musicbrainz_albumid')
-        self.album = TagVorbis('album')
-        self.album_artist = TagVorbis('albumartist')
-        self.release_date = TagVorbis('date')
+        self.kexp = None
+        
+        self.mbid = Tag('mbid')
+        self.mbid_p = Tag('musicbrainz_albumid')
+        self.album = Tag('album')
+        self.album_artist = Tag('albumartist')
+        self.release_date = Tag('date')
 
-        self.disc_num = TagVorbis('discnumber')
-        self.track_num = TagVorbis('tracknumber')
-        self.title = TagVorbis('title')
-        self.artist = TagVorbis('artist')
+        self.disc_num = Tag('discnumber')
+        self.track_num = Tag('tracknumber')
+        self.title = Tag('title')
+        self.artist = Tag('artist')
         
         if kexp:
-            self.kexp_genre = TagVorbis('KEXPPRIMARYGENRE')
-            self.kexp_obscenity = TagVorbis('KEXPFCCOBSCENITYRATING')
+            self.kexp = KEXP()
+            self.kexp.primary_genre = Tag('KEXPPRIMARYGENRE')
+            self.kexp.obscenity = Tag('KEXPFCCOBSCENITYRATING')

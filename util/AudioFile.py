@@ -1,6 +1,6 @@
 import os
 import mutagen
-import AudioTag
+import audio_pipeline.util.AudioTag as AudioTag
 
 
 class UnsupportedFiletypeError(Exception):
@@ -22,7 +22,7 @@ class AudioFile(object):
     def __init__(self, file_name):
         self.mbid, self.album, self.album_artist, self.release_date, self.title, self.artist = '', '', '', '', '', ''
         self.disc_num, self.track_num, self.length = None, None, None
-        self._kexp = None
+        self.kexp = None
         self.format = None
         self.audio = None
     
@@ -42,7 +42,7 @@ class AudioFile(object):
                 break
 
         if not format:
-            # we can not process this audio file type; return None
+            # we can not process this audio file type; raise an error
             raise UnsupportedFiletypeError(file_name)
         else:
             tags = self.audio.tags
@@ -53,45 +53,45 @@ class AudioFile(object):
             mbid = format.mbid
             mbid_p = format.mbid_p
             if mbid.name in tags:
-                self.mbid = mbid.extract(tags[mbid.name])
+                self.mbid = mbid.extract_str(tags[mbid.name])
             elif mbid_p.name in tags:
-                self.mbid = mbid_p.extract(tags[mbid_p.name])
+                self.mbid = mbid_p.extract_str(tags[mbid_p.name])
             else:
                 self.mbid = ''
 
             album = format.album
             if album.name in tags:
-                self.album = album.extract(tags[album.name])
+                self.album = album.extract_str(tags[album.name])
             album_artist = format.album_artist
             if album_artist.name in tags:
-                self.album_artist = album_artist.extract(tags[album_artist.name])
+                self.album_artist = album_artist.extract_str(tags[album_artist.name])
             release_date = format.release_date
             if release_date.name in tags:
-                self.release_date = release_date.extract(tags[release_date.name])
+                self.release_date = release_date.extract_str(tags[release_date.name])
                 
             disc_num = format.disc_num
             if disc_num.name in tags:
-                self.disc_num = int(disc_num.extract(tags[disc_num.name]))
+                self.disc_num = int(disc_num.extract_int(tags[disc_num.name]))
             track_num = format.track_num
             if track_num.name in tags:
-                self.track_num = int(track_num.extract(tags[track_num.name]))
+                self.track_num = int(track_num.extract_int(tags[track_num.name]))
             title = format.title
             if title.name in tags:
-                self.title = title.extract(tags[title.name])
+                self.title = title.extract_str(tags[title.name])
             artist = format.artist
             if artist.name in tags:
-                self.artist = artist.extract(tags[title.name])
+                self.artist = artist.extract_str(tags[artist.name])
                 
-            self._kexp = KEXP(self)
+            self.kexp = self.KEXP()
                 
             self.length = self.audio.info.length
             
         
-    def kexp(self):
-        if not self._kexp:
-            self._kexp = KEXP(self)
+    def KEXP(self):
+        if not self.kexp:
+            self.kexp = KEXP(self.audio, self.format)
             
-        return self._kexp
+        return self.kexp
     
     
     def __save_tag__(self, tag, tag_value):
@@ -174,35 +174,64 @@ class AudioFile(object):
         self.__save_tag__(tag, self.artist)
         
         # set KEXP attributes
-        if self._kexp:
-            tag = self.format.kexp_genre
-            self.__save_tag__(tag, self._kexp.primary_genre)
-            tag = self.format.kexp_obscenity
-            self.__save_tag__(tag, self._kexp.obscenity_rating)
+        if self.kexp:
+            tag = self.format.kexp.primary_genre
+            self.__save_tag__(tag, self.kexp.primary_genre)
+            tag = self.format.kexp.obscenity
+            self.__save_tag__(tag, self.kexp.obscenity_rating)
             
         self.audio.save()
 
 
 
 class KEXP(object):
-    def __init__(self, audio_file):
+    def __init__(self, audio, format):
         """
-        KEXP-specific metadata extracted from the audio file.
+        Extract and save KEXP-specific metadata from an audio file.
 
-        :param audio_file: AudioFile object of the audio file.
+        :param audio: mutagen.File() object
+        :param format: Audio format
         :return:
         """
-        format = audio_file.format
-        tags = audio_file.audio.tags
+        self.format = format
+        self.audio = audio
         
         self.primary_genre = ''
-        self.obscenity_rating = ''
+        self.obscenity = ''
         
-        obscenity_rating = format.kexp_obscenity
-        if obscenity_rating.name in tags:
-            self.obscenity_rating = obscenity_rating.extract(tags[obscenity_rating.name])
+        tags = audio.tags
         
-        primary_genre = format.kexp_genre
+        obscenity = format.kexp.obscenity
+        if obscenity.name in tags:
+            self.obscenity = obscenity.extract_str(tags[obscenity_rating.name])
+        
+        primary_genre = format.kexp.primary_genre
         if primary_genre.name in tags:
-            self.primary_genre = primary_genre.extract(tags[primary_genre.name])
+            self.primary_genre = primary_genre.extract_str(tags[primary_genre.name])
+            
+    def __save_tag__(self, tag, tag_value):
+        """
+        :return: True if self.audio's tags have been changed,
+        False otherwise
+        """
+        set = False
+    
+        if tag.name in self.audio.tags or tag_value > 0:
+            tag_value = tag.format(tag_value)
+            self.audio[tag.name] = tag_value
+            set = True
+            
+        return set
+
+            
+    def save_primary_genre(self, primary_genre):
+        tag = self.format.kexp.primary_genre
+        self.__save_tag__(tag, primary_genre)
+        self.audio.save()
+        
+    def save_obscenity_rating(self, obscenity):
+        tag = self.format.kexp.obscenity
+        self.__save_tag__(tag, obscenity)
+        self.audio.save()
+
         
