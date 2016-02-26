@@ -31,15 +31,15 @@ class Formats(BaseFormats):
                       mime_flac: vorbis}
 
 
-class Tag(object):
+class TagFormat(object):
     def __init__(self, name):
         """
         Store information about a tag for a specific metadata format
 
         :param name: Tag name, formatted appropriately
         """
-        self.name = name
-
+        self.name = name                    # formatted tag name
+        
     def format(self, tag_value):
         """
         Format the tag value for this tag.
@@ -50,45 +50,92 @@ class Tag(object):
         formatted = str(tag_value)
         return formatted
         
-    @classmethod
-    def extract_str(self, raw_value):
+    def extract(self, tags):
         """
         Extract a tag value from a formatted tag value string
         
-        :param raw_value: Raw tag value
-        :return: Plain utf-8 string tag value
+        :param tags: Metadata tags
+        :return: Raw value
         """
-        val = raw_value[0]
+        if self.name in tags:
+            raw_value = tags[self.name]
+        else:
+            raw_value = None
+        return raw_value
+        
+    def make_tag(self, tags, release):
+        """
+        Make a new Tag object encapsulating a certain tag value
+        
+        :param tags: Mutagen tags
+        :param release: True if this tag is release metadata, False otherwise
+        :return: new tag object representing the value tags[self.name]
+        """
+        return Tag(self, tags, release)
+        
+
+class Tag(object):
+    def __init__(self, tag_format, tags, release):
+        """
+        Represents a specific tag value
+        
+        :param formatter: A TagFormat object to format / extract this value
+        :param tags: Tags this value is encoded in
+        :param release: Release (True) or Track (False) metadata
+        """
+        self.tag_format = tag_format
+        self.value = self.tag_format.extract(tags)
+        self.release = release
+        self.name = self.tag_format.name
+        
+    def format(self):
+        val = self.tag_format.format(self.value)
         return val
         
-    @classmethod
-    def extract_int(self, raw_value):
-        """
-        Extract an integer tag value from a formatted tag value
         
-        :param raw_value: Raw tag value
-        :return: Integer value of tag
-        """
-        val = raw_value[0]
-        return int(val)
+##############
+#   Vorbis Tags
+##############
+
+class TagVorbisString(TagFormat):
+    def extract(self, tags):
+        val = super().extract(tags)
+        if val:
+            val = str(tags[self.name][0])
+        else:
+            val = ''
+        return val
+       
+       
+class TagVorbisInt(TagFormat):
+    def extract(self, tags):
+        val = super().extract(tags)
+        if val:
+            val = int(tags[self.name][0])
+        return val
 
 ##############
 #   AAC Tags
 ##############
         
-class TagAAC(Tag):
+class TagAACString(TagFormat):
     def format(self, tag_value):
         formatted = tag_value.encode('utf-8')
         return formatted
         
-    @classmethod
-    def extract_str(self, raw_value):
-        val = str(raw_value[0])
+    def extract(self, tags):
+        val = super().extract(tags)
+        if val:
+            val = str(tags[self.name][0])
+        else:
+            val = ''
         return val
-        
-    @classmethod
-    def extract_int(self, raw_value):
-        val = int(raw_value[0][0])
+
+class TagAACInt(TagFormat):
+    def extract(self, tags):
+        val = super().extract(tags)
+        if val:
+            val = int(tags[self.name][0][0])
         return val
         
         
@@ -96,19 +143,25 @@ class TagAAC(Tag):
 #   ID3 Tags
 ##############
         
-class TagID3(Tag):
-    @classmethod
-    def extract_str(self, raw_value):
-        val = raw_value.text[0]
+class TagID3String(TagFormat):
+    def extract(self, tags):
+        val = super().extract(tags)
+        if val:
+            val = tags[self.name].text[0]
+        else:
+            val = ''
+        return val
+
+        
+class TagID3Int(TagFormat):
+    def extract(self, tags):
+        val = super().extract(tags)
+        if val:
+            val = int(tags[self.name].text[0].split('/')[0])
         return val
         
-    @classmethod
-    def extract_int(self, raw_value):
-        val = int(raw_value.text[0].split('/')[0])
-        return val
         
-        
-class TagID3Text(TagID3):
+class TagID3Text(TagID3String):
     def format(self, tag_value):
         name = re.match('(?<=TXXX:)\w+', self.name)
         if name:
@@ -120,43 +173,43 @@ class TagID3Text(TagID3):
         return frame
 
 
-class TagID3AlbumName(TagID3):
+class TagID3AlbumName(TagID3String):
     def format(self, tag_value):
         frame = mutagen.id3.TALB(encoding=3, text=tag_value)
         return frame
 
 
-class TagID3AlbumArtist(TagID3):
+class TagID3AlbumArtist(TagID3String):
     def format(self, tag_value):
         frame = mutagen.id3.TPE1(encoding=3, text=tag_value)
         return frame
 
 
-class TagID3TrackNum(TagID3):
+class TagID3TrackNum(TagID3Int):
     def format(self, tag_value):
         frame = mutagen.id3.TRCK(encoding=3, text=tag_value)
         return frame
 
 
-class TagID3DiscNum(TagID3):
+class TagID3DiscNum(TagID3String):
     def format(self, tag_value):
         frame = mutagen.id3.TPOS(encoding=3, text=tag_value)
         return frame
 
 
-class TagID3TrackTitle(TagID3):
+class TagID3TrackTitle(TagID3String):
     def format(self, tag_value):
         frame = mutagen.id3.TIT2(encoding=3, text=tag_value)
         return frame
 
 
-class TagID3TrackArtist(TagID3):
+class TagID3TrackArtist(TagID3String):
     def format(self, tag_value):
         frame = mutagen.id3.TPE2(encoding=3, text=tag_value)
         return frame
 
 
-class TagID3Releasedate(TagID3):
+class TagID3Releasedate(TagID3String):
     def format(self, tag_value):
         frame = mutagen.id3.TDRC(encoding=3, text=tag_value)
         return frame
@@ -169,43 +222,108 @@ class KEXP(object):
     def __init__(self):
         self.primary_genre = None
         self.obscenity = None
+        
+    def primary_genre(self, tags):
+        return self.primary_genre.make_tag(tags, False)
+        
+    def obscenity(self, tags):
+        return self.obscenity.make_tag(tags, False)
+        
+############
+#   Format Metadata Tags
+############
 
+class Format(object):
+    _mbid = None
+    _mbid_p = None
+    _album = None
+    _album_artist = None
+    _release_date = None
 
-class AAC(object):
+    _disc_num = None
+    _track_num = None
+    _title = None
+    _artist = None
+
     def __init__(self, kexp=False):
         self.kexp = None
-    
-        self.mbid = TagAAC('----:com.apple.iTunes:MBID')
-        self.mbid_p = TagAAC('----:com.apple.iTunes:MusicBrainz Album Id')
-        self.album = TagAAC('\xa9alb')
-        self.album_artist = TagAAC('\xa9ART')
-        self.release_date = TagAAC('aART')
+        
+    @classmethod        
+    def mbid(cls, tags):
+        if cls._mbid.name in tags:
+            return mbid.make_tag(tags, True)
+        elif cls._mbid_p.name in tags:
+            return cls._mbid_p.make_tag(tags, True)
+        else:
+            return None
+            
+    @classmethod
+    def album(cls, tags):
+        return cls._album.make_tag(tags, True)
+        
+    @classmethod
+    def album_artist(cls, tags):
+        return cls._album_artist.make_tag(tags, True)
+        
+    @classmethod
+    def release_date(cls, tags):
+        return cls._release_date.make_tag(tags, True)
+        
+    @classmethod
+    def disc_num(cls, tags):
+        return cls._disc_num.make_tag(tags, False)
+        
+    @classmethod
+    def track_num(cls, tags):
+        return cls._track_num.make_tag(tags, False)
+        
+    @classmethod
+    def title(cls, tags):
+        return cls._title.make_tag(tags, False)
+        
+    @classmethod
+    def artist(cls, tags):
+        return cls._artist.make_tag(tags, False)
+        
 
-        self.disc_num = TagAAC('disk')
-        self.track_num = TagAAC('trkn')
-        self.title = TagAAC('\xa9nam')
-        self.artist = TagAAC('\xa9ART')
+class AAC(Format):
+    
+    _mbid = TagAACString('----:com.apple.iTunes:MBID')
+    _mbid_p = TagAACString('----:com.apple.iTunes:MusicBrainz Album Id')
+    _album = TagAACString('\xa9alb')
+    _album_artist = TagAACString('aART')
+    _release_date = TagAACString('\xa9day')
+
+    _disc_num = TagAACInt('disk')
+    _track_num = TagAACInt('trkn')
+    _title = TagAACString('\xa9nam')
+    _artist = TagAACString('\xa9ART')
+
+
+    def __init__(self, kexp=False):
+        self.kexp = None
         
         if kexp:
             self.kexp = KEXP()
-            self.kexp.primary_genre = TagAAC('----:com.apple.iTunes:KEXPPRIMARYGENRE')
-            self.kexp.obscenity = TagAAC('KEXPFCCOBSCENITYRATING')
-
+            self.kexp.primary_genre = TagAACString('----:com.apple.iTunes:KEXPPRIMARYGENRE')
+            self.kexp.obscenity = TagAACString('KEXPFCCOBSCENITYRATING')
+            
         
-class ID3(object):
+class ID3(Format):
+
+    _mbid = TagID3Text('TXXX:MBID')
+    _mbid_p = TagID3Text('TXXX:MusicBrainz Album Id')
+    _album = TagID3AlbumName('TALB')
+    _album_artist = TagID3AlbumArtist('TPE1')
+    _release_date = TagID3Releasedate('TDRC')
+
+    _disc_num = TagID3DiscNum('TPOS')
+    _track_num = TagID3TrackNum('TRCK')
+    _title = TagID3TrackTitle('TIT2')
+    _artist = TagID3TrackArtist('TPE2')
+
     def __init__(self, kexp=False):
         self.kexp = None
-
-        self.mbid = TagID3Text('TXXX:MBID')
-        self.mbid_p = TagID3Text('TXXX:MusicBrainz Album Id')
-        self.album = TagID3AlbumName('TALB')
-        self.album_artist = TagID3AlbumArtist('TPE1')
-        self.release_date = TagID3Releasedate('TDRC')
-
-        self.disc_num = TagID3DiscNum('TPOS')
-        self.track_num = TagID3TrackNum('TRCK')
-        self.title = TagID3TrackTitle('TIT2')
-        self.artist = TagID3TrackArtist('TPE2')
         
         if kexp:
             self.kexp = KEXP()
@@ -213,22 +331,22 @@ class ID3(object):
             self.kexp.obscenity = TagID3Text('TXXX:KEXPFCCOBSCENITYRATING')
 
         
-class Vorbis(object):
+class Vorbis(Format):
+    _mbid = TagVorbisString('mbid')
+    _mbid_p = TagVorbisString('musicbrainz_albumid')
+    _album = TagVorbisString('album')
+    _album_artist = TagVorbisString('albumartist')
+    _release_date = TagVorbisString('date')
+
+    _disc_num = TagVorbisInt('discnumber')
+    _track_num = TagVorbisInt('tracknumber')
+    _title = TagVorbisString('title')
+    _artist = TagVorbisString('artist')
+
     def __init__(self, kexp=False):
         self.kexp = None
         
-        self.mbid = Tag('mbid')
-        self.mbid_p = Tag('musicbrainz_albumid')
-        self.album = Tag('album')
-        self.album_artist = Tag('albumartist')
-        self.release_date = Tag('date')
-
-        self.disc_num = Tag('discnumber')
-        self.track_num = Tag('tracknumber')
-        self.title = Tag('title')
-        self.artist = Tag('artist')
-        
         if kexp:
             self.kexp = KEXP()
-            self.kexp.primary_genre = Tag('KEXPPRIMARYGENRE')
-            self.kexp.obscenity = Tag('KEXPFCCOBSCENITYRATING')
+            self.kexp.primary_genre = TagVorbisString('KEXPPRIMARYGENRE')
+            self.kexp.obscenity = TagVorbisString('KEXPFCCOBSCENITYRATING')

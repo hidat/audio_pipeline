@@ -20,7 +20,7 @@ class AudioFile(object):
     formats = {"aac": aac, "id3": id3, "vorbis": vorbis}
 
     def __init__(self, file_name):
-        self.mbid, self.album, self.album_artist, self.release_date, self.title, self.artist = '', '', '', '', '', ''
+        self.mbid, self.album, self.album_artist, self.release_date, self.title, self.artist = None, None, None, None, None, None
         self.disc_num, self.track_num, self.length = None, None, None
         self.kexp = None
         self.format = None
@@ -50,37 +50,15 @@ class AudioFile(object):
             format = self.format
             
             # fill in basic metadata
-            mbid = format.mbid
-            mbid_p = format.mbid_p
-            if mbid.name in tags:
-                self.mbid = mbid.extract_str(tags[mbid.name])
-            elif mbid_p.name in tags:
-                self.mbid = mbid_p.extract_str(tags[mbid_p.name])
-            else:
-                self.mbid = ''
-
-            album = format.album
-            if album.name in tags:
-                self.album = album.extract_str(tags[album.name])
-            album_artist = format.album_artist
-            if album_artist.name in tags:
-                self.album_artist = album_artist.extract_str(tags[album_artist.name])
-            release_date = format.release_date
-            if release_date.name in tags:
-                self.release_date = release_date.extract_str(tags[release_date.name])
-                
-            disc_num = format.disc_num
-            if disc_num.name in tags:
-                self.disc_num = int(disc_num.extract_int(tags[disc_num.name]))
-            track_num = format.track_num
-            if track_num.name in tags:
-                self.track_num = int(track_num.extract_int(tags[track_num.name]))
-            title = format.title
-            if title.name in tags:
-                self.title = title.extract_str(tags[title.name])
-            artist = format.artist
-            if artist.name in tags:
-                self.artist = artist.extract_str(tags[artist.name])
+            self.mbid = format.mbid(tags)
+            self.album = format.album(tags)
+            self.album_artist = format.album_artist(tags)
+            self.release_date = format.release_date(tags)   
+            
+            self.disc_num = format.disc_num(tags)
+            self.track_num = format.track_num(tags)
+            self.title = format.title(tags)
+            self.artist = format.artist(tags)
                 
             self.kexp = self.KEXP()
                 
@@ -94,7 +72,7 @@ class AudioFile(object):
         return self.kexp
     
     
-    def __save_tag__(self, tag, tag_value):
+    def __save_tag__(self, tag):
         """
         :return: True if self.audio's tags have been changed,
         False otherwise
@@ -102,7 +80,7 @@ class AudioFile(object):
         set = False
     
         if tag.name in self.audio.tags or tag_value > 0:
-            tag_value = tag.format(tag_value)
+            tag_value = tag.format()
             self.audio[tag.name] = tag_value
             set = True
             
@@ -110,44 +88,44 @@ class AudioFile(object):
 
         
     def save_mbid(self, mbid):
-        tag = self.format.mbid
-        self.__save_tag__(tag, mbid)
+        self.mbid.value = mbid
+        self.__save_tag__(self.mbid)
         self.audio.save()
         
         
     def save_album(self, album):
-        tag = self.format.album
-        self.__save_tag__(tag, album)
+        self.album.value = album
+        self.__save_tag__(self.album)
         self.audio.save()
         
         
     def save_album_artist(self, album_artist):
-        tag = self.format.album_artist
-        self.__save_tag__(tag, album_artist)
+        self.album_artist.value = album_artist
+        self.__save_tag__(self.album_artist)
         self.audio.save()
         
         
     def save_release_date(self, release_date):
-        tag = self.format.release_date
-        self.__save_tag__(tag, release_date)
+        self.release_date.value = release_date
+        self.__save_tag__(self.release_date)
         self.audio.save()
         
 
     def save_disc_num(self, disc_num):
-        tag = self.format.disc_num
-        self.__save_tag__(tag, disc_num)
+        self.disc_num.value = disc_num
+        self.__save_tag__(self.disc_num)
         self.audio.save()
         
        
     def save_track_num(self, track_num):
-        tag = self.format.track_num
+        self.track_num.value = track_num
         self.__save_tag__(tag, track_num)
         self.audio.save()
         
         
     def save_artist(self, artist):
-        tag = self.format.artist
-        self.__save_tag__(tag, artist)
+        self.artist.value = artist
+        self.__save_tag__(self.artist)
         self.audio.save()
         
 
@@ -158,27 +136,18 @@ class AudioFile(object):
         """
         
         # set all elements in the mutagen File object
-        tag = self.format.mbid
-        self.__save_tag__(tag, self.mbid)
-        tag = self.format.album
-        self.__save_tag__(tag, self.album)
-        tag = self.format.album_artist
-        self.__save_tag__(tag, self.album_artist)
-        tag = self.format.release_date
-        self.__save_tag__(tag, self.release_date)
-        tag = self.format.disc_num
-        self.__save_tag__(tag, self.disc_num)
-        tag = self.format.track_num
-        self.__save_tag__(tag, self.track_num)
-        tag = self.format.artist
-        self.__save_tag__(tag, self.artist)
+        self.__save_tag__(self.mbid)
+        self.__save_tag__(self.album)
+        self.__save_tag__(self.album_artist)
+        self.__save_tag__(self.release_date)
+        self.__save_tag__(self.disc_num)
+        self.__save_tag__(self.track_num)
+        self.__save_tag__(self.artist)
         
         # set KEXP attributes
         if self.kexp:
-            tag = self.format.kexp.primary_genre
-            self.__save_tag__(tag, self.kexp.primary_genre)
-            tag = self.format.kexp.obscenity
-            self.__save_tag__(tag, self.kexp.obscenity_rating)
+            self.__save_tag__(self.kexp.primary_genre)
+            self.__save_tag__(self.kexp.obscenity_rating)
             
         self.audio.save()
 
@@ -196,20 +165,16 @@ class KEXP(object):
         self.format = format
         self.audio = audio
         
-        self.primary_genre = ''
-        self.obscenity = ''
+        self.primary_genre = None
+        self.obscenity = None
         
         tags = audio.tags
         
-        obscenity = format.kexp.obscenity
-        if obscenity.name in tags:
-            self.obscenity = obscenity.extract_str(tags[obscenity_rating.name])
+        self.obscenity = format.obscenity(tags)
         
-        primary_genre = format.kexp.primary_genre
-        if primary_genre.name in tags:
-            self.primary_genre = primary_genre.extract_str(tags[primary_genre.name])
+        self.primary_genre = primary_genre.(tags)
             
-    def __save_tag__(self, tag, tag_value):
+    def __save_tag__(self, tag):
         """
         :return: True if self.audio's tags have been changed,
         False otherwise
@@ -217,7 +182,7 @@ class KEXP(object):
         set = False
     
         if tag.name in self.audio.tags or tag_value > 0:
-            tag_value = tag.format(tag_value)
+            tag_value = tag.format()
             self.audio[tag.name] = tag_value
             set = True
             
@@ -225,13 +190,11 @@ class KEXP(object):
 
             
     def save_primary_genre(self, primary_genre):
-        tag = self.format.kexp.primary_genre
-        self.__save_tag__(tag, primary_genre)
+        self.__save_tag__(self.primary_genre)
         self.audio.save()
         
     def save_obscenity_rating(self, obscenity):
-        tag = self.format.kexp.obscenity
-        self.__save_tag__(tag, obscenity)
+        self.__save_tag__(self.obscenity)
         self.audio.save()
 
         

@@ -151,15 +151,3 @@ class MetaController:
                 MetaView.err_message("Please select a valid directory.", self.base_frame.choose_dir, quit=True)
         else:
             MetaView.err_message("Please select a valid directory.", self.base_frame.choose_dir, quit=True)
-        
-            
-def main():
-    directory = None
-    if len(sys.argv) >= 2:
-        directory = sys.argv[1]
-                
-    controller = MetaController(directory)
-    
-    controller.base_frame.mainloop()
-
-main()
