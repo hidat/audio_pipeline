@@ -1,4 +1,5 @@
 import os
+import audio_pipeline.Settings as Settings
 import MBInfo
 import MetaProcessor
 import argparse
@@ -281,8 +282,8 @@ def main():
     parser.add_argument('-c', '--category', type=str.casefold, choices=["recent acquisitions", "acq", "electronic", "ele", "experimental", "exp", "hip hop", "hip", "jaz", "jazz", "live on kexp", "liv", "local", "reggae", "reg", "rock", "pop", "rock/pop", "roc", "roots", "roo", "rotation", "rot", "shows around town", "sho", "soundtracks", "sou", "world", "wor"], help="Category or genre of releases being filewalked")
     parser.add_argument('-s', '--source', type=str.casefold, choices=["cd library", "melly"], help="KEXPSource value - Melly or CD Library")
     parser.add_argument('-r', '--rotation', type=str.casefold, choices=["heavy", "library", "light", "medium", "r/n"], help="Rotation workflow value")
-    parser.add_argument('-l', '--local', type=str.casefold, default='musicbrainz.org', const='musicbrainz.kexp.org:5000',
-                        help="Switch server to retrieve MusicBrainz metadata. Options are \'musicbrainz.org\' (default) and \'musicbrainz.kexp.org:5000\' (with flag)",
+    parser.add_argument('-l', '--local', type=str.casefold, default='musicbrainz.org', const=Settings.Settings.local_server,
+                        help="Switch server to retrieve MusicBrainz metadata. Options are \'musicbrainz.org\' (default) and " + Settings.Settings.local_server + " (with flag)",
                         nargs='?')
     parser.add_argument('--mbhost', type=str.casefold,
                         help="Specify the server to retrieve MusicBrainz data from. Default is musicbrainz.org; default --server option is http://musicbrainz.kexp.org:5000/; another server can be manually specified")

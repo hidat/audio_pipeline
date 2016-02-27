@@ -20,6 +20,12 @@ class AudioFile(object):
     formats = {"aac": aac, "id3": id3, "vorbis": vorbis}
 
     def __init__(self, file_name):
+    
+        ############################
+        #   switch back around to straight-up?????????
+        #   i think this way only helps this class, and this class
+        #   is allowed to be messy internally
+        ############################
         self.mbid, self.album, self.album_artist, self.release_date, self.title, self.artist = None, None, None, None, None, None
         self.disc_num, self.track_num, self.length = None, None, None
         self.kexp = None
@@ -171,7 +177,6 @@ class KEXP(object):
         tags = audio.tags
         
         self.obscenity = format.obscenity(tags)
-        
         self.primary_genre = primary_genre.(tags)
             
     def __save_tag__(self, tag):

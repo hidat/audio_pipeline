@@ -1,7 +1,7 @@
 __author__ = 'hidat'
 
 from yattag import Doc, indent
-import os.path as path
+import os.path as path4
 import unicodedata
 import os
 import datetime
@@ -24,7 +24,7 @@ class DaletSerializer:
             os.makedirs(self.release_meta_dir)
         print("Release meta: ", self.release_meta_dir)
         
-        self.log_dir = os.path.join(output_dir, 'session_logs')
+        self.process_log_dir = os.path.join(output_dir, 'session_logs')
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
         print("Logs: ", self.log_dir)

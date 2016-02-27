@@ -19,7 +19,15 @@ class MBInfo():
     #####
     def get_release(self, release_id):
         include=["artist-credits", "recordings", "isrcs", "media", "release-groups", "labels", "artists"]
-        mb_release = ngs.get_release_by_id(release_id, includes=include)['release']
+        try:
+            mb_release = ngs.get_release_by_id(release_id, includes=include)['release']
+        except ngs.ResponseError as e:
+            # probably a bad request / mbid
+            mb_release = None
+        except ngs.NetworkError as e:
+            # can't reach the musicbrainz server - if we have a local, try hitting it?
+            mb_release = None
+        
         return mb_release
         
     #####

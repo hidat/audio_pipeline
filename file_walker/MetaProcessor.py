@@ -2,56 +2,9 @@ __author = 'cephalopodblue'
 import unicodedata
 import musicbrainzngs as ngs
 import uuid as UUID
-
+`
 
 secondary_category = "CATEGORIES/ROTATION-STAGING"
-
-class Release():
-
-    def __init__(self, item_code):
-        """
-        Holds release metadata
-        """
-        
-        self.item_code = ""
-        
-        self.release_id = ""
-        self.disc_count = None
-        self.title = ""
-        self.release_group_id = ""
-        self.first_release_date = ""
-        self.tags = []
-        self.format = []
-        self.artist_credit = {}
-        self.disambiguation = ""
-        self.labels = []
-        self.date = ""
-        self.country = ""
-        self.barcode = ""
-        self.asin = ""
-        self.packaging = ""
-        self.distribution_category = ""
-        
-class Track():
-    
-    def __init__(self, item_code):
-        """
-        Holds track metadata
-        """
-        
-        self.release_id = ""
-        self.disc_count = None
-        self.artist_credit = []
-        self.release_track_id = ""
-        self.recording_id = ""
-        self.track_id = ""
-        self.title = ""
-        self.length = Noneself.isrcs = []
-        self.secondary_category = ""
-        self.artist_dist_rule =""
-        self.various_artist_dist_rule = ""
-        self.item_code = ""
-
 
 class ProcessMeta():
 
@@ -200,8 +153,6 @@ class ProcessMeta():
         
         track_info["release_id"] = self.mb_release['id']
         track_info["disc_count"] = len(self.mb_release["medium-list"])
-        track_info["artist_credit"] = self.mb_release["artist-credit"]
-        track_info["release_track_id"] = track["id"]
         track_info["track_id"] = track["recording"]["id"]    
         track_info["track_count"] = len(self.mb_release["medium-list"][disc_index]["track-list"])
         track_info["title"] = track["recording"]["title"]
@@ -337,18 +288,3 @@ def process_artist(mb_artist):
                 artist_info['url_list'].append(link['target'])
     return artist_info
     
-def distRuleCleanup(rule):
-    cleanRule = rule
-    if not rule.isalpha():
-        cleanRule = '#'
-    else:
-        rule = unicodedata.normalize('NFKD', rule).encode('ascii', 'ignore').decode()
-        if len(rule) > 0:
-            cleanRule = rule
-    return cleanRule
-    
-def stringCleanup(text):
-    clean = {'\\': '-', '/': '-', '\"': '\''}
-    for character, replacement in clean.items():
-        text = text.replace(character, replacement)
-    return text
