@@ -65,7 +65,7 @@ class AudioFile(object):
             self.track_num = format.track_num(tags)
             self.title = format.title(tags)
             self.artist = format.artist(tags)
-                
+            
             self.kexp = self.KEXP()
                 
             self.length = self.audio.info.length
@@ -128,9 +128,14 @@ class AudioFile(object):
         self.__save_tag__(tag, track_num)
         self.audio.save()
         
+    def save_title(self, title):
+        self.title.value = title
+        self.__save_tag__(tag, title)
+        self.audio.save()
         
     def save_artist(self, artist):
         self.artist.value = artist
+        self.artist = artist
         self.__save_tag__(self.artist)
         self.audio.save()
         
@@ -148,12 +153,13 @@ class AudioFile(object):
         self.__save_tag__(self.release_date)
         self.__save_tag__(self.disc_num)
         self.__save_tag__(self.track_num)
+        self.__save_tag__(self.title)
         self.__save_tag__(self.artist)
         
         # set KEXP attributes
         if self.kexp:
             self.__save_tag__(self.kexp.primary_genre)
-            self.__save_tag__(self.kexp.obscenity_rating)
+            self.__save_tag__(self.kexp.obscenity)
             
         self.audio.save()
 
@@ -176,8 +182,8 @@ class KEXP(object):
         
         tags = audio.tags
         
-        self.obscenity = format.obscenity(tags)
-        self.primary_genre = primary_genre.(tags)
+        self.obscenity = format.kexp.obscenity(tags)
+        self.primary_genre = format.kexp.primary_genre(tags)
             
     def __save_tag__(self, tag):
         """
@@ -195,10 +201,12 @@ class KEXP(object):
 
             
     def save_primary_genre(self, primary_genre):
+        self.primary_genre.value = primary_genre
         self.__save_tag__(self.primary_genre)
         self.audio.save()
         
-    def save_obscenity_rating(self, obscenity):
+    def save_obscenity(self, obscenity):
+        self.obscenity.value = obscenity
         self.__save_tag__(self.obscenity)
         self.audio.save()
 

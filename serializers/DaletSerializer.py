@@ -233,11 +233,12 @@ class DaletSerializer:
 
         output_dir = self.artist_meta_dir
         
-        with open(self.log_file_name, 'ab') as log_file:
-            log = artist["log_text"]
-            log_file.write(log.encode("UTF-8"))
-            for member in artist_members:
-                log_file.write(member["log_text"].encode("UTF-8"))
+        # get metadata for artist and, if artist is a group
+        # all group members (that have not yet had metadata generated this batch)
+        
+        self.logs.log_artist(artist)
+        for member in artist_members:
+            self.logs.log_artist(member)
         
         doc, tag, text = Doc().tagtext()
 
@@ -250,12 +251,10 @@ class DaletSerializer:
             with tag('GlossaryValue'):
                 self.save_one_artist(artist, tag, text)
 
-                if "artist-relation-list" in artist:
-                    for member in artist["artist-relation-list"]:
-                        if member["type"] == 'member of band' and "direction" in member \
-                                and member["direction"] == "backward":
-                            with tag('KEXPMember'):
-                                text(member["artist"]["id"])
+                if artist.group_members:
+                    for member in artist.group_members:
+                        with tag('KEXPMember'):
+                            text(member)
 
         formatted_data = indent(doc.getvalue())
 

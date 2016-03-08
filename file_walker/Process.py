@@ -3,12 +3,10 @@ import audio_pipeline.file_walker.Resources as Resources
 import audio_pipeline.file_walker.Util as Util
 
 class Process(object):
-    releases = {}   # dictionary of release mbid -> instantiated process objects
-    artists = {}    # dictionary of artist mbid -> instantiated artist objects (Artist is defined in Resources.py file)
     mb = None       # MBInfo object shared between Process objects
     secondary_category = "CATEGORIES/ROTATION-STAGING"
-
-    def __init__(self, mbid, mbinfo=None):
+    
+    def __init__(self, mbinfo=None):
         if not self.mb:
             if mbinfo:
                 self.mb = mbinfo
@@ -17,7 +15,13 @@ class Process(object):
                 self = None
         elif mbinfo:
             self.mb = mbinfo
-                
+               
+class ReleaseProcess(Process):
+    releases = {}   # dictionary of release mbid -> instantiated process objects
+
+    def __init__(self, mbid, mbinfo=None):
+        super().__init__(mbinfo)
+    
         if mbid in releases:
             self = releases[mbid]
         else:
@@ -135,8 +139,8 @@ class Process(object):
         Extract the track metadata we care about from the release metadata & AudioFile metadata.
         """
         
-        disc_index = audio_file.disc_num - 1    # zero-index the disc num
-        track_index = audio_file.track_num - 1  # zero-index the track num
+        disc_index = audio_file.disc_num.value - 1    # zero-index the disc num
+        track_index = audio_file.track_num.value - 1  # zero-index the track num
         
         if not self.release:
             self.process_release()
@@ -177,10 +181,10 @@ class Process(object):
         track.release_id = release_meta.release_id
         
         # fields straight from the AudioFile
-        track.disc_num = audio_file.disc_num
-        track.track_num = audio_file.track_num
-        track.obscenity = audio_file.kexp.obscenity
-        track.primary_genre = audio_file.kexp.primary_genre
+        track.disc_num = audio_file.disc_num.value
+        track.track_num = audio_file.track_num.value
+        track.obscenity = audio_file.kexp.obscenity.value
+        track.primary_genre = audio_file.kexp.primary_genre.value
         
         # get the secondary category
         cat = None
@@ -208,14 +212,32 @@ class Process(object):
         return track
 
         
-    @classmethod
-    def process_artist(cls, mbid):
+class ArtistProcess(Process):
+    artists = {}    # dictionary of artist mbid -> instantiated artist objects (Artist is defined in Resources.py file)
+
+    def __init__(self, mbid, mbinfo=None):
+        super().__init__(mbinfo)
+                
+        if mbid in artists:
+            self = artists[mbid]
+        else:
+            artists[mbid] = self
+            
+            self.mb_artist = self.mb.get_artist(mbid)
+            if not self.mb_artist:
+                # error getting musicbrainz data for this release - remove mbid from cache
+                # (and return an error??)
+                artists.pop(mbid)
+            else:
+                self.artist = None
+
+    def process_artist(self):
         # make sure we haven't already processed this artist:
-        if mbid in cls.artists.keys():
-            artist = cls.artists[mbid]
+        if self.artist:
+            artist = self.artist
         else:
             # get MusicBrainz metadata
-            meta = cls.mb.get_artist(mbid)
+            meta = self.mb_artist
             
             # extract relevent metadata into an Artist object
             # (at this point, the artist item code is always the artist mbid)
@@ -279,13 +301,15 @@ class Process(object):
                     if member['type'] == 'member of band' and 'direction' in member \
                             and member['direction'] == 'backward':
                         artist.group_members.append(member['artist']['id'])
+                        
+        return artist
         
-    @classmethod
-    def get_artist(cls, mbid):
-        if mbid in cls.artists.keys():
+
+    def get_artist(self):
+        if mbid in self.artists.keys():
             # already have info about this artist; don't need to do anything
-            artist = cls.artists[mbid]
+            artist = self.artists[mbid]
         else:
             # process this artist
-            artist = cls.process_artist(mbid)
+            artist = self.process_artist(mbid)
             return artist

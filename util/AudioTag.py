@@ -220,14 +220,14 @@ class TagID3Releasedate(TagID3String):
 ############
 class KEXP(object):
     def __init__(self):
-        self.primary_genre = None
-        self.obscenity = None
+        self._primary_genre = None
+        self._obscenity = None
         
     def primary_genre(self, tags):
-        return self.primary_genre.make_tag(tags, False)
+        return self._primary_genre.make_tag(tags, False)
         
     def obscenity(self, tags):
-        return self.obscenity.make_tag(tags, False)
+        return self._obscenity.make_tag(tags, False)
         
 ############
 #   Format Metadata Tags
@@ -305,8 +305,8 @@ class AAC(Format):
         
         if kexp:
             self.kexp = KEXP()
-            self.kexp.primary_genre = TagAACString('----:com.apple.iTunes:KEXPPRIMARYGENRE')
-            self.kexp.obscenity = TagAACString('KEXPFCCOBSCENITYRATING')
+            self.kexp._primary_genre = TagAACString('----:com.apple.iTunes:KEXPPRIMARYGENRE')
+            self.kexp._obscenity = TagAACString('----:com.apple.iTunes:KEXPFCCOBSCENITYRATING')
             
         
 class ID3(Format):
@@ -327,8 +327,8 @@ class ID3(Format):
         
         if kexp:
             self.kexp = KEXP()
-            self.kexp.primary_genre = TagID3Text('TXXX:KEXPPRIMARYGENRE')
-            self.kexp.obscenity = TagID3Text('TXXX:KEXPFCCOBSCENITYRATING')
+            self.kexp._primary_genre = TagID3Text('TXXX:KEXPPRIMARYGENRE')
+            self.kexp._obscenity = TagID3Text('TXXX:KEXPFCCOBSCENITYRATING')
 
         
 class Vorbis(Format):
@@ -348,5 +348,5 @@ class Vorbis(Format):
         
         if kexp:
             self.kexp = KEXP()
-            self.kexp.primary_genre = TagVorbisString('KEXPPRIMARYGENRE')
-            self.kexp.obscenity = TagVorbisString('KEXPFCCOBSCENITYRATING')
+            self.kexp._primary_genre = TagVorbisString('KEXPPRIMARYGENRE')
+            self.kexp._obscenity = TagVorbisString('KEXPFCCOBSCENITYRATING')

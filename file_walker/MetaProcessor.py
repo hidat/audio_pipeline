@@ -4,7 +4,6 @@ import musicbrainzngs as ngs
 import uuid as UUID
 `
 
-secondary_category = "CATEGORIES/ROTATION-STAGING"
 
 class ProcessMeta():
 
