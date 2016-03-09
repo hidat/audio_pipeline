@@ -39,6 +39,12 @@ def process_directory(source_dir, output_dir, batch_meta, generate, server, seri
     # create & open log file
     log_file_name = os.path.join(log_dir, ts.strftime("filewalker_log_%d-%m-%y-%H%M%S%f.txt"))
     
+    # label log:
+    label_log_name = os.path.join(log_dir, ts.strftime("label_log_%d-%m-%y-%H%M%S%f.txt"))
+
+    # release log:
+    release_log_name = os.path.join(log_dir, ts.strftime("release_log_%d-%m-%y-%H%M%S%f.txt"))
+    
     # create a MBInfo object to get MusicBrainz metadata
     mbinfo = MBInfo.MBInfo(server)
     
@@ -94,11 +100,22 @@ def process_directory(source_dir, output_dir, batch_meta, generate, server, seri
                                 release = MetaProcessor.process_release(mb_release)
                                 # save release meta
                                 serializer.save_release(release, batch_meta, release_meta_dir)
-                                # save release to log
+                                
+                                # save release to release log
+                                with open(release_log_name, 'ab') as release_log_file:
+                                    release_log_file.write(release["log_text"].encode("UTF-8"))
+                                
+                                # save release to general log
                                 log_file.write(release["log_text"].encode("UTF-8"))
                                 for label in release["labels"]:
                                     if 'label' in label:
                                         label_log = "label\t" + str(label['label']['id']) + "\t" + str(label['label']['name']) + "\r\n"
+                                        
+                                        # Write label log to label log
+                                        with open(label_log_name, 'ab') as label_log_file:
+                                            label_log_file.write(label_log.encode("UTF-8"))
+                                            
+                                        # Write label log to general log
                                         log_file.write(label_log.encode("UTF-8"))
                             
                             # Pull metadata from MusicBrainz
