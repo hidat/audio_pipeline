@@ -81,7 +81,7 @@ class Artist():
 
     glossary_type = 'Artist'
     
-    def __init__(self, item_code)
+    def __init__(self, item_code):
         """
         Holds artist metadata
         """

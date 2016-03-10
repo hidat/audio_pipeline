@@ -2,7 +2,7 @@ import audio_pipeline.util.MBInfo as MBInfo
 import audio_pipeline.file_walker.Resources as Resources
 import audio_pipeline.file_walker.Util as Util
 
-class Process(object):
+class Processor(object):
     mb = None       # MBInfo object shared between Process objects
     secondary_category = "CATEGORIES/ROTATION-STAGING"
     
@@ -11,12 +11,12 @@ class Process(object):
             if mbinfo:
                 self.mb = mbinfo
             else:
-                # how do you make initialization return a None??
+                # raise a 'no mbinfo object' objection
                 self = None
         elif mbinfo:
             self.mb = mbinfo
                
-class ReleaseProcess(Process):
+class ReleaseProcessor(Processor):
     releases = {}   # dictionary of release mbid -> instantiated process objects
 
     def __init__(self, mbid, mbinfo=None):
@@ -113,7 +113,7 @@ class ReleaseProcess(Process):
             dist_cat = Util.stringCleanup(dist_cat)
             release.distribution_category = dist_cat
             
-            glossary_title = release.title + " " + release.artist + " " +
+            glossary_title = release.title + " " + release.artist + " " + \
                 release.date + " " + release.country + labels + formats + cat_nums
             
             release.glossary_title = Util.stringCleanup(glossary_title)
@@ -212,7 +212,7 @@ class ReleaseProcess(Process):
         return track
 
         
-class ArtistProcess(Process):
+class ArtistProcessor(Processor):
     artists = {}    # dictionary of artist mbid -> instantiated artist objects (Artist is defined in Resources.py file)
 
     def __init__(self, mbid, mbinfo=None):
@@ -225,7 +225,7 @@ class ArtistProcess(Process):
             
             self.mb_artist = self.mb.get_artist(mbid)
             if not self.mb_artist:
-                # error getting musicbrainz data for this release - remove mbid from cache
+                # error getting musicbrainz data for this artist - remove mbid from cache
                 # (and return an error??)
                 artists.pop(mbid)
             else:
@@ -275,7 +275,7 @@ class ArtistProcess(Process):
                 if 'ended' in life:
                     if life['ended'].lower() == 'true':
                         artist.ended = '1'
-                     else:
+                    else:
                         artist.ended = '0'
             
             if 'country' in meta:

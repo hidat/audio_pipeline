@@ -27,11 +27,12 @@ class DaletSerializer:
             os.makedirs(self.release_meta_dir)
         print("Release meta: ", self.release_meta_dir)
         
-        self.logs = ProcessLog.ProcessLog(output_dir, 'session_logs')
+        log_dir = os.path.join(output_dir, 'session_logs')
+        self.logs = ProcessLog.ProcessLog(log_dir, release=True, label=True)
         print("Logs: ", self.logs.log_dir)
 
         
-    def save_track(self, meta_processor, audio_file):
+    def save_track(self, release, track):
         """
         Create an XML file of track metadata that Dalet will be happy with
 
@@ -42,8 +43,6 @@ class DaletSerializer:
         """
         doc, tag, text = Doc().tagtext()
         
-        release = meta_processor.get_release()
-        track = meta_processor.get_track(audio_file)
         output_dir = self.track_meta_dir
         
         self.logs.log_track(track)
@@ -108,7 +107,7 @@ class DaletSerializer:
             f.write(formatted_data.encode("UTF-8"))
 
             
-    def save_release(self, meta_processor):
+    def save_release(self, release):
         """
         Create an XML file of release metadata that Dalet will be happy with
         
@@ -236,9 +235,7 @@ class DaletSerializer:
         # get metadata for artist and, if artist is a group
         # all group members (that have not yet had metadata generated this batch)
         
-        self.logs.log_artist(artist)
-        for member in artist_members:
-            self.logs.log_artist(member)
+        self.logs.log_artist(artist, artist_members)
         
         doc, tag, text = Doc().tagtext()
 
