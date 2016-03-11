@@ -23,9 +23,10 @@ def process_directory(source_dir, output_dir, serializer):
     
     # If copying audio (not just generating metadata), 
     # get the locations that audio files will be copied to
+    track_dir, track_success_dir, track_fail_dir = '', '', ''
     if not batch_constants.generate:
         track_dir, track_success_dir, track_fail_dir = audio_directories(output_dir)
-    
+
     # Get directories for processed hashes
     processed_hashes = info_directories(output_dir)
     

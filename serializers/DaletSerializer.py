@@ -201,8 +201,6 @@ class DaletSerializer:
                 for item in release.tags:
                     with tag('KEXPTag'):
                         text(item)
-                with tag('KEXPFirstReleaseDate'):
-                    text(release.first_released)
                         
                 if Resources.BatchConstants.rotation:
                     r_status = Util.stringCleanup(Resources.BatchConstants.rotation)

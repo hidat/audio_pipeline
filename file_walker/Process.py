@@ -79,9 +79,7 @@ class ReleaseProcessor(Processor):
                             label.catalog_num = l['catalog-number']
                             cat_nums = cat_nums + " " + label.catalog_num
                         release.labels.append(label)
-            
-            if 'first-release-date' in meta:
-                release.first_released = meta['first-release-date']
+
             if 'date' in meta:
                 release.date = meta['date']
             if 'country' in meta:
@@ -205,7 +203,8 @@ class ReleaseProcessor(Processor):
         if Resources.BatchConstants.rotation:
             cat = release_meta.artist
             cat += " - " + release_meta.title
-            cat = secondary_category + "/" + stringCleanup(Resources.BatchConstants.rotation) + "/" + stringCleanup(cat)
+            cat = self.secondary_category + "/" + Util.stringCleanup(Resources.BatchConstants.rotation) + \
+                    "/" + Util.stringCleanup(cat)
             track.secondary_category = cat
             
         sort_names.sort()
