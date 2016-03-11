@@ -15,6 +15,9 @@ class ProcessMeta():
         self.batch_meta = batch_meta
         self.processed_release = None
         
+        print("Batch meta: ")
+        print(self.batch_meta)
+        print("\n")
         
         ngs.set_useragent("hidat_audio_pipeline", "0.1")
         include=["artist-credits", "recordings", "isrcs", "media", "release-groups", "labels", "artists"]
@@ -124,7 +127,8 @@ class ProcessMeta():
         track_info["artist-credit"] = track["artist-credit"]
 
         cat = None
-        if "rotation" in self.batch_meta:
+        print(self.batch_meta["rotation"] > "")
+        if self.batch_meta["rotation"] > "":
             cat = ""
         
         for artist in self.mb_release['artist-credit']:
@@ -328,7 +332,7 @@ def process_track(mb_release, batch_meta, discnum, tracknum):
     track_info["artist-credit"] = track["artist-credit"]
     
     cat = None
-    if "rotation" in batch_meta:
+    if batch_meta["rotation"] > "":
         cat = ""
         
     for artist in mb_release['artist-credit']:
