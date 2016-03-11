@@ -197,9 +197,9 @@ def main():
         
     server = args.mbhost if args.mbhost != None else args.local
         
-    batch_constants.category = args.category
-    batch_constants.rotation = args.rotation
-    batch_constants.source = args.source
+    batch_constants.category = options[args.category] if args.category != None else ""
+    batch_constants.rotation = options[args.rotation] if args.rotation != None else ""
+    batch_constants.source = options[args.source] if args.source != None else ""
     
     batch_constants.generate = args.generate
     batch_constants.delete = args.delete
