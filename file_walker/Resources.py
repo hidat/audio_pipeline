@@ -72,6 +72,7 @@ class Track():
         self.various_artist_dist_rule = ""
         self.obscenity = ""
         self.primary_genre = ""
+        self.type = ""
         
         self.artists = []
         self.artist_credit = ''

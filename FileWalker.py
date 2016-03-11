@@ -1,11 +1,10 @@
 import os
-import audio_pipeline.Settings as Settings
-import audio_pipeline.file_walker.MBInfo as MBInfo
-import audio_pipeline.Process as Processor
-import audio_pipeline.serializers as serializers
-import audio_pipeline.file_walker.Resources.BatchConstants as batch_constants
-import audio_pipeline.util.AudioFile as AudioFile
-import audio_pipeline.file_walker.Process as Process
+import Settings as Settings
+from util import MBInfo
+from util import AudioFile
+from file_walker import Process as Processor
+from file_walker.Resources import BatchConstants as batch_constants
+import serializers
 import argparse
 import mutagen
 import shutil
@@ -64,10 +63,10 @@ def process_directory(source_dir, output_dir, serializer):
                         try:
                             # process track's metadata:
                             if audio_file.mbid.value in Processor.ReleaseProcessor.releases:
-                                release_meta = Process.ReleaseProcessor.releases[audio_file.mbid.value]
+                                release_meta = Processor.ReleaseProcessor.releases[audio_file.mbid.value]
                                 release = release_meta.get_release()
                             else:
-                                release_meta = Process.ReleaseProcessor(audio_file.mbid.value)
+                                release_meta = Processor.ReleaseProcessor(audio_file.mbid.value)
                                 release = release_meta.get_release()
 
                                 # serialize the release
@@ -76,7 +75,7 @@ def process_directory(source_dir, output_dir, serializer):
                             
                             # Serialize track metadata
                             track = release_meta.get_track(audio_file)
-                            serializer.save_track(release, audio_file)
+                            serializer.save_track(release, track)
                             
                             # Make a copy of the original file (just in case)
                             copy_to_path = os.path.join(track_success_dir, path)                            
@@ -91,7 +90,7 @@ def process_directory(source_dir, output_dir, serializer):
                                     group_members = []
                                     
                                     for member in artist.group_members:
-                                        if member not in Process.ArtistProcessor.artists:
+                                        if member not in Processor.ArtistProcessor.artists:
                                             member_meta = Processor.ArtistProcessor(member)
                                             group_members.append(member_meta.get_artist())
                                             
@@ -127,7 +126,7 @@ def process_directory(source_dir, output_dir, serializer):
                     os.makedirs(copy_to_path)
                     
                 target = os.path.join(copy_to_path, src_name)
-                if batch_constants.delete_processed:
+                if batch_constants.delete:
                     shutil.move(file_name, target)
                 else:
                     shutil.copy(file_name, target)

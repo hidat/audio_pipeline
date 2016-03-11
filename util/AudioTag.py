@@ -103,6 +103,7 @@ class TagVorbisString(TagFormat):
         if val:
             val = str(tags[self.name][0])
         else:
+            print(val)
             val = ''
         return val
        
@@ -138,6 +139,15 @@ class TagAACInt(TagFormat):
             val = int(tags[self.name][0][0])
         return val
         
+class TagAACFreeform(TagAACString):
+    def extract(self, tags):
+        if self.name in tags:
+            val = str(tags[self.name][0], encoding='UTF-8')
+        else:
+            val = ''
+            
+        return val
+
         
 ##############
 #   ID3 Tags
@@ -251,7 +261,7 @@ class Format(object):
     @classmethod        
     def mbid(cls, tags):
         if cls._mbid.name in tags:
-            return mbid.make_tag(tags, True)
+            return cls._mbid.make_tag(tags, True)
         elif cls._mbid_p.name in tags:
             return cls._mbid_p.make_tag(tags, True)
         else:
@@ -288,8 +298,8 @@ class Format(object):
 
 class AAC(Format):
     
-    _mbid = TagAACString('----:com.apple.iTunes:MBID')
-    _mbid_p = TagAACString('----:com.apple.iTunes:MusicBrainz Album Id')
+    _mbid = TagAACFreeform('----:com.apple.iTunes:MBID')
+    _mbid_p = TagAACFreeform('----:com.apple.iTunes:MusicBrainz Album Id')
     _album = TagAACString('\xa9alb')
     _album_artist = TagAACString('aART')
     _release_date = TagAACString('\xa9day')
@@ -305,8 +315,8 @@ class AAC(Format):
         
         if kexp:
             self.kexp = KEXP()
-            self.kexp._primary_genre = TagAACString('----:com.apple.iTunes:KEXPPRIMARYGENRE')
-            self.kexp._obscenity = TagAACString('----:com.apple.iTunes:KEXPFCCOBSCENITYRATING')
+            self.kexp._primary_genre = TagAACFreeform('----:com.apple.iTunes:KEXPPRIMARYGENRE')
+            self.kexp._obscenity = TagAACFreeform('----:com.apple.iTunes:KEXPFCCOBSCENITYRATING')
             
         
 class ID3(Format):

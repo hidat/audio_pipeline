@@ -1,4 +1,5 @@
 import datetime
+import os
 
 class ProcessLog:
 
@@ -25,10 +26,10 @@ class ProcessLog:
         self.log_file = os.path.join(self.log_dir, now.strftime("filewalker_log_%d-%m-%y-%H%M%S%f.txt"))
         
         if release:
-            self.release_log = os.path.join(self.log_dir, ts.strftime("release_log_%d-%m-%y-%H%M%S%f.txt"))
+            self.release_log = os.path.join(self.log_dir, now.strftime("release_log_%d-%m-%y-%H%M%S%f.txt"))
         
         if label:
-            self.label_log = os.path.join(self.log_dir, ts.strftime("label_log_%d-%m-%y-%H%M%S%f.txt"))
+            self.label_log = os.path.join(self.log_dir, now.strftime("label_log_%d-%m-%y-%H%M%S%f.txt"))
 
         # to prevent duplicates, we'll keep a set of release, artist, track, and label item codes
         self.releases = set([])
@@ -39,7 +40,7 @@ class ProcessLog:
         
     def log_release(self, release):
         if release.item_code not in self.releases:
-            log_text = str(release.glossary_type) + str(release.item_code) + '\t' + str(release.release_title) + '\r\n'
+            log_text = str(release.glossary_type) + "\t" + str(release.item_code) + '\t' + str(release.title) + '\r\n'
             self.save_log(self.log_file, log_text)
             if self.release_log:
                 self.save_log(self.release_log, log_text)
@@ -50,20 +51,21 @@ class ProcessLog:
             self.save_log(self.log_file, log_text)
     
     def log_artist(self, artist, group_members = []):
-        if artist.item_code not in artists:
-            log_text = str(artist.glossary_type) + str(artist.item_code) + '\t' + str(artist.title) + '\r\n'
+        if artist.item_code not in self.artists:
+            log_text = str(artist.glossary_type) + "\t" + str(artist.item_code) + '\t' + str(artist.title) + '\r\n'
+            self.save_log(self.log_file, log_text)
         with open(self.log_file, 'ab') as file:
             for member in group_members:
                 if member.item_code not in artists:
-                    log_text = str(member.glossary_type) + str(member.item_code) + '\t' + str(member.title) + '\r\n'
+                    log_text = str(member.glossary_type) + "\t" + str(member.item_code) + '\t' + str(member.title) + '\r\n'
                     file.write(log_text.encode('UTF-8'))
                     
     def log_label(self, label):
-        if label.id not in labels:
+        if label.id not in self.labels:
             log_text = 'label\t' + str(label.id) + '\t' + str(label.name) + '\r\n'
             self.save_log(self.log_file, log_text)
             if self.label_log:
-                self.save_file(self.label_log, log_text)
+                self.save_log(self.label_log, log_text)
             
     def save_log(self, log_file, log_text):
         with open(log_file, 'ab') as file:

@@ -1,33 +1,35 @@
 __author__ = 'hidat'
 
 from yattag import Doc, indent
-import os.path as path4
+import os.path as path
 import unicodedata
 import os
-import audio_pipeline.file_walker.ProcessLog as ProcessLog
-import audio_pipeline.file_walker.Resources as Resources
-import audio_pipeline.file_walker.Util as Util
+import file_walker.ProcessLog as ProcessLog
+import file_walker.Resources as Resources
+import file_walker.Util as Util
 
 class DaletSerializer:
 
     def __init__(self, output_dir):
         # Set up metadata directories
-        self.track_meta_dir = os.path.join(output_dir, 'track_meta')
-        if not os.path.exists(self.track_meta_dir):
+        self.track_meta_dir = path.join(output_dir, 'track_meta')
+        if not path.exists(self.track_meta_dir):
             os.makedirs(self.track_meta_dir)
         print("Track meta: ", self.track_meta_dir)
         
-        self.artist_meta_dir = os.path.join(output_dir, 'artist_meta')
-        if not os.path.exists(self.artist_meta_dir):
+        self.artist_meta_dir = path.join(output_dir, 'artist_meta')
+        if not path.exists(self.artist_meta_dir):
             os.makedirs(self.artist_meta_dir)
         print("Artist meta: ", self.artist_meta_dir)
         
-        self.release_meta_dir = os.path.join(output_dir, 'release_meta')
-        if not os.path.exists(self.release_meta_dir):
+        self.release_meta_dir = path.join(output_dir, 'release_meta')
+        if not path.exists(self.release_meta_dir):
             os.makedirs(self.release_meta_dir)
         print("Release meta: ", self.release_meta_dir)
         
-        log_dir = os.path.join(output_dir, 'session_logs')
+        log_dir = path.join(output_dir, 'session_logs')
+        if not path.exists(log_dir):
+            os.makedirs(log_dir)
         self.logs = ProcessLog.ProcessLog(log_dir, release=True, label=True)
         print("Logs: ", self.logs.log_dir)
 
@@ -94,7 +96,7 @@ class DaletSerializer:
                 with tag('KEXPVariousArtistReleaseTitleDistributionRule'):
                     text(track.various_artist_dist_rule)
                 with tag('KEXPContentType'):
-                    text(track.kexp_content_type)
+                    text(track.content_type)
                 
                 if Resources.BatchConstants.source:
                     with tag('KEXPSource'):
@@ -102,7 +104,7 @@ class DaletSerializer:
 
 
         formatted_data = indent(doc.getvalue())    
-        output_file = path.join(output_dir, track_data["item_code"] + ".xml")
+        output_file = path.join(output_dir, track.item_code + ".xml")
         with open(output_file, "wb") as f:
             f.write(formatted_data.encode("UTF-8"))
 
@@ -141,7 +143,6 @@ class DaletSerializer:
             <KEXPTag>tag 2</KEXPTag>
         """
 
-        release = meta_processor.get_release()
         output_dir = self.release_meta_dir
 
         # write release & labels to the log
@@ -213,7 +214,7 @@ class DaletSerializer:
 
         formatted_data = indent(doc.getvalue())
         
-        output_file = path.join(output_dir, 'r' + release["release_id"] + ".xml")
+        output_file = path.join(output_dir, 'r' + release.item_code + ".xml")
         with open(output_file, "wb") as f:
             f.write(formatted_data.encode("UTF-8"))
 
@@ -255,7 +256,7 @@ class DaletSerializer:
 
         formatted_data = indent(doc.getvalue())
 
-        output_file = path.join(output_dir, 'a' + artist["id"] + ".xml")
+        output_file = path.join(output_dir, 'a' + artist.item_code + ".xml")
         with open(output_file, "wb") as f:
             f.write(formatted_data.encode("UTF-8"))
 
@@ -331,12 +332,12 @@ class DaletSerializer:
                 with tag('KEXPIPICode'):
                     text(code)
 
-        if len(artist.isni-list) > 0:
+        if len(artist.isni_list) > 0:
             for code in artist.isni_list:
                 with tag('KEXPISNICode'):
                     text(code)
 
-        if len(artist.url-relation-list) > 0:
-            for link in artist.url-relation-list:
+        if len(artist.url_relation_list) > 0:
+            for link in artist.url_relation_list:
                 with tag('KEXPLink'):
                     text(link)

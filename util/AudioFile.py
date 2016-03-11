@@ -1,6 +1,6 @@
 import os
 import mutagen
-import audio_pipeline.util.AudioTag as AudioTag
+from util import AudioTag
 
 
 class UnsupportedFiletypeError(Exception):

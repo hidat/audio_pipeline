@@ -8,7 +8,7 @@ class MBInfo():
     def __init__(self, server, useragent=("hidat_audio_pipeline", "0.1")):
         self.server_location = server
         
-        if server != default_server:
+        if server != self.default_server:
             ngs.set_hostname(server)
         
         ngs.set_useragent(useragent[0], useragent[1])
@@ -39,4 +39,17 @@ class MBInfo():
     #####
     def get_artist(self, artist_id):
         include=["aliases", "url-rels", "annotation", "artist-rels"]
+        
+        try:
+            mb_artist = ngs.get_artist_by_id(artist_id, includes=include)['artist']
+        except ngs.ResponseError as e:
+            # probably a bad request / mbid
+            # propagate up
+            raise e
+        except ngs.NetworkError as e:
+            # can't reach the musicbrainz server - if we have a local, try hitting it?
+            mb_artist = None
+            # propagate error up
+            raise e
+            
         return mb_artist

@@ -1,6 +1,6 @@
-import audio_pipeline.util.MBInfo as MBInfo
-import audio_pipeline.file_walker.Resources as Resources
-import audio_pipeline.file_walker.Util as Util
+from util import MBInfo
+from file_walker import Resources
+from file_walker import Util
 
 class Processor(object):
     mb = None       # MBInfo object shared between Process objects
@@ -22,15 +22,15 @@ class ReleaseProcessor(Processor):
     def __init__(self, mbid, mbinfo=None):
         super().__init__(mbinfo)
     
-        if mbid in releases:
+        if mbid in self.releases:
             self = releases[mbid]
         else:
-            releases[mbid] = self
+            self.releases[mbid] = self
             
             self.mb_release = self.mb.get_release(mbid)
             if not self.mb_release:
                 # error getting musicbrainz data for this release - remove mbid from cache
-                releases.pop(mbid)
+                self.releases.pop(mbid)
                 self = None
             else:
                 self.release = None
@@ -42,7 +42,7 @@ class ReleaseProcessor(Processor):
         if not self.release:
             meta = self.mb_release
             
-            release = Resources.Release(item_code = meta[id])
+            release = Resources.Release(item_code = meta['id'])
         
             rg = meta['release-group']
             
@@ -100,9 +100,9 @@ class ReleaseProcessor(Processor):
                     a = artist['artist']
                     full_name = full_name + a['name']
                     release.artist_ids.append(a['id'])
-                    release.artist_sort_names.append(a['sort_name'])
+                    release.artist_sort_names.append(a['sort-name'])
                     
-                    dist_cat = dist_cat + a['sort_name']
+                    dist_cat = dist_cat + a['sort-name']
                     if 'disambiguation' in a:
                         dist_cat = dist_cat + ' (' + a['disambiguation'] + ') '
                 else:
@@ -146,22 +146,25 @@ class ReleaseProcessor(Processor):
             self.process_release()
             
         release_meta = self.release
-        track_meta = release_meta['medium-list'][disc_index]['track-list'][track-index]
+        track_meta = self.mb_release['medium-list'][disc_index]['track-list'][track_index]
         recording_meta = track_meta['recording']
         
         
         # get the track item_code
-        if audio_file.kexp.obscenity.upper() == 'RADIO EDIT':
+        track_type = ''
+        if audio_file.kexp.obscenity.value.upper() == 'RADIO EDIT':
             item_code = str(UUID.uuid4())
+            track_type = "track with filewalker itemcode"
         else:
             item_code = track_meta['id']
+            track_type = "track"
             
         # create the track object
         track = Resources.Track(item_code)
+        track.type = track_type
         
         # fields from track_meta
         track.id = track_meta['id']
-        track.title = track_meta['title']
         
         for artist in track_meta['artist-credit']:
             if 'artist' in artist:
@@ -171,6 +174,8 @@ class ReleaseProcessor(Processor):
                 track.artist_credit = track.artist_credit + artist
 
         # fields from the recording
+        track.title = recording_meta['title']
+        
         track.recording_id = recording_meta['id']
         if 'length' in recording_meta:
             track.length = recording_meta['length']
@@ -178,7 +183,9 @@ class ReleaseProcessor(Processor):
             track.isrc_list = recording_meta['isrc-list']
 
         # fields from release_meta
-        track.release_id = release_meta.release_id
+        track.release_id = release_meta.id
+        
+        track.track_count = len(self.mb_release["medium-list"][disc_index]["track-list"])
         
         # fields straight from the AudioFile
         track.disc_num = audio_file.disc_num.value
@@ -193,7 +200,7 @@ class ReleaseProcessor(Processor):
             cat = ""
             
         for artist in release_meta.artist_sort_names:
-            sort_name.append(artist)
+            sort_names.append(artist)
                 
         if Resources.BatchConstants.rotation:
             cat = release_meta.artist
@@ -201,8 +208,8 @@ class ReleaseProcessor(Processor):
             cat = secondary_category + "/" + stringCleanup(Resources.BatchConstants.rotation) + "/" + stringCleanup(cat)
             track.secondary_category = cat
             
-        sort_name.sort()
-        track.artist_dist_rule = Util.distRuleCleanup(sort[0][:1])
+        sort_names.sort()
+        track.artist_dist_rule = Util.distRuleCleanup(sort_names[0][:1])
         track.various_artist_dist_rule = Util.distRuleCleanup(release_meta.title[:1])
         
         return track
@@ -218,16 +225,16 @@ class ArtistProcessor(Processor):
     def __init__(self, mbid, mbinfo=None):
         super().__init__(mbinfo)
                 
-        if mbid in artists:
-            self = artists[mbid]
+        if mbid in self.artists:
+            self = self.artists[mbid]
         else:
-            artists[mbid] = self
+            self.artists[mbid] = self
             
             self.mb_artist = self.mb.get_artist(mbid)
             if not self.mb_artist:
                 # error getting musicbrainz data for this artist - remove mbid from cache
                 # (and return an error??)
-                artists.pop(mbid)
+                self.artists.pop(mbid)
             else:
                 self.artist = None
 
@@ -241,9 +248,9 @@ class ArtistProcessor(Processor):
             
             # extract relevent metadata into an Artist object
             # (at this point, the artist item code is always the artist mbid)
-            artist = Resources.Artist(mbid)
+            artist = Resources.Artist(meta['id'])
             
-            artist.name = artist['name']
+            artist.name = meta['name']
             
             if 'disambiguation' in meta:
                 artist.disambiguation = meta['disambiguation']
@@ -306,10 +313,10 @@ class ArtistProcessor(Processor):
         
 
     def get_artist(self):
-        if mbid in self.artists.keys():
+        if self.artist:
             # already have info about this artist; don't need to do anything
-            artist = self.artists[mbid]
+            artist = self.artist
         else:
             # process this artist
-            artist = self.process_artist(mbid)
-            return artist
+            artist = self.process_artist()
+        return artist

@@ -1,3 +1,5 @@
+import unicodedata
+
 def distRuleCleanup(rule):
     cleanRule = rule
     if not rule.isalpha():
