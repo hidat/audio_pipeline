@@ -50,7 +50,7 @@ class ReleaseProcessor(Processor):
             release.disc_count = len(meta['medium-list'])
             release.title = meta['title']
             release.release_group_id = rg['id']
-            release.first_release_date = rg['first-release-date']
+            release.first_released = rg['first-release-date']
             
             if 'tag-list' in rg:
                 release.tags = rg['tag-list']
