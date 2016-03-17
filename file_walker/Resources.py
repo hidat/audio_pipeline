@@ -7,6 +7,7 @@ class BatchConstants():
     input_directory = ''
     output_directory = ''
     
+    gen_item_code = False
     generate = False
     delete = False
     local_server = False
@@ -74,6 +75,7 @@ class Track():
         self.primary_genre = ""
         self.type = ""
         
+        self.radio_edit = False
         self.artists = []
         self.artist_credit = ''
         

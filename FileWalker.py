@@ -184,7 +184,7 @@ def main():
     parser.add_argument('output_directory', help="Directory to store output files. MUST ALREADY EXIST for now.")
     parser.add_argument('-d', '--delete', default=False, const=True, nargs='?', help="Delete audio files from input_directory after processing")
     parser.add_argument('-c', '--category', type=str.casefold, choices=["recent acquisitions", "acq", "electronic", "ele", "experimental", "exp", "hip hop", "hip", "jaz", "jazz", "live on kexp", "liv", "local", "reggae", "reg", "rock", "pop", "rock/pop", "roc", "roots", "roo", "rotation", "rot", "shows around town", "sho", "soundtracks", "sou", "world", "wor"], help="Category or genre of releases being filewalked")
-    parser.add_argument('-s', '--source', type=str.casefold, choices=["cd library", "melly"], help="KEXPSource value - Melly or CD Library")
+    parser.add_argument('-s', '--source', type=str.casefold, choices=["cd library", "melly", "hitters"], help="KEXPSource value - Melly or CD Library")
     parser.add_argument('-r', '--rotation', type=str.casefold, choices=["heavy", "library", "light", "medium", "r/n"], help="Rotation workflow value")
     parser.add_argument('-l', '--local', type=str.casefold, default='musicbrainz.org', const=Settings.Settings.local_server,
                         help="Switch server to retrieve MusicBrainz metadata. Options are \'musicbrainz.org\' (default) and " + Settings.Settings.local_server + " (with flag)",
@@ -192,6 +192,7 @@ def main():
     parser.add_argument('--mbhost', type=str.casefold,
                         help="Specify the server to retrieve MusicBrainz data from. Default is musicbrainz.org; default --server option is http://musicbrainz.kexp.org:5000/; another server can be manually specified")
     parser.add_argument('-g', '--generate', default=False, const=True, nargs='?')
+    parser.add_argument('-i', '--gen-item-code', default=False, const=True, nargs='?')
     
     args = parser.parse_args()
         
@@ -201,6 +202,7 @@ def main():
     batch_constants.rotation = options[args.rotation] if args.rotation != None else ""
     batch_constants.source = options[args.source] if args.source != None else ""
     
+    batch_constants.gen_item_code = args.gen-item-code
     batch_constants.generate = args.generate
     batch_constants.delete = args.delete
     batch_constants.local_server = args.local

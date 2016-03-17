@@ -148,15 +148,15 @@ class ReleaseProcessor(Processor):
         recording_meta = track_meta['recording']
         
         
-        # get the track item_code
+        # if generating unique item codes, do that
         track_type = ''
-        if audio_file.kexp.obscenity.value.upper() == 'RADIO EDIT':
+        if Resources.batch_constants.gen_item_code:
             item_code = str(UUID.uuid4())
             track_type = "track with filewalker itemcode"
         else:
             item_code = track_meta['id']
             track_type = "track"
-            
+                        
         # create the track object
         track = Resources.Track(item_code)
         track.type = track_type
@@ -190,6 +190,10 @@ class ReleaseProcessor(Processor):
         track.track_num = audio_file.track_num.value
         track.obscenity = audio_file.kexp.obscenity.value
         track.primary_genre = audio_file.kexp.primary_genre.value
+
+        #####################################
+        # NEED TO ADD RADIO EDIT INFORMATION
+        #####################################
         
         # get the secondary category
         cat = None
