@@ -38,6 +38,7 @@ Walks a directory structure of audio files and does the following:
     
     - Melly  
     - CD Library
+    - Hitters
       
  * *--category, -c*   
     Passes in the category of audio files, to be recorded in XML.
@@ -75,6 +76,9 @@ Walks a directory structure of audio files and does the following:
     
   * *--mbhost*
     Specify a host server other than musicbrainz.org
+    
+  * *--gen_item_code, -i*
+    Generate a new unique item code for all audio files.
       
 ######To Run
 

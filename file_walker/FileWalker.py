@@ -126,7 +126,7 @@ def process_directory(source_dir, output_dir, batch_meta, generate, server, seri
                             track_data['kexp_obscenity_rating'] = kexp_obscenity_rating
                             
                             # If this is a radio edit, assign a unique track id so we can also have a non-radio edit with the same MBID
-                            if kexp_obscenity_rating.upper() == "RADIO EDIT":
+                            if batch_meta["item_code"]:
                                 item_code = str(UUID.uuid4())
                                 track_type = str("track-with-filewalker-GUID")
                             else:
@@ -321,7 +321,7 @@ def main():
                "pop": "Rock/Pop", "rock/pop": "Rock/Pop", "roo": "Roots", "roots": "Roots",
                "rot": "Rotation", "rotation": "Rotation", "sho": "Shows Around Town", "shows around town": "Shows Around Town",
                "sou": "Soundtracks", "soundtracks": "Soundtracks", "wor": "World", "world": "World",
-               "cd library": "CD Library", "melly": "Melly",
+               "cd library": "CD Library", "melly": "Melly", "hitters": "Hitters",
                "heavy": "Heavy", "library": "Library", "light": "Light", "medium": "Medium", "r/n": "R/N"}
                
     parser = argparse.ArgumentParser(description='Get metadata from files.')
@@ -329,7 +329,7 @@ def main():
     parser.add_argument('output_directory', help="Directory to store output files. MUST ALREADY EXIST for now.")
     parser.add_argument('-d', '--delete', default=False, const=True, nargs='?', help="Delete audio files from input_directory after processing")
     parser.add_argument('-c', '--category', type=str.casefold, choices=["recent acquisitions", "acq", "electronic", "ele", "experimental", "exp", "hip hop", "hip", "jaz", "jazz", "live on kexp", "liv", "local", "reggae", "reg", "rock", "pop", "rock/pop", "roc", "roots", "roo", "rotation", "rot", "shows around town", "sho", "soundtracks", "sou", "world", "wor"], help="Category or genre of releases being filewalked")
-    parser.add_argument('-s', '--source', type=str.casefold, choices=["cd library", "melly"], help="KEXPSource value - Melly or CD Library")
+    parser.add_argument('-s', '--source', type=str.casefold, choices=["cd library", "melly", "hitters"], help="KEXPSource value - Melly or CD Library")
     parser.add_argument('-r', '--rotation', type=str.casefold, choices=["heavy", "library", "light", "medium", "r/n"], help="Rotation workflow value")
     parser.add_argument('-l', '--local', type=str.casefold, default='musicbrainz.org', const='musicbrainz.kexp.org:5000',
                         help="Switch server to retrieve MusicBrainz metadata. Options are \'musicbrainz.org\' (default) and \'musicbrainz.kexp.org:5000\' (with flag)",
@@ -337,6 +337,7 @@ def main():
     parser.add_argument('--mbhost', type=str.casefold,
                         help="Specify the server to retrieve MusicBrainz data from. Default is musicbrainz.org; default --server option is http://musicbrainz.kexp.org:5000/; another server can be manually specified")
     parser.add_argument('-g', '--generate', default=False, const=True, nargs='?')
+    parser.add_argument('-i', '--gen_item_code', default=False, const=True, nargs='?', help='Generate a unique item code for all audio files.')
     
     args = parser.parse_args()
         
@@ -346,6 +347,7 @@ def main():
     batch_meta["category"] = options[args.category] if args.category != None else ""
     batch_meta["rotation"] = options[args.rotation] if args.rotation != None else ""
     batch_meta["source"] = options[args.source] if args.source != None else ""
+    batch_meta['item_code'] = args.gen_item_code
         
     process_directory(args.input_directory, args.output_directory, batch_meta, args.generate, server, DaletSerializer, args.delete)
 
