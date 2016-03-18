@@ -26,6 +26,7 @@ class AudioFile(object):
         #   i think this way only helps this class, and this class
         #   is allowed to be messy internally
         ############################
+        self.file_name = file_name
         self.mbid, self.album, self.album_artist, self.release_date, self.title, self.artist = None, None, None, None, None, None
         self.disc_num, self.track_num, self.length = None, None, None
         self.kexp = None
@@ -162,7 +163,38 @@ class AudioFile(object):
             self.__save_tag__(self.kexp.obscenity)
             
         self.audio.save()
+        
+    def __iter__(self):
+        it = AudioFileIterator(self)
+        return it
+        
+        
+class AudioFileIterator():
 
+    ordering = ["MBID", "Album", "Album Artist", "Disc Num", "Release Date", "Track Num", "Title", "Artist", "Length", "KEXPFCCOBSCENITYRATING"]
+
+    def __init__(self, audiofile):
+        self.as_dict = {"MBID": audiofile.mbid, "Album": audiofile.album, "Album Artist": audiofile.album_artist, \
+                        "Release Date": audiofile.release_date, "Title": audiofile.title, "Artist": audiofile.artist, \
+                        "Disc Num": audiofile.disc_num, "Track Num": audiofile.track_num, "Length": audiofile.length}
+                        
+        if audiofile.kexp:
+            self.as_dict["Primary Genre"] = audiofile.kexp.primary_genre
+            self.as_dict["KEXPFCCOBSCENITYRATING"] = audiofile.kexp.obscenity
+                
+        self.index = 0
+                
+    
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.index >= len(self.ordering):
+            raise StopIteration
+        key = self.ordering[self.index]
+        next = (key, self.as_dict[key])
+        self.index += 1
+        return next
 
 
 class KEXP(object):

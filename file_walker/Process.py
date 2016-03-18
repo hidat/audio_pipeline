@@ -1,6 +1,7 @@
 from util import MBInfo
 from file_walker import Resources
 from file_walker import Util
+import uuid as UUID
 
 class Processor(object):
     mb = None       # MBInfo object shared between Process objects
@@ -150,7 +151,7 @@ class ReleaseProcessor(Processor):
         
         # if generating unique item codes, do that
         track_type = ''
-        if Resources.batch_constants.gen_item_code:
+        if Resources.BatchConstants.gen_item_code:
             item_code = str(UUID.uuid4())
             track_type = "track with filewalker itemcode"
         else:

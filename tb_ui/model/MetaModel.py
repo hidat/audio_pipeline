@@ -2,7 +2,7 @@
 # Read in metadata relevant to human comparison with physical disc media info
 import os
 import mutagen
-import audio_pipeline.util.AudioFile as AudioFile
+from util import AudioFile
 
 
 class process_directory:
@@ -45,7 +45,6 @@ class process_directory:
                     break
                 if next:
                     break
-
         
         meta = self.get_meta(next_release)
         return meta
@@ -92,9 +91,9 @@ class process_directory:
 
             self.current_releases.clear()
             
-            releases_index = {}
-            releases = []
-            i = 0
+            releases_index = {0: set([])}
+            releases = [{}]
+            i = 1
             
             for item in files:
                 file = os.path.join(release_dir, item)
@@ -108,24 +107,30 @@ class process_directory:
                     continue
                 # else blow up.
                 
-                new_release = True
-                for index, release in releases_index.items():
-                    if (file_data.mbid > '' and file_data.mbid in release) or \
-                       (file_data.album in release and file_data.album_artist in release and \
-                        file_data.release_date in release):
-                        
-                        # there's already a list of AudioFiles for this release; add file_data to that list
-                        releases[index][file] = file_data
-                        new_release = False
-                        break
-                        
-                if new_release:
-                    # create a new release list & put release metadata in the release_index list
-                    # to check future files
-                    releases.append({file: file_data})
-                    releases_index[i] = set([file_data.mbid, file_data.album, \
-                                             file_data.album_artist, file_data.release_date])
-                    i += 1
+                
+                # if we have no release-identifying metadata in the audio_file, put file in index 0 (general / unknown files)
+                if file_data.mbid.value <= '' and file_data.album_artist.value <= '' and file_data.album.value <= '':
+                   releases[0][file] = file_data
+                
+                else:
+                    new_release = True
+                    for index, release in releases_index.items():
+                        if (file_data.mbid.value > '' and file_data.mbid.value in release) or \
+                           (file_data.album.value in release and file_data.album_artist.value in release and \
+                            file_data.release_date.value in release):
+                            
+                            # there's already a list of AudioFiles for this release; add file_data to that list
+                            releases[index][file] = file_data
+                            new_release = False
+                            break
+                            
+                    if new_release:
+                        # create a new release list & put release metadata in the release_index list
+                        # to check future files
+                        releases.append({file: file_data})
+                        releases_index[i] = set([file_data.mbid.value, file_data.album.value, \
+                                                 file_data.album_artist.value, file_data.release_date.value])
+                        i += 1
                     
             self.current_releases = releases
             

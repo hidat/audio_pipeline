@@ -103,7 +103,6 @@ class TagVorbisString(TagFormat):
         if val:
             val = str(tags[self.name][0])
         else:
-            print(val)
             val = ''
         return val
        
@@ -262,10 +261,8 @@ class Format(object):
     def mbid(cls, tags):
         if cls._mbid.name in tags:
             return cls._mbid.make_tag(tags, True)
-        elif cls._mbid_p.name in tags:
-            return cls._mbid_p.make_tag(tags, True)
         else:
-            return None
+            return cls._mbid_p.make_tag(tags, True)
             
     @classmethod
     def album(cls, tags):

@@ -1,7 +1,66 @@
-class MetaFrame(tk.Frame):
+import view.Settings as Settings
+
+class TrackFrame(tk.Frame):
     
-    def __init__(self, release_info, track_info, master=None):
+    def __init__(self, master=None):
+        tk.Frame.__init__(self, master, bg=Settings.bg_color)
         
+        self.track_attributes = {}
+        
+    def display_meta(self, metadata, padding=True):
+        self.track_attributes.clear()
+        
+        if padding:
+            padding_label = tk.Label(self, text="        ", bg=bg_color)
+            padding_label.grid(row=0, column=0)
+            rowval = 1
+            colval = 1
+        else:
+            rowval = 0
+            colval = 0
+
+        # sort track file names by tracknum (?)
+        keys = list(metadata.keys()
+        keys.sort()
+
+        for name in keys:
+            track = metadata[name]
+            self.track_attributes[name] = {}
+
+            color = Settings.text_color
+            if "KEXPFCCOBSCENITYRATING" in track.keys():
+                obscenity = track["KEXPFCCOBSCENITYRATING"].casefold()
+                if obscenity == "yellow dot":
+                    color = yellow
+                elif obscenity == "red dot":
+                    color = red
+
+            for tag, value in metadata:
+                if not value.release:
+                    self.track_attributes[name][tag] = tk.Label(self, text=value.value, anchor="nw", fg=color, bg=Settings.bg_color)
+                    self.track_attributes[name][tag].grid(row=rowval, column=colval, sticky="w", padx=10, pady=5)
+                    colval += 1
+            rowval += 1
+            colval = 1
+            
+    def update_track(self, name, meta):
+        for key in track_categories:
+            value=""
+            if key in meta.keys():
+                value = str(meta[key])
+                self.track_attributes[name][key].config(text=value)
+            elif key in self.track_attributes[name].keys():
+                self.track_attributes[name][key].config(text="")
+            if "KEXPFCCOBSCENITYRATING" in meta.keys():
+                obscenity = meta["KEXPFCCOBSCENITYRATING"].casefold()
+                if obscenity == "yellow dot":
+                    color = yellow
+                elif obscenity == "red dot":
+                    color = red
+                self.track_attributes[name][key].config(fg=color)
+            else:
+                self.track_attributes[name][key].config(fg=text_color)
+
 class MetaFrame(tk.Frame):
 
     def __init__(self, release_info, track_info, master=None):

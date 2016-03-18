@@ -56,7 +56,7 @@ class ProcessLog:
             self.save_log(self.log_file, log_text)
         with open(self.log_file, 'ab') as file:
             for member in group_members:
-                if member.item_code not in artists:
+                if member.item_code not in self.artists:
                     log_text = str(member.glossary_type) + "\t" + str(member.item_code) + '\t' + str(member.title) + '\r\n'
                     file.write(log_text.encode('UTF-8'))
                     

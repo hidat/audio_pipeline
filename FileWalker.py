@@ -1,5 +1,5 @@
 import os
-import Settings as Settings
+import Settings
 from util import MBInfo
 from util import AudioFile
 from file_walker import Process as Processor
@@ -176,7 +176,7 @@ def main():
                "pop": "Rock/Pop", "rock/pop": "Rock/Pop", "roo": "Roots", "roots": "Roots",
                "rot": "Rotation", "rotation": "Rotation", "sho": "Shows Around Town", "shows around town": "Shows Around Town",
                "sou": "Soundtracks", "soundtracks": "Soundtracks", "wor": "World", "world": "World",
-               "cd library": "CD Library", "melly": "Melly",
+               "cd library": "CD Library", "melly": "Melly", "hitters": "Hitters",
                "heavy": "Heavy", "library": "Library", "light": "Light", "medium": "Medium", "r/n": "R/N"}
                
     parser = argparse.ArgumentParser(description='Get metadata from files.')
@@ -192,7 +192,7 @@ def main():
     parser.add_argument('--mbhost', type=str.casefold,
                         help="Specify the server to retrieve MusicBrainz data from. Default is musicbrainz.org; default --server option is http://musicbrainz.kexp.org:5000/; another server can be manually specified")
     parser.add_argument('-g', '--generate', default=False, const=True, nargs='?')
-    parser.add_argument('-i', '--gen-item-code', default=False, const=True, nargs='?')
+    parser.add_argument('-i', '--gen_item_code', default=False, const=True, nargs='?', help="Generate a unique item code for all audio files")
     
     args = parser.parse_args()
         
@@ -202,7 +202,7 @@ def main():
     batch_constants.rotation = options[args.rotation] if args.rotation != None else ""
     batch_constants.source = options[args.source] if args.source != None else ""
     
-    batch_constants.gen_item_code = args.gen-item-code
+    batch_constants.gen_item_code = args.gen_item_code
     batch_constants.generate = args.generate
     batch_constants.delete = args.delete
     batch_constants.local_server = args.local

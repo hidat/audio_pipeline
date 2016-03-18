@@ -1,14 +1,26 @@
-import audio_pipeline.tb_ui.model.MetaModel as MetaModel
-import audio_pipeline.tb_ui.view.MetaView as MetaView
+import tb_ui.model.MetaModel as MetaModel
+import tb_ui.view.MetaView as MetaView
 import sys
 import re
 
-tracknum_acc = "track_num"
-meta_acc = "meta"
-command_acc = "command"
+class InputPatterns():
+    tracknum_acc = "track_num"
+    meta_acc = "meta"
+    command_acc = "command"
 
-track_meta_pattern = re.compile('(?P<' + tracknum_acc + '>(((\d+((,)|(\s))*)+)|(\s*all)))\s*(?P<' + meta_acc + '>.+)')
-command_pattern = re.compile('(?P<' + command_acc + '>.+)')
+    track_meta_pattern = re.compile('(?P<' + tracknum_acc + '>(((\d+((,)|(\s))*)+)|(\s*all)))\s*(?P<' + meta_acc + '>.+)')
+    command_pattern = re.compile('(?P<' + command_acc + '>.+)')
+    
+    prev_pattern = re.compile("\s*p(rev)?.*", flags=re.I)
+    next_pattern = re.compile("\s*n(ext)?", flags=re.I)
+    done_pattern = re.compile("\s*d+(one)?", flags=re.I)
+    help_pattern = re.compile("\s*h(elp)?", flags=re.I)
+    
+    yellow_dot = re.compile("\s*y(ellow)?\s*(dot)?", flags=re.I)
+    red_dot = re.compile("\s*r(ed)?\s*(dot)?", flags=re.I)
+    rm_rating = re.compile("\s*c(lear)?", flags=re.I)
+
+
 
 class MetaController:
 
@@ -34,12 +46,12 @@ class MetaController:
         Process the user-inputted metadata
         """
         input_string = self.base_frame.get_input()
-        match = track_meta_pattern.match(input_string)
+        match = input_patterns.track_meta_pattern.match(input_string)
         if match:
             # we (probably) have a track metadata match (currently only RED DOT, YELLOW DOT)
             # process it accordingly
             try:
-                track_nums = match.group(tracknum_acc)
+                track_nums = match.group(input_patterns.tracknum_acc)
                 if re.search("all", track_nums):
                     track_nums = self.meta_model.current_tracks.keys()
                 else:
