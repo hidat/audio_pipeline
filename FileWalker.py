@@ -1,27 +1,17 @@
 import os
-import Settings
+from . import Settings
 from util import MBInfo
 from util import AudioFile
 from file_walker import Process as Processor
 from file_walker.Resources import BatchConstants as batch_constants
 import serializers
 import argparse
-import mutagen
 import shutil
-import csv
 import hashlib
-import uuid as UUID
-import sys
-import datetime
 
 
 def process_directory(source_dir, output_dir, serializer):
-    cached_mb_releases = {}
-    unique_artists = {}
-    unique_labels = set([])
-    current_release_id = ''
-    
-    # If copying audio (not just generating metadata), 
+    # If copying audio (not just generating metadata),
     # get the locations that audio files will be copied to
     track_dir, track_success_dir, track_fail_dir = '', '', ''
     if not batch_constants.generate:
@@ -72,8 +62,7 @@ def process_directory(source_dir, output_dir, serializer):
 
                                 # serialize the release
                                 serializer.save_release(release)
-                                
-                            
+
                             # Serialize track metadata
                             track = release_meta.get_track(audio_file)
                             serializer.save_track(release, track)
@@ -108,7 +97,6 @@ def process_directory(source_dir, output_dir, serializer):
                             print("    ERROR: Invalid characters!")
                             copy_to_path = os.path.join(track_fail_dir, path)
 
-                
                     with open(hash_file, 'w+') as hash_file_d:
                         hash_file_d.write(ascii(file_name))
 
@@ -131,7 +119,8 @@ def process_directory(source_dir, output_dir, serializer):
                     shutil.move(file_name, target)
                 else:
                     shutil.copy(file_name, target)
-                        
+
+
 def audio_directories(output_dir):
     track_dir = os.path.join(output_dir, 'track')
     if not os.path.exists(track_dir):

@@ -1,4 +1,4 @@
-import audio_pipeline.tb_ui.controller as TB
+import tb_ui.controller as TB
 import sys
 
 def main():
@@ -6,9 +6,9 @@ def main():
     if len(sys.argv) >= 2:
         directory = sys.argv[1]
                 
-    controller = TB.MetaController.MetaController(directory)
+    controller = TB.MetaControl.MetaController(directory)
     
-    controller.base_frame.mainloop()
+    controller.app.mainloop()
 
 
 if __name__ == "__main__":
