@@ -5,7 +5,7 @@ import mutagen
 from util import AudioFile
 
 
-class process_directory:
+class ProcessDirectory(object):
     def __init__(self, src_dir):
         # Create a new process_directory item, which finds all directories
         # in the specified directory (one layer)
@@ -21,15 +21,20 @@ class process_directory:
                 self.releases.append(item)
         
         self.releases.sort()
-        
-        self.current_releases = {}
-                
-        if len(self.releases) > 0:
-            self.cur_index = -1
-        else:
-            self.cur_index = None
+
+        self.current_releases = []
+        self.current_release = []
+
+        self.cur_release_index = -1
+        self.cur_index = -1
     
     def get_next(self):
+
+        if self.cur_release_index >= 0 and self.cur_release_index + 1 < len(self.current_releases):
+            self.cur_release_index += 1
+            self.current_release = self.current_releases[self.cur_release_index]
+            return self.current_release
+
         # get index of next release
         next_release = self.cur_index
         if self.cur_index is not None and ((self.cur_index + 1) < len(self.releases)):
@@ -50,6 +55,11 @@ class process_directory:
         return meta
         
     def get_prev(self):
+        if 0 < self.cur_release_index < len(self.current_releases):
+            self.cur_release_index -= 1
+            self.current_release = self.current_releases[self.cur_release_index]
+            return self.current_release
+
         # get index of previous release
         prev_release = self.cur_index
         if self.cur_index is not None and ((self.cur_index - 1) >= 0):
@@ -66,11 +76,9 @@ class process_directory:
                 if next:
                     break
 
-        
         meta = self.get_meta(prev_release)
         return meta
-            
-    
+
     def get_meta(self, release_index):
         """
         Get the relevent metadata for the specified release
@@ -78,8 +86,7 @@ class process_directory:
         :param release_index: The index of the desired directory in the directory list
         :return: List of lists of audio files. Each list corresponds to one release.
         """
-        # Right now we're just gonna assume that The Info Is Good
-        if release_index >= 0 and release_index < len(self.releases):
+        if 0 <= release_index < len(self.releases):
             release_dir = self.releases[release_index]
         else:
             return None
@@ -92,7 +99,7 @@ class process_directory:
             self.current_releases.clear()
             
             releases_index = {0: set([])}
-            releases = [{}]
+            releases = [[]]
             i = 1
             
             for item in files:
@@ -102,15 +109,14 @@ class process_directory:
                 except IOError as e:
                     print("Mutagen IO error")
                     continue
-                except AudioTag.UnsupportedFiletypeError as e:
+                except AudioFile.UnsupportedFiletypeError as e:
                     print("Unsupported filetype")
                     continue
                 # else blow up.
-                
-                
+
                 # if we have no release-identifying metadata in the audio_file, put file in index 0 (general / unknown files)
                 if file_data.mbid.value <= '' and file_data.album_artist.value <= '' and file_data.album.value <= '':
-                   releases[0][file] = file_data
+                   releases[0].append(file_data)
                 
                 else:
                     new_release = True
@@ -120,22 +126,34 @@ class process_directory:
                             file_data.release_date.value in release):
                             
                             # there's already a list of AudioFiles for this release; add file_data to that list
-                            releases[index][file] = file_data
+                            releases[index].append(file_data)
                             new_release = False
                             break
                             
                     if new_release:
                         # create a new release list & put release metadata in the release_index list
                         # to check future files
-                        releases.append({file: file_data})
+                        releases.append([file_data])
                         releases_index[i] = set([file_data.mbid.value, file_data.album.value, \
                                                  file_data.album_artist.value, file_data.release_date.value])
                         i += 1
-                    
-            self.current_releases = releases
-            
-        return self.current_releases
-        
+
+            if len(releases[0]) <= 0:
+                releases.pop(0)
+
+            self.current_releases = [sorted(release, key=lambda x: x.track_num.value) for release in releases]
+            self.cur_release_index = 0
+
+            self.current_release = self.current_releases[self.cur_release_index]
+            return self.current_release
+
+    def track_nums(self):
+        tracknums = set([])
+        for audio_file in self.current_release:
+            tracknums.add(audio_file.track_num.value)
+
+        return tracknums
+
     def update_metadata(self, file_name):
         """
         Save changes to metadata of file_name
@@ -158,10 +176,11 @@ class process_directory:
             
         return success
 
-        
     def has_next(self):
-        next = False
-        if self.cur_index is not None and ((self.cur_index + 1) < len(self.releases)):
+        has_next = False
+        if self.cur_release_index >= 0 and self.cur_release_index+1 < len(self.current_releases):
+            has_next = True
+        elif self.cur_index is not None and ((self.cur_index + 1) < len(self.releases)):
             for i in range(self.cur_index+1, len(self.releases)):
                 files = os.listdir(self.releases[i])
                 # it's not pretty, but:
@@ -175,17 +194,18 @@ class process_directory:
                         af = AudioFile.AudioFile(file)
                     except IOError or AudioFile.UnsupportedFiletypeError:
                         continue
-                    next = True
+                    has_next = True
                     break
-                if next:
+                if has_next:
                     break
                     
-        return next
-
+        return has_next
 
     def has_prev(self):
-        next = False
-        if self.cur_index is not None and ((self.cur_index - 1) >= 0):
+        has_next = False
+        if self.cur_release_index > 0 and self.cur_release_index < len(self.current_releases):
+            has_next = True
+        elif self.cur_index is not None and ((self.cur_index - 1) >= 0):
             for i in reversed(range(0, self.cur_index)):
                 files = os.listdir(self.releases[i])
                 
@@ -195,9 +215,9 @@ class process_directory:
                         af = AudioFile.AudioFile(file)
                     except IOError or AudioFile.UnsupportedFiletypeError:
                         continue
-                    next = True
+                    has_next = True
                     break
-                if next:
+                if has_next:
                     break
 
-        return next
+        return has_next
