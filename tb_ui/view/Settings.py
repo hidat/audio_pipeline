@@ -1,3 +1,9 @@
+class Command:
+    def __init__(self, command, help, examples=[]):
+        self.command = command
+        self.help = help
+        self.examples = examples
+
 
 bg_color = "black"
 text_color = "light gray"
@@ -15,10 +21,11 @@ commands = [Command("<track_num>[[,][ ]<track_num>...][ ]<meta_command>", "Add t
               Command("d[one]", "Close this application."),
               Command("n[ext]", "Display metadata of next album"),
               Command("p[[rev]ious]", "Display metadata of previous album")]
-              
-    
-class Command:
-    def __init__(self, command, help, examples=None):
-        self.command = command
-        self.help = help
-        self.examples = examples
+
+def get_text_color(audio_file):
+    color = text_color
+    if audio_file.kexp.obscenity.value == 'YELLOW DOT':
+        color = yellow
+    elif audio_file.kexp.obscenity.value == 'RED DOT':
+        color = red
+    return color

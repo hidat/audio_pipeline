@@ -1,3 +1,6 @@
+import tkinter as tk
+import tkinter.filedialog as filedialog
+
 class DialogBox(tk.Toplevel):
 
     def __init__(self, message, buttons=None, dimensions=(100,75), cancel=False, title=None, master=None):
@@ -5,7 +8,7 @@ class DialogBox(tk.Toplevel):
         Create a dialog popup box containing the specified message string and button options.
         
         :param message: string message to display in popup
-        :param buttons: List of button directories; each button directory must contain
+        :param buttons: List of button dictionaries; each button dictionary must contain
                         {"name": name, "command": command}
         """
         tk.Toplevel.__init__(self, master, width=dimensions[0], height=dimensions[1])
@@ -34,9 +37,10 @@ class DialogBox(tk.Toplevel):
         
         for i in range(0, len(buttons)):
             button = buttons[i]
-            if not "command" in button.keys() or not button["command"]:
-                button["command"] = self.cancel
-            but = tk.Button(box, text=button["name"], command=lambda x=button["command"]: self.apply(x))
+            if button["command"]:
+                but = tk.Button(box, text=button["name"], command=lambda x=button["command"]: self.apply(x))
+            else:
+                but = tk.Button(box, text=button["name"], command=self.cancel)
             if i == 0:
                 but.focus_set()
                 
@@ -52,16 +56,19 @@ class DialogBox(tk.Toplevel):
 
     def cancel(self):
         self.destroy()
-        
+
+
 def choose_dir(directory_selector, master=None, initial_dir="\\"):
     directory_name = filedialog.askdirectory(title="fialog", parent=master, initialdir=initial_dir, mustexist=True)
     directory_selector(directory_name)
-    
+
+
 def quit_message(message, quit_command, parent=None):
     quit_display = DialogBox(message, master=parent)
     buttons = [{"name": "Close", "command": quit_command}, {"name": "Cancel", "command": quit_display.cancel}]
     quit_display.button_box(buttons)
-    
+
+
 def err_message(message, ok_command, parent=None, quit=False):
     err_display = DialogBox(message, master=parent)
     buttons = [{"name": "OK", "command": ok_command}]

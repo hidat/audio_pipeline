@@ -1,7 +1,4 @@
 import tkinter as tk
-import tkinter.filedialog as filedialog
-from Util import *
-
 
 class AppFrame(tk.Frame):
 

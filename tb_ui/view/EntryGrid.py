@@ -19,7 +19,6 @@ class MetaGrid(tk.Grid):
         self.forbidden_columns = forbidden_columns
         self.curr_pos = self.start
         
-        
     def editnotify(self, x, y):
         # make a map of position -> (track, metadata) for use here
         
@@ -37,7 +36,6 @@ class MetaGrid(tk.Grid):
         else:
             return True
             
-            
     def tab_press(self, event):
         # (possibly) update metadata 
         pos = self.curr_pos
@@ -54,7 +52,6 @@ class MetaGrid(tk.Grid):
             self.tab_press_innards()
             
         return "break"
-        
         
     def enter_press(self, event):
         # (possibly) update metadata
@@ -90,7 +87,6 @@ class MetaGrid(tk.Grid):
         if self.curr_pos:
             self.set_curr_cell()
             
-            
     def enter_press_innards(self):
         if self.curr_pos == self.final:
             # call the psased 'final' method
@@ -107,7 +103,6 @@ class MetaGrid(tk.Grid):
         if self.curr_pos:
             self.set_curr_cell()
             
-            
     def set_curr_cell(self):
         self.anchor_set(self.curr_pos[0], self.curr_pos[1])
         self.edit_set(self.curr_pos[0], self.curr_pos[1])
@@ -115,28 +110,31 @@ class MetaGrid(tk.Grid):
         
 class MetaEntry():
 
-    def __init__(self, release_meta, track_meta, master=None, *args, **kwargs):
+    def __init__(self, tracks, master=None):
         """
         :param release: Current release metadata
         :param track_meta: Current track metadata
                            Dictionary of track filename -> (tag name-> tag)
         """
-        # tk.Toplevel.__init__(self, *args, **kwargs)
-        # self.title("Metadata Entry Friend")
-        self.release_meta = release_meta
-        self.tracks = sorted(track_meta, key=lambda track: track_meta[track]['track_num'])
-        self.track_meta = track_meta
+        tk.TopLevel.__init__(self)
+        self.title("Metadata Entry Friend")
+        self.tracks = tracks
+        self.release = {key: value for key, value in tracks[0] if value.release}
+
         self.release_update = dict.fromkeys(self.release_meta.keys(), None)
         self.track_update = {}
         for key, val in self.track_meta.items():
             self.track_update[key] = dict.fromkeys(val, None)
-        
-        # set up the release grid
-        self.release_grid = MetaGrid(update_command=self.update_release, last_command=self.release_end, 
-                                    start_index=(0, 1), forbidden_rows = [0], forbidden_columns=[], 
-                                    master=master, name="release_grid", width=len(release_categories),
-                                    height=2, selectunit="cell")
-        
+
+        # set up grid for the release metadata
+        self.release_grid = MetaGrid(update_command=self.update_release, last_command=self.release_end,
+                                     start_index=(0, 1), forbidden_rows = [0], forbidden_columns=[],
+                                     master=self, name="release_grid", width=len(self.release),
+                                     height=2, selectunit="cell")
+
+        for item in self.release:
+            col =
+
         for item in release_categories:
             col = release_categories.index(item)
             if item == "album_artist":

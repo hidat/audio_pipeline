@@ -1,174 +1,122 @@
-import view.Settings as Settings
+from . import Settings
+import tkinter as tk
+
+class ReleaseFrame(tk.Frame):
+    def __init__(self, master=None):
+        """
+        A frame to display metadata information
+
+        :param master: Frame's master
+        :return:
+        """
+        self.master = master
+
+        tk.Frame.__init__(self, master, bg=Settings.bg_color)
+        self.attributes = {}
+        self.labels = {}
+
+    def display_meta(self, metadata):
+        """
+        Display metadata
+
+        :param metadata: A list of [audiofiles] to display the metadata of
+        :return:
+        """
+        self.clear()
+        self.attributes.clear()
+        release = metadata[0]
+
+        rowval = 0
+        colval = 0
+
+        for name, tag in release:
+            if tag.release:
+                if name not in self.labels:
+                    self.labels[name] = tk.Label(self, text=name, anchor="nw", fg=Settings.text_color, bg=Settings.bg_color)
+                    self.labels[name].grid(row=rowval, column=colval, sticky="w", padx=10, pady=5)
+                rowval += 1
+                self.attributes[name] = tk.Label(self, text=tag.value, anchor="nw", fg=Settings.text_color, bg=Settings.bg_color)
+                self.attributes[name].grid(row=rowval, column=colval, sticky="w", padx=10, pady=3)
+                colval += 1
+                rowval = 0
+
+    def update(self, audio_file):
+        for tag, value in audio_file:
+            if tag.release:
+                self.attributes[tag].config(text=value.value, fg=Settings.text_color)
+
+    def clear(self):
+        print(self.attributes)
+        for name, label in self.attributes.items():
+            label.destroy()
+
+    def close(self):
+        self.destroy()
 
 class TrackFrame(tk.Frame):
     
     def __init__(self, master=None):
+        """
+        A frame to display track metadata
+
+        :param master: God king of this frame
+        :return:
+        """
+        self.master = master
         tk.Frame.__init__(self, master, bg=Settings.bg_color)
-        
-        self.track_attributes = {}
-        
-    def display_meta(self, metadata, padding=True):
-        self.track_attributes.clear()
-        
-        if padding:
-            padding_label = tk.Label(self, text="        ", bg=bg_color)
-            padding_label.grid(row=0, column=0)
-            rowval = 1
-            colval = 1
-        else:
-            rowval = 0
-            colval = 0
+        self.attributes = {}
+        self.labels = {}
 
-        # sort track file names by tracknum (?)
-        keys = list(metadata.keys()
-        keys.sort()
+    def display_meta(self, metadata):
+        self.clear()
+        self.attributes.clear()
+        bg_color = Settings.bg_color
 
-        for name in keys:
-            track = metadata[name]
-            self.track_attributes[name] = {}
+        padding_label = tk.Label(self, text="        ", bg=bg_color)
+        padding_label.grid(row=0, column=0)
+        rowval = 0
+        colval = 1
 
-            color = Settings.text_color
-            if "KEXPFCCOBSCENITYRATING" in track.keys():
-                obscenity = track["KEXPFCCOBSCENITYRATING"].casefold()
-                if obscenity == "yellow dot":
-                    color = yellow
-                elif obscenity == "red dot":
-                    color = red
+        # Model will give us a list of audio_files already sorted by tracknum
 
-            for tag, value in metadata:
+        if not len(self.labels) > 0:
+            for tag, value in metadata[0]:
                 if not value.release:
-                    self.track_attributes[name][tag] = tk.Label(self, text=value.value, anchor="nw", fg=color, bg=Settings.bg_color)
-                    self.track_attributes[name][tag].grid(row=rowval, column=colval, sticky="w", padx=10, pady=5)
+                    self.labels[tag] = tk.Label(self, text=tag, anchor="nw", fg=Settings.text_color, bg=Settings.bg_color)
+                    self.labels[tag].grid(row=rowval, column = colval, sticky="w", padx=10, pady=5)
+                    colval += 1
+
+        colval = 1
+        rowval = 1
+
+        for track in metadata:
+            name = track.file_name
+            self.attributes[name] = {}
+
+            color = Settings.get_text_color(track)
+
+            for tag, value in track:
+                if not value.release:
+                    self.attributes[name][tag] = tk.Label(self, text=value.value, anchor="nw", fg=color, bg=bg_color)
+                    self.attributes[name][tag].grid(row=rowval, column=colval, sticky="w", padx=10, pady=3)
                     colval += 1
             rowval += 1
             colval = 1
-            
-    def update_track(self, name, meta):
-        for key in track_categories:
-            value=""
-            if key in meta.keys():
-                value = str(meta[key])
-                self.track_attributes[name][key].config(text=value)
-            elif key in self.track_attributes[name].keys():
-                self.track_attributes[name][key].config(text="")
-            if "KEXPFCCOBSCENITYRATING" in meta.keys():
-                obscenity = meta["KEXPFCCOBSCENITYRATING"].casefold()
-                if obscenity == "yellow dot":
-                    color = yellow
-                elif obscenity == "red dot":
-                    color = red
-                self.track_attributes[name][key].config(fg=color)
-            else:
-                self.track_attributes[name][key].config(fg=text_color)
 
-class MetaFrame(tk.Frame):
+    def clear(self):
+        for file, tags in self.attributes.items():
+            for name, label in tags.items():
+                label.destroy()
 
-    def __init__(self, release_info, track_info, master=None):
-        tk.Frame.__init__(self, master, bg=bg_color)
+    def update(self, audio_file):
+        name = audio_file.file_name
+        color = Settings.get_text_color(audio_file)
+        for tag, value in audio_file:
+            if not value.release:
+                if value.value:
+                    self.attributes[name][tag].config(text=value.value, fg=color)
+                else:
+                    self.attributes[name][tag].config(text="", fg=color)
 
-        self.release_frame = tk.Frame(self, bg=bg_color)
-        self.track_frame = tk.Frame(self, bg=bg_color)
-        self.input_frame = tk.Frame(self, bg=bg_color)
-        
-        self.release_frame.grid(row=0, column=0, sticky="w", padx=10, pady=5)
-        self.track_frame.grid(row=1, column=0, sticky="e", padx=10, pady=5)
-        self.input_frame.grid(row=2, column=0, sticky="w", padx=10, pady=5)
-
-        release_attribute_labels = []
-        self.release_attributes = {}
-        colval = 0
-        for value in release_categories:
-            index = release_categories.index(value)
-            value = str(value)
-            release_attribute_label = tk.Label(self.release_frame, fg=text_color, font=heading, 
-                                                 bg=bg_color, text=release_mapping[value])
-            release_attribute_labels.append(release_attribute_label)
-            release_attribute_labels[index].grid(row=0, column=colval, sticky="w", padx=10, pady=5)
-            colval += 1
-
-        self.display_release(release_info)
-
-        track_attribute_labels = []
-        self.track_attributes = {}
-        colval = 1
-        for value in track_categories:
-            index = track_categories.index(value)
-            value = str(value)
-            track_attribute_label = tk.Label(self.track_frame, fg=text_color, font=heading, 
-                                             bg=bg_color, text=track_mapping[value])
-            track_attribute_labels.append(track_attribute_label)
-            track_attribute_labels[index].grid(row=0, column=colval, sticky="w", padx=10, pady=5)
-            colval += 1
-
-        self.display_tracks(track_info)
-
-        self.grid()
-
-    def display_release(self, release_info):
-        rowval = 1
-        colval = 0
-        for key in release_categories:
-            if key in release_info.keys():
-                value = str(release_info[key])
-            else:
-                value = ""
-            self.release_attributes[key] = tk.Label(self.release_frame, text=value, anchor="nw",
-                                                    bg=bg_color, fg=text_color)
-            self.release_attributes[key].grid(row=rowval, column=colval, sticky="w", padx=10, pady=5)
-            colval += 1
-
-    def display_tracks(self, track_info):
-        self.track_attributes.clear()
-
-        padding_label = tk.Label(self.track_frame, text="        ", bg=bg_color)
-        padding_label.grid(row=0, column=0)
-
-        keys = track_info.keys()
-        keys = list(keys)
-        keys.sort()
-
-        rowval = 1
-        colval = 1
-        for name in keys:
-            track = track_info[name]
-            self.track_attributes[name] = {}
-
-            color = text_color
-            if "KEXPFCCOBSCENITYRATING" in track.keys():
-                obscenity = track["KEXPFCCOBSCENITYRATING"].casefold()
-                if obscenity == "yellow dot":
-                    color = yellow
-                elif obscenity == "red dot":
-                    color = red
-
-            for key in track_categories:
-                value = ""
-                if key in track.keys():
-                    value = str(track[key])
-                self.track_attributes[name][key] = tk.Label(self.track_frame, text=value, anchor="nw", fg=color, bg=bg_color)
-                self.track_attributes[name][key].grid(row=rowval, column=colval, sticky="w", padx=10, pady=5)
-                colval += 1
-            rowval += 1
-            colval = 1
-
-    def update_track(self, name, meta):
-        for key in track_categories:
-            value=""
-            if key in meta.keys():
-                value = str(meta[key])
-                self.track_attributes[name][key].config(text=value)
-            elif key in self.track_attributes[name].keys():
-                self.track_attributes[name][key].config(text="")
-            if "KEXPFCCOBSCENITYRATING" in meta.keys():
-                obscenity = meta["KEXPFCCOBSCENITYRATING"].casefold()
-                if obscenity == "yellow dot":
-                    color = yellow
-                elif obscenity == "red dot":
-                    color = red
-                self.track_attributes[name][key].config(fg=color)
-            else:
-                self.track_attributes[name][key].config(fg=text_color)
-                
-    def close_frame(self):
+    def close(self):
         self.destroy()
-        
