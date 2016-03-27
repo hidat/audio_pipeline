@@ -1,7 +1,6 @@
-import os
 import mutagen
 from util import AudioTag
-
+from util import Util
 
 class UnsupportedFiletypeError(Exception):
     def __init__(self, message):
@@ -9,6 +8,20 @@ class UnsupportedFiletypeError(Exception):
         
     def __str(self):
         return str(self.message)
+
+class Length(object):
+
+    def __init__(self, length):
+        """
+        A tag-like class to encapsulate length (which is not a tag)
+        so that it can be treated the same as other tags
+
+        :param length: Length of audio file in seconds
+        :return:
+        """
+        self.value = Util.minutes_seconds(length)
+        self.name = "Length"
+        self.release = False
 
 
 class AudioFile(object):
@@ -69,77 +82,70 @@ class AudioFile(object):
             
             self.kexp = self.KEXP()
                 
-            self.length = self.audio.info.length
-            
+            self.length = Length(self.audio.info.length)
         
     def KEXP(self):
         if not self.kexp:
             self.kexp = KEXP(self.audio, self.format)
             
         return self.kexp
-    
-    
+
     def __save_tag__(self, tag):
         """
         :return: True if self.audio's tags have been changed,
         False otherwise
         """
-        set = False
-    
-        if tag.name in self.audio.tags or tag_value > 0:
+        tag_set = False
+
+        if tag.value:
             tag_value = tag.format()
             self.audio[tag.name] = tag_value
-            set = True
-            
-        return set
+            tag_set = True
+        elif tag.name in self.audio.tags:
+            self.audio.pop(tag.name)
+            tag_set = True
 
+        return tag_set
         
     def save_mbid(self, mbid):
         self.mbid.value = mbid
         self.__save_tag__(self.mbid)
         self.audio.save()
         
-        
     def save_album(self, album):
         self.album.value = album
         self.__save_tag__(self.album)
         self.audio.save()
-        
         
     def save_album_artist(self, album_artist):
         self.album_artist.value = album_artist
         self.__save_tag__(self.album_artist)
         self.audio.save()
         
-        
     def save_release_date(self, release_date):
         self.release_date.value = release_date
         self.__save_tag__(self.release_date)
         self.audio.save()
-        
 
     def save_disc_num(self, disc_num):
         self.disc_num.value = disc_num
         self.__save_tag__(self.disc_num)
         self.audio.save()
-        
        
     def save_track_num(self, track_num):
         self.track_num.value = track_num
-        self.__save_tag__(tag, track_num)
+        self.__save_tag__(self.track_num)
         self.audio.save()
         
     def save_title(self, title):
         self.title.value = title
-        self.__save_tag__(tag, title)
+        self.__save_tag__(self.title)
         self.audio.save()
         
     def save_artist(self, artist):
         self.artist.value = artist
-        self.artist = artist
         self.__save_tag__(self.artist)
         self.audio.save()
-        
 
     def save(self):
         """
@@ -163,7 +169,7 @@ class AudioFile(object):
             self.__save_tag__(self.kexp.obscenity)
             
         self.audio.save()
-        
+
     def __iter__(self):
         it = AudioFileIterator(self)
         return it
@@ -171,7 +177,8 @@ class AudioFile(object):
         
 class AudioFileIterator():
 
-    ordering = ["MBID", "Album", "Album Artist", "Disc Num", "Release Date", "Track Num", "Title", "Artist", "Length", "KEXPFCCOBSCENITYRATING"]
+    ordering = ["Album", "Album Artist", "Disc Num", "Release Date", "Disc Num", "MBID", \
+                "Track Num", "Title", "Artist", "Length", "KEXPFCCOBSCENITYRATING"]
 
     def __init__(self, audiofile):
         self.as_dict = {"MBID": audiofile.mbid, "Album": audiofile.album, "Album Artist": audiofile.album_artist, \
@@ -179,11 +186,10 @@ class AudioFileIterator():
                         "Disc Num": audiofile.disc_num, "Track Num": audiofile.track_num, "Length": audiofile.length}
                         
         if audiofile.kexp:
-            self.as_dict["Primary Genre"] = audiofile.kexp.primary_genre
+            self.as_dict["KEXP Primary Genre"] = audiofile.kexp.primary_genre
             self.as_dict["KEXPFCCOBSCENITYRATING"] = audiofile.kexp.obscenity
                 
         self.index = 0
-                
     
     def __iter__(self):
         return self
@@ -222,16 +228,18 @@ class KEXP(object):
         :return: True if self.audio's tags have been changed,
         False otherwise
         """
-        set = False
-    
-        if tag.name in self.audio.tags or tag_value > 0:
+        tag_set = False
+
+        if tag.value and tag.value > '':
             tag_value = tag.format()
             self.audio[tag.name] = tag_value
-            set = True
-            
-        return set
+            tag_set = True
+        elif tag.name in self.audio.tags:
+            self.audio.pop(tag.name)
+            tag_set = True
 
-            
+        return tag_set
+
     def save_primary_genre(self, primary_genre):
         self.primary_genre.value = primary_genre
         self.__save_tag__(self.primary_genre)
@@ -242,4 +250,3 @@ class KEXP(object):
         self.__save_tag__(self.obscenity)
         self.audio.save()
 
-        
