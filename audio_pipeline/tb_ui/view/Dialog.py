@@ -73,5 +73,5 @@ def err_message(message, ok_command, parent=None, quit=False):
     err_display = DialogBox(message, master=parent)
     buttons = [{"name": "OK", "command": ok_command}]
     if quit:
-        buttons.append({"name": "Quit", "command": err_display.cancel})
+        buttons.append({"name": "Cancel", "command": err_display.cancel})
     err_display.button_box(buttons)

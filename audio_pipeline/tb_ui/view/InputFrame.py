@@ -24,12 +24,17 @@ class InputFrame(tk.Frame):
         self.input_value = tk.StringVar()
         self.input_value.set("Enter input")
         self.entrybox['textvariable'] = self.input_value
+        
+        self.set_focus()
+
+    def set_focus(self):
         self.entrybox.focus_set()
         self.entrybox.select_range(0, tk.END)
 
         self.entrybox.bind('<Key-Return>', self.input_processor)
 
-    def get_input(self):
+        
+    def get_input(self):    
         if self.entrybox:
             contents = self.input_value.get()
         return contents

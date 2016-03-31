@@ -1,10 +1,10 @@
 import os
-from . import Settings
-from util import MBInfo
-from util import AudioFile
-from file_walker import Process as Processor
-from file_walker.Resources import BatchConstants as batch_constants
-import serializers
+import settings
+from audio_pipeline.util import MBInfo
+from audio_pipeline.util import AudioFile
+from audio_pipeline.file_walker import Process as Processor
+from audio_pipeline.file_walker.Resources import BatchConstants as batch_constants
+from audio_pipeline import serializers
 import argparse
 import shutil
 import hashlib

@@ -54,7 +54,6 @@ class MetaController:
         :return:
         """
         input_string = self.app.get_input()
-        print(input_string)
         match = InputPatterns.track_meta_pattern.match(input_string)
         self.app.select_input()
         if match:
@@ -107,8 +106,6 @@ class MetaController:
         for track in track_nums:
             err_msg = "Invalid Track Number: " + str(track)
             Dialog.err_message(err_msg, None, parent=self.app)
-
-        self.app.clear_input()
             
     def process_command(self, command):
         """
@@ -116,7 +113,7 @@ class MetaController:
         depending on the command that is passed in.
         """
         if InputPatterns.entry_pattern.match(command):
-            meta_entry = EntryController.Entry(self.model.current_release, self.app)
+            meta_entry = EntryController.Entry(self.model.current_release, self.app, self.update_album)
             meta_entry.start()
         elif InputPatterns.next_pattern.match(command):
             if self.model.has_next():
@@ -133,6 +130,13 @@ class MetaController:
         elif InputPatterns.help_pattern.match(command):
             self.app.display_info()
 
+    def update_album(self):
+        """
+        Update current release metadata
+        """
+        for track in self.model.current_release:
+            self.app.update_meta(track)
+            
     def next_album(self):
         """
         Display the next directory / album

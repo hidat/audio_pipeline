@@ -4,12 +4,14 @@ import tkinter.tix as tk
 
 class Entry():
 
-    def __init__(self, release, app):
+    def __init__(self, release, app, update):
         self.release_categories = [key for key, value in release[0] if value.release]
         self.track_categories = [key for key, value in release[0] if not value.release]
         self.tracks = release
         self.release = release[0]
-
+        self.update = update
+        
+        self.entry = app.input_frame
         self.meta_entry = EntryGrid.EntryGrid(self, app)
 
     def start(self):
@@ -88,6 +90,9 @@ class Entry():
                 track[tag].value = meta
             self.tracks[i].save()
 
+        self.update()
+        self.entry.set_focus()
+        
 def main():
     root_dir = "Z:\C\music\Chilliwack"
     model = MetaModel.ProcessDirectory(root_dir)

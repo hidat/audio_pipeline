@@ -89,4 +89,4 @@ class App(tk.Tk):
         self.info_window = None
 
     def quit(self):
-        self.after(100, self.destroy())
+        self.after(100, self.destroy)

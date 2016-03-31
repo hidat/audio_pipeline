@@ -1,4 +1,4 @@
-from .tb_ui.controller import MetaControl
+from audio_pipeline.tb_ui.controller import MetaControl
 import sys
 
 def main():
