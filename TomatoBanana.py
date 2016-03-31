@@ -1,4 +1,4 @@
-import tb_ui.controller as TB
+from .tb_ui.controller import MetaControl
 import sys
 
 def main():
@@ -6,7 +6,7 @@ def main():
     if len(sys.argv) >= 2:
         directory = sys.argv[1]
                 
-    controller = TB.MetaControl.MetaController(directory)
+    controller = MetaControl.MetaController(directory)
     
     controller.app.mainloop()
 

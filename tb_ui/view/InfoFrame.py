@@ -1,5 +1,5 @@
 from . import Settings
-import tkinter as tk
+import tkinter.tix as tk
 
 
 class InfoFrame(tk.Frame):

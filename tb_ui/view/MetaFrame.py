@@ -1,5 +1,5 @@
 from . import Settings
-import tkinter as tk
+import tkinter.tix as tk
 
 class ReleaseFrame(tk.Frame):
     def __init__(self, master=None):
@@ -46,7 +46,6 @@ class ReleaseFrame(tk.Frame):
                 self.attributes[tag].config(text=value.value, fg=Settings.text_color)
 
     def clear(self):
-        print(self.attributes)
         for name, label in self.attributes.items():
             label.destroy()
 

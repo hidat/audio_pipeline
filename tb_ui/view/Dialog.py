@@ -1,4 +1,4 @@
-import tkinter as tk
+import tkinter.tix as tk
 import tkinter.filedialog as filedialog
 
 class DialogBox(tk.Toplevel):

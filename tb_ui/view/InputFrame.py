@@ -1,4 +1,4 @@
-import tkinter as tk
+import tkinter.tix as tk
 from . import Settings
 
 class InputFrame(tk.Frame):

@@ -1,4 +1,4 @@
-import tkinter as tk
+import tkinter.tix as tk
 from . import Settings
 from . import MetaFrame
 from . import InfoFrame
@@ -36,7 +36,7 @@ class App(tk.Tk):
         self.menubar.add_command(label="Help", command=self.display_info)
         self.config(menu=self.menubar)
 
-        # self.protocol("WM_DELETE_WINDOW", self.quit)
+        #self.protocol("WM_DELETE_WINDOW", self.destroy)
 
         self.allow_input()
         self.grid()
@@ -60,6 +60,7 @@ class App(tk.Tk):
         else:
             self.info_window = tk.Toplevel()
             self.info_window.title("Help")
+            self.info_window["bg"] = Settings.bg_color
             info = InfoFrame.InfoFrame(master=self.info_window)
             info.display_commands()
             self.info_window.focus_set()
@@ -86,3 +87,6 @@ class App(tk.Tk):
     def close_info(self):
         self.info_window.destroy()
         self.info_window = None
+
+    def quit(self):
+        self.after(100, self.destroy())

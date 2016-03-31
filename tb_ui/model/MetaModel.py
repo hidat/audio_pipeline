@@ -2,7 +2,7 @@
 # Read in metadata relevant to human comparison with physical disc media info
 import os
 import mutagen
-from util import AudioFile
+from ...util import AudioFile
 
 
 class ProcessDirectory(object):
@@ -98,7 +98,8 @@ class ProcessDirectory(object):
 
             self.current_releases.clear()
             
-            releases_index = {0: set([])}
+            releases_index = dict()
+            releases_index[0] = set([])
             releases = [[]]
             i = 1
             
@@ -122,8 +123,7 @@ class ProcessDirectory(object):
                     new_release = True
                     for index, release in releases_index.items():
                         if (file_data.mbid.value > '' and file_data.mbid.value in release) or \
-                           (file_data.album.value in release and file_data.album_artist.value in release and \
-                            file_data.release_date.value in release):
+                           (file_data.album.value in release and file_data.album_artist.value in release):
                             
                             # there's already a list of AudioFiles for this release; add file_data to that list
                             releases[index].append(file_data)
@@ -135,8 +135,10 @@ class ProcessDirectory(object):
                         # to check future files
                         releases.append([file_data])
                         releases_index[i] = set([file_data.mbid.value, file_data.album.value, \
-                                                 file_data.album_artist.value, file_data.release_date.value])
+                                                 file_data.album_artist.value])
                         i += 1
+
+            print(releases_index)
 
             if len(releases[0]) <= 0:
                 releases.pop(0)

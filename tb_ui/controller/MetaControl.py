@@ -1,13 +1,15 @@
-import tb_ui.model.MetaModel as MetaModel
-import tb_ui.view.App as App
-import tb_ui.view.Dialog as Dialog
-import util.Util as Util
+from ..model import MetaModel
+from ..view import App
+from ..view import Dialog
+from ...util import Util
+from . import EntryController
 import re
 
 class InputPatterns():
     tracknum_acc = "track_num"
     meta_acc = "meta"
     command_acc = "command"
+
 
     track_meta_pattern = re.compile('(?P<' + tracknum_acc + '>(((\d+((,)|(\s))*)+)|(\s*all)))\s*(?P<' + meta_acc + '>.+)')
     command_pattern = re.compile('(?P<' + command_acc + '>.+)')
@@ -16,7 +18,7 @@ class InputPatterns():
     next_pattern = re.compile("\s*n(ext)?", flags=re.I)
     done_pattern = re.compile("\s*d+(one)?", flags=re.I)
     help_pattern = re.compile("\s*h(elp)?", flags=re.I)
-    
+    entry_pattern = re.compile("\s*e((nter)|(ntry))|m(eta)?")
     yellow_dot = re.compile("\s*y(ellow)?\s*(dot)?", flags=re.I)
     red_dot = re.compile("\s*r(ed)?\s*(dot)?", flags=re.I)
     rm_rating = re.compile("\s*c(lear)?", flags=re.I)
@@ -54,6 +56,7 @@ class MetaController:
         input_string = self.app.get_input()
         print(input_string)
         match = InputPatterns.track_meta_pattern.match(input_string)
+        self.app.select_input()
         if match:
             # input is (probably) track metadata (currently only RED DOT, YELLOW DOT)
             try:
@@ -65,12 +68,13 @@ class MetaController:
                     track_nums = set([int(track_num) for track_num in track_nums])
                 value = match.group(InputPatterns.meta_acc)
                 self.new_meta_input(track_nums, value)
-            except ValueError:
+            except ValueError as e:
+                print(e)
                 err_msg = "Invalid input " + str(input_string)
                 Dialog.err_message(err_msg, None, parent=self.app)
         else:
             command = input_string.split()[0]
-            self.change_displayed_album(command)
+            self.process_command(command)
 
     def new_meta_input(self, track_nums, value):
         """
@@ -96,7 +100,6 @@ class MetaController:
                     track.kexp.save_obscenity(Util.Obscenity.yellow)
                 elif clear:
                     track.kexp.save_obscenity(None)
-                track.save()
                 self.app.update_meta(track)
                 track_nums.remove(track.track_num.value)
 
@@ -107,12 +110,15 @@ class MetaController:
 
         self.app.clear_input()
             
-    def change_displayed_album(self, command):
+    def process_command(self, command):
         """
         Changes the album metadata on screen to the previous or next in the directory list,
         depending on the command that is passed in.
         """
-        if InputPatterns.next_pattern.match(command):
+        if InputPatterns.entry_pattern.match(command):
+            meta_entry = EntryController.Entry(self.model.current_release, self.app)
+            meta_entry.start()
+        elif InputPatterns.next_pattern.match(command):
             if self.model.has_next():
                 self.next_album()
             else:
@@ -126,8 +132,6 @@ class MetaController:
             self.last_album()
         elif InputPatterns.help_pattern.match(command):
             self.app.display_info()
-                
-        self.app.select_input()
 
     def next_album(self):
         """
