@@ -2,11 +2,10 @@ __author__ = 'hidat'
 
 from yattag import Doc, indent
 import os.path as path
-import unicodedata
 import os
-import file_walker.ProcessLog as ProcessLog
-import file_walker.Resources as Resources
-import file_walker.Util as Util
+from ..file_walker import ProcessLog
+from ..file_walker import Resources
+from ..file_walker import Util
 
 class DaletSerializer:
 

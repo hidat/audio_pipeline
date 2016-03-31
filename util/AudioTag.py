@@ -177,13 +177,13 @@ class TagID3Int(TagFormat):
         
 class TagID3Text(TagID3String):
     def format(self, tag_value):
-        name = re.match('(?<=TXXX:)\w+', self.tag_name)
+        val = str(tag_value)
+        name = re.search('(?<=TXXX:)\w+', self.tag_name)
         if name:
             name = name.group(0)
-            frame = mutagen.id3.TXXX(encoding=3, desc=name, text=tag_value)
+            frame = mutagen.id3.TXXX(encoding=3, desc=name, text=val)
         else:
-            frame = mutagen.id3.TXXX(encoding=3, desc=self.tag_name, text=tag_value)
-
+            frame = mutagen.id3.TXXX(encoding=3, desc=self.tag_name, text=val)
         return frame
 
 
@@ -195,19 +195,21 @@ class TagID3AlbumName(TagID3String):
 
 class TagID3AlbumArtist(TagID3String):
     def format(self, tag_value):
-        frame = mutagen.id3.TPE1(encoding=3, text=tag_value)
+        frame = mutagen.id3.TPE2(encoding=3, text=tag_value)
         return frame
 
 
 class TagID3TrackNum(TagID3Int):
     def format(self, tag_value):
-        frame = mutagen.id3.TRCK(encoding=3, text=tag_value)
+        val = str(tag_value)
+        frame = mutagen.id3.TRCK(encoding=3, text=val)
         return frame
 
 
 class TagID3DiscNum(TagID3String):
     def format(self, tag_value):
-        frame = mutagen.id3.TPOS(encoding=3, text=tag_value)
+        val = str(tag_value)
+        frame = mutagen.id3.TPOS(encoding=3, text=val)
         return frame
 
 
@@ -219,13 +221,14 @@ class TagID3TrackTitle(TagID3String):
 
 class TagID3TrackArtist(TagID3String):
     def format(self, tag_value):
-        frame = mutagen.id3.TPE2(encoding=3, text=tag_value)
+        frame = mutagen.id3.TPE1(encoding=3, text=tag_value)
         return frame
 
 
 class TagID3Releasedate(TagID3String):
     def format(self, tag_value):
-        frame = mutagen.id3.TDRC(encoding=3, text=tag_value)
+        val = str(tag_value)
+        frame = mutagen.id3.TDRC(encoding=3, text=val)
         return frame
         
         
@@ -325,13 +328,13 @@ class ID3(Format):
     _mbid = TagID3Text('TXXX:MBID', 'MBID')
     _mbid_p = TagID3Text('TXXX:MusicBrainz Album Id', 'MBID')
     _album = TagID3AlbumName('TALB', 'Album')
-    _album_artist = TagID3AlbumArtist('TPE1', 'Album Artist')
+    _album_artist = TagID3AlbumArtist('TPE2', 'Album Artist')
     _release_date = TagID3Releasedate('TDRC', 'Release Date')
 
     _disc_num = TagID3DiscNum('TPOS', 'Disc Num')
     _track_num = TagID3TrackNum('TRCK', 'Track Num')
     _title = TagID3TrackTitle('TIT2', 'Title')
-    _artist = TagID3TrackArtist('TPE2', 'Artist')
+    _artist = TagID3TrackArtist('TPE1', 'Artist')
 
     def __init__(self, kexp=False):
         self.kexp = None

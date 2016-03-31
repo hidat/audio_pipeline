@@ -1,4 +1,4 @@
-from serializers import DaletSerializer
-from serializers import JsonSerializer
+from . import DaletSerializer
+from . import JsonSerializer
 
 __all__ = ['DaletSerializer', 'JsonSerializer']

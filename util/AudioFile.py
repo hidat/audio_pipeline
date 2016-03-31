@@ -1,6 +1,6 @@
 import mutagen
-from util import AudioTag
-from util import Util
+from . import AudioTag
+from . import Util
 
 class UnsupportedFiletypeError(Exception):
     def __init__(self, message):
@@ -86,7 +86,7 @@ class AudioFile(object):
         
     def KEXP(self):
         if not self.kexp:
-            self.kexp = KEXP(self.audio, self.format)
+            self.kexp = KEXP(self.audio, self)
             
         return self.kexp
 
@@ -97,12 +97,18 @@ class AudioFile(object):
         """
         tag_set = False
 
+        print(tag)
+        print(tag.value)
+
         if tag.value:
             tag_value = tag.format()
-            self.audio[tag.name] = tag_value
+            print(tag_value)
+            print(type(tag.value))
+            self.audio[tag.tag_name] = tag_value
             tag_set = True
-        elif tag.name in self.audio.tags:
-            self.audio.pop(tag.name)
+        elif tag.tag_name in self.audio.tags:
+            print("removing tag")
+            self.audio.pop(tag.tag_name)
             tag_set = True
 
         return tag_set
@@ -170,6 +176,16 @@ class AudioFile(object):
             
         self.audio.save()
 
+    def as_dict(self):
+        as_dict = {"MBID": self.mbid, "Album": self.album, "Album Artist": self.album_artist,
+                        "Release Date": self.release_date, "Title": self.title, "Artist": self.artist,
+                        "Disc Num": self.disc_num, "Track Num": self.track_num, "Length": self.length}
+
+        if self.kexp:
+            as_dict["KEXP Primary Genre"] = self.kexp.primary_genre
+            as_dict["KEXPFCCOBSCENITYRATING"] = self.kexp.obscenity
+        return as_dict
+
     def __iter__(self):
         it = AudioFileIterator(self)
         return it
@@ -177,12 +193,12 @@ class AudioFile(object):
         
 class AudioFileIterator():
 
-    ordering = ["Album", "Album Artist", "Disc Num", "Release Date", "Disc Num", "MBID", \
+    ordering = ["Album", "Album Artist", "Disc Num", "Release Date", "MBID",
                 "Track Num", "Title", "Artist", "Length", "KEXPFCCOBSCENITYRATING"]
 
     def __init__(self, audiofile):
-        self.as_dict = {"MBID": audiofile.mbid, "Album": audiofile.album, "Album Artist": audiofile.album_artist, \
-                        "Release Date": audiofile.release_date, "Title": audiofile.title, "Artist": audiofile.artist, \
+        self.as_dict = {"MBID": audiofile.mbid, "Album": audiofile.album, "Album Artist": audiofile.album_artist,
+                        "Release Date": audiofile.release_date, "Title": audiofile.title, "Artist": audiofile.artist,
                         "Disc Num": audiofile.disc_num, "Track Num": audiofile.track_num, "Length": audiofile.length}
                         
         if audiofile.kexp:
@@ -204,7 +220,7 @@ class AudioFileIterator():
 
 
 class KEXP(object):
-    def __init__(self, audio, format):
+    def __init__(self, audio, audio_file):
         """
         Extract and save KEXP-specific metadata from an audio file.
 
@@ -212,7 +228,8 @@ class KEXP(object):
         :param format: Audio format
         :return:
         """
-        self.format = format
+        self.format = audio_file.format
+        self.__save_tag__ = audio_file.__save_tag__
         self.audio = audio
         
         self.primary_genre = None
@@ -220,25 +237,8 @@ class KEXP(object):
         
         tags = audio.tags
         
-        self.obscenity = format.kexp.obscenity(tags)
-        self.primary_genre = format.kexp.primary_genre(tags)
-            
-    def __save_tag__(self, tag):
-        """
-        :return: True if self.audio's tags have been changed,
-        False otherwise
-        """
-        tag_set = False
-
-        if tag.value and tag.value > '':
-            tag_value = tag.format()
-            self.audio[tag.name] = tag_value
-            tag_set = True
-        elif tag.name in self.audio.tags:
-            self.audio.pop(tag.name)
-            tag_set = True
-
-        return tag_set
+        self.obscenity = self.format.kexp.obscenity(tags)
+        self.primary_genre = self.format.kexp.primary_genre(tags)
 
     def save_primary_genre(self, primary_genre):
         self.primary_genre.value = primary_genre
@@ -246,6 +246,7 @@ class KEXP(object):
         self.audio.save()
         
     def save_obscenity(self, obscenity):
+        print(self.__save_tag__)
         self.obscenity.value = obscenity
         self.__save_tag__(self.obscenity)
         self.audio.save()
