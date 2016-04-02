@@ -5,7 +5,7 @@ class MetaGrid(tk.Grid):
 
     def __init__(self, update_command, last_command, bindings, start_index,
                  forbidden_rows, forbidden_columns, *args, **kwargs):
-        
+        kwargs['editdone'] = self.edit_done
         kwargs['editnotify'] = self.editnotify
         tk.Grid.__init__(self, *args, **kwargs)
         self.update_command = update_command
@@ -19,6 +19,9 @@ class MetaGrid(tk.Grid):
         self.forbidden_columns = forbidden_columns
         self.curr_pos = self.start
         self.curr_meta = ""
+        
+    def edit_done(self, x, y):
+        print("DONE EDITING " + x + " " + y)
         
     def editnotify(self, x, y):
         # make a map of position -> (track, metadata) for use here
@@ -34,13 +37,15 @@ class MetaGrid(tk.Grid):
             self.bind_class("Entry", "<Key-Up>", self.up)
             self.bind_class("Entry", "<Key-Down>", self.down)
             self.bind_class("Entry", "<Shift-Tab>", self.left)
-        pos = self.curr_pos
-        meta = self.entrycget(pos[0], pos[1], 'text')
-        good_meta = self.update_command(pos, meta)
+            self.bind_class("Entry", "<Shift-Left>", self.left)
+            self.bind_class("Entry", "<Shift-Right>", self.right)
+            self.bind_class("Entry", "<Shift-Up>", self.up)
+            self.bind_class("Entry", "<Shift-Down>", self.down)
+        good_meta = self.move()
         if good_meta:
             self.curr_pos = (x, y)
         else:
-            self.set_curr_cell(pos[0], pos[1])
+            self.set_curr_cell()
         return success
         
     def move(self):
@@ -173,6 +178,7 @@ class EntryGrid(tk.Toplevel):
         tk.Toplevel.__init__(self, master=master)
         self.title("Metadata Entry Friend")
         self.__save = control.save
+        self.the_end = control.quit
 
         # set up grid for the release metadata
         self.release = MetaGrid(update_command=control.check_release, last_command=self.release_end, bindings=self.bind_release,
@@ -222,7 +228,10 @@ class EntryGrid(tk.Toplevel):
             col = 0
             for name, tag in track:
                 if not tag.release:
-                    self.tracks.set(col, row, text=str(tag.value))
+                    if tag.value:
+                        self.tracks.set(col, row, text=str(tag.value))
+                    else:
+                        self.tracks.set(col, row, text="")
                     col += 1
             row += 1
             
@@ -244,7 +253,11 @@ class EntryGrid(tk.Toplevel):
         self.unbind_class("Entry", "<Key-Up>")
         self.unbind_class("Entry", "<Key-Down>")
         self.unbind_class("Entry", "<Shift-Tab>")
-        self.after(100, self.destroy)
+        self.unbind_class("Entry", "<Shift-Left>")
+        self.unbind_class("Entry", "<Shift-Right>")
+        self.unbind_class("Entry", "<Shift-Up>")
+        self.unbind_class("Entry", "<Shift-Down>")
+        self.after(100, self.the_end)
         
     def quit_popup(self):
         quit_display = Dialog.DialogBox("Save metadata changes?", master=self)

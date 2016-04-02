@@ -70,7 +70,6 @@ class Entry():
         return success
 
     def save(self):
-
         # update all tracks with new metadata
         for i in range(0, len(self.tracks)):
             track = self.tracks[i].as_dict()
@@ -90,6 +89,8 @@ class Entry():
                 track[tag].value = meta
             self.tracks[i].save()
 
+    def quit(self):
+        self.meta_entry.destroy()
         self.update()
         self.entry.set_focus()
         

@@ -1,6 +1,7 @@
 import tkinter.tix as tk
 from . import Settings
 
+
 class InputFrame(tk.Frame):
     def __init__(self, input_processor, label=None, master=None):
         if label:
@@ -18,23 +19,25 @@ class InputFrame(tk.Frame):
         """
         Use an entry box to retrieve user input
         """
-        self.entrybox = tk.Entry(self, exportselection=0)
-        self.entrybox.grid()
+        label = tk.Label(self, bg=Settings.bg_color, fg=Settings.text_color, text="Input>> ", font=Settings.heading)
+        label.grid(row=0, column=0, padx=20, pady=15)
+        self.entrybox = tk.Entry(self, exportselection=0, width=50, bg=Settings.bg_color, 
+                                 fg=Settings.text_color, bd=0, font=Settings.standard, insertbackground=Settings.text_color)
+        self.entrybox.grid(row=0, column=1,)
 
         self.input_value = tk.StringVar()
         self.input_value.set("Enter input")
         self.entrybox['textvariable'] = self.input_value
         
         self.set_focus()
+        self.entrybox.bind('<Key-Return>', self.input_processor)
 
     def set_focus(self):
+        self.bind_class("Entry", "<Key-Return>", lambda x: None)
         self.entrybox.focus_set()
         self.entrybox.select_range(0, tk.END)
 
-        self.entrybox.bind('<Key-Return>', self.input_processor)
-
-        
-    def get_input(self):    
+    def get_input(self):
         if self.entrybox:
             contents = self.input_value.get()
         return contents

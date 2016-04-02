@@ -97,17 +97,11 @@ class AudioFile(object):
         """
         tag_set = False
 
-        print(tag)
-        print(tag.value)
-
         if tag.value:
             tag_value = tag.format()
-            print(tag_value)
-            print(type(tag.value))
             self.audio[tag.tag_name] = tag_value
             tag_set = True
         elif tag.tag_name in self.audio.tags:
-            print("removing tag")
             self.audio.pop(tag.tag_name)
             tag_set = True
 
@@ -246,7 +240,6 @@ class KEXP(object):
         self.audio.save()
         
     def save_obscenity(self, obscenity):
-        print(self.__save_tag__)
         self.obscenity.value = obscenity
         self.__save_tag__(self.obscenity)
         self.audio.save()

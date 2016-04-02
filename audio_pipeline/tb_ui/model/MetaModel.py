@@ -138,8 +138,6 @@ class ProcessDirectory(object):
                                                  file_data.album_artist.value])
                         i += 1
 
-            print(releases_index)
-
             if len(releases[0]) <= 0:
                 releases.pop(0)
 

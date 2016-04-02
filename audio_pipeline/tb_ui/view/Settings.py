@@ -10,7 +10,7 @@ text_color = "light gray"
 yellow = "yellow"
 red = "red"
 heading = ('Helvetica', '10', 'bold')
-standard = ('Ariel', '10')
+standard = ('Helvetica', '10')
 initial_size = (500, 500)
 
 commands = [Command("<track_num>[[,][ ]<track_num>...][ ]<meta_command>", "Add the metadata specified by <meta_command> to track <track_num>. <meta_command> is not case-sensitive.\

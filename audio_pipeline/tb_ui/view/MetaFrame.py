@@ -32,10 +32,10 @@ class ReleaseFrame(tk.Frame):
         for name, tag in release:
             if tag.release:
                 if name not in self.labels:
-                    self.labels[name] = tk.Label(self, text=name, anchor="nw", fg=Settings.text_color, bg=Settings.bg_color)
+                    self.labels[name] = tk.Label(self, text=name, anchor="nw", fg=Settings.text_color, bg=Settings.bg_color, font=Settings.heading)
                     self.labels[name].grid(row=rowval, column=colval, sticky="w", padx=10, pady=5)
                 rowval += 1
-                self.attributes[name] = tk.Label(self, text=tag.value, anchor="nw", fg=Settings.text_color, bg=Settings.bg_color)
+                self.attributes[name] = tk.Label(self, text=tag.value, anchor="nw", fg=Settings.text_color, bg=Settings.bg_color, font=Settings.standard)
                 self.attributes[name].grid(row=rowval, column=colval, sticky="w", padx=10, pady=3)
                 colval += 1
                 rowval = 0
@@ -81,7 +81,7 @@ class TrackFrame(tk.Frame):
         if not len(self.labels) > 0:
             for tag, value in metadata[0]:
                 if not value.release:
-                    self.labels[tag] = tk.Label(self, text=tag, anchor="nw", fg=Settings.text_color, bg=Settings.bg_color)
+                    self.labels[tag] = tk.Label(self, text=tag, anchor="nw", fg=Settings.text_color, bg=Settings.bg_color, font=Settings.heading)
                     self.labels[tag].grid(row=rowval, column = colval, sticky="w", padx=10, pady=5)
                     colval += 1
 
@@ -96,7 +96,7 @@ class TrackFrame(tk.Frame):
 
             for tag, value in track:
                 if not value.release:
-                    self.attributes[name][tag] = tk.Label(self, text=value.value, anchor="nw", fg=color, bg=bg_color)
+                    self.attributes[name][tag] = tk.Label(self, text=value.value, anchor="nw", fg=color, bg=bg_color, font=Settings.standard)
                     self.attributes[name][tag].grid(row=rowval, column=colval, sticky="w", padx=10, pady=3)
                     colval += 1
             rowval += 1
