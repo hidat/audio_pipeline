@@ -41,9 +41,9 @@ class ReleaseFrame(tk.Frame):
                 rowval = 0
 
     def update(self, audio_file):
-        for tag, value in audio_file:
+        for name, tag in audio_file:
             if tag.release:
-                self.attributes[tag].config(text=value.value, fg=Settings.text_color)
+                self.attributes[name].config(text=tag.value, fg=Settings.text_color)
 
     def clear(self):
         for name, label in self.attributes.items():

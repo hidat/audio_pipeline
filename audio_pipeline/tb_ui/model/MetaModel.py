@@ -122,8 +122,8 @@ class ProcessDirectory(object):
                 else:
                     new_release = True
                     for index, release in releases_index.items():
-                        if (file_data.mbid.value > '' and file_data.mbid.value in release) or \
-                           (file_data.album.value in release and file_data.album_artist.value in release):
+                        if (file_data.mbid.value > '' and file_data.mbid.value in release and file_data.disc_num.value in release) or \
+                           (file_data.album.value in release and file_data.album_artist.value in release and file_data.disc_num.value in release):
                             
                             # there's already a list of AudioFiles for this release; add file_data to that list
                             releases[index].append(file_data)
@@ -135,7 +135,7 @@ class ProcessDirectory(object):
                         # to check future files
                         releases.append([file_data])
                         releases_index[i] = set([file_data.mbid.value, file_data.album.value, \
-                                                 file_data.album_artist.value])
+                                                 file_data.album_artist.value, file_data.disc_num.value])
                         i += 1
 
             if len(releases[0]) <= 0:

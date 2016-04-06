@@ -1,12 +1,13 @@
+from . import InputPatterns
 from ..view import EntryGrid
 from ..model import MetaModel
+from ...util import Util
 import tkinter.tix as tk
+
 
 class Entry():
 
     def __init__(self, release, app, update):
-        self.release_categories = [key for key, value in release[0] if value.release]
-        self.track_categories = [key for key, value in release[0] if not value.release]
         self.tracks = release
         self.release = release[0]
         self.update = update
@@ -27,8 +28,8 @@ class Entry():
                     False otherwise
         """
 
-        success = self.check_meta(meta, self.release.as_dict(), self.release_categories[index[0]])
-        return success
+        new_meta = self.check_meta(meta, self.release.as_dict(), self.meta_entry.release_categories[index[0]])
+        return new_meta
 
     def check_track(self, index, meta):
         """
@@ -43,48 +44,67 @@ class Entry():
         # track nums will come in 1-off, so correct that
         track = self.tracks[index[1] - 1].as_dict()
 
-        success = self.check_meta(meta, track, self.track_categories[index[0]])
-        return success
+        new_meta = self.check_meta(meta, track, self.meta_entry.track_categories[index[0]])
+        return new_meta
 
     def check_meta(self, meta, audio_file, tag_name):
         """
-        Check that new metadata is of the same type
-        as the old metadata
+        Check that metadata is of the same type as the old metadata,
+        and perform any transformation to get appropriate metadata.
 
         :param meta: New metadata
         :param audio_file: AudioFile as dict where metadata is changing
         :param tag_name: Name of new metadata category
-        :return:    True if new meta is of the appropriate type
-                    False otherwise
+        :return:    New metadata if possible
+                    None if new metadata is of incorrect type
         """
 
-        success = True
-
         old_meta = audio_file[tag_name].value
-        if type(old_meta) is int:
-            try:
-                meta = int(meta) + 1
-                print(meta)
-            except ValueError:
-                success = False
-        return success
+        new_meta = None
+        if meta:
+            if type(old_meta) is int:
+                try:
+                    new_meta = int(meta)
+                except ValueError:
+                    new_meta = None
+            elif InputPatterns.whitespace.match(meta):
+                new_meta = " "
+            elif tag_name == "KEXPFCCOBSCENITYRATING":
+                # figure out the appropriate tag to put here (to deal with misspellings, etc)
+                if InputPatterns.yellow_dot.match(meta):
+                    new_meta = Util.Obscenity.yellow
+                elif InputPatterns.red_dot.match(meta):
+                    new_meta = Util.Obscenity.red
+                elif InputPatterns.clean_edit.match(meta):
+                    new_meta = Util.Obscenity.clean
+                else:
+                    new_meta = " "
+            elif tag_name == "Album Artist":
+                # fill in empty track artists with entered album artist
+                new_meta = meta
+                self.meta_entry.track_artist_set(new_meta)
+            else:
+                new_meta = meta
+        else:
+            new_meta = " "
+        return new_meta
 
     def save(self):
         # update all tracks with new metadata
         for i in range(0, len(self.tracks)):
             track = self.tracks[i].as_dict()
 
-            for k in range(0, len(self.release_categories)):
-                tag = self.release_categories[k]
+            for k in range(0, len(self.meta_entry.release_categories)):
+                tag = self.meta_entry.release_categories[k]
                 meta = self.meta_entry.release.entrycget(k, 1, 'text')
                 if meta == '':
                     meta = None
                 track[tag].value = meta
-            for k in range(0,len(self.track_categories)):
-                tag = self.track_categories[k]
+            for k in range(0,len(self.meta_entry.track_categories)):
+                tag = self.meta_entry.track_categories[k]
                 track_index = i + 1
                 meta = self.meta_entry.tracks.entrycget(k, track_index, 'text')
-                if meta == '':
+                if InputPatterns.whitespace.match(meta):
                     meta = None
                 track[tag].value = meta
             self.tracks[i].save()
