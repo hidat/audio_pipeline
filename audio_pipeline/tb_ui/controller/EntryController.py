@@ -77,8 +77,6 @@ class Entry():
                     new_meta = Util.Obscenity.red
                 elif InputPatterns.clean_edit.match(meta):
                     new_meta = Util.Obscenity.clean
-                else:
-                    new_meta = " "
             elif tag_name == "Album Artist":
                 # fill in empty track artists with entered album artist
                 new_meta = meta
@@ -113,17 +111,3 @@ class Entry():
         self.meta_entry.destroy()
         self.update()
         self.entry.set_focus()
-        
-def main():
-    root_dir = "Z:\C\music\Chilliwack"
-    model = MetaModel.ProcessDirectory(root_dir)
-
-    if model.has_next():
-        release = model.get_next()
-
-    r = tk.Tk()
-    enter_meta = Entry(release, r)
-    r.mainloop()
-
-if __name__ == "__main__":
-    main()

@@ -192,7 +192,9 @@ class ProcessDirectory(object):
                     file = os.path.join(self.releases[i], item)
                     try:
                         af = AudioFile.AudioFile(file)
-                    except IOError or AudioFile.UnsupportedFiletypeError:
+                    except IOError:
+                        continue
+                    except AudioFile.UnsupportedFiletypeError:
                         continue
                     has_next = True
                     break
@@ -213,7 +215,9 @@ class ProcessDirectory(object):
                     file = os.path.join(self.releases[i], item)
                     try:
                         af = AudioFile.AudioFile(file)
-                    except IOError or AudioFile.UnsupportedFiletypeError:
+                    except IOError:
+                        continue
+                    except AudioFile.UnsupportedFiletypeError:
                         continue
                     has_next = True
                     break

@@ -23,9 +23,6 @@ class MetaGrid(tk.Grid):
         
     def editdone(self, x, y):
         print("DONE EDITING " + str((x, y)))
-        success = self.move()
-        if success:
-            print('hooray')
         
     def editnotify(self, x, y):
         # make a map of position -> (track, metadata) for use here
@@ -37,16 +34,22 @@ class MetaGrid(tk.Grid):
         self.curr_pos = (x, y)
         success = True
         if not self.bindings():
-            self.bind_class("Entry", "<Key-Tab>", self.right)
-            self.bind_class("Entry", "<Key-Return>", self.down)
-            self.bind_class("Entry", "<Key-Up>", self.up)
-            self.bind_class("Entry", "<Key-Down>", self.down)
-            self.bind_class("Entry", "<Shift-Tab>", self.left)
-            self.bind_class("Entry", "<Shift-Left>", self.left)
-            self.bind_class("Entry", "<Shift-Right>", self.right)
-            self.bind_class("Entry", "<Shift-Up>", self.up)
-            self.bind_class("Entry", "<Shift-Down>", self.down)
+            self.bind_class("Entry", "<Key-Tab>", lambda x: self.move_cell(self.right))
+            self.bind_class("Entry", "<Key-Return>", lambda x: self.move_cell(self.down))
+            self.bind_class("Entry", "<Key-Up>", lambda x: self.move_cell(self.up))
+            self.bind_class("Entry", "<Key-Down>", lambda x: self.move_cell(self.down))
+            self.bind_class("Entry", "<Shift-Tab>", lambda x: self.move_cell(self.left))
+            self.bind_class("Entry", "<Shift-Left>", lambda x: self.move_cell(self.left))
+            self.bind_class("Entry", "<Shift-Right>", lambda x: self.move_cell(self.right))
+            self.bind_class("Entry", "<Shift-Up>", lambda x: self.move_cell(self.up))
+            self.bind_class("Entry", "<Shift-Down>", lambda x: self.move_cell(self.down))
         return success
+        
+    def done(self):
+        if self.curr_pos:
+            success = self.move()
+            if success:
+                self.editdone(self.curr_pos[0], self.curr_pos[1])
         
     def move(self):
         success = False
@@ -57,46 +60,24 @@ class MetaGrid(tk.Grid):
             self.set(pos[0], pos[1], text=new_meta)
             success = True
         else:
+            # display an error message
+            Dialog.err_message("Please enter appropriate metadata", ok_command=self.set(pos[0], pos[1], text=meta))
             self.set(pos[0], pos[1], text=meta)
+            self.set_curr_cell()
         return success
         
-    def left(self, event):
+    def move_cell(self, direction_command):
         pos = self.curr_pos
-        pos = self.left_innards(pos)
-        while pos and (pos[0] in self.forbidden_columns or pos[1] in self.forbidden_rows):
-            pos = self.left_innards(pos)
-        if pos:
-            self.set_cell(pos)
+        success = self.move()
+        if success:
+            pos = direction_command(pos)
+            while pos and (pos[0] in self.forbidden_columns or pos[1] in self.forbidden_rows):
+                pos = direction_command(pos)
+            if pos:
+                self.set_cell(pos)
         return "break"
         
-    def up(self, event):
-        pos = self.curr_pos
-        pos = self.up_innards(pos)
-        while pos and (pos[0] in self.forbidden_columns or pos[1] in self.forbidden_rows):
-            pos = self.up_innards(pos)
-        if pos:
-            self.set_cell(pos)
-        return "break"
-        
-    def down(self, event):
-        pos = self.curr_pos
-        pos = self.down_innards(pos)
-        while pos and (pos[0] in self.forbidden_columns or pos[1] in self.forbidden_rows):
-            pos = self.down_innards(pos)
-        if pos:
-            self.set_cell(pos)
-        return "break"
-    
-    def right(self, event):
-        pos = self.curr_pos
-        pos = self.right_innards(pos)
-        while pos and (pos[0] in self.forbidden_columns or pos[1] in self.forbidden_rows):
-            pos = self.right_innards(pos)
-        if pos:
-            self.set_cell(pos)
-        return "break"
-        
-    def up_innards(self, curr):
+    def up(self, curr):
         if curr == self.start:
             # going up we will not loop????
             pos = curr
@@ -109,7 +90,7 @@ class MetaGrid(tk.Grid):
             
         return pos
         
-    def down_innards(self, curr):
+    def down(self, curr):
         # check if we need to update metadata
         if curr == self.final:
             # call a passed method
@@ -123,7 +104,7 @@ class MetaGrid(tk.Grid):
             
         return pos
             
-    def right_innards(self, curr):
+    def right(self, curr):
         if curr == self.final:
             # call the passed 'final' method
             # behavior in the final cell is the same for return and tab
@@ -138,7 +119,7 @@ class MetaGrid(tk.Grid):
             
         return pos
         
-    def left_innards(self, curr):
+    def left(self, curr):
         if curr == self.start:
             # right now we're just gonna not move
             pos = curr
@@ -234,16 +215,17 @@ class EntryGrid(tk.Toplevel):
             row += 1
             
             
-        self.quit_button = tk.Button(self, text="Finish Entry", command=self.quit_popup)
+        self.quit_button = tk.Button(self, text="Finish & Save", command=self.save)
         self.quit_button.bind("<Return>", self.quit_button["command"])
         self.quit_button.bind("<Tab>", self.starting_selection)
+        self.bind("<Escape>", self.quit_popup)
         # ask if user wants to save on close
         self.protocol("WM_DELETE_WINDOW", self.quit_popup)
         self.release_bindings = False
 
     def save(self):
-        self.release.editdone(self.release.curr_pos[0], self.release.curr_pos[1])
-        self.tracks.editdone(self.tracks.curr_pos[0], self.tracks.curr_pos[1])
+        self.release.done()
+        self.tracks.done()
         self.__save()
         self.quit()
 
@@ -259,7 +241,7 @@ class EntryGrid(tk.Toplevel):
         self.unbind_class("Entry", "<Shift-Down>")
         self.after(100, self.the_end)
         
-    def quit_popup(self):
+    def quit_popup(self, event=None):
         quit_display = Dialog.DialogBox("Save metadata changes?", master=self)
         buttons = [{"name": "Save", "command": self.save}, {"name": "Close Without Saving", "command": self.quit}]
         quit_display.button_box(buttons)
