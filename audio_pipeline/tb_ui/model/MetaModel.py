@@ -7,9 +7,13 @@ from ...util import AudioFile
 
 class ProcessDirectory(object):
     def __init__(self, src_dir):
-        # Create a new process_directory item, which finds all directories
-        # in the specified directory (one layer)
-        # and will get the relevent metadata from all audio files contained in those directories
+        """
+        Create a new ProcessDirectory item, which will go through all subdirectories
+        of the specified src_dir, find useable audio files, extract relevent metadata from
+        them, and organize the audio files into releases for review.
+        
+        :param src_dir: Absolute path to starting directory
+        """
         directories = os.listdir(src_dir)
         
         self.releases = []
@@ -25,14 +29,14 @@ class ProcessDirectory(object):
         self.current_releases = []
         self.current_release = []
 
-        self.cur_release_index = -1
+        self.release_index = -1
         self.cur_index = -1
     
     def get_next(self):
 
-        if self.cur_release_index >= 0 and self.cur_release_index + 1 < len(self.current_releases):
-            self.cur_release_index += 1
-            self.current_release = self.current_releases[self.cur_release_index]
+        if self.release_index >= 0 and self.release_index + 1 < len(self.current_releases):
+            self.release_index += 1
+            self.current_release = self.current_releases[self.release_index]
             return self.current_release
 
         # get index of next release
@@ -55,9 +59,9 @@ class ProcessDirectory(object):
         return meta
         
     def get_prev(self):
-        if 0 < self.cur_release_index < len(self.current_releases):
-            self.cur_release_index -= 1
-            self.current_release = self.current_releases[self.cur_release_index]
+        if 0 < self.release_index < len(self.current_releases):
+            self.release_index -= 1
+            self.current_release = self.current_releases[self.release_index]
             return self.current_release
 
         # get index of previous release
@@ -142,9 +146,9 @@ class ProcessDirectory(object):
                 releases.pop(0)
 
             self.current_releases = [sorted(release, key=lambda x: x.track_num.value) for release in releases]
-            self.cur_release_index = 0
+            self.release_index = 0
 
-            self.current_release = self.current_releases[self.cur_release_index]
+            self.current_release = self.current_releases[self.release_index]
             return self.current_release
 
     def track_nums(self):
@@ -178,11 +182,13 @@ class ProcessDirectory(object):
 
     def has_next(self):
         has_next = False
-        if self.cur_release_index >= 0 and self.cur_release_index+1 < len(self.current_releases):
+        if self.release_index >= 0 and self.release_index+1 < len(self.current_releases):
             has_next = True
         elif self.cur_index is not None and ((self.cur_index + 1) < len(self.releases)):
             for i in range(self.cur_index+1, len(self.releases)):
                 files = os.listdir(self.releases[i])
+                directories = []
+
                 # it's not pretty, but:
                 # try to create an audiofile
                 # if we can make one, success!
@@ -190,14 +196,23 @@ class ProcessDirectory(object):
                 # [also just throw away all our hard work]
                 for item in files:
                     file = os.path.join(self.releases[i], item)
-                    try:
-                        af = AudioFile.AudioFile(file)
-                    except IOError:
-                        continue
-                    except AudioFile.UnsupportedFiletypeError:
-                        continue
-                    has_next = True
-                    break
+                    if os.path.isdir(file):
+                        directories.append(file)
+                    else:
+                        try:
+                            af = AudioFile.AudioFile(file)
+                        except IOError:
+                            continue
+                        except AudioFile.UnsupportedFiletypeError:
+                            continue
+                        has_next = True
+                        
+                new_dirs = []
+                for item in directories:
+                    if item not in self.releases:
+                        new_dirs.append(item)
+                if new_dirs > []:
+                    self.releases = self.releases[0:i] + new_dirs + self.releases[i:len(self.releases)]
                 if has_next:
                     break
                     
@@ -205,22 +220,32 @@ class ProcessDirectory(object):
 
     def has_prev(self):
         has_next = False
-        if self.cur_release_index > 0 and self.cur_release_index < len(self.current_releases):
+        if self.release_index > 0 and self.release_index < len(self.current_releases):
             has_next = True
         elif self.cur_index is not None and ((self.cur_index - 1) >= 0):
             for i in reversed(range(0, self.cur_index)):
                 files = os.listdir(self.releases[i])
+                directories = []
                 
                 for item in files:
                     file = os.path.join(self.releases[i], item)
-                    try:
-                        af = AudioFile.AudioFile(file)
-                    except IOError:
-                        continue
-                    except AudioFile.UnsupportedFiletypeError:
-                        continue
-                    has_next = True
-                    break
+                    if os.path.isdir(file):
+                        directories.append(file)
+                    else:
+                        try:
+                            af = AudioFile.AudioFile(file)
+                        except IOError:
+                            continue
+                        except AudioFile.UnsupportedFiletypeError:
+                            continue
+                        has_next = True
+                        
+                new_dirs = []
+                for item in directories:
+                    if item not in self.releases:
+                        new_dirs.append(item)
+                if new_dirs > []:
+                    self.releases = self.releases[0:i] + new_dirs + self.releases[i:len(self.releases)]
                 if has_next:
                     break
 

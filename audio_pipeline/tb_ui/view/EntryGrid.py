@@ -34,6 +34,10 @@ class MetaGrid(tk.Grid):
         self.curr_pos = (x, y)
         success = True
         if not self.bindings():
+            # These are all class-level bindings, that are unbound when this app is closed
+            # However, some of these class-level bindings override previous default bindings
+            # which are not restored when these are unbound on closure, and may effect
+            # entry behavior in general TB
             self.bind_class("Entry", "<Key-Tab>", lambda x: self.move_cell(self.right))
             self.bind_class("Entry", "<Key-Return>", lambda x: self.move_cell(self.down))
             self.bind_class("Entry", "<Key-Up>", lambda x: self.move_cell(self.up))
