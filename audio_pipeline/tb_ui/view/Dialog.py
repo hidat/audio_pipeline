@@ -25,9 +25,7 @@ class DialogBox(tk.Toplevel):
         self.text(message)
         if buttons:
             self.button_box(buttons)
-            
-        self.protocol("WM_DELETE_WINDOW", self.cancel)
-        
+    
     def text(self, message):
         label = tk.Label(self, text=message)
         label.pack()
@@ -51,8 +49,8 @@ class DialogBox(tk.Toplevel):
         self.wait_window(self)
     
     def apply(self, command):
-        self.cancel()
         command()
+        self.cancel()
 
     def cancel(self):
         self.destroy()

@@ -18,7 +18,9 @@ class MetaController:
         :return:
         """
         self.model = None
+        self.root_dir = None
         self.app = App.App(self.process_input, self.choose_dir)
+        self.app.bind("<Escape>", self.last_album)
 
         if root_dir:
             self.model = MetaModel.ProcessDirectory(root_dir)
@@ -134,12 +136,12 @@ class MetaController:
         tracks = self.model.get_prev()
         self.app.display_meta(tracks)
 
-    def last_album(self):
+    def last_album(self, event=None):
         """
         Display a 'quit'? dialog
         """
         Dialog.quit_message("Close TomatoBanana?", self.app.quit, self.app)
-
+  
     def choose_dir(self, root_dir):
         if root_dir > "":
             new_model = MetaModel.ProcessDirectory(root_dir)
@@ -148,6 +150,14 @@ class MetaController:
                 self.model = new_model
                 self.next_album()
             else:
-                Dialog.err_message("Please select a valid directory.", self.app.choose_dir, quit=True)
+                if not self.root_dir:
+                    Dialog.DialogBox("Please select a valid directory.", buttons=[{"name": "OK", "command": self.app.choose_dir},
+                                     {"name": "Cancel", "command": self.app.quit}])
+                else:
+                    Dialog.err_message("Please select a valid directory.", self.app.choose_dir, quit=True)
         else:
-            Dialog.err_message("Please select a valid directory.", self.app.choose_dir, quit=True)
+            if not self.root_dir:
+                Dialog.DialogBox("Please select a valid directory.", buttons=[{"name": "OK", "command": self.app.choose_dir},
+                                  {"name": "Cancel", "command": self.app.quit}])
+            else:
+                Dialog.err_message("Please select a valid directory.", self.app.choose_dir, quit=True)

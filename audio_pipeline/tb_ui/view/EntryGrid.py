@@ -143,7 +143,7 @@ class MetaGrid(tk.Grid):
     def set_cell(self, pos):
         self.anchor_set(pos[0], pos[1])
         self.edit_set(pos[0], pos[1])
- 
+        
         
 class EntryGrid(tk.Toplevel):
 
