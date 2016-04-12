@@ -1,6 +1,6 @@
 import tkinter.tix as tk
 from . import Dialog
-from ..controller import InputPatterns
+from .. import InputPatterns
 
 class MetaGrid(tk.Grid):
 

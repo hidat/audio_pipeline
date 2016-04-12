@@ -1,3 +1,5 @@
+from .. import InputPatterns
+
 class Command:
     def __init__(self, command, help, examples=[]):
         self.command = command
@@ -9,6 +11,7 @@ bg_color = "black"
 text_color = "light gray"
 yellow = "yellow"
 red = "red"
+blue = "cyan"
 heading = ('Helvetica', '10', 'bold')
 standard = ('Helvetica', '10')
 initial_size = (500, 500)
@@ -24,8 +27,10 @@ commands = [Command("<track_num>[[,][ ]<track_num>...][ ]<meta_command>", "Add t
 
 def get_text_color(audio_file):
     color = text_color
-    if audio_file.kexp.obscenity.value == 'YELLOW DOT':
+    if InputPatterns.yellow_dot.match(audio_file.kexp.obscenity.value):
         color = yellow
-    elif audio_file.kexp.obscenity.value == 'RED DOT':
+    elif InputPatterns.red_dot.match(audio_file.kexp.obscenity.value):
         color = red
+    elif InputPatterns.clean_edit.match(audio_file.kexp.obscenity.value):
+        color = blue
     return color

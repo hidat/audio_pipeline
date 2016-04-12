@@ -2,8 +2,9 @@ from ..model import MetaModel
 from ..view import App
 from ..view import Dialog
 from ...util import Util
+from .. import InputPatterns
 from . import EntryController
-from . import InputPatterns
+from .. import InputPatterns
 import re
 
 
