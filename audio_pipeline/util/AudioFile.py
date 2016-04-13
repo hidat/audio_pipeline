@@ -73,7 +73,7 @@ class AudioFile(object):
             self.mbid = format.mbid(tags)
             self.album = format.album(tags)
             self.album_artist = format.album_artist(tags)
-            self.release_date = format.release_date(tags)   
+            self.release_date = format.release_date(tags)
             
             self.disc_num = format.disc_num(tags)
             self.track_num = format.track_num(tags)

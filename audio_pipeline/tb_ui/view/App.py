@@ -91,3 +91,9 @@ class App(tk.Tk):
 
     def quit(self):
         self.after(100, self.destroy)
+        
+    ####
+    
+    def select_tracks(self, tracks):
+        if self.track_frame:
+            self.track_frame.select_tracks(tracks)

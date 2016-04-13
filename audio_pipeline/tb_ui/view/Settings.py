@@ -1,4 +1,4 @@
-from .. import InputPatterns
+from ..util import InputPatterns
 
 class Command:
     def __init__(self, command, help, examples=[]):
@@ -16,6 +16,9 @@ heading = ('Helvetica', '10', 'bold')
 standard = ('Helvetica', '10')
 initial_size = (500, 500)
 
+active_fg = "black"
+active_bg = "white"
+
 commands = [Command("<track_num>[[,][ ]<track_num>...][ ]<meta_command>", "Add the metadata specified by <meta_command> to track <track_num>. <meta_command> is not case-sensitive.\
               \nMultiple <track_nums> may be specified, separated by \",\" and/or \" \"\
               \nValid <meta_command>s:\n\tr[ed[ dot]]: RED DOT obscenity rating\
@@ -27,10 +30,11 @@ commands = [Command("<track_num>[[,][ ]<track_num>...][ ]<meta_command>", "Add t
 
 def get_text_color(audio_file):
     color = text_color
-    if InputPatterns.yellow_dot.match(audio_file.kexp.obscenity.value):
-        color = yellow
-    elif InputPatterns.red_dot.match(audio_file.kexp.obscenity.value):
-        color = red
-    elif InputPatterns.clean_edit.match(audio_file.kexp.obscenity.value):
-        color = blue
+    if audio_file.kexp.obscenity.value:
+        if InputPatterns.yellow_dot.match(audio_file.kexp.obscenity.value):
+            color = yellow
+        elif InputPatterns.red_dot.match(audio_file.kexp.obscenity.value):
+            color = red
+        elif InputPatterns.clean_edit.match(audio_file.kexp.obscenity.value):
+            color = blue
     return color

@@ -2,9 +2,8 @@ from ..model import MetaModel
 from ..view import App
 from ..view import Dialog
 from ...util import Util
-from .. import InputPatterns
 from . import EntryController
-from .. import InputPatterns
+from ..util import InputPatterns
 import re
 
 
@@ -66,6 +65,8 @@ class MetaController:
         When we have input we've determined is (probably) metadata,
         add it to the metadata of the specified track
         """
+        tracks = []
+        
         red = InputPatterns.red_dot.match(value)
         yellow = InputPatterns.yellow_dot.match(value)
         clear = InputPatterns.rm_rating.match(value)
@@ -78,6 +79,8 @@ class MetaController:
         # update the ones with the specified track number
         for track in self.model.current_release:
             if track.track_num.value in track_nums:
+                # get track filename
+                tracks.append(track.file_name)
                 # update this track's metadata
                 if red:
                     track.kexp.save_obscenity(Util.Obscenity.red)
@@ -92,6 +95,7 @@ class MetaController:
         for track in track_nums:
             err_msg = "Invalid Track Number: " + str(track)
             Dialog.err_message(err_msg, None, parent=self.app)
+        self.app.select_tracks(tracks)
             
     def process_command(self, command):
         """
