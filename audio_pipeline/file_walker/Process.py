@@ -199,7 +199,10 @@ class ReleaseProcessor(Processor):
         # get the secondary category
         cat = None
         sort_names = []
-        if Resources.BatchConstants.rotation:
+        
+        if Resources.BatchConstants.source == Resources.Hitters.source:
+            cat = Resources.Hitters.Artist + Resources.BatchConstants.rotation + " Hitters"
+        elif Resources.BatchConstants.rotation:
             cat = ""
             
         for artist in release_meta.artist_sort_names:

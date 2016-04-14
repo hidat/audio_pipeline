@@ -1,4 +1,9 @@
+class Hitters():
+    source = "hitters"
+    artist = "(Various Artists) "
+    
 class BatchConstants():
+
     obscenity = None
     category = None
     source = None

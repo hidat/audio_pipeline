@@ -56,7 +56,7 @@ class MetaController:
                 print(e)
                 err_msg = "Invalid input " + str(input_string)
                 Dialog.err_message(err_msg, None, parent=self.app)
-        else:
+        elif input_string > '':
             command = input_string.split()[0]
             self.process_command(command)
 
