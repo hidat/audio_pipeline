@@ -1,6 +1,6 @@
-from util import MBInfo
-from file_walker import Resources
-from file_walker import Util
+from ..util import MBInfo
+from . import Resources
+from . import Util
 import uuid as UUID
 
 class Processor(object):
@@ -197,15 +197,13 @@ class ReleaseProcessor(Processor):
         #####################################
         
         # get the secondary category
-        cat = None
         sort_names = []
-        if Resources.BatchConstants.rotation:
-            cat = ""
-            
         for artist in release_meta.artist_sort_names:
-            sort_names.append(artist)
-                
-        if Resources.BatchConstants.rotation:
+           sort_names.append(artist)
+       
+        if Resources.BatchConstants.source == Resources.Hitters.source:
+            track.secondary_category = Resources.Hitters.artist + Resources.BatchConstants.rotation + " Hitters"
+        elif Resources.BatchConstants.rotation:
             cat = release_meta.artist
             cat += " - " + release_meta.title
             cat = self.secondary_category + "/" + Util.stringCleanup(Resources.BatchConstants.rotation) + \

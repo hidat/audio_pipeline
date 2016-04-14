@@ -32,6 +32,6 @@ rm_rating = re.compile("\s*c(lear)?", flags=re.I)
 # change obscenity rating pattern
 yellow_dot = re.compile("\s*y(ellow)?\s*(dot)?", flags=re.I)
 red_dot = re.compile("\s*r(ed)?\s*(dot)?", flags=re.I)
-clean_edit = re.compile("\s*c(lean)?\s*(edit)?", flags=re.I)
+clean_edit = re.compile("\s*(clean\s*(edit)?)|l\s*", flags=re.I)
 
 whitespace = re.compile("\s+")

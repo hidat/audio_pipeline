@@ -68,8 +68,9 @@ class MetaController:
         """
         red = InputPatterns.red_dot.match(value)
         yellow = InputPatterns.yellow_dot.match(value)
+        clean = InputPatterns.clean_edit.match(value)
         clear = InputPatterns.rm_rating.match(value)
-        if not red and not yellow and not clear:
+        if not (red or yellow or clean or clear):
                 err_msg = "Invalid Input " + str(value)
                 Dialog.err_message(err_msg, None, parent=self.app)
                 return None
@@ -83,6 +84,8 @@ class MetaController:
                     track.kexp.save_obscenity(Util.Obscenity.red)
                 elif yellow:
                     track.kexp.save_obscenity(Util.Obscenity.yellow)
+                elif clean:
+                    track.kexp.save_obscenity(Util.Obscenity.clean)
                 elif clear:
                     track.kexp.save_obscenity(None)
                 self.app.update_meta(track)

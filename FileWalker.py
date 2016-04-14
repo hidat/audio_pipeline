@@ -1,5 +1,5 @@
 import os
-import settings
+import Settings
 from audio_pipeline.util import MBInfo
 from audio_pipeline.util import AudioFile
 from audio_pipeline.file_walker import Process as Processor
@@ -109,7 +109,7 @@ def process_directory(source_dir, output_dir, serializer):
                 print("Skipping " + ascii(file_name))
                 copy_to_path = os.path.join(track_fail_dir, path)
 
-            if not batch_constants.generate:
+            if not batch_constants.generate and copy_to_path > '':
                 # If we aren't just generating metadata, make backup of original file just in case
                 if not os.path.exists(copy_to_path):
                     os.makedirs(copy_to_path)
