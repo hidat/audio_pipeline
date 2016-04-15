@@ -97,3 +97,7 @@ class App(tk.Tk):
     def select_tracks(self, tracks):
         if self.track_frame:
             self.track_frame.select_tracks(tracks)
+            
+    def select_release(self):
+        if self.release_frame:
+            self.release_frame.select_release()

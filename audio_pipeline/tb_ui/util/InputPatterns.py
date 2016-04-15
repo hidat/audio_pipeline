@@ -17,8 +17,14 @@ length = "length"
 title = "title"
 obscenity = "obscenity"
 
+release_meta_pattern = re.compile('\s*r(elease)?', flags=re.I)
 
 track_meta_pattern = re.compile('\s*(?P<' + tracknum_acc + '>(((\d+((,)|(\s))*)+)|(\s*all)))\s*(?P<' + meta_acc + '>.+)')
+
+tag_pattern = re.compile('\s*(?P<' + artist + '>(a(rtist)?))|(?P<' + album + '>)(album)|(n(ame)?)| \
+                          (?P<' + num + '>(track|disc))|(?P<' + mbid + '>(m(bid)?))| \
+                          (?P<' + date + '>(d(ate)?))|(?P<' + length + '>(l(ength?)))| \
+                          (?P<' + title + '>(t(itle)?))(?P<' + obscenity + '>(o(bscenity)?))', flags=re.I)
 
 prev_pattern = re.compile("\s*p(rev)?.*", flags=re.I)
 next_pattern = re.compile("\s*n(ext)?", flags=re.I)

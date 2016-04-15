@@ -71,6 +71,10 @@ class ReleaseFrame(MetaFrame):
                 self.attribute_text[name].set(tag.value)
                 self.attributes[name].config(fg=Settings.text_color)
 
+    def select_release(self):
+        self.active.clear()
+        for tag, label in self.attributes.items():
+            label['state'] = 'active'
 
 class TrackFrame(MetaFrame):
     
