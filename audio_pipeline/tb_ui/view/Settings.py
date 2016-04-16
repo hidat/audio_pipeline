@@ -1,4 +1,4 @@
-from .. import InputPatterns
+from ..util import InputPatterns
 
 class Command:
     def __init__(self, command, help, examples=[]):
@@ -15,6 +15,9 @@ blue = "cyan"
 heading = ('Helvetica', '10', 'bold')
 standard = ('Helvetica', '10')
 initial_size = (500, 500)
+
+active_fg = "black"
+active_bg = "white"
 
 commands = [Command("<track_num>[[,][ ]<track_num>...][ ]<meta_command>", "Add the metadata specified by <meta_command> to track <track_num>. <meta_command> is not case-sensitive.\
               \nMultiple <track_nums> may be specified, separated by \",\" and/or \" \"\

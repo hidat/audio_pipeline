@@ -2,9 +2,8 @@ from ..model import MetaModel
 from ..view import App
 from ..view import Dialog
 from ...util import Util
-from .. import InputPatterns
 from . import EntryController
-from .. import InputPatterns
+from ..util import InputPatterns
 import re
 
 
@@ -40,18 +39,20 @@ class MetaController:
         :return:
         """
         input_string = self.app.get_input()
-        match = InputPatterns.track_meta_pattern.match(input_string)
+        tracks = InputPatterns.track_meta_pattern.match(input_string)
+        release = InputPatterns.release_meta_pattern.match(input_string)
+        tag = InputPatterns.tag_pattern.match(input_string)
         self.app.select_input()
-        if match:
+        if tracks:
             # input is (probably) track metadata (currently only RED DOT, YELLOW DOT)
             try:
-                track_nums = match.group(InputPatterns.tracknum_acc)
+                track_nums = tracks.group(InputPatterns.tracknum_acc)
                 if re.search("all", track_nums):
                     track_nums = set(self.model.track_nums())
                 else:
                     track_nums = re.findall("\d+", track_nums)
                     track_nums = set([int(track_num) for track_num in track_nums])
-                value = match.group(InputPatterns.meta_acc)
+                value = tracks.group(InputPatterns.meta_acc)
                 self.new_meta_input(track_nums, value)
             except ValueError as e:
                 print(e)
