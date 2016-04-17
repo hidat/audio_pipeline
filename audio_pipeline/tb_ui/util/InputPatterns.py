@@ -33,6 +33,8 @@ help_pattern = re.compile("\s*(\?+)|h(elp)?", flags=re.I)
 entry_pattern = re.compile("\s*e((nter)|(ntry)|(dit))|m(eta)?")
 rm_rating = re.compile("\s*c(lear)?", flags=re.I)
 
+unknown = re.compile("unknown artist", flags=re.I)
+
 # patterns to choose which track metadata to change
 
 # change obscenity rating pattern

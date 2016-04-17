@@ -10,7 +10,7 @@ class UnsupportedFiletypeError(Exception):
 
 class AudioFile(util.AudioFile.AudioFile):
 
-    release_style = {'anchor': 'nw', 'bg': Settings.bg_color, 'fg': Settings.text_color, 
+    release_style = {'anchor': 'nw', 'bg': Settings.bg_color, 'foreground': Settings.text_color, 
                                  'font': Settings.standard, 'activeforeground': Settings.active_fg,
                                  'activebackground': Settings.active_bg, 'justify': 'left'}
     name_style = {'anchor': 'nw', 'justify': 'left', 'background': Settings.bg_color,
@@ -46,7 +46,10 @@ class AudioFile(util.AudioFile.AudioFile):
             self.kexp.primary_genre.style = self.style(20, True)
                     
     def style(self, width, track):
-        configuration = self.track_style.copy() if track else self.release_style.copy()
+        if track:
+            configuration = self.track_style.copy()
+        else:
+            configuration = self.release_style.copy()
         configuration['width'] = width
         configuration['wraplength'] = 8 * width
         return configuration

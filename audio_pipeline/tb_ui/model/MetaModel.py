@@ -24,7 +24,7 @@ class ProcessDirectory(object):
             if os.path.isdir(item):
                 self.releases.append(item)
         
-        self.releases.sort()
+        self.releases.sort(reverse=True)
 
         self.current_releases = []
         self.current_release = []

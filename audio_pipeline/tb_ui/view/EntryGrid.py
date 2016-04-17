@@ -296,7 +296,7 @@ class EntryGrid(tk.Toplevel):
         artist_column = self.track_categories.index('Artist')
         for y in range(0, int(self.tracks['height'])):
             artist = self.tracks.entrycget(artist_column, y, 'text')
-            if InputPatterns.whitespace.match(artist):
+            if InputPatterns.whitespace.match(artist) or InputPatterns.unknown.match(artist):
                 # set track artist to album artist
                 self.tracks.set(artist_column, y, text=album_artist)
             

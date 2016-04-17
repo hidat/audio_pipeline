@@ -36,7 +36,7 @@ class App(tk.Tk):
         self.menubar.add_command(label="Help", command=self.display_info)
         self.config(menu=self.menubar)
 
-        #self.protocol("WM_DELETE_WINDOW", self.destroy)
+        self.protocol("WM_DELETE_WINDOW", self.destroy)
 
         self.allow_input()
         self.grid()

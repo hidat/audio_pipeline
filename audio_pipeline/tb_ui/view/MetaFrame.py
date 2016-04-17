@@ -3,10 +3,6 @@ import tkinter.tix as tk
 
 class MetaFrame(tk.Frame):
 
-    meta_styling = {'anchor': 'nw', 'background': Settings.bg_color, 'font': Settings.standard,
-                    'activeforeground': Settings.active_fg, 'activebackground': Settings.active_bg}
-    name_styling = {'anchor': 'nw', 'background': Settings.bg_color, 'foreground': Settings.text_color, 'font': Settings.heading}
-
     meta_padding = {'sticky': "w", 'padx': 10, 'pady': 3}
     name_padding = {'sticky': "w", 'padx': 10, 'pady': 5}
 

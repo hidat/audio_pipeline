@@ -26,7 +26,8 @@ commands = [Command("<track_num>[[,][ ]<track_num>...][ ]<meta_command>", "Add t
               ["<track_num><meta_command>: 7y: Add YELLOW DOT obscenity rating to track 7 of the current album."]),
               Command("d[one]", "Close this application."),
               Command("n[ext]", "Display metadata of next album"),
-              Command("p[[rev]ious]", "Display metadata of previous album")]
+              Command("p[[rev]ious]", "Display metadata of previous album"),
+              Command("e[dit] or m[eta]", "Edit all metadata categories with the Metadata Input Friend")]
 
 def get_text_color(audio_file):
     color = text_color

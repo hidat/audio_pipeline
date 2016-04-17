@@ -21,6 +21,10 @@ class MetaController:
         self.root_dir = None
         self.app = App.App(self.process_input, self.choose_dir)
         self.app.bind("<Escape>", self.last_album)
+        
+        dir = os.path.split(root_dir)
+        self.mbid_dir = os.path.join(dir, "Completed")
+        self.picard_dir = os.path.join(dir, "Picard Me")
 
         if root_dir:
             self.model = MetaModel.ProcessDirectory(root_dir)
