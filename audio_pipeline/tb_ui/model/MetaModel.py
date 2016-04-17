@@ -2,7 +2,7 @@
 # Read in metadata relevant to human comparison with physical disc media info
 import os
 import mutagen
-from ...util import AudioFile
+from ..util import AudioFile
 
 
 class ProcessDirectory(object):

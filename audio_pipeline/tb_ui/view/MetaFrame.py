@@ -60,8 +60,7 @@ class ReleaseFrame(MetaFrame):
                     self.labels[name].grid(self.name_padding, row=rowval, column=colval)
                 rowval += 1
                 self.attribute_text[name].set(tag.value)
-                self.attributes[name] = tk.Label(self, release.release_style, foreground=Settings.text_color,
-                                                 textvariable=self.attribute_text[name])
+                self.attributes[name] = tk.Label(self, tag.style, textvariable=self.attribute_text[name])
                 self.attributes[name].grid(self.meta_padding, row=rowval, column=colval)
                 colval += 1
                 rowval = 0
