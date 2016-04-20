@@ -23,16 +23,8 @@ class MetaController:
         self.app = App.App(self.process_input, self.choose_dir)
         self.app.bind("<Escape>", self.last_album)
         
-        path, directory = os.path.split(root_dir)
-        self.mbid_dir = os.path.join(path, "Completed")
-        self.picard_dir = os.path.join(path, "Picard Me")
-
         if root_dir:
-            self.model = MetaModel.ProcessDirectory(root_dir)
-            self.root_dir = root_dir
-
-            if self.model.has_next():
-                self.next_album()
+            self.choose_dir(root_dir)
         else:
             self.app.after_idle(func=self.app.choose_dir)
 

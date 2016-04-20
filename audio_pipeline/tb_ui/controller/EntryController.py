@@ -2,7 +2,6 @@ from ..util import InputPatterns
 from ..view import EntryGrid
 from ..model import MetaModel
 from ...util import Util
-import tkinter.tix as tk
 
 
 class Entry():
@@ -59,6 +58,7 @@ class Entry():
                     None if new metadata is of incorrect type
         """
 
+        print(str(tag_name) + ": " + str(meta))
         old_meta = audio_file[tag_name].value
         new_meta = None
         if meta:
@@ -77,6 +77,8 @@ class Entry():
                     new_meta = Util.Obscenity.red
                 elif InputPatterns.clean_edit.match(meta):
                     new_meta = Util.Obscenity.clean
+                elif InputPatterns.whitespace.match(meta):
+                    new_meta = " "
             elif tag_name == "Album Artist":
                 # fill in empty track artists with entered album artist
                 new_meta = meta

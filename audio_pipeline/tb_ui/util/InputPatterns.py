@@ -28,7 +28,7 @@ tag_pattern = re.compile('\s*(?P<' + artist + '>(a(rtist)?))|(?P<' + album + '>)
 
 prev_pattern = re.compile("\s*p(rev)?.*", flags=re.I)
 next_pattern = re.compile("\s*n(ext)?", flags=re.I)
-done_pattern = re.compile("\s*d+(one)?", flags=re.I)
+done_pattern = re.compile("\s*(d+(one)?)|(q+(uit)?)", flags=re.I)
 help_pattern = re.compile("\s*(\?+)|h(elp)?", flags=re.I)
 entry_pattern = re.compile("\s*e((nter)|(ntry)|(dit))|m(eta)?")
 rm_rating = re.compile("\s*c(lear)?", flags=re.I)

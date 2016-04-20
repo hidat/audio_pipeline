@@ -35,7 +35,7 @@ class DialogBox(tk.Toplevel):
         
         for i in range(0, len(buttons)):
             button = buttons[i]
-            if button["command"]:
+            if "command" in button:
                 but = tk.Button(box, text=button["name"], command=lambda x=button["command"]: self.apply(x))
             else:
                 but = tk.Button(box, text=button["name"], command=self.cancel)
