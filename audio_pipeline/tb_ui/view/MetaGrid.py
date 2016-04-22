@@ -5,7 +5,6 @@ class MetaGrid(tk.Grid):
 
     def __init__(self, update_command, last_command, bindings, start_index,
                  forbidden_rows, forbidden_columns, *args, **kwargs):
-        kwargs['editdone'] = self.editdone
         kwargs['editnotify'] = self.editnotify
         tk.Grid.__init__(self, *args, **kwargs)
         self.update_command = update_command
@@ -19,11 +18,7 @@ class MetaGrid(tk.Grid):
         self.forbidden_columns = forbidden_columns
         self.curr_pos = self.start
         self.curr_meta = " "
-        
                 
-    def editdone(self, x, y):
-        print("DONE EDITING " + str((x, y)))
-        
     def editapply(self):
         
         print("applying edit")
@@ -63,8 +58,11 @@ class MetaGrid(tk.Grid):
 
     def restore_meta(self, event):
         print("restoring: " + self.curr_meta)
-        self.set(self.curr_pos[0], self.curr_pos[1], text=self.curr_meta)
-        self.edit_set(self.curr_pos[0], self.curr_pos[1])
+        meta = self.curr_meta
+        position = self.curr_pos
+        self.edit_set(self.start[0], self.start[1])
+        self.set(position[0], position[1], text=meta)
+        self.edit_set(position[0], position[1])
         
     def move(self):
         success = False

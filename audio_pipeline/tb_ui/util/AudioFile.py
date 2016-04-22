@@ -28,7 +28,7 @@ class AudioFile(util.AudioFile.AudioFile):
         except util.AudioFile.UnsupportedFiletypeError:
             raise UnsupportedFiletypeError(file_name)
             
-        self.track_style = self.release_style
+        self.track_style = self.release_style.copy()
         self.track_style['fg'] = Settings.get_text_color(self)
         
         self.mbid.style = self.style(30, False)

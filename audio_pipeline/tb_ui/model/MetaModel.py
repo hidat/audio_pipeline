@@ -6,6 +6,7 @@ from ..util import AudioFile
 
 
 class ProcessDirectory(object):
+
     def __init__(self, src_dir):
         """
         Create a new ProcessDirectory item, which will go through all subdirectories
@@ -24,11 +25,13 @@ class ProcessDirectory(object):
             if os.path.isdir(item):
                 self.releases.append(item)
         
-        self.releases.sort(reverse=True)
+        self.releases.sort
+        
+        print(self.releases)
 
         self.current_releases = []
         self.current_release = []
-
+        
         self.release_index = -1
         self.cur_index = -1
     
@@ -40,7 +43,7 @@ class ProcessDirectory(object):
             return self.current_release
 
         # get index of next release
-        next_release = self.cur_index
+        next_release = None
         if self.cur_index is not None and ((self.cur_index + 1) < len(self.releases)):
             for i in range(self.cur_index+1, len(self.releases)):
                 files = os.listdir(self.releases[i])
@@ -48,14 +51,21 @@ class ProcessDirectory(object):
                     file = os.path.join(self.releases[i], item)
                     try:
                         af = AudioFile.AudioFile(file)
-                    except IOError or AudioFile.UnsupportedFiletypeError:
+                    except IOError as e:
+                        print("IOERROR " + e)
+                        continue
+                    except AudioFile.UnsupportedFiletypeError as e:
+                        print("unsupported filetype: " + e)
                         continue
                     next_release = i
                     break
-                if next:
+                if next_release is not None:
                     break
         
-        meta = self.get_meta(next_release)
+        if next_release is not None:
+            meta = self.get_meta(next_release)
+        else:
+            meta = None
         return meta
         
     def get_prev(self):
@@ -65,7 +75,7 @@ class ProcessDirectory(object):
             return self.current_release
 
         # get index of previous release
-        prev_release = self.cur_index
+        prev_release = None
         if self.cur_index is not None and ((self.cur_index - 1) >= 0):
             for i in reversed(range(0, self.cur_index)):
                 files = os.listdir(self.releases[i])
@@ -73,14 +83,21 @@ class ProcessDirectory(object):
                     file = os.path.join(self.releases[i], item)
                     try:
                         af = AudioFile.AudioFile(file)
-                    except IOError or AudioFile.UnsupportedFiletypeError:
+                    except IOError as e:
+                        print("IOERROR " + e)
+                        continue
+                    except AudioFile.UnsupportedFiletypeError as e:
+                        print("unsupported filetype: " + e)
                         continue
                     prev_release = i
                     break
-                if next:
+                if prev_release is not None:
                     break
 
-        meta = self.get_meta(prev_release)
+        if prev_release is not None:
+            meta = self.get_meta(prev_release)
+        else:
+            meta = None
         return meta
 
     def get_meta(self, release_index):
@@ -179,7 +196,15 @@ class ProcessDirectory(object):
             success = True
             
         return success
-
+        
+    def reset(self):
+        """
+        Reset the model to the first album
+        """
+        next = None
+        self.release_index = -1
+        self.cur_index = -1
+        
     def has_next(self):
         has_next = False
         if self.release_index >= 0 and self.release_index+1 < len(self.current_releases):

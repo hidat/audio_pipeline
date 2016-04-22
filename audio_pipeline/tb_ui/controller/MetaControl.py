@@ -4,6 +4,8 @@ from ..view import Dialog
 from ...util import Util
 from . import EntryController
 from ..util import InputPatterns
+from ..util import Resources
+import shutil
 import os
 import re
 
@@ -20,6 +22,8 @@ class MetaController:
         """
         self.model = None
         self.root_dir = None
+        self.mbid_dir = None
+        self.picard_dir = None
         self.app = App.App(self.process_input, self.choose_dir)
         self.app.bind("<Escape>", self.last_album)
         
@@ -142,12 +146,64 @@ class MetaController:
         """
         Display a 'quit'? dialog
         """
-        Dialog.quit_message("Close TomatoBanana?", self.app.quit, self.app)
-  
+        Dialog.DialogBox("Close TomatoBanana?", buttons=[{"name": "Move Files", "command": self.close},
+                         {"name": "Don't Move Files", "command": self.app.quit}, {"name": "Cancel"}])
+        
+    def close(self):
+        """
+        Close TomatoBanana; move files into appropriate folders
+        """
+        self.model.reset()
+        
+        while self.model.has_next():
+            release = self.model.get_next()
+            
+            # get path to has-mbid and no-mbid folders once per release
+            release_path, file = os.path.split(release[0].file_name)
+            release_name = os.path.split(release_path)[1]
+            
+            mbid = os.path.join(self.mbid_dir, release_name)
+            picard = os.path.join(self.picard_dir, release_name)
+            
+            for track in release:
+                # if track has a valid mbid, move to has-mbid folder,
+                # if not, move to needs-to-picard folder
+                name = os.path.split(track.file_name)[1]
+                if Resources.has_mbid(track):
+                    if not os.path.exists(mbid):
+                        os.mkdir(mbid)
+                    destination = os.path.join(mbid, name)
+                else:
+                    if not os.path.exists(picard):
+                        os.mkdir(picard)
+                    destination = os.path.join(picard, name)
+                    
+                shutil.move(track.file_name, destination)
+                
+            try:
+                print("\n THE ReLEASE PATH " + str(release_path) + "\n\n")
+                os.rmdir(release_path)
+            except OSError as e:
+                # release directory is not empty
+                continue
+        self.app.quit()
+
+        
     def choose_dir(self, root_dir):
         if root_dir > "":
             new_model = MetaModel.ProcessDirectory(root_dir)
             if new_model.has_next():
+            
+                path, releases = os.path.split(root_dir)
+                self.mbid_dir = os.path.join(path, Resources.mbid_directory)
+                if not os.path.exists(self.mbid_dir):
+                    os.makedirs(self.mbid_dir)
+                    
+                self.picard_dir = os.path.join(path, Resources.picard_directory)
+                if not os.path.exists(self.picard_dir):
+                    os.makedirs(self.picard_dir)
+            
+            
                 self.root_dir = root_dir
                 self.model = new_model
                 self.next_album()
@@ -156,10 +212,10 @@ class MetaController:
                     Dialog.DialogBox("Please select a valid directory.", buttons=[{"name": "OK", "command": self.app.choose_dir},
                                      {"name": "Cancel", "command": self.app.quit}])
                 else:
-                    Dialog.err_message("Please select a valid directory.", self.app.choose_dir, quit=True)
+                    Dialog.err_message("Please select a valid directory.", self.app.choose_dir, self.app, True)
         else:
             if not self.root_dir:
                 Dialog.DialogBox("Please select a valid directory.", buttons=[{"name": "OK", "command": self.app.choose_dir},
                                   {"name": "Cancel", "command": self.app.quit}])
             else:
-                Dialog.err_message("Please select a valid directory.", self.app.choose_dir, quit=True)
+                Dialog.err_message("Please select a valid directory.", self.app.choose_dir, self.app, True)

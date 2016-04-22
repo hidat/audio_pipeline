@@ -77,7 +77,7 @@ class EntryGrid(tk.Toplevel):
             row += 1
             
             
-        self.quit_button = tk.Button(self, text="Finish & Save", command=self.quit_save)
+        self.quit_button = tk.Button(self, text="Finish & Save", command=self.save)
         self.quit_button.bind("<Return>", self.quit_button["command"])
         self.quit_button.bind("<Tab>", self.starting_selection)
         self.bind("<Escape>", self.quit_popup)
