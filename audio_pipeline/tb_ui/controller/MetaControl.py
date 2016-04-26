@@ -41,8 +41,6 @@ class MetaController:
         """
         input_string = self.app.get_input()
         tracks = InputPatterns.track_meta_pattern.match(input_string)
-        release = InputPatterns.release_meta_pattern.match(input_string)
-        tag = InputPatterns.tag_pattern.match(input_string)
         self.app.select_input()
         if tracks:
             # input is (probably) track metadata (currently only RED DOT, YELLOW DOT)
@@ -146,9 +144,8 @@ class MetaController:
         """
         Display a 'quit'? dialog
         """
-        Dialog.DialogBox("Close TomatoBanana?", buttons=[{"name": "Move Files", "command": self.close},
-                         {"name": "Don't Move Files", "command": self.app.quit}, {"name": "Cancel"}])
-        
+        Dialog.Check(self.app, "Processing complete", "Close TB", self.close, self.app.quit, "Close TomatoBanana?")
+
     def close(self):
         """
         Close TomatoBanana; move files into appropriate folders
@@ -212,10 +209,12 @@ class MetaController:
                     Dialog.DialogBox("Please select a valid directory.", buttons=[{"name": "OK", "command": self.app.choose_dir},
                                      {"name": "Cancel", "command": self.app.quit}])
                 else:
-                    Dialog.err_message("Please select a valid directory.", self.app.choose_dir, self.app, True)
+                    Dialog.DialogBox("Please select a valid directory.", buttons=[{"name": "OK", "command": self.app.choose_dir},
+                                     {"name": "Cancel"}], master=self.app)
         else:
             if not self.root_dir:
                 Dialog.DialogBox("Please select a valid directory.", buttons=[{"name": "OK", "command": self.app.choose_dir},
                                   {"name": "Cancel", "command": self.app.quit}])
             else:
-                Dialog.err_message("Please select a valid directory.", self.app.choose_dir, self.app, True)
+                Dialog.DialogBox("Please select a valid directory.", buttons=[{"name": "OK", "command": self.app.choose_dir},
+                                 {"name": "Cancel"}], master=self.app)

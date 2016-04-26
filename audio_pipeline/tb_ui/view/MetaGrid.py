@@ -1,5 +1,5 @@
 import tkinter.tix as tk
-
+from . import Dialog
 
 class MetaGrid(tk.Grid):
 
@@ -18,14 +18,11 @@ class MetaGrid(tk.Grid):
         self.forbidden_columns = forbidden_columns
         self.curr_pos = self.start
         self.curr_meta = " "
-                
-    def editapply(self):
-        
-        print("applying edit")
 
+    def editapply(self):
         self.edit_apply()
         if self.curr_pos:
-           return self.move()
+            return self.move()
         
     def editnotify(self, x, y):
         # make a map of position -> (track, metadata) for use here
@@ -36,8 +33,6 @@ class MetaGrid(tk.Grid):
         y = int(y)
         self.curr_pos = (x, y)
         self.curr_meta = self.entrycget(x, y, 'text')
-        print("notify: " + self.curr_meta)
-        print("BEGIN EDITING " + str((x, y)))
         if not self.bindings():
             # These are all class-level bindings, that are unbound when this app is closed
             # However, some of these class-level bindings override previous default bindings
@@ -54,7 +49,6 @@ class MetaGrid(tk.Grid):
             self.bind_class("Entry", "<Shift-Down>", lambda x: self.move_cell(self.down))
             self.bind_class("Entry", "<Control-z>", self.restore_meta)
         return True
-       
 
     def restore_meta(self, event):
         print("restoring: " + self.curr_meta)
@@ -64,33 +58,54 @@ class MetaGrid(tk.Grid):
         self.set(position[0], position[1], text=meta)
         self.edit_set(position[0], position[1])
         
-    def move(self):
-        success = False
+    # def move(self):
+    #     success = False
+    #     pos = self.curr_pos
+    #     meta = self.entrycget(pos[0], pos[1], 'text')
+    #     new_meta = self.update_command(pos, meta)
+    #     print(new_meta)
+    #     if new_meta:
+    #         self.set(pos[0], pos[1], text=new_meta)
+    #         success = True
+    #     else:
+    #         # display an error message
+    #         Dialog.err_message("Please enter appropriate metadata", ok_command=self.set(pos[0], pos[1], text=meta))
+    #         self.set(pos[0], pos[1], text=meta)
+    #         self.set_curr_cell()
+    #     return success
+    #
+    # def move_cell(self, direction_command, event=None):
+    #     success = self.editapply()
+    #     if success:
+    #         pos = direction_command(self.curr_pos)
+    #         while pos and (pos[0] in self.forbidden_columns or pos[1] in self.forbidden_rows):
+    #             pos = direction_command(pos)
+    #         if pos:
+    #             self.set_cell(pos)
+    #     return "break"
+
+    def move_cell(self, direction_command, event=None):
+        # apply edit so new metadata can be retrieved
+        self.edit_apply()
+
         pos = self.curr_pos
         meta = self.entrycget(pos[0], pos[1], 'text')
         new_meta = self.update_command(pos, meta)
-        print(new_meta)
+
         if new_meta:
+            # If entered metadata is valid, formatting may occur in update_command, so set the cell
             self.set(pos[0], pos[1], text=new_meta)
-            success = True
-        else:
-            # display an error message
-            Dialog.err_message("Please enter appropriate metadata", ok_command=self.set(pos[0], pos[1], text=meta))
-            self.set(pos[0], pos[1], text=meta)
-            self.set_curr_cell()
-        return success
-        
-    def move_cell(self, direction_command, event=None):
-        if event:
-            print(event.widget)
-        success = self.editapply()
-        if success:
             pos = direction_command(self.curr_pos)
             while pos and (pos[0] in self.forbidden_columns or pos[1] in self.forbidden_rows):
-                pos = direction_command(pos)
-            if pos:
-                self.set_cell(pos)
+                    pos = direction_command(pos)
+        else:
+            # Entered metadata is invalid, so display an error message
+            Dialog.err_message("Please enter appropriate metadata", ok_command=self.set(pos[0], pos[1], text=meta))
+            self.set_curr_cell()
+        if pos:
+            self.set_cell(pos)
         return "break"
+
         
     def up(self, curr):
         if curr == self.start:

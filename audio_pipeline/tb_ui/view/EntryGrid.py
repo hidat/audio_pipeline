@@ -77,13 +77,15 @@ class EntryGrid(tk.Toplevel):
             row += 1
             
             
-        self.quit_button = tk.Button(self, text="Finish & Save", command=self.save)
+        self.quit_button = tk.Button(self, text="Finish & Save", command=self.quit_popup)
         self.quit_button.bind("<Return>", self.quit_button["command"])
         self.quit_button.bind("<Tab>", self.starting_selection)
         self.bind("<Escape>", self.quit_popup)
         # ask if user wants to save on close
         self.protocol("WM_DELETE_WINDOW", self.quit_popup)
         self.release_bindings = False
+
+        self.grab_set()
 
     def save(self):
         self.release.editapply()
@@ -101,6 +103,7 @@ class EntryGrid(tk.Toplevel):
         self.unbind_class("Entry", "<Shift-Right>")
         self.unbind_class("Entry", "<Shift-Up>")
         self.unbind_class("Entry", "<Shift-Down>")
+        self.unbind_class("Entry", "<Control-z>")
         self.after(100, self.the_end)
         
     def quit_popup(self, event=None):
