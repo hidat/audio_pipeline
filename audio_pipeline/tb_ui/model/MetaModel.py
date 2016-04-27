@@ -25,12 +25,13 @@ class ProcessDirectory(object):
             if os.path.isdir(item):
                 self.releases.append(item)
         
-        self.releases.sort
+        self.releases.sort()
         
-        print(self.releases)
-
         self.current_releases = []
         self.current_release = []
+        
+        self.cached = 0
+        self.replace = 0
         
         self.release_index = -1
         self.cur_index = -1
@@ -52,10 +53,10 @@ class ProcessDirectory(object):
                     try:
                         af = AudioFile.AudioFile(file)
                     except IOError as e:
-                        print("IOERROR " + e)
+                        print("IOERROR " + ascii(e))
                         continue
                     except AudioFile.UnsupportedFiletypeError as e:
-                        print("unsupported filetype: " + e)
+                        print("unsupported filetype: " + ascii(e))
                         continue
                     next_release = i
                     break
@@ -84,10 +85,10 @@ class ProcessDirectory(object):
                     try:
                         af = AudioFile.AudioFile(file)
                     except IOError as e:
-                        print("IOERROR " + e)
+                        print("IOERROR " + ascii(e))
                         continue
                     except AudioFile.UnsupportedFiletypeError as e:
-                        print("unsupported filetype: " + e)
+                        print("unsupported filetype: " + ascii(e))
                         continue
                     prev_release = i
                     break
@@ -113,11 +114,13 @@ class ProcessDirectory(object):
             return None
             
         if release_index != self.cur_index:
+        
+            if (len(self.current_releases) > CACHE_LIMIT):
+                self.current_releases.pop(0)
+        
             self.cur_index = release_index
             
             files = os.listdir(release_dir)
-
-            self.current_releases.clear()
             
             releases_index = dict()
             releases_index[0] = set([])
@@ -162,8 +165,10 @@ class ProcessDirectory(object):
             if len(releases[0]) <= 0:
                 releases.pop(0)
 
-            self.current_releases = [sorted(release, key=lambda x: x.track_num.value) for release in releases]
-            self.release_index = 0
+            releases = [sorted(release, key=lambda x: x.track_num.value) for release in releases]
+            self.current_releases = self.current_releases + releases
+            print(self.current_releases)
+            self.release_index = self.release_index + 1
 
             self.current_release = self.current_releases[self.release_index]
             return self.current_release
@@ -275,3 +280,4 @@ class ProcessDirectory(object):
                     break
 
         return has_next
+        

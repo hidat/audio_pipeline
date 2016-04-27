@@ -58,53 +58,53 @@ class MetaGrid(tk.Grid):
         self.set(position[0], position[1], text=meta)
         self.edit_set(position[0], position[1])
         
-    # def move(self):
-    #     success = False
-    #     pos = self.curr_pos
-    #     meta = self.entrycget(pos[0], pos[1], 'text')
-    #     new_meta = self.update_command(pos, meta)
-    #     print(new_meta)
-    #     if new_meta:
-    #         self.set(pos[0], pos[1], text=new_meta)
-    #         success = True
-    #     else:
-    #         # display an error message
-    #         Dialog.err_message("Please enter appropriate metadata", ok_command=self.set(pos[0], pos[1], text=meta))
-    #         self.set(pos[0], pos[1], text=meta)
-    #         self.set_curr_cell()
-    #     return success
-    #
-    # def move_cell(self, direction_command, event=None):
-    #     success = self.editapply()
-    #     if success:
-    #         pos = direction_command(self.curr_pos)
-    #         while pos and (pos[0] in self.forbidden_columns or pos[1] in self.forbidden_rows):
-    #             pos = direction_command(pos)
-    #         if pos:
-    #             self.set_cell(pos)
-    #     return "break"
-
-    def move_cell(self, direction_command, event=None):
-        # apply edit so new metadata can be retrieved
-        self.edit_apply()
-
+    def move(self):
+        success = False
         pos = self.curr_pos
         meta = self.entrycget(pos[0], pos[1], 'text')
         new_meta = self.update_command(pos, meta)
-
         if new_meta:
-            # If entered metadata is valid, formatting may occur in update_command, so set the cell
             self.set(pos[0], pos[1], text=new_meta)
+            success = True
+        else:
+            # display an error message
+            Dialog.err_message("Please enter appropriate metadata", ok_command=self.set(pos[0], pos[1], text=meta))
+            self.set(pos[0], pos[1], text=meta)
+            self.set_curr_cell()
+        return success
+    
+    def move_cell(self, direction_command, event=None):
+        success = self.editapply()
+        
+        if success:
             pos = direction_command(self.curr_pos)
             while pos and (pos[0] in self.forbidden_columns or pos[1] in self.forbidden_rows):
-                    pos = direction_command(pos)
-        else:
-            # Entered metadata is invalid, so display an error message
-            Dialog.err_message("Please enter appropriate metadata", ok_command=self.set(pos[0], pos[1], text=meta))
-            self.set_curr_cell()
-        if pos:
-            self.set_cell(pos)
+                pos = direction_command(pos)
+            if pos:
+                self.set_cell(pos)
         return "break"
+
+    # def move_cell(self, direction_command, event=None):
+        # # apply edit so new metadata can be retrieved
+        # self.edit_apply()
+
+        # pos = self.curr_pos
+        # meta = self.entrycget(pos[0], pos[1], 'text')
+        # new_meta = self.update_command(pos, meta)
+
+        # if new_meta:
+            # # If entered metadata is valid, formatting may occur in update_command, so set the cell
+            # self.set(pos[0], pos[1], text=new_meta)
+            # pos = direction_command(self.curr_pos)
+            # while pos and (pos[0] in self.forbidden_columns or pos[1] in self.forbidden_rows):
+                    # pos = direction_command(pos)
+        # else:
+            # # Entered metadata is invalid, so display an error message
+            # Dialog.err_message("Please enter appropriate metadata", ok_command=self.set(pos[0], pos[1], text=meta))
+            # self.set_curr_cell()
+        # if pos:
+            # self.set_cell(pos)
+        # return "break"
 
         
     def up(self, curr):

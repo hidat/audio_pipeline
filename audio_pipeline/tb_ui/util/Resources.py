@@ -4,6 +4,7 @@ import uuid
 mbid_directory = "Ready To Filewalk"
 picard_directory = "Picard Me!"
 
+cache_limit = 30
 
 def has_mbid(track):
     """

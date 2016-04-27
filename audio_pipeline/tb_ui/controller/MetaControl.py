@@ -24,7 +24,7 @@ class MetaController:
         self.root_dir = None
         self.mbid_dir = None
         self.picard_dir = None
-        self.app = App.App(self.process_input, self.choose_dir)
+        self.app = App.App(self.process_input, self.choose_dir, self.last_album)
         self.app.bind("<Escape>", self.last_album)
         
         if root_dir:
@@ -160,8 +160,14 @@ class MetaController:
             release_name = os.path.split(release_path)[1]
             
             mbid = os.path.join(self.mbid_dir, release_name)
+            if not os.path.exists(mbid):
+                os.mkdir(mbid)
+                
             picard = os.path.join(self.picard_dir, release_name)
-            
+            if not os.path.exists(picard):
+                os.mkdir(picard)
+                
+                
             for track in release:
                 # if track has a valid mbid, move to has-mbid folder,
                 # if not, move to needs-to-picard folder
@@ -178,11 +184,22 @@ class MetaController:
                 shutil.move(track.file_name, destination)
                 
             try:
-                print("\n THE ReLEASE PATH " + str(release_path) + "\n\n")
+                os.rmdir(picard)
+            except OSError as e:
+                # release directory is not empty
+                print("Picard files")
+                
+            try:
+                os.rmdir(mbid)
+            except OSError as e:
+                print("Filewalk files")
+                
+            try:
                 os.rmdir(release_path)
             except OSError as e:
                 # release directory is not empty
                 continue
+
         self.app.quit()
 
         

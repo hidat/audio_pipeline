@@ -110,16 +110,9 @@ class EntryGrid(tk.Toplevel):
         if event:
             print(event.widget)
         quit_display = Dialog.DialogBox("Save metadata changes?", master=self)
-        buttons = [{"name": "Save", "command": self.save}, {"name": "Close Without Saving", "command": self.quit}, {"name": "Cancel"}]
+        buttons = [{"name": "Save", "command": self.save}, {"name": "Don't Save", "command": self.quit}, {"name": "Cancel"}]
         quit_display.button_box(buttons)
         
-    def quit_save(self, event=None):
-        if event:
-            print(event.widget)
-        quit_display = Dialog.DialogBox("Save metadata changes?", master=self)
-        buttons = [{"name": "Save & Quit", "command": self.save}, {"name": "Cancel"}]
-        quit_display.button_box(buttons)
-
     def starting_selection(self, event=None):
         self.release.curr_pos = self.release.start
         self.release.set_curr_cell()

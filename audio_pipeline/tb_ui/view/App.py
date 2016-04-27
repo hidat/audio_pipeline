@@ -7,10 +7,10 @@ from . import Dialog
 
 class App(tk.Tk):
 
-    def __init__(self, input_processor, directory_selector):
+    def __init__(self, input_processor, directory_selector, close_command):
         self.input_processor = input_processor
         self.directory_selector = directory_selector
-
+        self.close_command = close_command
 
         self.release_location = (1, 1)
         self.track_location = (2, 1)
@@ -36,7 +36,7 @@ class App(tk.Tk):
         self.menubar.add_command(label="Help", command=self.display_info)
         self.config(menu=self.menubar)
 
-        self.protocol("WM_DELETE_WINDOW", self.destroy)
+        self.protocol("WM_DELETE_WINDOW", self.close_command)
 
         self.allow_input()
         self.grid()
@@ -89,8 +89,11 @@ class App(tk.Tk):
         self.info_window.destroy()
         self.info_window = None
 
+    def close_dialog(self):
+        Dialog.Check(self.app, "Processing complete", "Close TB", self.close, self.app.quit, "Close TomatoBanana?")
+        
     def quit(self):
-        self.after(100, self.destroy)
+        self.after(40, self.destroy)
 
     ####
 

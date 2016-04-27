@@ -58,7 +58,6 @@ class Entry():
                     None if new metadata is of incorrect type
         """
 
-        print(str(tag_name) + ": " + str(meta))
         old_meta = audio_file[tag_name].value
         new_meta = None
         if meta:

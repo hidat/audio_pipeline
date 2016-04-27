@@ -47,9 +47,11 @@ class Check(tk.Toplevel):
         select_but.pack(side=tk.LEFT, padx=5,pady=5)
         cancel_but.pack(side=tk.LEFT, padx=5,pady=5)
         box.pack()
-        self.grab_set()
-        self.mainloop()
 
+    def start(self):
+        self.grab_set()
+        self.master.wait_window(self)
+        
     def apply(self):
         # get value of checkbox
         on = self.selected.get()
@@ -79,7 +81,6 @@ class DialogBox(tk.Toplevel):
             self.transient(master)
             location = "+" + str(int(self.master.winfo_rootx() + self.master.winfo_width() / 2)) +\
                        "+" + str(int(self.master.winfo_rooty() + self.master.winfo_height() / 2))
-            print(location)
             self.geometry(location)
 
         if title:
@@ -88,9 +89,6 @@ class DialogBox(tk.Toplevel):
         self.text(message)
         if buttons:
             self.button_box(buttons)
-
-        self.grab_set()
-        self.master.wait_window(self)
 
     def text(self, message):
         label = tk.Label(self, text=message)
@@ -113,6 +111,10 @@ class DialogBox(tk.Toplevel):
 
         box.pack()
 
+    def start(self):
+        self.grab_set();
+        self.master.wait_window(self);
+        
     def apply(self, command):
         command()
         self.cancel()

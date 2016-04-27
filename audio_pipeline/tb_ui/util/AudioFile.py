@@ -35,9 +35,11 @@ class AudioFile(util.AudioFile.AudioFile):
         self.album.style = self.style(30, False)
         self.album_artist.style = self.style(25, False)
         self.release_date.style = self.style(15, False)
+        self.disc_num.style = self.style(10, False)
+        self.label.style = self.style(20, False)
+
         self.title.style = self.style(30, True)
         self.artist.style = self.style(25, True)
-        self.disc_num.style = self.style(10, False)
         self.track_num.style = self.style(5, True)
         self.length.style = self.style(10, True)
         

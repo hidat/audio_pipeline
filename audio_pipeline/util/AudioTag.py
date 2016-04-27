@@ -231,6 +231,12 @@ class TagID3Releasedate(TagID3String):
         frame = mutagen.id3.TDRC(encoding=3, text=val)
         return frame
         
+class TagID3Label(TagID3String):
+    def format(self, tag_value):
+        val = str(tag_value)
+        frame = mutagen.id3.TPUB(encoding=3, text=val)
+        return frame
+        
         
 ############
 #   KEXP Metadata
@@ -300,6 +306,10 @@ class Format(object):
     def artist(cls, tags):
         return cls._artist.make_tag(tags, False)
         
+    @classmethod
+    def label(cls, tags):
+        return cls._label.make_tag(tags, True)
+        
 
 class AAC(Format):
     
@@ -307,7 +317,8 @@ class AAC(Format):
     _mbid_p = TagAACFreeform('----:com.apple.iTunes:MusicBrainz Album Id', 'MBID')
     _album = TagAACString('\xa9alb', 'Album')
     _album_artist = TagAACString('aART', 'Album Artist')
-    _release_date = TagAACString('\xa9day', 'Release Date')
+    _release_date = TagAACString('\xa9day', 'Year')
+    _label = TagAACFreeform('----:com.apple.iTunes:LABEL', 'Label')
 
     _disc_num = TagAACInt('disk', 'Disc Num')
     _track_num = TagAACInt('trkn', 'Track Num')
@@ -329,8 +340,9 @@ class ID3(Format):
     _mbid_p = TagID3Text('TXXX:MusicBrainz Album Id', 'MBID')
     _album = TagID3AlbumName('TALB', 'Album')
     _album_artist = TagID3AlbumArtist('TPE2', 'Album Artist')
-    _release_date = TagID3Releasedate('TDRC', 'Release Date')
-
+    _release_date = TagID3Releasedate('TDRC', 'Year')
+    _label = TagID3Label('TPUB', 'Label')
+    
     _disc_num = TagID3DiscNum('TPOS', 'Disc Num')
     _track_num = TagID3TrackNum('TRCK', 'Track Num')
     _title = TagID3TrackTitle('TIT2', 'Title')
@@ -350,8 +362,9 @@ class Vorbis(Format):
     _mbid_p = TagVorbisString('musicbrainz_albumid', 'MBID')
     _album = TagVorbisString('album', 'Album')
     _album_artist = TagVorbisString('albumartist', 'Album Artist')
-    _release_date = TagVorbisString('date', 'Release Date')
-
+    _release_date = TagVorbisString('date', 'Year')
+    _label = TagVorbisString('label', 'Label')
+    
     _disc_num = TagVorbisInt('discnumber', 'Disc Num')
     _track_num = TagVorbisInt('tracknumber', 'Track Num')
     _title = TagVorbisString('title', 'Title')

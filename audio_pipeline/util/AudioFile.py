@@ -42,6 +42,7 @@ class AudioFile(object):
         self.file_name = file_name
         self.mbid, self.album, self.album_artist, self.release_date, self.title, self.artist = None, None, None, None, None, None
         self.disc_num, self.track_num, self.length = None, None, None
+        self.label = None
         self.kexp = None
         self.format = None
         self.audio = None
@@ -74,6 +75,7 @@ class AudioFile(object):
             self.album = format.album(tags)
             self.album_artist = format.album_artist(tags)
             self.release_date = format.release_date(tags)   
+            self.label = format.label(tags)
             
             self.disc_num = format.disc_num(tags)
             self.track_num = format.track_num(tags)
@@ -146,6 +148,11 @@ class AudioFile(object):
         self.artist.value = artist
         self.__save_tag__(self.artist)
         self.audio.save()
+        
+    def save_label(self, label):
+        self.label.value = label
+        self.__save_tag__(self.label)
+        self.label.save()
 
     def save(self):
         """
@@ -162,6 +169,7 @@ class AudioFile(object):
         self.__save_tag__(self.track_num)
         self.__save_tag__(self.title)
         self.__save_tag__(self.artist)
+        self.__save_tag__(self.label)
         
         # set KEXP attributes
         if self.kexp:
@@ -171,8 +179,8 @@ class AudioFile(object):
         self.audio.save()
 
     def as_dict(self):
-        as_dict = {"MBID": self.mbid, "Album": self.album, "Album Artist": self.album_artist,
-                        "Release Date": self.release_date, "Title": self.title, "Artist": self.artist,
+        as_dict = {"MBID": self.mbid, "Label": self.label, "Album": self.album, "Album Artist": self.album_artist,
+                        "Year": self.release_date, "Title": self.title, "Artist": self.artist,
                         "Disc Num": self.disc_num, "Track Num": self.track_num, "Length": self.length}
 
         if self.kexp:
@@ -187,17 +195,11 @@ class AudioFile(object):
         
 class AudioFileIterator():
 
-    ordering = ["Album", "Album Artist", "Disc Num", "Release Date", "MBID",
+    ordering = ["Album Artist", "Album", "Label", "Disc Num", "Year", "MBID",
                 "Track Num", "Title", "Artist", "Length", "KEXPFCCOBSCENITYRATING"]
 
     def __init__(self, audiofile):
-        self.as_dict = {"MBID": audiofile.mbid, "Album": audiofile.album, "Album Artist": audiofile.album_artist,
-                        "Release Date": audiofile.release_date, "Title": audiofile.title, "Artist": audiofile.artist,
-                        "Disc Num": audiofile.disc_num, "Track Num": audiofile.track_num, "Length": audiofile.length}
-                        
-        if audiofile.kexp:
-            self.as_dict["KEXP Primary Genre"] = audiofile.kexp.primary_genre
-            self.as_dict["KEXPFCCOBSCENITYRATING"] = audiofile.kexp.obscenity
+        self.as_dict = audiofile.as_dict()
                 
         self.index = 0
     
