@@ -48,7 +48,7 @@ class ProcessDirectory(object):
         self.current_release = None
 
     def next(self):
-        if self.in_range() and self.releases[self.current] and self.release + 1 < len(self.releases[self.current]):
+        if self.valid_release_index() and self.releases[self.current] and self.release + 1 < len(self.releases[self.current]):
             self.release += 1
         else:
             self.current += 1
@@ -59,7 +59,7 @@ class ProcessDirectory(object):
         return self.current_release
 
     def prev(self):
-        if self.in_range() and self.releases[self.current] and self.release > 0:
+        if self.valid_release_index() and self.releases[self.current] and self.release > 0:
             self.release -= 1
         else:
             self.current -= 1
@@ -68,9 +68,6 @@ class ProcessDirectory(object):
 
         self.current_release = self.releases[self.current][self.release]
         return self.current_release
-
-    def in_range(self):
-        return (self.release >= 0 and self.release < len(self.releases))
 
     def load_release(self):
         if self.releases[self.current] is None:
@@ -168,3 +165,10 @@ class ProcessDirectory(object):
                 continue
             break
         return track
+
+    def valid_release_index(self):
+        return (self.release >= 0 and self.release < len(self.releases))
+
+    def track_nums(self):
+        tn = set([af.track_num.value for af in self.current_release])
+        return tn

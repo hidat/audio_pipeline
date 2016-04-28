@@ -47,7 +47,7 @@ class MetaController:
             try:
                 track_nums = tracks.group(InputPatterns.tracknum_acc)
                 if re.search("all", track_nums):
-                    track_nums = set(self.model.track_nums())
+                    track_nums = self.model.track_nums()
                 else:
                     track_nums = re.findall("\d+", track_nums)
                     track_nums = set([int(track_num) for track_num in track_nums])
