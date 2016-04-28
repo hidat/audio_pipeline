@@ -141,8 +141,7 @@ class ProcessDirectory(object):
 
                 # if we have no release-identifying metadata in the audio_file, put file in index 0 (general / unknown files)
                 if file_data.mbid.value <= '' and file_data.album_artist.value <= '' and file_data.album.value <= '':
-                   releases[0].append(file_data)
-                
+                    releases[0].append(file_data)
                 else:
                     new_release = True
                     for index, release in releases_index.items():

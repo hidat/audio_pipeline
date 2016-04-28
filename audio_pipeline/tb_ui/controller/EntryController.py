@@ -1,6 +1,5 @@
 from ..util import InputPatterns
 from ..view import EntryGrid
-from ..model import MetaModel
 from ...util import Util
 
 

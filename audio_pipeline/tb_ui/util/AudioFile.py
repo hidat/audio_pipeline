@@ -1,5 +1,6 @@
 from ... import util
 from ..view import Settings
+from ..util import Resources
 
 class UnsupportedFiletypeError(Exception):
     def __init__(self, message):
@@ -16,7 +17,7 @@ class AudioFile(util.AudioFile.AudioFile):
     name_style = {'anchor': 'nw', 'justify': 'left', 'background': Settings.bg_color,
                   'foreground': Settings.text_color, 'font': Settings.heading}
 
-    def __init__(self, file_name):
+    def __init__(self, file_name, picard, mb):
         """
         An AudioFile object that has all information about audiofile tags as a standard AudioFile,
         but also encodes UI formatting inforation for each tags.
@@ -46,6 +47,30 @@ class AudioFile(util.AudioFile.AudioFile):
         if self.kexp:
             self.kexp.obscenity.style = self.style(20, True)
             self.kexp.primary_genre.style = self.style(20, True)
+
+        self.picard = picard
+        self.mb = mb
+
+        self.dest_file = self.move_file()
+
+
+    def move_file(self):
+        if Resources.has_mbid(self):
+            self.dest_file = self.mb
+        else:
+            self.dest_file = self.picard
+
+        return self.dest_file
+
+    def save_mbid(self, mbid):
+        super().save_mbid(mbid)
+
+        self.dest_file = self.move_file()
+
+    def save(self):
+        super().save()
+
+        self.dest_file = self.move_file()
                     
     def style(self, width, track):
         if track:

@@ -1,4 +1,4 @@
-from ..model import MetaModel
+from ..model import Model
 from ..view import App
 from ..view import Dialog
 from ...util import Util
@@ -130,14 +130,14 @@ class MetaController:
         """
         Display the next directory / album
         """
-        tracks = self.model.get_next()
+        tracks = self.model.next()
         self.app.display_meta(tracks)
 
     def prev_album(self):
         """
         Display the previous album's metadata
         """
-        tracks = self.model.get_prev()
+        tracks = self.model.prev()
         self.app.display_meta(tracks)
 
     def last_album(self, event=None):
@@ -150,50 +150,34 @@ class MetaController:
         """
         Close TomatoBanana; move files into appropriate folders
         """
-        self.model.reset()
+        self.model.first()
         
         while self.model.has_next():
-            release = self.model.get_next()
-            
+            release = self.model.next()
+
             # get path to has-mbid and no-mbid folders once per release
             release_path, file = os.path.split(release[0].file_name)
-            release_name = os.path.split(release_path)[1]
-            
-            mbid = os.path.join(self.mbid_dir, release_name)
-            if not os.path.exists(mbid):
-                os.mkdir(mbid)
-                
-            picard = os.path.join(self.picard_dir, release_name)
+            picard = os.path.split(release[0].picard)[0]
+            mbid = os.path.split(release[0].mb)[0]
             if not os.path.exists(picard):
-                os.mkdir(picard)
-                
-                
+                os.makedirs(picard)
+            if not os.path.exists(mbid):
+                os.makedirs(mbid)
+
             for track in release:
-                # if track has a valid mbid, move to has-mbid folder,
-                # if not, move to needs-to-picard folder
-                name = os.path.split(track.file_name)[1]
-                if Resources.has_mbid(track):
-                    if not os.path.exists(mbid):
-                        os.mkdir(mbid)
-                    destination = os.path.join(mbid, name)
-                else:
-                    if not os.path.exists(picard):
-                        os.mkdir(picard)
-                    destination = os.path.join(picard, name)
-                    
-                shutil.move(track.file_name, destination)
-                
+                # move to correct folder
+                shutil.move(track.file_name, track.dest_file)
+
             try:
                 os.rmdir(picard)
             except OSError as e:
-                # release directory is not empty
-                print("Picard files")
-                
+                print(release_path + " ready to picard")
+
             try:
                 os.rmdir(mbid)
             except OSError as e:
-                print("Filewalk files")
-                
+                print(release_path + " ready to filewalk")
+
             try:
                 os.rmdir(release_path)
             except OSError as e:
@@ -205,7 +189,7 @@ class MetaController:
         
     def choose_dir(self, root_dir):
         if root_dir > "":
-            new_model = MetaModel.ProcessDirectory(root_dir)
+            new_model = Model.ProcessDirectory(root_dir)
             if new_model.has_next():
             
                 path, releases = os.path.split(root_dir)

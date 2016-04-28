@@ -53,7 +53,7 @@ class AudioFile(object):
                 raise UnsupportedFiletypeError(file_name)
         except IOError as e:
             # if there's an error opening the file with mutagen, return None
-            print("Mutagen IO error: ", e)
+            #print("Mutagen IO error: ", e)
             raise e
 
         format = None
