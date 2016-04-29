@@ -2,6 +2,7 @@ import tkinter.tix as tk
 from . import Dialog
 from . import MetaGrid
 from ..util import InputPatterns
+import re
 
 class EntryGrid(tk.Toplevel):
 
@@ -155,11 +156,14 @@ class EntryGrid(tk.Toplevel):
         return release
         
     def track_artist_set(self, album_artist):
+        print('this is dumb')
         # should probably change this because strings are terrible
         artist_column = self.track_categories.index('Artist')
+        aa = re.compile("\s*" + self.release.curr_meta + "\s*") # will do this better, sometime, probably
         for y in range(0, int(self.tracks['height'])):
             artist = self.tracks.entrycget(artist_column, y, 'text')
-            if InputPatterns.whitespace.match(artist) or InputPatterns.unknown.match(artist):
+            if aa.match(artist) or InputPatterns.whitespace.match(artist) or\
+               InputPatterns.unknown.match(artist):
                 # set track artist to album artist
                 self.tracks.set(artist_column, y, text=album_artist)
             

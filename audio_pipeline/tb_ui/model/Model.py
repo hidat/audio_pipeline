@@ -1,10 +1,11 @@
 import os
 from ..util import AudioFile
 from ..util import Resources
+from ..util import InputPatterns
 
 
 not_release = -1
-max_af = 350
+max_af = 2000
 
 
 class ProcessDirectory(object):
@@ -17,11 +18,11 @@ class ProcessDirectory(object):
         self.directories = list()
         for path, dirs, files in os.walk(root_dir):
             for directory in dirs:
-                directory = os.path.join(path, directory)
                 if self.is_release(directory):
+                    directory = os.path.join(path, directory)
                     self.directories.append(directory)
 
-        self.directories.sort()
+        self.directories.sort(key=lambda x: int(os.path.split(x)[1].split()[0]))
 
         self.releases = [None for directory in self.directories]
 
@@ -32,19 +33,28 @@ class ProcessDirectory(object):
         # take care of caching releases + audiofiles
         self.af = 0
         self.occupied = list()
+        
+        self.first()
 
     def first(self):
         self.current = -1
         self.release = -1
-        #self.load_release()
+        while (self.af - 20 < max_af and self.has_next()):
+            self.next()
+            
+        self.current = -1
+        self.release = -1
 
         self.current_release = None
 
     def last(self):
         self.current = len(self.releases)
-        #self.load_release()
         self.release = -1
+        while (self.af - 20 < max_af and self.has_prev()):
+            self.prev()
 
+        self.current = len(self.releases)
+        self.release = -1
         self.current_release = None
 
     def next(self):
@@ -54,9 +64,14 @@ class ProcessDirectory(object):
             self.current += 1
             self.load_release()
             self.release = 0
-
-        self.current_release = self.releases[self.current][self.release]
-        return self.current_release
+            while (not self.valid_release_index()) and self.has_next():
+                self.current += 1
+                self.load_release()
+                self.release = 0
+            
+        if self.valid_release_index():
+            self.current_release = self.releases[self.current][self.release]
+            return self.current_release
 
     def prev(self):
         if self.valid_release_index() and self.releases[self.current] and self.release > 0:
@@ -65,8 +80,25 @@ class ProcessDirectory(object):
             self.current -= 1
             self.load_release()
             self.release = len(self.releases[self.current]) - 1
+            while (not self.valid_release_index()) and self.has_prev():
+                self.current -= 1
+                self.load_release()
+                self.release = len(self.releases[self.current]) - 1
 
-        self.current_release = self.releases[self.current][self.release]
+        if self.valid_release_index():
+            self.current_release = self.releases[self.current][self.release]
+            return self.current_release
+        
+    def jump(self, i):
+        if i < 0:
+            for k in range(-1 * i):
+                if self.has_prev():
+                    self.prev()
+        else:
+            for k in range(i):
+                if self.has_next():
+                    self.next()
+                    
         return self.current_release
 
     def load_release(self):
@@ -88,7 +120,7 @@ class ProcessDirectory(object):
                 file = os.path.join(directory, f)
 
                 try:
-                    file_data = AudioFile.AudioFile(file, os.path.join(picard, f), os.path.join(mbid, f))
+                    file_data = AudioFile.AudioFile(file, picard, mbid)
                 except IOError as e:
                     continue
                 except AudioFile.UnsupportedFiletypeError as e:
@@ -147,27 +179,30 @@ class ProcessDirectory(object):
         return (self.current > 0) or (self.release > 0)
 
     def is_release(self, directory):
-        track = False
+        return InputPatterns.release_pattern.match(directory)
+        # track = False
 
-        picard = os.path.join(self.picard_dir, os.path.split(directory)[1])
-        mbid = os.path.join(self.mbid_dir, os.path.split(directory)[1])
+        # picard = os.path.join(self.picard_dir, os.path.split(directory)[1])
+        # mbid = os.path.join(self.mbid_dir, os.path.split(directory)[1])
 
-        for file in os.listdir(directory):
-            file_name = os.path.join(directory, file)
+        # for file in os.listdir(directory):
+            # file_name = os.path.join(directory, file)
 
-            try:
-                track = AudioFile.AudioFile(file_name, os.path.join(picard, file), os.path.join(mbid, file))
-            except IOError:
-                track = False
-                continue
-            except AudioFile.UnsupportedFiletypeError:
-                track = False
-                continue
-            break
-        return track
+            # try:
+                # track = AudioFile.AudioFile(file_name, os.path.join(picard, file), os.path.join(mbid, file))
+            # except IOError:
+                # track = False
+                # continue
+            # except AudioFile.UnsupportedFiletypeError:
+                # track = False
+                # continue
+            # break
+        # return track
 
+    
     def valid_release_index(self):
-        return (self.release >= 0 and self.release < len(self.releases))
+        return (self.releases[self.current] is not None and 
+                self.release >= 0 and self.release < len(self.releases[self.current]))
 
     def track_nums(self):
         tn = set([af.track_num.value for af in self.current_release])

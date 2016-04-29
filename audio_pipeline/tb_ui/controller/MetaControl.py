@@ -58,7 +58,7 @@ class MetaController:
                 err_msg = "Invalid input " + str(input_string)
                 Dialog.err_message(err_msg, None, parent=self.app)
         else:
-            command = input_string.split()[0]
+            command = input_string
             self.process_command(command)
 
     def new_meta_input(self, track_nums, value):
@@ -100,17 +100,25 @@ class MetaController:
         """
         Changes the album metadata on screen to the previous or next in the directory list,
         depending on the command that is passed in.
-        """
+        """        
         if InputPatterns.entry_pattern.match(command):
             meta_entry = EntryController.Entry(self.model.current_release, self.app, self.update_album)
             meta_entry.start()
         elif InputPatterns.next_pattern.match(command):
-            if self.model.has_next():
+            jump = InputPatterns.next_pattern.match(command).group(InputPatterns.forward)
+            if jump:
+                tracks = self.model.jump(int(jump))
+                self.app.display_meta(tracks)
+            elif self.model.has_next():
                 self.next_album()
             else:
                 self.last_album()
         elif InputPatterns.prev_pattern.match(command):
-            if self.model.has_prev():
+            jump = InputPatterns.prev_pattern.match(command).group(InputPatterns.forward)
+            if jump:
+                tracks = self.model.jump((-1 *int(jump)))
+                self.app.display_meta(tracks)
+            elif self.model.has_prev():
                 self.prev_album()
             else:
                 self.last_album()
@@ -118,7 +126,7 @@ class MetaController:
             self.last_album()
         elif InputPatterns.help_pattern.match(command):
             self.app.display_info()
-
+            
     def update_album(self):
         """
         Update current release metadata
@@ -156,33 +164,37 @@ class MetaController:
             release = self.model.next()
 
             # get path to has-mbid and no-mbid folders once per release
-            release_path, file = os.path.split(release[0].file_name)
-            picard = os.path.split(release[0].picard)[0]
-            mbid = os.path.split(release[0].mb)[0]
+            release_path = os.path.split(release[0].file_name)[0]
+            picard = release[0].picard
+            mb = release[0].mb
             if not os.path.exists(picard):
-                os.makedirs(picard)
-            if not os.path.exists(mbid):
-                os.makedirs(mbid)
-
+                os.mkdir(picard)
+            if not os.path.exists(mb):
+                os.mkdir(mb)
+            
             for track in release:
                 # move to correct folder
-                shutil.move(track.file_name, track.dest_file)
-
+                shutil.move(track.file_name, track.dest_dir)
+                
+                
             try:
                 os.rmdir(picard)
             except OSError as e:
-                print(release_path + " ready to picard")
-
+                print("picard)")
+                
             try:
-                os.rmdir(mbid)
+                os.rmdir(mb)
             except OSError as e:
-                print(release_path + " ready to filewalk")
-
+                print("mb")
+                
             try:
                 os.rmdir(release_path)
             except OSError as e:
                 # release directory is not empty
                 continue
+
+                
+
 
         self.app.quit()
 
@@ -194,12 +206,8 @@ class MetaController:
             
                 path, releases = os.path.split(root_dir)
                 self.mbid_dir = os.path.join(path, Resources.mbid_directory)
-                if not os.path.exists(self.mbid_dir):
-                    os.makedirs(self.mbid_dir)
                     
                 self.picard_dir = os.path.join(path, Resources.picard_directory)
-                if not os.path.exists(self.picard_dir):
-                    os.makedirs(self.picard_dir)
             
             
                 self.root_dir = root_dir

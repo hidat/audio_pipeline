@@ -128,3 +128,10 @@ class DialogBox(tk.Toplevel):
 def choose_dir(directory_selector, master=None, initial_dir="\\"):
     directory_name = filedialog.askdirectory(title="fialog", parent=master, initialdir=initial_dir, mustexist=True)
     directory_selector(directory_name)
+    
+def err_message(message, ok_command, parent=None, quit=False):
+    err_display = DialogBox(message, master=parent)
+    buttons = [{"name": "OK", "command": ok_command}]
+    if quit:
+        buttons.append({"name": "Cancel", "command": err_display.cancel})
+    err_display.button_box(buttons) 

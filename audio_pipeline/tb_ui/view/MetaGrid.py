@@ -26,7 +26,7 @@ class MetaGrid(tk.Grid):
         
     def editnotify(self, x, y):
         # make a map of position -> (track, metadata) for use here
-        
+        print('haha')
         # There has got to be a better way to bind tab and return to the selected cell entry
         # But I haven't found it yet! So this is what we'll do for now.
         x = int(x)
@@ -169,3 +169,4 @@ class MetaGrid(tk.Grid):
     def set_cell(self, pos):
         self.anchor_set(pos[0], pos[1])
         self.edit_set(pos[0], pos[1])
+        

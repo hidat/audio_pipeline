@@ -28,8 +28,8 @@ active_bg = "white"
 
 obscenity_rating_commands = SubCommand("Valid <meta_command>s:", [Command("red dot, red, r", "RED DOT obscenity rating"),
                              Command("yellow dot, yellow, y", "YELLOW DOT obscenity rating"),
-                             Command("clean edit, l", "CLEAN EDIT obscenity rating"),
-                             Command("clear, c", "Remove obscenity rating")])
+                             Command("clean edit, clean, c", "CLEAN EDIT obscenity rating"),
+                             Command("clear, l", "Remove obscenity rating")])
                              
 
 commands = [Command("<track_num>[[,][ ]<track_num>...][ ]<meta_command>", "Add the metadata specified by <meta_command> to track <track_num>.<meta_command> is not case-sensitive.\

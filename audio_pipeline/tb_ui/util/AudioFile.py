@@ -51,26 +51,26 @@ class AudioFile(util.AudioFile.AudioFile):
         self.picard = picard
         self.mb = mb
 
-        self.dest_file = self.move_file()
+        self.dest_dir = self.move_file()
 
 
     def move_file(self):
         if Resources.has_mbid(self):
-            self.dest_file = self.mb
+            self.dest_dir = self.mb
         else:
-            self.dest_file = self.picard
+            self.dest_dir = self.picard
 
-        return self.dest_file
+        return self.dest_dir
 
     def save_mbid(self, mbid):
         super().save_mbid(mbid)
 
-        self.dest_file = self.move_file()
+        self.dest_dir = self.move_file()
 
     def save(self):
         super().save()
 
-        self.dest_file = self.move_file()
+        self.dest_dir = self.move_file()
                     
     def style(self, width, track):
         if track:
