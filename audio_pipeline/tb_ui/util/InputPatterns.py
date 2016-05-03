@@ -44,6 +44,6 @@ release_pattern = re.compile("\d+ -.*")
 # change obscenity rating pattern
 yellow_dot = re.compile("\s*y(ellow)?\s*(dot)?", flags=re.I)
 red_dot = re.compile("\s*r(ed)?\s*(dot)?", flags=re.I)
-clean_edit = re.compile("\s*(s*c(lean)?\s*(edit)?)|l\s*", flags=re.I)
+clean_edit = re.compile("\s*s*c(lean)?\s*(edit)?\s*", flags=re.I)
 
 whitespace = re.compile("\s+")

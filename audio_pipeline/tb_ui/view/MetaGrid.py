@@ -68,9 +68,9 @@ class MetaGrid(tk.Grid):
             success = True
         else:
             # display an error message
-            Dialog.err_message("Please enter appropriate metadata", ok_command=self.set(pos[0], pos[1], text=meta))
             self.set(pos[0], pos[1], text=meta)
             self.set_curr_cell()
+            Dialog.err_message("Please enter appropriate metadata", ok_command=self.set(pos[0], pos[1], text=meta))
         return success
     
     def move_cell(self, direction_command, event=None):

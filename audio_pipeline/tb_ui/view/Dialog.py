@@ -110,6 +110,7 @@ class DialogBox(tk.Toplevel):
             but.pack(side=tk.LEFT, padx=5,pady=5)
 
         box.pack()
+        self.start()
 
     def start(self):
         self.grab_set();
@@ -120,15 +121,16 @@ class DialogBox(tk.Toplevel):
         self.cancel()
 
     def cancel(self):
-        if self.master:
-            self.master.focus_set()
+        #if self.master:
+        #    self.master.focus_set()
         self.destroy()
 
 
 def choose_dir(directory_selector, master=None, initial_dir="\\"):
     directory_name = filedialog.askdirectory(title="fialog", parent=master, initialdir=initial_dir, mustexist=True)
     directory_selector(directory_name)
-    
+
+
 def err_message(message, ok_command, parent=None, quit=False):
     err_display = DialogBox(message, master=parent)
     buttons = [{"name": "OK", "command": ok_command}]

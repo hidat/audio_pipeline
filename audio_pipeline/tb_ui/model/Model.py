@@ -18,8 +18,8 @@ class ProcessDirectory(object):
         self.directories = list()
         for path, dirs, files in os.walk(root_dir):
             for directory in dirs:
+                directory = os.path.join(path, directory)
                 if self.is_release(directory):
-                    directory = os.path.join(path, directory)
                     self.directories.append(directory)
 
         self.directories.sort(key=lambda x: int(os.path.split(x)[1].split()[0]))
@@ -39,7 +39,7 @@ class ProcessDirectory(object):
     def first(self):
         self.current = -1
         self.release = -1
-        while (self.af - 20 < max_af and self.has_next()):
+        while self.af - 20 < max_af and self.has_next():
             self.next()
             
         self.current = -1
@@ -50,7 +50,7 @@ class ProcessDirectory(object):
     def last(self):
         self.current = len(self.releases)
         self.release = -1
-        while (self.af - 20 < max_af and self.has_prev()):
+        while self.af - 20 < max_af and self.has_prev():
             self.prev()
 
         self.current = len(self.releases)
@@ -58,36 +58,26 @@ class ProcessDirectory(object):
         self.current_release = None
 
     def next(self):
-        if self.valid_release_index() and self.releases[self.current] and self.release + 1 < len(self.releases[self.current]):
+        if self.valid_release_index(self.release + 1):
             self.release += 1
         else:
             self.current += 1
             self.load_release()
             self.release = 0
-            while (not self.valid_release_index()) and self.has_next():
-                self.current += 1
-                self.load_release()
-                self.release = 0
-            
-        if self.valid_release_index():
-            self.current_release = self.releases[self.current][self.release]
-            return self.current_release
+
+        self.current_release = self.releases[self.current][self.release]
+        return self.current_release
 
     def prev(self):
-        if self.valid_release_index() and self.releases[self.current] and self.release > 0:
+        if self.valid_release_index(self.release - 1):
             self.release -= 1
         else:
             self.current -= 1
             self.load_release()
             self.release = len(self.releases[self.current]) - 1
-            while (not self.valid_release_index()) and self.has_prev():
-                self.current -= 1
-                self.load_release()
-                self.release = len(self.releases[self.current]) - 1
 
-        if self.valid_release_index():
-            self.current_release = self.releases[self.current][self.release]
-            return self.current_release
+        self.current_release = self.releases[self.current][self.release]
+        return self.current_release
         
     def jump(self, i):
         if i < 0:
@@ -172,37 +162,35 @@ class ProcessDirectory(object):
                     self.af -= len(r)
 
     def has_next(self):
-        return (self.current + 1 < len(self.releases)) or \
-               (self.current < len(self.releases) and (self.release + 1 < len(self.releases[self.current])))
+        return (self.current + 1 < len(self.releases)) or self.valid_release_index(self.release + 1)
 
     def has_prev(self):
         return (self.current > 0) or (self.release > 0)
 
     def is_release(self, directory):
-        return InputPatterns.release_pattern.match(directory)
-        # track = False
+        d = os.path.split(directory)[1]
+        track = False
+        if InputPatterns.release_pattern.match(d):
+            picard = os.path.join(self.picard_dir, d)
+            mbid = os.path.join(self.mbid_dir, d)
 
-        # picard = os.path.join(self.picard_dir, os.path.split(directory)[1])
-        # mbid = os.path.join(self.mbid_dir, os.path.split(directory)[1])
+            for file in os.listdir(directory):
+                file_name = os.path.join(directory, file)
 
-        # for file in os.listdir(directory):
-            # file_name = os.path.join(directory, file)
+                try:
+                    track = AudioFile.AudioFile(file_name, os.path.join(picard, file), os.path.join(mbid, file))
+                except IOError:
+                    track = False
+                    continue
+                except AudioFile.UnsupportedFiletypeError:
+                    track = False
+                    continue
+                break
+            return track
 
-            # try:
-                # track = AudioFile.AudioFile(file_name, os.path.join(picard, file), os.path.join(mbid, file))
-            # except IOError:
-                # track = False
-                # continue
-            # except AudioFile.UnsupportedFiletypeError:
-                # track = False
-                # continue
-            # break
-        # return track
-
-    
-    def valid_release_index(self):
-        return (self.releases[self.current] is not None and 
-                self.release >= 0 and self.release < len(self.releases[self.current]))
+    def valid_release_index(self, index):
+        return (-1 < self.current < len(self.releases) and self.releases[self.current] is not None and
+                                        0 <= index < len(self.releases[self.current]))
 
     def track_nums(self):
         tn = set([af.track_num.value for af in self.current_release])
