@@ -98,7 +98,9 @@ class AudioFile(object):
         False otherwise
         """
         tag_set = False
-
+        
+        print(ascii(tag.tag_name))
+        
         if tag.value:
             tag_value = tag.format()
             self.audio[tag.tag_name] = tag_value

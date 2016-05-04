@@ -5,10 +5,17 @@ release = "release"
 
 meta_pattern = re.compile('\s*((?P<' + track + '>(((\d+((,)|(\s))*)+)|(\s*all)))|(?P<' + release + '>(r(elease)?)))\s*')
 
+prev = "prev"
+next = "next"
+jump = "jump"
+
+quit = "quit"
+help = "help"
+edit = "edit"
+
 forward = "forward"
 tracknum_acc = "track_num"
 meta_acc = "meta"
-
 
 artist = "artist"
 album = "album"
@@ -28,12 +35,8 @@ tag_pattern = re.compile('\s*(?P<' + artist + '>(a(rtist)?))|(?P<' + album + '>)
                           (?P<' + date + '>(d(ate)?))|(?P<' + length + '>(l(ength?)))| \
                           (?P<' + title + '>(t(itle)?))(?P<' + obscenity + '>(o(bscenity)?))', flags=re.I)
 
-prev_pattern = re.compile("\s*p(rev)?\s*(?P<" + forward + ">(\d+)?)", flags=re.I)
-next_pattern = re.compile("\s*n(ext)?\s*(?P<" + forward + ">(\d+)?)", flags=re.I)
-done_pattern = re.compile("\s*(d+(one)?)|(q+(uit)?)", flags=re.I)
-help_pattern = re.compile("\s*(\?+)|h(elp)?", flags=re.I)
-entry_pattern = re.compile("\s*(e((nter)|(ntry)|(dit))?)|(m(eta)?)")
-rm_rating = re.compile("\s*(l|clear)", flags=re.I)
+nav_pattern = re.compile("\s*(((?P<" + prev + ">\s*p(rev)?))|((?P<" + next + ">\s*n(ext)?)))\s*(?P<" + jump + ">(\d+)?)", flags=re.I)
+popup_pattern = re.compile("\s*(((?P<" + quit + ">\s*(d+(one)?)|(q+(uit)?)))|((?P<" + help + ">\s*(\?+)|h(elp)?))|((?P<" + edit + ">\s*((e((nter)|(ntry)|(dit))?)|(m(eta)?)))))\s*", flags=re.I)
 
 unknown = re.compile("unknown artist", flags=re.I)
 
@@ -45,5 +48,6 @@ release_pattern = re.compile("\d+ -.*")
 yellow_dot = re.compile("\s*y(ellow)?\s*(dot)?", flags=re.I)
 red_dot = re.compile("\s*r(ed)?\s*(dot)?", flags=re.I)
 clean_edit = re.compile("\s*s*c(lean)?\s*(edit)?\s*", flags=re.I)
+rm_rating = re.compile("\s*(l|clear)", flags=re.I)
 
 whitespace = re.compile("\s+")

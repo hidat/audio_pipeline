@@ -32,18 +32,19 @@ class MetaController:
         else:
             self.app.after_idle(func=self.app.choose_dir)
 
-    def process_input(self, event):
+    def process_input(self, input_string):
         """
         Process user input
 
         :param event:
         :return:
         """
-        input_string = self.app.get_input()
         tracks = InputPatterns.track_meta_pattern.match(input_string)
+        nav = InputPatterns.nav_pattern.match(input_string)
+        popup = InputPatterns.popup_pattern.match(input_string)
         self.app.select_input()
         if tracks:
-            # input is (probably) track metadata (currently only RED DOT, YELLOW DOT)
+            # input is (probably) track metadata (currently only RED DOT, YELLOW DOT, CLEAN EDIT, clear)
             try:
                 track_nums = tracks.group(InputPatterns.tracknum_acc)
                 if re.search("all", track_nums):
@@ -57,9 +58,13 @@ class MetaController:
                 print(e)
                 err_msg = "Invalid input " + str(input_string)
                 Dialog.err_message(err_msg, None, parent=self.app)
+        elif nav:
+            self.navigate(nav)
+        elif popup:
+            self.popup(popup)
         else:
-            command = input_string
-            self.process_command(command)
+            err_msg = "Invalid input " + str(input_string)
+            Dialog.err_message(err_msg, None, parent=self.app)
 
     def new_meta_input(self, track_nums, value):
         """
@@ -96,16 +101,13 @@ class MetaController:
             err_msg = "Invalid Track Number: " + str(track)
             Dialog.err_message(err_msg, None, parent=self.app)
             
-    def process_command(self, command):
+    def navigate(self, command):
         """
-        Changes the album metadata on screen to the previous or next in the directory list,
-        depending on the command that is passed in.
-        """        
-        if InputPatterns.entry_pattern.match(command):
-            meta_entry = EntryController.Entry(self.model.current_release, self.app, self.update_album)
-            meta_entry.start()
-        elif InputPatterns.next_pattern.match(command):
-            jump = InputPatterns.next_pattern.match(command).group(InputPatterns.forward)
+        Change the album displayed.
+        """
+        jump = command.group(InputPatterns.jump)
+        
+        if command.group(InputPatterns.next):
             if jump:
                 tracks = self.model.jump(int(jump))
                 self.app.display_meta(tracks)
@@ -113,8 +115,7 @@ class MetaController:
                 self.next_album()
             else:
                 self.last_album()
-        elif InputPatterns.prev_pattern.match(command):
-            jump = InputPatterns.prev_pattern.match(command).group(InputPatterns.forward)
+        elif command.group(InputPatterns.prev):
             if jump:
                 tracks = self.model.jump((-1 *int(jump)))
                 self.app.display_meta(tracks)
@@ -122,9 +123,17 @@ class MetaController:
                 self.prev_album()
             else:
                 self.last_album()
-        elif InputPatterns.done_pattern.match(command):
-            self.last_album()
-        elif InputPatterns.help_pattern.match(command):
+            
+    def popup(self, command):
+        """
+        Open the appropriate popup, as determined by the command
+        """
+        if command.group(InputPatterns.edit):
+            meta_entry = EntryController.Entry(self.model.current_release, self.app, self.update_album)
+            meta_entry.start()        
+        elif command.group(InputPatterns.quit):
+            self.last_album()        
+        elif command.group(InputPatterns.help):
             self.app.display_info()
             
     def update_album(self):

@@ -123,8 +123,9 @@ class TagVorbisInt(TagFormat):
 
 class TagAACString(TagFormat):
     def format(self, tag_value):
-        formatted = tag_value.encode('utf-8')
-        return formatted
+        if tag_value:
+            tag_value = tag_value.encode('utf-8')
+        return tag_value
         
     def extract(self, tags):
         val = super().extract(tags)

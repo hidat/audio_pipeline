@@ -73,6 +73,7 @@ class App(tk.Tk):
 
     def allow_input(self):
         self.input_frame.allow_input()
+        self.input_frame.nav_buttons()
 
     def get_input(self):
         return self.input_frame.get_input()

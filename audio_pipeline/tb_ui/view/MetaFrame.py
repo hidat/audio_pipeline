@@ -55,7 +55,10 @@ class ReleaseFrame(MetaFrame):
                     self.labels[name] = tk.Label(self, release.name_style, text=name)
                     self.labels[name].grid(self.name_padding, row=rowval, column=colval)
                 rowval += 1
-                self.attribute_text[name].set(tag.value)
+                if tag.value:
+                    self.attribute_text[name].set(tag.value)
+                else:
+                    self.attribute_text[name].set("")
                 self.attributes[name] = tk.Label(self, tag.style, textvariable=self.attribute_text[name])
                 self.attributes[name].grid(self.meta_padding, row=rowval, column=colval)
                 colval += 1
@@ -64,7 +67,10 @@ class ReleaseFrame(MetaFrame):
     def update(self, audio_file):
         for name, tag in audio_file:
             if tag.release:
-                self.attribute_text[name].set(tag.value)
+                if tag.value:
+                    self.attribute_text[name].set(tag.value)
+                else:
+                    self.attribute_text[name].set("")
                 self.attributes[name].config(fg=Settings.text_color)
 
     def select_release(self):
@@ -104,7 +110,10 @@ class TrackFrame(MetaFrame):
             for tag, value in track:
                 if not value.release:
                     self.attribute_text[name][tag] = tk.StringVar()
-                    self.attribute_text[name][tag].set(value.value)
+                    if value.value:
+                        self.attribute_text[name][tag].set(value.value)
+                    else:
+                        self.attribute_text[name][tag].set(" ")
                     self.attributes[name][tag] = tk.Label(self, value.style, foreground=color,
                                                           textvariable=self.attribute_text[name][tag])
                     self.attributes[name][tag].grid(self.meta_padding, row=rowval, column=colval)
@@ -125,7 +134,7 @@ class TrackFrame(MetaFrame):
                 if value.value:
                     self.attribute_text[name][tag].set(value.value)
                 else:
-                    self.attribute_text[name][tag].set("")
+                    self.attribute_text[name][tag].set(" ")
                 self.attributes[name][tag].config(fg=color)
 
     def select_tracks(self, tracks):

@@ -95,7 +95,7 @@ class Entry():
             for k in range(0, len(self.meta_entry.release_categories)):
                 tag = self.meta_entry.release_categories[k]
                 meta = self.meta_entry.release.entrycget(k, 1, 'text')
-                if meta == '':
+                if InputPatterns.whitespace.match(meta):
                     meta = None
                 track[tag].value = meta
             for k in range(0,len(self.meta_entry.track_categories)):
@@ -103,6 +103,7 @@ class Entry():
                 track_index = i + 1
                 meta = self.meta_entry.tracks.entrycget(k, track_index, 'text')
                 if InputPatterns.whitespace.match(meta):
+                    print(tag)
                     meta = None
                 track[tag].value = meta
             self.tracks[i].save()

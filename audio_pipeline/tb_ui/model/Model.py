@@ -39,7 +39,7 @@ class ProcessDirectory(object):
     def first(self):
         self.current = -1
         self.release = -1
-        while self.af - 20 < max_af and self.has_next():
+        while self.af < 500 and self.af - 20 < max_af and self.has_next():
             self.next()
             
         self.current = -1
