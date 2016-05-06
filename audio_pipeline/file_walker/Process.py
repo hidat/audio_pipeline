@@ -3,38 +3,53 @@ from . import Resources
 from . import Util
 import uuid as UUID
 
-class Processor(object):
-    mb = None       # MBInfo object shared between Process objects
-    secondary_category = "CATEGORIES/ROTATION-STAGING"
-    
-    def __init__(self, mbinfo=None):
-        if not self.mb:
-            if mbinfo:
-                self.mb = mbinfo
-            else:
-                # raise a 'no mbinfo object' objection
-                self = None
-        elif mbinfo:
-            self.mb = mbinfo
-               
-class ReleaseProcessor(Processor):
-    releases = {}   # dictionary of release mbid -> instantiated process objects
-
-    def __init__(self, mbid, mbinfo=None):
-        super().__init__(mbinfo)
-    
-        if mbid in self.releases:
-            self = releases[mbid]
-        else:
-            self.releases[mbid] = self
+class NoMusicBrainzError(Exception):
+    def __init__(self, message=None):
+        self.message = message
+        
+    def __str(self):
+        m = "No MusicBrainz object"
+        
+        if self.message:
+            m = m + ": " + self.message
             
-            self.mb_release = self.mb.get_release(mbid)
-            if not self.mb_release:
-                # error getting musicbrainz data for this release - remove mbid from cache
-                self.releases.pop(mbid)
-                self = None
-            else:
-                self.release = None
+        return str(m)
+
+class Processor(object):
+    
+    def __init__(self, mbinfo):
+        if mbinfo:
+            self.mbinfo = mbinfo
+        else:
+            raise NoMusicBrainzError("Processor needs an MBInfo Object")
+            
+        self.releases = dict()
+        self.artists = dict()
+        
+    def get_release(self, mbid):
+        if mbid in self.releases:
+            return self.releases[mbid]
+        else:
+            release = ReleaseProcessor(mbid, self.mbinfo)
+            self.releases[mbid] = release
+            return release
+            
+    def get_artist(self, mbid):
+        if mbid in self.artists:
+            return self.artists[mbid]
+        else:
+            artist = ArtistProcessor(mbid, self.mbinfo)
+            self.artists[mbid] = artist
+            return artist
+               
+class ReleaseProcessor:
+    secondary_category = "CATEGORIES/ROTATION-STAGING"
+
+    def __init__(self, mbid, mbinfo):
+        self.release = None
+        self.mb_release = mbinfo.get_release(mbid)
+        if not self.mb_release:
+            raise NoMusicBrainzError()
 
     def process_release(self):
         """
@@ -221,25 +236,14 @@ class ReleaseProcessor(Processor):
         return track
 
         
-class ArtistProcessor(Processor):
-    artists = {}    # dictionary of artist mbid -> instantiated artist objects (Artist is defined in Resources.py file)
+class ArtistProcessor:
 
-    def __init__(self, mbid, mbinfo=None):
-        super().__init__(mbinfo)
-                
-        if mbid in self.artists:
-            self = self.artists[mbid]
-        else:
-            self.artists[mbid] = self
-            
-            self.mb_artist = self.mb.get_artist(mbid)
-            if not self.mb_artist:
-                # error getting musicbrainz data for this artist - remove mbid from cache
-                # (and return an error??)
-                self.artists.pop(mbid)
-            else:
-                self.artist = None
-
+    def __init__(self, mbid, mbinfo):
+        self.artist = None
+        self.mb_artist = mbinfo.get_artist(mbid)
+        if not self.mb_artist:
+            raise NoMusicBrainzError()
+        
     def process_artist(self):
         # make sure we haven't already processed this artist:
         if self.artist:

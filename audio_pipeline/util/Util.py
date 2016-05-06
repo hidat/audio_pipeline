@@ -1,3 +1,5 @@
+import uuid
+
 def minutes_seconds(length):
     # turns a floating point value into a string of (approximate)
     # minutes : seconds
@@ -14,3 +16,28 @@ class Obscenity:
     red = "RED DOT"
     yellow = "YELLOW DOT"
     clean = "CLEAN EDIT"
+    
+
+def is_mbid(id):
+    """
+    Check that 's' looks like an MBID
+    """
+    try:
+        id = uuid.UUID(id)
+        good = True
+    except ValueError as e:
+        good = False    
+    
+    return good
+    
+def has_mbid(track):
+    """
+    Check whether or not the given track has an MBID.
+    """
+    
+    if track.mbid.value:
+        good = is_mbid(track.mbid.value)
+    else:
+        good = False
+        
+    return good

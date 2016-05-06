@@ -1,5 +1,6 @@
 __author__ = 'cephalopodblue'
 import musicbrainzngs as ngs
+from . import Util
 
 
 class MBInfo():
@@ -18,38 +19,40 @@ class MBInfo():
     # Retrieves a raw release from MusicBrainz using their API
     #####
     def get_release(self, release_id):
-        include=["artist-credits", "recordings", "isrcs", "media", "release-groups", "labels", "artists"]
-        try:
-            mb_release = ngs.get_release_by_id(release_id, includes=include)['release']
-        except ngs.ResponseError as e:
-            # probably a bad request / mbid
-            # propagate up
-            raise e
-        except ngs.NetworkError as e:
-            # can't reach the musicbrainz server - if we have a local, try hitting it?
-            mb_release = None
-            # propagate error up
-            raise e
-        
-        return mb_release
+        if Util.is_mbid(release_id):
+            include=["artist-credits", "recordings", "isrcs", "media", "release-groups", "labels", "artists"]
+            try:
+                mb_release = ngs.get_release_by_id(release_id, includes=include)['release']
+            except ngs.ResponseError as e:
+                # probably a bad request / mbid
+                # propagate up
+                raise e
+            except ngs.NetworkError as e:
+                # can't reach the musicbrainz server - if we have a local, try hitting it?
+                mb_release = None
+                # propagate error up
+                raise e
+            
+            return mb_release
         
     #####
     # == Get artist
     # Retrieves raw artist metadata from MusicBrainz using their API
     #####
     def get_artist(self, artist_id):
-        include=["aliases", "url-rels", "annotation", "artist-rels"]
-        
-        try:
-            mb_artist = ngs.get_artist_by_id(artist_id, includes=include)['artist']
-        except ngs.ResponseError as e:
-            # probably a bad request / mbid
-            # propagate up
-            raise e
-        except ngs.NetworkError as e:
-            # can't reach the musicbrainz server - if we have a local, try hitting it?
-            mb_artist = None
-            # propagate error up
-            raise e
+        if Util.is_mbid(artist_id):
+            include=["aliases", "url-rels", "annotation", "artist-rels"]
             
-        return mb_artist
+            try:
+                mb_artist = ngs.get_artist_by_id(artist_id, includes=include)['artist']
+            except ngs.ResponseError as e:
+                # probably a bad request / mbid
+                # propagate up
+                raise e
+            except ngs.NetworkError as e:
+                # can't reach the musicbrainz server - if we have a local, try hitting it?
+                mb_artist = None
+                # propagate error up
+                raise e
+                
+            return mb_artist

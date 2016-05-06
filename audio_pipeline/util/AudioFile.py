@@ -23,8 +23,8 @@ class Length(object):
         self.name = "Length"
         self.release = False
 
-
-class AudioFile(object):
+        
+class MutagenAudioFile(object):
 
     aac = AudioTag.AAC(True)
     id3 = AudioTag.ID3(True)
@@ -248,3 +248,17 @@ class KEXP(object):
         self.__save_tag__(self.obscenity)
         self.audio.save()
 
+
+class AudioFile:
+
+    def __init__(self, audiofile = MutagenAudioFile):
+        self.audiofile = audiofile
+        self.audiofiles = dict()
+        
+    def get(self, file_name):
+        if file_name in self.audiofiles:
+            return self.audiofiles[file_name]
+        else:
+            af = self.audiofile(file_name)
+            self.audiofiles[file_name] = af
+            return af

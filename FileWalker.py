@@ -1,5 +1,6 @@
 import os
 import Settings
+from audio_pipeline.util import Util
 from audio_pipeline.util import MBInfo
 from audio_pipeline.util import AudioFile
 from audio_pipeline.file_walker import Process as Processor
@@ -23,7 +24,9 @@ def process_directory(source_dir, output_dir, serializer):
     # create a MBInfo object to get MusicBrainz metadata
     mbinfo = MBInfo.MBInfo(batch_constants.mbhost)
     # Set the (metadata) processor's mbinfo object
-    Processor.Processor.mb = mbinfo
+    processor = Processor.Processor(mbinfo)
+    
+    af = AudioFile.AudioFile()
     
     path_start = len(source_dir) + 1
     for root, dir, files in os.walk(source_dir):
@@ -37,7 +40,7 @@ def process_directory(source_dir, output_dir, serializer):
             copy_to_path = ''
             
             try:
-                audio_file = AudioFile.AudioFile(file_name)
+                audio_file = af.get(file_name)
                 
                 # check if file is in processed_hash directory
                 sha1 = hashlib.sha1()
@@ -48,16 +51,16 @@ def process_directory(source_dir, output_dir, serializer):
                 
                 if not os.path.exists(hash_file):
                     # Get the MusicBrainz Release ID from the file
-                    if audio_file.mbid.value > '':
+                    if Util.has_mbid(audio_file):
                         print("Processing " + ascii(file_name))
 
                         try:
                             # process track's metadata:
-                            if audio_file.mbid.value in Processor.ReleaseProcessor.releases:
-                                release_meta = Processor.ReleaseProcessor.releases[audio_file.mbid.value]
+                            if audio_file.mbid.value in processor.releases:
+                                release_meta = processor.get_release(audio_file.mbid.value)
                                 release = release_meta.get_release()
                             else:
-                                release_meta = Processor.ReleaseProcessor(audio_file.mbid.value)
+                                release_meta = processor.get_release(audio_file.mbid.value)
                                 release = release_meta.get_release()
 
                                 # serialize the release
@@ -72,16 +75,16 @@ def process_directory(source_dir, output_dir, serializer):
                             
                             for artist in track.artists:
                                 # Save artist meta if we have not already.
-                                if artist not in Processor.ArtistProcessor.artists:
+                                if artist not in processor.artists:
                                 
-                                    artist_meta = Processor.ArtistProcessor(artist)
+                                    artist_meta = processor.get_artist(artist)
                                     artist = artist_meta.get_artist()
                                     
                                     group_members = []
                                     
                                     for member in artist.group_members:
-                                        if member not in Processor.ArtistProcessor.artists:
-                                            member_meta = Processor.ArtistProcessor(member)
+                                        if member not in processor.artists:
+                                            member_meta = processor.get_artist(member)
                                             group_members.append(member_meta.get_artist())
                                             
                                     serializer.save_artist(artist, group_members)

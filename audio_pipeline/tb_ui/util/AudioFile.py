@@ -9,7 +9,7 @@ class UnsupportedFiletypeError(Exception):
     def __str(self):
         return str(self.message)
 
-class AudioFile(util.AudioFile.AudioFile):
+class AudioFile(util.AudioFile.MutagenAudioFile):
 
     release_style = {'anchor': 'nw', 'bg': Settings.bg_color, 'foreground': Settings.text_color, 
                                  'font': Settings.standard, 'activeforeground': Settings.active_fg,
