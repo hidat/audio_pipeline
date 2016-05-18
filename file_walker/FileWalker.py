@@ -126,7 +126,8 @@ def process_directory(source_dir, output_dir, batch_meta, generate, server, seri
                             track_data['kexp_obscenity_rating'] = kexp_obscenity_rating
                             
                             # If this is a radio edit, assign a unique track id so we can also have a non-radio edit with the same MBID
-                            if batch_meta["item_code"]:
+                            # radio edits are either a specific batch, or have KEXPFCCOBSCENITYRATING tag "KEXP CLEAN EDIT"
+                            if batch_meta["item_code"] or track_data['kexp_obscenity_rating'].casefold() == "kexp clean edit":
                                 item_code = str(UUID.uuid4())
                                 track_type = str("track-with-filewalker-GUID")
                             else:
