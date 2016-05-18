@@ -166,7 +166,7 @@ class ReleaseProcessor:
         
         # if generating unique item codes, do that
         track_type = ''
-        if Resources.BatchConstants.gen_item_code:
+        if Resources.BatchConstants.gen_item_code or audio_file.kexp.obscenity.value.casefold() == "kexp clean edit":
             item_code = str(UUID.uuid4())
             track_type = "track with filewalker itemcode"
         else:
