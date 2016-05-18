@@ -12,7 +12,7 @@ import re
 
 class MetaController:
 
-    def __init__(self, root_dir):
+    def __init__(self, root_dir, copy_dir):
         """
         MetaControl is in charge of sending commands to the view & getting information from the model
         Runs the TomatoBanana app
@@ -22,8 +22,7 @@ class MetaController:
         """
         self.model = None
         self.root_dir = None
-        self.mbid_dir = None
-        self.picard_dir = None
+        self.copy_dir = copy_dir
         self.app = App.App(self.process_input, self.choose_dir, self.last_album)
         self.app.bind("<Escape>", self.last_album)
         
@@ -168,6 +167,10 @@ class MetaController:
         Close TomatoBanana; move files into appropriate folders
         """
         self.model.first()
+        if self.copy_dir:
+            move = shutil.copy
+        else:
+            move = shutil.move
         
         while self.model.has_next():
             release = self.model.next()
@@ -176,6 +179,7 @@ class MetaController:
             release_path = os.path.split(release[0].file_name)[0]
             picard = release[0].picard
             mb = release[0].mb
+            
             if not os.path.exists(picard):
                 os.mkdir(picard)
             if not os.path.exists(mb):
@@ -183,13 +187,13 @@ class MetaController:
             
             for track in release:
                 # move to correct folder
-                shutil.move(track.file_name, track.dest_dir)
+                move(track.file_name, track.dest_dir)
                 
                 
             try:
                 os.rmdir(picard)
             except OSError as e:
-                print("picard)")
+                print("picard")
                 
             try:
                 os.rmdir(mb)
@@ -201,23 +205,22 @@ class MetaController:
             except OSError as e:
                 # release directory is not empty
                 continue
-
                 
-
-
         self.app.quit()
 
         
     def choose_dir(self, root_dir):
         if root_dir > "":
-            new_model = Model.ProcessDirectory(root_dir)
+        
+            if self.copy_dir:
+                dest_dir = self.copy_dir
+            else:
+                dest_dir = os.path.split(root_dir)[0]
+                
+            new_model = Model.ProcessDirectory(root_dir, dest_dir)
             if new_model.has_next():
             
                 path, releases = os.path.split(root_dir)
-                self.mbid_dir = os.path.join(path, Resources.mbid_directory)
-                    
-                self.picard_dir = os.path.join(path, Resources.picard_directory)
-            
             
                 self.root_dir = root_dir
                 self.model = new_model

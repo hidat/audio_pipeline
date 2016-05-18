@@ -4,16 +4,19 @@ from ..util import Resources
 from ..util import InputPatterns
 
 
-not_release = -1
-max_af = 2000
+max_af = 10000
 
 
 class ProcessDirectory(object):
 
-    def __init__(self, root_dir):
-        path, releases = os.path.split(root_dir)
-        self.picard_dir = os.path.join(path, Resources.picard_directory)
-        self.mbid_dir = os.path.join(path, Resources.mbid_directory)
+    def __init__(self, root_dir, dest_dir):
+        releases = os.path.split(root_dir)[1]
+        self.picard_dir = os.path.join(dest_dir, Resources.picard_directory)
+        if not os.path.exists(self.picard_dir):
+            os.mkdir(self.picard_dir)
+        self.mbid_dir = os.path.join(dest_dir, Resources.mbid_directory)
+        if not os.path.exists(self.mbid_dir):
+            os.mkdir(self.mbid_dir)
 
         self.directories = list()
         for path, dirs, files in os.walk(root_dir):

@@ -19,7 +19,7 @@ class App(tk.Tk):
         tk.Tk.__init__(self)
         self['bg'] = Settings.bg_color
         self['width'] = 500
-        self['height'] = 500
+        self['height'] = 900
         self.title("TomatoBanana")
 
         self.release_frame = MetaFrame.ReleaseFrame()
