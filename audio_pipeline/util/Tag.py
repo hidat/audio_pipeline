@@ -80,26 +80,7 @@ class MetadataFormat(abc.ABCMeta):
     @classmethod
     @abc.abstractmethod
     def custom_string(cls, name, serialization_name, value): pass
-    
-    
-class VorbisMetadata(MetadataFormat):
 
-    """
-    A static class used to extract and save Vorbis-formated metadata tags.
-    """
-    # release-level serialization names
-    _album = "album"
-    _album_artist = "albumartist"
-    _release_date = "date"
-    _label = "label"
-    
-    # track-level serialization names
-    _title = "title"
-    _artist = "artist"
-    _disc_num = "discnumber"
-    _track_num = "tracknumber"
-    _length = "Length"
-    
     
 class Tag(abc.ABCMethod):
 
@@ -151,13 +132,3 @@ class Tag(abc.ABCMethod):
 class VorbisStringTag(Tag):
     
     def extract(self, tags):
-        
-
-        
-class Tags:
-    def __init__(self, tag):
-        self._tag = tag
-        
-    @property
-    def tag(self):
-        return self._tag.value

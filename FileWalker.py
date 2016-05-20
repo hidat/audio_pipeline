@@ -22,7 +22,7 @@ def process_directory(source_dir, output_dir, serializer):
     processed_hashes = info_directories(output_dir)
     
     # create a MBInfo object to get MusicBrainz metadata
-    mbinfo = MBInfo.MBInfo(batch_constants.mbhost)
+    mbinfo = MBInfo.MBInfo(batch_constants.initial_server)
     # Set the (metadata) processor's mbinfo object
     processor = Processor.Processor(mbinfo)
     
@@ -160,53 +160,38 @@ def main():
     and metadata from MusicBrainz.
     For success, audio file must have a release MBID in metadata.
     """
-    # dict of passed choices -> what we want for category, source, and rotation
-    options = {"acq": "Recent Acquisitions", "recent acquisitions": "Recent Acquisitions", "electronic": "Electronic",
-               "ele": "Electronic", "exp": "Experimental", "experimental": "Experimental", "hip": "Hip Hop",
-               "hip hop": "Hip Hop", "jaz": "Jazz", "jazz": "Jazz", "liv": "Live on KEXP", "live on kexp": "Live on Kexp",
-               "loc": "Local", "local": "Local", "reg": "Reggae", "reggae": "Reggae", "roc": "Rock/Pop", "rock": "Rock/Pop",
-               "pop": "Rock/Pop", "rock/pop": "Rock/Pop", "roo": "Roots", "roots": "Roots",
-               "rot": "Rotation", "rotation": "Rotation", "sho": "Shows Around Town", "shows around town": "Shows Around Town",
-               "sou": "Soundtracks", "soundtracks": "Soundtracks", "wor": "World", "world": "World",
-               "cd library": "CD Library", "melly": "Melly", "hitters": "Hitters",
-               "heavy": "Heavy", "library": "Library", "light": "Light", "medium": "Medium", "r/n": "R/N"}
                
     parser = argparse.ArgumentParser(description='Get metadata from files.')
     parser.add_argument('input_directory', help="Input audio file.")
-    parser.add_argument('output_directory', help="Directory to store output files. MUST ALREADY EXIST for now.")
-    parser.add_argument('-d', '--delete', default=False, const=True, nargs='?', help="Delete audio files from input_directory after processing")
-    parser.add_argument('-c', '--category', type=str.casefold, choices=["recent acquisitions", "acq", "electronic", "ele", "experimental", "exp", "hip hop", "hip", "jaz", "jazz", "live on kexp", "liv", "local", "reggae", "reg", "rock", "pop", "rock/pop", "roc", "roots", "roo", "rotation", "rot", "shows around town", "sho", "soundtracks", "sou", "world", "wor"], help="Category or genre of releases being filewalked")
-    parser.add_argument('-s', '--source', type=str.casefold, choices=["cd library", "melly", "hitters"], help="KEXPSource value - Melly or CD Library")
-    parser.add_argument('-r', '--rotation', type=str.casefold, choices=["heavy", "library", "light", "medium", "r/n"], help="Rotation workflow value")
-    parser.add_argument('-l', '--local', type=str.casefold, default='musicbrainz.org', const=Settings.Settings.local_server,
-                        help="Switch server to retrieve MusicBrainz metadata. Options are \'musicbrainz.org\' (default) and " + Settings.Settings.local_server + " (with flag)",
-                        nargs='?')
-    parser.add_argument('--mbhost', type=str.casefold,
-                        help="Specify the server to retrieve MusicBrainz data from. Default is musicbrainz.org; default --server option is http://musicbrainz.kexp.org:5000/; another server can be manually specified")
-    parser.add_argument('-g', '--generate', default=False, const=True, nargs='?')
-    parser.add_argument('-i', '--gen_item_code', default=False, const=True, nargs='?', help="Generate a unique item code for all audio files")
-    
+    parser.add_argument('output_directory', help="Directory to store output files.")
+    parser.add_argument('-d', '--delete', metavar='', default=False, const=True, nargs='?', help="Delete audio files from input_directory after processing")
+    parser.add_argument('-c', '--category', type=str.casefold, metavar='',
+                        choices=["recent acquisitions", "acq", "electronic", "ele", "experimental", 
+                        "exp", "hip hop", "hip", "jaz", "jazz", "live on kexp", "liv", 
+                        "local", "reggae", "reg", "rock", "pop", "rock/pop", "roc", "roots", 
+                        "roo", "rotation", "rot", "shows around town", "sho", "soundtracks", 
+                        "sou", "world", "wor"], help="Category or genre of releases being filewalked.")
+    parser.add_argument('-s', '--source', type=str.casefold, metavar='',
+                        choices=["cd library", "melly", "hitters"], 
+                        help="KEXPSource value - 'Melly', 'CD Library', or 'Hitters'")
+    parser.add_argument('-r', '--rotation', type=str.casefold, metavar='',
+                        choices=["heavy", "library", "light", "medium", "r/n"],
+                        help="Rotation workflow value: \'heavy\', \'library\', \'light\', \'medium\' or \'r/n\'")
+    parser.add_argument('--mb_server', default="lr", type=str.casefold, metavar="\'r\': Remote only,\
+                        \'l\': local only, \'lr\': local then remote, \'rl\': remote then local",
+                        choices=["r", "l", "lr", "rl"],
+                        help='Specify what server(s) to retrive MusicBrainz meta from.' )
+    parser.add_argument('--local', help="Set local MusicBrainz server address")
+    parser.add_argument('--remote', help="Set remote MusicBrainz server address")
+    parser.add_argument('-g', '--generate', default=False, const=True, nargs='?',
+                        help="Generate metadata only; don't copy any files")
+    parser.add_argument('-i', '--gen_item_code', default=False, const=True, nargs='?',
+                        help="Generate a unique item code for all audio files")
     args = parser.parse_args()
-        
-    server = args.mbhost if args.mbhost != None else args.local
-        
-    batch_constants.category = options[args.category] if args.category != None else ""
-    batch_constants.rotation = options[args.rotation] if args.rotation != None else ""
-    batch_constants.source = options[args.source] if args.source != None else ""
     
-    batch_constants.gen_item_code = args.gen_item_code
-    batch_constants.generate = args.generate
-    batch_constants.delete = args.delete
-    batch_constants.local_server = args.local
-    batch_constants.mbhost = args.mbhost
-    
-    batch_constants.input_directory = args.input_directory
-    batch_constants.output_directory = args.output_directory
-    
-    if args.mbhost:
-        batch_constants.mbhost = args.mbhost
-    else:
-        batch_constants.mbhost = args.local
+    config_file = os.path.split(__file__)[0] + "FileWalkerConfiguration.ini"
+
+    batch_constants.config(config_file, args)
     
     # Create the serializer (rigt now... we're just making a DaletSerializer)
     serializer = serializers.DaletSerializer.DaletSerializer(batch_constants.output_directory)

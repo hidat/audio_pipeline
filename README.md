@@ -73,8 +73,8 @@ Walks a directory structure of audio files and does the following:
   * *--local, -l*
     Use the local KEXP MusicBrainz server instead of musicbrainz.org
     
-  * *--mbhost*
-    Specify a host server other than musicbrainz.org
+  * *--i, --gen_item_code*
+    Generate a unique item code for all audio files
       
 ######To Run
 

@@ -1,3 +1,11 @@
+import os
+import configparser
+
+config_defaults = {"LocalServer": "",
+                   "RemoteServer": 'musicbrainz.org',
+                   "Delete": "no",
+                   "Generate": "no"}
+ 
 class Hitters():
     artist = "(Various Artists) - "
     source = "Hitters"
@@ -14,10 +22,83 @@ class BatchConstants():
     gen_item_code = False
     generate = False
     delete = False
-    local_server = False
     
-    mbhost = None
+    remote_server = None
+    local_server = None
+    
+    inital_server = remote_server
+    backup_server = None
+
+    @classmethod
+    def config(cls, config_file, args):
+    
+        # dict of passed choices -> what we want for category, source, and rotation
+        options = {"acq": "Recent Acquisitions", "recent acquisitions": "Recent Acquisitions", "electronic": "Electronic",
+                   "ele": "Electronic", "exp": "Experimental", "experimental": "Experimental", "hip": "Hip Hop",
+                   "hip hop": "Hip Hop", "jaz": "Jazz", "jazz": "Jazz", "liv": "Live on KEXP", "live on kexp": "Live on Kexp",
+                   "loc": "Local", "local": "Local", "reg": "Reggae", "reggae": "Reggae", "roc": "Rock/Pop", "rock": "Rock/Pop",
+                   "pop": "Rock/Pop", "rock/pop": "Rock/Pop", "roo": "Roots", "roots": "Roots",
+                   "rot": "Rotation", "rotation": "Rotation", "sho": "Shows Around Town", "shows around town": "Shows Around Town",
+                   "sou": "Soundtracks", "soundtracks": "Soundtracks", "wor": "World", "world": "World",
+                   "cd library": "CD Library", "melly": "Melly", "hitters": "Hitters",
+                   "heavy": "Heavy", "library": "Library", "light": "Light", "medium": "Medium", "r/n": "R/N"}
+
+        config = configparser.ConfigParser(allow_no_value=True)
         
+        if (os.path.exists(config_file)):
+            config.read(config_file)
+        else:
+            # create / write new config file
+            config['DEFAULT'] = config_defaults
+        
+        if "USER" not in config:
+            config["USER"] = {}
+         
+        if args.local:
+            self.config["USER"]["LocalServer"] = args.local
+        if args.remote:
+            self.config["USER"]["RemoteServer"] = args.remote
+            
+        # write configuration
+        with open(config_file, 'w+') as c_file:
+            config.write(c_file)
+            
+        # set batch constants from config file
+        settings = config["USER"]
+        cls.local_server = settings.get("LocalServer")
+        cls.remote_server = settings.get("RemoteServer")
+        cls.generate = settings.getboolean("Generate")
+        cls.delete = settings.getboolean("Delete")
+        
+        # set batch constants from batch arguments
+        cls.category = options[args.category] if args.category != None else ""
+        cls.rotation = options[args.rotation] if args.rotation != None else ""
+        cls.source = options[args.source] if args.source != None else ""
+        
+        cls.gen_item_code = args.gen_item_code
+        cls.generate = args.generate
+        cls.delete = args.delete
+        
+        cls.input_directory = args.input_directory
+        cls.output_directory = args.output_directory
+        
+        # set initial / backup server
+        order = args.mb_server
+        first = order[0]
+        second = order[1] if len(order) > 1 else None
+        
+        if first == 'l':
+            cls.initial_server = cls.local_server
+        else:
+            cls.initial_server = cls.remote_server
+            
+        if second:
+            if second == 'l':
+                cls.backup_server = cls.local_server
+            else:
+                cls.backup_server = cls.remote_server
+
+                
 class Release():
 
     glossary_type = 'Release'
