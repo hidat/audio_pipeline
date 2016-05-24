@@ -1,11 +1,12 @@
-__author__ = 'hidat'
-
 from yattag import Doc, indent
 import os.path as path
 import os
 from ..file_walker import ProcessLog
 from ..file_walker import Resources
 from ..file_walker import Util
+
+__author__ = 'hidat'
+
 
 class DaletSerializer:
 
@@ -68,9 +69,9 @@ class DaletSerializer:
                 with tag('Title'):
                     text(track.title)
                 with tag('KEXPTrackNumber'):
-                    text(track.track_num)
+                    text(str(track.track_num))
                 with tag('KEXPTotalTracks'):
-                    text(track.track_count)
+                    text(str(track.track_count))
                 with tag('KEXPPrimaryGenre'):
                     text(track.primary_genre)
                 with tag('KEXPFCCObscenityRating'):

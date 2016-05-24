@@ -1,5 +1,4 @@
 import os
-import Settings
 from audio_pipeline.util import Util
 from audio_pipeline.util import MBInfo
 from audio_pipeline.util import AudioFile

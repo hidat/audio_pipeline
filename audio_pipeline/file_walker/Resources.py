@@ -5,10 +5,12 @@ config_defaults = {"LocalServer": "",
                    "RemoteServer": 'musicbrainz.org',
                    "Delete": "no",
                    "Generate": "no"}
- 
+
+
 class Hitters():
     artist = "(Various Artists) - "
     source = "Hitters"
+
 
 class BatchConstants():
     obscenity = None
@@ -26,7 +28,7 @@ class BatchConstants():
     remote_server = None
     local_server = None
     
-    inital_server = remote_server
+    initial_server = None
     backup_server = None
 
     @classmethod
@@ -45,7 +47,7 @@ class BatchConstants():
 
         config = configparser.ConfigParser(allow_no_value=True)
         
-        if (os.path.exists(config_file)):
+        if os.path.exists(config_file):
             config.read(config_file)
         else:
             # create / write new config file
@@ -55,9 +57,9 @@ class BatchConstants():
             config["USER"] = {}
          
         if args.local:
-            self.config["USER"]["LocalServer"] = args.local
+            config["USER"]["LocalServer"] = args.local
         if args.remote:
-            self.config["USER"]["RemoteServer"] = args.remote
+            config["USER"]["RemoteServer"] = args.remote
             
         # write configuration
         with open(config_file, 'w+') as c_file:
@@ -86,17 +88,21 @@ class BatchConstants():
         order = args.mb_server
         first = order[0]
         second = order[1] if len(order) > 1 else None
-        
-        if first == 'l':
-            cls.initial_server = cls.local_server
-        else:
-            cls.initial_server = cls.remote_server
-            
-        if second:
-            if second == 'l':
-                cls.backup_server = cls.local_server
+
+        if cls.local_server:
+            if first == 'l':
+                cls.initial_server = cls.local_server
             else:
-                cls.backup_server = cls.remote_server
+                cls.initial_server = cls.remote_server
+
+            if second:
+                if second == 'l':
+                    cls.backup_server = cls.local_server
+                else:
+                    cls.backup_server = cls.remote_server
+        elif cls.remote_server:
+            cls.initial_server = cls.remote_server
+            cls.backup_server = cls.remote_server
 
                 
 class Release():
@@ -132,7 +138,8 @@ class Release():
         self.distribution_category = ""
         
         self.glossary_title = ''
-        
+
+
 class Track():
     
     content_type = "music library track"

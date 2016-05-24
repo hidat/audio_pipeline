@@ -1,6 +1,7 @@
 import tkinter.tix as tk
 from . import Dialog
 
+
 class MetaGrid(tk.Grid):
 
     def __init__(self, update_command, last_command, bindings, start_index,

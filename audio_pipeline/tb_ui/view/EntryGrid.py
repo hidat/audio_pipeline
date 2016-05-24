@@ -4,6 +4,7 @@ from . import MetaGrid
 from ..util import InputPatterns
 import re
 
+
 class EntryGrid(tk.Toplevel):
 
     def __init__(self, control, master=None):
@@ -76,8 +77,7 @@ class EntryGrid(tk.Toplevel):
                         self.tracks.set(col, row, text=" ")
                     col += 1
             row += 1
-            
-            
+
         self.quit_button = tk.Button(self, text="Finish & Save", command=self.quit_popup)
         self.quit_button.bind("<Return>", self.quit_button["command"])
         self.quit_button.bind("<Tab>", self.starting_selection)
@@ -108,8 +108,8 @@ class EntryGrid(tk.Toplevel):
         self.after(100, self.the_end)
         
     def quit_popup(self, event=None):
-        if event:
-            print(event.widget)
+        #check_messages = ["Error in MusicBrainz metadata", "Wrong disc for case", "Burned disc"]
+        #quit_display = Dialog.MultiCheck(self, check_messages, )
         quit_display = Dialog.DialogBox("Save metadata changes?", master=self)
         buttons = [{"name": "Save", "command": self.save}, {"name": "Don't Save", "command": self.quit}, {"name": "Cancel"}]
         quit_display.button_box(buttons)
@@ -166,4 +166,3 @@ class EntryGrid(tk.Toplevel):
                InputPatterns.unknown.match(artist):
                 # set track artist to album artist
                 self.tracks.set(artist_column, y, text=album_artist)
-            

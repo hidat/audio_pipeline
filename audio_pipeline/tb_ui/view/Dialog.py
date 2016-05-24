@@ -102,9 +102,9 @@ class MultiCheck(tk.Toplevel):
         i = 0
         for message in check_messages:
             self.selected.append(tk.BooleanVar)
-            self.buttons.append(tk.Checkbutton(f, text=check_message, variable=self.selected[i]))
+            self.buttons.append(tk.Checkbutton(f, text=message, variable=self.selected[i]))
             self.buttons[i].pack()
-            self.buttons[i].bind("<Return>", lambda x: c.toggle())
+            self.buttons[i].bind("<Return>", lambda x: self.buttons[i].toggle())
             i += 1
 
         box = tk.Frame(f)
