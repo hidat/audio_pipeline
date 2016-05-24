@@ -11,6 +11,10 @@ class InvalidTagValueError(Exception):
             return str("Invalid Tag Value: " + self.message)
         else:
             return "Invalid Tag Value"
+            
+            
+class CurrentTag:
+    value = "Use the current tag value"
 
 
 class MetadataFormat(abc.ABC):
@@ -99,20 +103,31 @@ class MetadataFormat(abc.ABC):
 class Tag(abc.ABC):
 
     def __init__(self, name, serialization_name, mutagen):
+        self._value = None
+        self.mutagen = mutagen
         self.name = name
         self.serialization_name = serialization_name
-        self.mutagen = mutagen
-        self._value = self.extract(self.mutagen)    
+        self.extract()
+
+    def delete(self):
+        self._value = None
+        if self.serialization_name in self.mutagen:
+            self.mutage.pop(self.serialization_name)
+        self.mutagen.save()
     
     def save(self):
+        self.set()
+        self.mutagen.save()
+        
+    def set(self, value=CurrentTag):
+        if value is not CurrentTag:
+            self.value = value
+            
         if self._value:
-            formatted_value = self.format(self._value)
-            self.mutagen[self.serialization_name] = formatted_value
+            self.mutagen[self.serialization_name] = self._value
         else:
             if self.serialization_name in self.mutagen:
                 self.mutagen.pop(self.serialization_name)
-                
-        self.mutagen.save()
 
     def __str__(self):
         if self._value:
@@ -129,27 +144,25 @@ class Tag(abc.ABC):
     def value(self, val):
         self._value = val
 
-    def format(self, value=None):
-        formatted = None
-
-        if value:
-            self.value = value
-
-        if self._value:
-            formatted = str(self.value)
-
-        return formatted
-
-    @abc.abstractmethod
-    def extract(self, tags):
-        if self.serialization_name in tags:
-            raw_value = tags[self.serialization_name]
+    def extract(self):
+        if self.serialization_name in self.mutagen:
+            self._value = self.mutagen[self.serialization_name]
         else:
-            raw_value = None
-        return raw_value
+            self._value = None
 
 
 class NumberTagMixin:
     # just some regex to help format / extract values like "1/2"
     _num_match = re.compile("(?P<type>.+)\s*num", flags=re.I)
     _value_match = re.compile("\d+/\d+", flags=re.I)
+    
+    @property
+    def total(self):
+        return self._total
+
+    @total.setter
+    def total(self, val):
+        if isinstance(val, int):
+            self._total = val
+        else:
+            raise Tag.InvalidTagValueError(str(val) + " is not an integer")

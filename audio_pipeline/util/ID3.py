@@ -9,24 +9,10 @@ class BaseTag(Tag.Tag):
     def __init__(self, *args):
         super().__init__(*args)
 
-    def set(self, mutagen, value=None):
-        formatted = None
-
-        if value:
-            self.value = value
-        if self._value:
-            formatted = self._value
-
-        mutagen[self.serialization_name] = formatted
-
-    def extract(self, tags):
-        raw_value = super().extract(tags)
-        return raw_value
-
     @property
     def value(self):
         if self._value:
-            val = self._value.text[0]
+            val = str(self._value.text[0])
             return val
 
     @value.setter
@@ -55,27 +41,16 @@ class NumberTag(Tag.NumberTagMixin, BaseTag):
         self._number = int(values[0])
         self._total = int(values[1])
 
-    @property
-    def total(self):
-        return self._total
-
-    @total.setter
-    def total(self, val):
-        if isinstance(val, int):
-            self._total = val
-        else:
-            raise Tag.InvalidTagValueError(str(val) + " is not an integer")
 
     @property
     def value(self):
         if self._number:
-            val = self._number
-            return val
+            return self._number
 
     @value.setter
     def value(self, val):
         if val is None:
-            val = None
+            self._value = None
         else:
             if isinstance(val, int):
                 self._number = val
@@ -224,7 +199,7 @@ class Format(Tag.MetadataFormat):
 
     @classmethod
     def title(cls, tags):
-        tag = TitleTag(cls._title_name, cls.title, tags)
+        tag = TitleTag(cls._title_name, cls._title, tags)
         return tag
 
     @classmethod
