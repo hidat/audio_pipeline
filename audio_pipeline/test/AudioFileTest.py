@@ -84,12 +84,14 @@ class TestReadGenericTags:
         # check name & check serialization name
         self.assertEqual(tag.value, tag_value)
         
+        
 class TestReadGenericTagsFlac(TestReadGenericTags, unittest.TestCase):
 
     def setUp(self):
         self.t1_meta = mutagen.File("audio_pipeline\\test\\t1.flac")
         self.t2_meta = mutagen.File("audio_pipeline\\test\\t2.flac")
         self.format = util.Vorbis.Format
+        
         
 class TestReadGenericTagsMP3(TestReadGenericTags, unittest.TestCase):
 
@@ -98,7 +100,8 @@ class TestReadGenericTagsMP3(TestReadGenericTags, unittest.TestCase):
         self.t2_meta = mutagen.File("audio_pipeline\\test\\t2.mp3")
         self.format = util.ID3.Format
         
-class TestReadGenericTagsAAC(TestReadGenericTags):
+        
+class TestReadGenericTagsAAC(TestReadGenericTags, unittest.TestCase):
 
     def setUp(self):
         self.t1_meta = mutagen.File("audio_pipeline\\test\\t1.m4a")

@@ -5,5 +5,6 @@ from . import Util
 from . import Tag
 from . import Vorbis
 from . import ID3
+from . import AAC
 
 __all__ = ['AudioFile', 'AudioTag', 'MBInfo', 'Util']

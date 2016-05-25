@@ -1,16 +1,16 @@
-from . import Tags
+from . import Tag
 
 
 class BaseTag(Tag.Tag):
 
     def set(self, value=Tag.CurrentTag):
-        if value is not CurrentTag:
+        if value is not Tag.CurrentTag:
             self.value = value
             
         if self._value:
             values = list()
             for val in self._value:
-                values.append(val.encode('utf-8'))
+                values.append(val)
             self.mutagen[self.serialization_name] = values
         else:
             if self.serialization_name in self.mutagen:
@@ -55,12 +55,9 @@ class FreeformTag(BaseTag):
         
 class NumberTag(Tag.NumberTagMixin, BaseTag):
     
-    def __init__(self):
+    def __init__(self, *args):
         self._total = None
-        super().__init__()
-        if len(self._value) > 1:
-            # get total
-            self._total = self._value[1]
+        super().__init__(*args)
             
     def extract(self):
         super().extract()
@@ -79,6 +76,23 @@ class NumberTag(Tag.NumberTagMixin, BaseTag):
         elif isinstance(val, str) and self._value_match.match(val):
             self._value = int(val.split('/')[0])
             self._total = int(val.split('/')[1])
+            
+    def __str__(self):
+        if self._value:
+            return str(self.value)
+        else:
+            return ""
+            
+            
+class DiscNumberTag(NumberTag):
+
+    def __str__(self):
+        if self._value and self._total:
+            return str(self._value) + "/" + str(self._total)
+        elif self._value:
+            return str(self._value)
+        else:
+            return ""
         
 
 class Format(Tag.MetadataFormat):
@@ -95,9 +109,9 @@ class Format(Tag.MetadataFormat):
     _mbid_p = "----:com.apple.iTunes:MusicBrainz Album Id"
     
     # track-level serialization names
-    _title = "title"
+    _title = "\xa9nam"
     _artist = "\xa9ART"
-    _track_total = "tracktotal"
+    _disc_num = "disk"
     _track_num = "trkn"
     _length = "Length"
     
@@ -151,17 +165,17 @@ class Format(Tag.MetadataFormat):
 
     @classmethod
     def disc_num(cls, tags):
-        tag = DiscNumberTag(cls._disc_total, cls._disc_num_name, cls._disc_num, tags)
+        tag = DiscNumberTag(cls._disc_num_name, cls._disc_num, tags)
         return tag
 
     @classmethod
     def track_num(cls, tags):
-        tag = NumberTag(cls._track_total, cls._track_num_name, cls._track_num, tags)
+        tag = NumberTag(cls._track_num_name, cls._track_num, tags)
         return tag
 
     @classmethod
     def length(cls, tags):
-        tag = BaseTag(cls._length_name, cls._length, tags)
+        tag = DiscNumberTag(cls._length_name, cls._length, tags)
         return tag
 
     #########################
@@ -171,5 +185,5 @@ class Format(Tag.MetadataFormat):
     @classmethod
     def custom_tag(cls, name, tags):
         serialization_name = re.sub("\s", "_", name)
-        tag = BaseTag(name, serialization_name, tags)
+        tag = FreeformTag(name, serialization_name, tags)
         return tag
