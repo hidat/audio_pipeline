@@ -78,7 +78,7 @@ def process_directory(source_dir, output_dir, batch_meta, generate, server, seri
                             copy_to_path = os.path.join(track_fail_dir, path)
                         ext = "ERROR_EXT"
                     
-                    release_id, track_num, disc_num, kexp_obscenity_rating, kexp_category =\
+                    release_id, track_num, disc_num, kexp_obscenity_rating, kexp_category, radio_edit, anchor_status =\
                         get_mutagen_meta(raw_metadata, ext)
 
                     if release_id > '':
@@ -124,12 +124,20 @@ def process_directory(source_dir, output_dir, batch_meta, generate, server, seri
                             # Add KEXP added metadata from tags
                             track_data['kexp_category'] = kexp_category
                             track_data['kexp_obscenity_rating'] = kexp_obscenity_rating
+                            track_data['radio_edit'] = radio_edit
+                            track_data['anchor_status'] = anchor_status
                             
                             # If this is a radio edit, assign a unique track id so we can also have a non-radio edit with the same MBID
                             # radio edits are either a specific batch, or have KEXPFCCOBSCENITYRATING tag "KEXP CLEAN EDIT"
-                            if batch_meta["item_code"] or track_data['kexp_obscenity_rating'].casefold() == "kexp clean edit":
+                            if batch_meta["item_code"]:
                                 item_code = str(UUID.uuid4())
                                 track_type = str("track-with-filewalker-GUID")
+                            elif track_data['kexp_obscenity_rating'].casefold() == "kexp clean edit":
+                                item_code = str(UUID.uuid4())
+                                track_type = track_data['kexp_obscenity_rating'].casefold()
+                            elif track_data['radio_edit'].casefold() == "kexp radio edit":
+                                item_code = str(UUID.uuid4())
+                                track_type = track_data['radio_edit'].casefold()
                             else:
                                 item_code = track_data["release_track_id"]
                                 track_type = str("track")
@@ -257,6 +265,8 @@ def get_mutagen_meta(raw_metadata, ext):
     release_id = ''
     kexp_obscenity_rating = ''
     kexp_category = ''
+    anchor_status = False
+    radio_edit = ''
     track_num, disc_num = 0, 0
 
     if _file_types[ext] == "vorbis":
@@ -272,6 +282,10 @@ def get_mutagen_meta(raw_metadata, ext):
             kexp_category = raw_metadata["KEXPPRIMARYGENRE"][0]
         if "KEXPFCCOBSCENITYRATING" in raw_metadata:
             kexp_obscenity_rating = raw_metadata["KEXPFCCOBSCENITYRATING"][0]
+        if 'KEXPRadioEdit' in raw_metadata:
+            radio_edit = raw_metadata['KEXPRadioEdit'][0]
+        if 'KEXPAnchorStatus' in raw_metadata:
+            anchor_status = raw_metadata['KEXPAnchorStatus'][0]
 
     elif _file_types[ext] == "aac":
         #raw_metadata.tags._DictProxy__dict['----:com.apple.iTunes:MBID']
@@ -288,6 +302,10 @@ def get_mutagen_meta(raw_metadata, ext):
             kexp_category = str(raw_metadata['----:com.apple.iTunes:KEXPPRIMARYGENRE'][0], encoding='UTF-8')
         if '----:com.apple.iTunes:KEXPFCCOBSCENITYRATING' in raw_metadata:
             kexp_obscenity_rating = str(raw_metadata['----:com.apple.iTunes:KEXPFCCOBSCENITYRATING'][0], encoding='UTF-8')
+        if '----:com.apple.iTunes:KEXPRadioEdit' in raw_metadata:
+            radio_edit = str(raw_metadata['----:com.apple.iTunes:KEXPRadioEdit'][0], encoding='UTF-8')
+        if '----:com.apple.iTunes:KEXPAnchorStatus' in raw_metadata:
+            anchor_status = str(raw_metadata['----:com.apple.iTunes:KEXPAnchorStatus'][0], encoding='UTF-8')
 
 
     elif _file_types[ext] == "id3":
@@ -304,8 +322,12 @@ def get_mutagen_meta(raw_metadata, ext):
             kexp_category = raw_metadata['TXXX:KEXPPRIMARYGENRE'].text[0]
         if 'TXXX:KEXPFCCOBSCENITYRATING' in raw_metadata:
             kexp_obscenity_rating = raw_metadata['TXXX:KEXPFCCOBSCENITYRATING'].text[0]
+        if 'TXXX:KEXPRadioEdit' in raw_metadata:
+            radio_edit = raw_metadata['TXXX:KEXPRadioEdit'].text[0]
+        if 'TXXX:KEXPAnchorStatus' in raw_metadata:
+            anchor_status = raw_metadata['TXXX:KEXPAnchorStatus'].text[0]
             
-    return release_id, track_num, disc_num, kexp_obscenity_rating, kexp_category
+    return release_id, track_num, disc_num, kexp_obscenity_rating, kexp_category, radio_edit, anchor_status
     
     
 def main():
@@ -339,6 +361,8 @@ def main():
                         help="Specify the server to retrieve MusicBrainz data from. Default is musicbrainz.org; default --server option is http://musicbrainz.kexp.org:5000/; another server can be manually specified")
     parser.add_argument('-g', '--generate', default=False, const=True, nargs='?')
     parser.add_argument('-i', '--gen_item_code', default=False, const=True, nargs='?', help='Generate a unique item code for all audio files.')
+    parser.add_argument('-a', '--anchor', default=False, const=True, nargs='?', help='Add anchor status to track XMLs')
+    parser.add_argument('--radio_edit', type=str.casefold, choices=["Radio Edit", "KEXP Radio Edit"], help='Add specified radio edit to track XMLs')
     
     args = parser.parse_args()
         
@@ -349,6 +373,7 @@ def main():
     batch_meta["rotation"] = options[args.rotation] if args.rotation != None else ""
     batch_meta["source"] = options[args.source] if args.source != None else ""
     batch_meta['item_code'] = args.gen_item_code
+    batch_meta['anchor'] = args.anchor
         
     process_directory(args.input_directory, args.output_directory, batch_meta, args.generate, server, DaletSerializer, args.delete)
 

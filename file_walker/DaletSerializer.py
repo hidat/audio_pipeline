@@ -76,6 +76,13 @@ def save_track(release_data, track_data, batch_meta, output_dir):
                 text("music library track")
             with tag('KEXPSource'):
                 text(batch_meta["source"])
+            if batch_meta['anchor'] or track_data['anchor_status'] == '1' or track_data['anchor_status'] == 1:
+                with tag('KEXPAnchorStatus'):
+                    text('1')
+            if track_data['radio_edit'] and (track_data['radio_edit'].casefold() == "radio edit" 
+                                             or track_data["radio_edit"].casefold() == "kexp radio edit"):
+                with tag('KEXPRadioEdit'):
+                    text(track_data["radio_edit"])
 
 
     formatted_data = indent(doc.getvalue())    

@@ -38,7 +38,6 @@ Walks a directory structure of audio files and does the following:
     
     - Melly  
     - CD Library
-    - Hitters
       
  * *--category, -c*   
     Passes in the category of audio files, to be recorded in XML.
@@ -74,11 +73,11 @@ Walks a directory structure of audio files and does the following:
   * *--local, -l*
     Use the local KEXP MusicBrainz server instead of musicbrainz.org
     
-  * *--mbhost*
-    Specify a host server other than musicbrainz.org
+  * *--i, --gen_item_code*
+    Generate a unique item code for all audio files
     
-  * *--gen_item_code, -i*
-    Generate a new unique item code for all audio files.
+  * *--anchor, -a*
+    Set KEXPAnchorStatus field of all tracks to '1'
       
 ######To Run
 
@@ -88,7 +87,7 @@ Walks a directory structure of audio files and does the following:
 IMPORTANT: Audio files must have release MBID, as well as track number and disc number associated with that MBID, for FileWalker to succeed. 
 
    
-#### Meta Reviewer (working title)
+#### TomatoBanana
 A program to assist in reviewing the metadata of ripped audio discs
  * Pulls relevent metadata - release name, artist, and disc number, and track name, artist, number, length, and KEXPFCCOBSCENITYRATING - from the audio file
  * Displays this metadata onscreen in an easily human-readable format for review
