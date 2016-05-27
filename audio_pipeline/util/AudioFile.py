@@ -1,6 +1,9 @@
 import mutagen
 from . import AudioTag
 from . import Util
+from . import Vorbis
+from . import ID3
+from . import AAC
 
 class UnsupportedFiletypeError(Exception):
     def __init__(self, message):
@@ -24,6 +27,93 @@ class Length(object):
         self.release = False
 
         
+class BaseAudioFile(object):
+
+    vorbis = Vorbis.Format
+    id3 = ID3.Format
+    aac = AAC.Format
+    
+    def __init__(self, file_name):
+        self._format = None
+        self.file_name = file_name
+        
+        try:
+            track = mutagen.File(file_name)
+            if not track:
+                raise UnsupportedFiletypeError(file_name)
+        except IOError as e:
+            # if there's an error opening the file (probably not an audio file)
+            # propagate the resulting exception on up
+            raise e
+            
+        for type in track.mime:
+            # get the appropriate tag Format for this file type
+            if type in AudioTag.Formats.mime_map:
+                t = AudioTag.Formats.mime_map[type]
+                print(t)
+                self.format = t
+                break
+                
+        if not self.format:
+            # Can't process this type of audio file; raise UnsupportedFileType error
+            raise UnsupportedFiletypeError(file_name)
+            
+        # get tags
+        
+        #######################
+        #   release-level tags
+        #######################
+        
+        self.mbid = self.format.mbid(track)
+        self.album = self.format.album(track)
+        self.album_artist = self.format.album_artist(track)
+        self.release_date = self.format.release_date(track)
+        self.label = self.format.label(track)
+                
+        #######################
+        #   track-level tags
+        #######################
+
+        self.title = self.format.title(track)
+        self.artist = self.format.artist(track)
+        self.disc_num = self.format.disc_num(track)
+        self.track_num = self.format.track_num(track)
+        self.length = self.format.length(track)
+                
+    
+    @property
+    def format(self):
+        return self._format
+        
+    @format.setter
+    def format(self, val):
+        if val.casefold() == "aac":
+            self._format = self.aac
+        elif val.casefold() == "id3":
+            self._format = self.id3
+        elif val.casefold() == "vorbis":
+            self._format = self.vorbis
+
+    def save(self):
+        for item in self:
+            item.save()
+        
+    def __iter__(self):
+        release = self.release()
+        for item in self.release:
+            yield item
+            
+        track = self.track()
+        for item in self.track:
+            yield item
+        
+    def release(self):
+        return [self.track_num, self.title, self.artist, self.length]
+    
+    def track(self):
+        return [self.album_artist, self.album, self.label, self.release_date, self.mbid]
+    
+    
 class MutagenAudioFile(object):
 
     aac = AudioTag.AAC(True)

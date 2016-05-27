@@ -18,10 +18,10 @@ class BaseTag(Tag.Tag):
                 
     @property
     def value(self):
-        if self._value is not None:
-            return str(self)
-        else:
+        if self._value is None:
             return self._value
+        else:
+            return str(self)
         
     @value.setter
     def value(self, val):
@@ -38,7 +38,7 @@ class BaseTag(Tag.Tag):
             rep = " ".join(self._value)
             
         return rep
-        
+                
         
 class FreeformTag(BaseTag):
     
@@ -49,8 +49,7 @@ class FreeformTag(BaseTag):
         if self._value:
             for val in self._value:
                 values.append(str(val, encoding='utf-8'))
-                
-        self._value = values
+            self._value = values
         
         
 class NumberTag(Tag.NumberTagMixin, BaseTag):
@@ -93,6 +92,11 @@ class DiscNumberTag(NumberTag):
             return str(self._value)
         else:
             return ""
+            
+            
+class ReleaseDateTag(Tag.ReleaseDateMixin, BaseTag):
+    def __init__(self, *args):
+        super().__init__(*args)
         
 
 class Format(Tag.MetadataFormat):
@@ -131,7 +135,7 @@ class Format(Tag.MetadataFormat):
 
     @classmethod
     def release_date(cls, tags):
-        tag = BaseTag(cls._release_date_name, cls._release_date, tags)
+        tag = ReleaseDateTag(cls._release_date_name, cls._release_date, tags)
         return tag
 
     @classmethod
@@ -141,13 +145,10 @@ class Format(Tag.MetadataFormat):
 
     @classmethod
     def mbid(cls, tags):
-        mbid_tag = FreeformTag(cls._mbid_name, cls._mbid, tags)
-        if mbid_tag.value:
-            return mbid_tag
-        else:
-            mbid_p_tag = FreeformTag(cls._mbid_name, cls._mbid_p, tags)
-            return mbid_p_tag
-
+        tag = FreeformTag(cls._mbid_name, cls._mbid_p, tags)
+        if tag.value is None:
+            tag = FreeformTag(cls._mbid_name, cls._mbid, tags)
+        return tag
 
     ######################
     #   track-level tags
@@ -171,11 +172,6 @@ class Format(Tag.MetadataFormat):
     @classmethod
     def track_num(cls, tags):
         tag = NumberTag(cls._track_num_name, cls._track_num, tags)
-        return tag
-
-    @classmethod
-    def length(cls, tags):
-        tag = DiscNumberTag(cls._length_name, cls._length, tags)
         return tag
 
     #########################

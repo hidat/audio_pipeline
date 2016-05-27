@@ -1,5 +1,7 @@
 import abc
 import re
+from . import Util
+
 
 class InvalidTagValueError(Exception):
 
@@ -49,23 +51,23 @@ class MetadataFormat(abc.ABC):
     
     @classmethod
     @abc.abstractmethod
-    def album(cls, tags): pass
+    def album(cls, mutagen): pass
     
     @classmethod
     @abc.abstractmethod
-    def album_artist(cls, tags): pass
+    def album_artist(cls, mutagen): pass
 
     @classmethod
     @abc.abstractmethod
-    def release_date(cls, tags): pass
+    def release_date(cls, mutagen): pass
 
     @classmethod
     @abc.abstractmethod
-    def label(cls, tags): pass
+    def label(cls, mutagen): pass
 
     @classmethod
     @abc.abstractmethod
-    def mbid(cls, tags): pass
+    def mbid(cls, mutagen): pass
 
     ######################
     #   track-level tags
@@ -73,23 +75,24 @@ class MetadataFormat(abc.ABC):
     
     @classmethod
     @abc.abstractmethod
-    def title(cls, tags): pass
+    def title(cls, mutagen): pass
 
     @classmethod
     @abc.abstractmethod
-    def artist(cls, tags): pass
+    def artist(cls, mutagen): pass
     
     @classmethod
     @abc.abstractmethod
-    def disc_num(cls, tags): pass
+    def disc_num(cls, mutagen): pass
 
     @classmethod
     @abc.abstractmethod
-    def track_num(cls, tags): pass
+    def track_num(cls, mutagen): pass
 
     @classmethod
-    @abc.abstractmethod
-    def length(cls, tags): pass
+    def length(cls, mutagen):
+        tag = LengthTag(cls._length_name, cls._length, mutagen)
+        return tag
     
     ######################
     #   custom tag makers
@@ -112,7 +115,7 @@ class Tag(abc.ABC):
     def delete(self):
         self._value = None
         if self.serialization_name in self.mutagen:
-            self.mutage.pop(self.serialization_name)
+            self.mutagen.pop(self.serialization_name)
         self.mutagen.save()
     
     def save(self):
@@ -149,9 +152,14 @@ class Tag(abc.ABC):
             self._value = self.mutagen[self.serialization_name]
         else:
             self._value = None
+            
+    def __eq__(self, other):
+        return str(self) == str(other)
+    
+    def __lt__(self, other):
+        return str(self) < str(other)
 
-
-class NumberTagMixin:
+class NumberTagMixin(abc.ABC):
     # just some regex to help format / extract values like "1/2"
     _num_match = re.compile("(?P<type>.+)\s*num", flags=re.I)
     _value_match = re.compile("\d+/\d+", flags=re.I)
@@ -166,3 +174,77 @@ class NumberTagMixin:
             self._total = val
         else:
             raise Tag.InvalidTagValueError(str(val) + " is not an integer")
+            
+            
+    def __eq__(self, other):
+        if (isinstance(other, NumberTagMixin)):
+            return self.value == other.value and self.total == other.total
+        elif (isinstance(other, int)):
+            return self.value == other
+        else:
+            return str(self) == str(other)
+    
+    def __lt__(self, other):
+        if (isinstance(other, NumberTagMixin)):
+            return self.value < other.value
+        elif (isinstance(other, int)):
+            return self.value < other
+        else:
+            return str(self) < str(other)
+            
+            
+class ReleaseDateMixin:
+    def __eq__(self, other):
+        if isinstance(other, Tag):
+            if re.search(str(self), str(other)) or re.search(str(other), str(self)):
+                # sometimes ID3 tags only have the year for some reason
+                # so this is kinda iffy, but. better than alternatives.
+                return True
+        else:
+            super().__eq__(other)
+        
+        
+class LengthTag(Tag):
+    # regex to help format / extract values
+    min = "min"
+    sec = "sec"
+    _value_match = re.compile("(?P<min>\d\d?):(?P<sec>\d\d)")
+    
+    
+    def extract(self):
+        self._value = self.mutagen.info.length
+        
+    def __str__(self):
+        if self._value:
+            return Util.minutes_seconds(self._value)
+        else:
+            return ""
+
+    @property
+    def value(self):
+        if self._value:
+            return Util.minutes_seconds(self._value)
+            
+    def __eq__(self, other):
+        if (isinstance(other, LengthTag)):
+            return self._value == other._value
+        elif isinstance(other, float):
+            return self._value == other
+        elif isinstance(other, string):
+            return (self.value == other or str(self._value) == other)
+            
+    def __lt__(self, other):
+        if isinstance(other, LengthTag):
+            return self._value < other._value
+        elif isinstance(other, float):
+            return self._value < other
+        elif isinstance(other, string):
+            try:
+                o = float(other)
+                return self._value < o
+            except ValueError:
+                if self._value_match(other):
+                    seconds = Util.seconds(other)
+                    return self._value < seconds
+        else:
+            raise TypeError("Unorderable types " + str(type(self)) + str(type(other)))

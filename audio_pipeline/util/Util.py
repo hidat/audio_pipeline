@@ -15,6 +15,13 @@ def minutes_seconds(length):
     final = str(minutes) + ":" + str(seconds)
     return final
 
+    
+def seconds(min_sec):
+    min, sec = min_sec.split(":")
+    seconds = int(min) * 60 + int(sec)
+    return seconds
+
+    
 class Obscenity:
     red = "RED DOT"
     yellow = "YELLOW DOT"

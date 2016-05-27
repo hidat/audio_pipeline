@@ -1,109 +1,115 @@
 from .. import util
+from . import TestUtil
 import unittest
 import abc
 import mutagen
 
-t1 = "audio_pipeline\\test\\t1.flac"
-t2 = "t2.flac"
-
-t1_tags = {'tracktotal': 12, 'album': 'Who Killed...... The Zutons?',
-           'encoder settings': '-compression-level-5', 'encoder': '(FLAC 1.2.1)',
-           'albumartist': 'The Zutons', 'label': 'Deltasonic', 'date': '2004 04 19', 'date2': '2004',
-           'source': 'CD (Lossless)', 'discnumber': 1,
-           'accurateripdiscid': '012-0011f4ba-00a8233b-8809700c-4', 'batchid': '50024',
-           'encoded by': 'dBpoweramp Release 14.4', 'title': 'Confusion',
-           'accurateripresult': 'AccurateRip: Accurate (confidence 62)   [37DEB629]', 
-           'artist': 'The Zutons', 'tracknumber': 4, 'disctotal': 1,
-           'genre': 'Rock', 'mbid': '5560ffa9-3824-44f4-b2bf-a96ae4864187'}
-
-t2_tags = {'title': 'The Domino Quivers', 'albumartist': 'Rudi Zygadlo', 
-           'encoded by': 'dBpoweramp Release 14.4', 
-           'accurateripdiscid': '013-0014462a-00cb7579-bf0a3e0d-6', 
-           'date': '2012', 'encoder': '(FLAC 1.2.1)', 'tracktotal': 13, 
-           'tracknumber': 6, 'disctotal': 1, 'discnumber': 1, 
-           'batchid': '50024', 'accurateripresult': 'AccurateRip: Not in database   [7CF59426]', 
-           'source': 'CD (Lossless)', 'artist': 'Rudi Zygadlo', 'album': 'Tragicomedies', 
-           'encoder settings': '-compression-level-5'}
-           
-class TestReadGenericTags:
+class TestAudioFileTags(TestUtil.TestUtilMixin):
     def test_artist_name(self):
-        tag = self.format.album_artist(self.t1_meta)
-        self.check_tag(tag, t1_tags["albumartist"])
+        tag = self.format.album_artist(self.meta)
+        self.check_af_tag(tag, self.af.album_artist)
 
     def test_mbid(self):
-        tag = self.format.mbid(self.t1_meta)
-        self.check_tag(tag, t1_tags["mbid"])
+        tag = self.format.mbid(self.meta)
+        self.check_af_tag(tag, self.af.mbid)
         
     def test_album(self):
-        tag = self.format.album(self.t1_meta)
-        self.check_tag(tag, t1_tags["album"])
+        tag = self.format.album(self.meta)
+        self.check_af_tag(tag, self.af.album)
         
     def test_release_date(self):
-        if self.format is util.ID3.Format:
-            self.skipTest("Date has different format for ID3")
-            
-        tag = self.format.release_date(self.t1_meta)
-        self.check_tag(tag, t1_tags["date"])
-        
-    def test_release_date_2(self):
-        if self.format is not util.ID3.Format:
-            self.skipTest("Date only has this format in ID3")
-            
-        tag = self.format.release_date(self.t1_meta)
-        self.check_tag(tag, t1_tags["date2"])
+        tag = self.format.release_date(self.meta)
+        self.check_af_tag(tag, self.af.release_date)
         
     def test_title(self):
-        tag = self.format.title(self.t1_meta)
-        self.check_tag(tag, t1_tags["title"])
+        tag = self.format.title(self.meta)
+        self.check_af_tag(tag, self.af.title)
         
     def test_artist(self):
-        tag = self.format.artist(self.t1_meta)
-        self.check_tag(tag, t1_tags["artist"])
+        tag = self.format.artist(self.meta)
+        self.check_af_tag(tag, self.af.artist)
         
     def test_disc_num(self):
-        tag = self.format.disc_num(self.t1_meta)
-        self.check_tag(tag, t1_tags["discnumber"])
+        tag = self.format.disc_num(self.meta)
+        self.check_af_tag(tag, self.af.disc_num)
         
     def test_track_num(self):
-        tag = self.format.track_num(self.t1_meta)
-        self.check_tag(tag, t1_tags["tracknumber"])
+        tag = self.format.track_num(self.meta)
+        self.check_af_tag(tag, self.af.track_num)
         
     def test_length(self):
-        tag = self.format.length(self.t1_meta)
-        
-    def check_empty_tag(self, tag):
-        self.assertIsNot(tag, None)
-        self.assertIs(tag.value, None)
-        self.assertIs(str(tag), '')
-        # check name & check serialization name
-        
-    def check_tag(self, tag, tag_value):
-        self.assertIsNot(tag, None)
-        self.assertIsNot(tag.value, None)
-        self.assertIsNot(tag.value, '')
-        # check name & check serialization name
-        self.assertEqual(tag.value, tag_value)
-        
-        
-class TestReadGenericTagsFlac(TestReadGenericTags, unittest.TestCase):
+        tag = self.format.length(self.meta)
+        self.check_af_tag(tag, self.af.length)
+    
 
-    def setUp(self):
-        self.t1_meta = mutagen.File("audio_pipeline\\test\\t1.flac")
-        self.t2_meta = mutagen.File("audio_pipeline\\test\\t2.flac")
-        self.format = util.Vorbis.Format
-        
-        
-class TestReadGenericTagsMP3(TestReadGenericTags, unittest.TestCase):
+class TestAudioFileVorbis_t1(TestAudioFileTags, unittest.TestCase):
 
-    def setUp(self):
-        self.t1_meta = mutagen.File("audio_pipeline\\test\\t1.mp3")
-        self.t2_meta = mutagen.File("audio_pipeline\\test\\t2.mp3")
-        self.format = util.ID3.Format
-        
-        
-class TestReadGenericTagsAAC(TestReadGenericTags, unittest.TestCase):
+    meta = mutagen.File("audio_pipeline\\test\\t1.flac")
+    format = util.Vorbis.Format
 
-    def setUp(self):
-        self.t1_meta = mutagen.File("audio_pipeline\\test\\t1.m4a")
-        self.t2_meta = mutagen.File("audio_pipeline\\test\\t2.m4a")
-        self.format = util.AAC.Format
+    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\t1.flac")
+    
+    
+class TestAudioFileVorbis_picard(TestAudioFileTags, unittest.TestCase):
+
+    meta = mutagen.File("audio_pipeline\\test\\picard.flac")
+    format = util.Vorbis.Format
+
+    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\picard.flac")
+    
+    
+class TestAudioFileVorbis_unknown(TestAudioFileTags, unittest.TestCase):
+
+    meta = mutagen.File("audio_pipeline\\test\\unknown.flac")
+    format = util.Vorbis.Format
+
+    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\unknown.flac")
+    
+    
+class TestAudioFileAAC_t1(TestAudioFileTags, unittest.TestCase):
+
+    meta = mutagen.File("audio_pipeline\\test\\t1.m4a")
+    format = util.AAC.Format
+
+    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\t1.m4a")
+    
+    
+class TestAudioFileAAC_picard(TestAudioFileTags, unittest.TestCase):
+
+    meta = mutagen.File("audio_pipeline\\test\\picard.m4a")
+    format = util.AAC.Format
+
+    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\picard.m4a")
+    
+    
+class TestAudioFileAAC_unknown(TestAudioFileTags, unittest.TestCase):
+
+    meta = mutagen.File("audio_pipeline\\test\\unknown.m4a")
+    format = util.AAC.Format
+
+    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\unknown.m4a")
+    
+    
+    
+class TestAudioFileID3_t1(TestAudioFileTags, unittest.TestCase):
+
+    meta = mutagen.File("audio_pipeline\\test\\t1.mp3")
+    format = util.ID3.Format
+
+    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\t1.mp3")
+    
+    
+class TestAudioFileID3_picard(TestAudioFileTags, unittest.TestCase):
+
+    meta = mutagen.File("audio_pipeline\\test\\picard.mp3")
+    format = util.ID3.Format
+
+    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\picard.mp3")
+    
+    
+class TestAudioFileID3_unknown(TestAudioFileTags, unittest.TestCase):
+
+    meta = mutagen.File("audio_pipeline\\test\\unknown.mp3")
+    format = util.ID3.Format
+
+    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\unknown.mp3")

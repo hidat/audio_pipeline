@@ -55,7 +55,7 @@ class NumberTag(Tag.NumberTagMixin, BaseTag):
             self._value = int(val.split('/')[0])
         else:
             raise Tag.InvalidTagValueError(str(val) + " is not a valid " + self.name)
-
+            
 
 class DiscNumberTag(NumberTag):
 
@@ -68,6 +68,11 @@ class DiscNumberTag(NumberTag):
             val = ""
             
         return val
+        
+        
+class ReleaseDateTag(Tag.ReleaseDateMixin, BaseTag):
+    def __init__(self, *args):
+        super().__init__(*args)
         
         
 class Format(Tag.MetadataFormat):
@@ -87,8 +92,10 @@ class Format(Tag.MetadataFormat):
     _title = "title"
     _artist = "artist"
     _disc_total = "disctotal"
+    _disc_total_picard = "totaldiscs"
     _disc_num = "discnumber"
     _track_total = "tracktotal"
+    _track_total_picard = "totaltracks"
     _track_num = "tracknumber"
     _length = "Length"
     
@@ -108,7 +115,7 @@ class Format(Tag.MetadataFormat):
 
     @classmethod
     def release_date(cls, tags):
-        tag = BaseTag(cls._release_date_name, cls._release_date, tags)
+        tag = ReleaseDateTag(cls._release_date_name, cls._release_date, tags)
         return tag
 
     @classmethod
@@ -118,13 +125,10 @@ class Format(Tag.MetadataFormat):
 
     @classmethod
     def mbid(cls, tags):
-        mbid_tag = BaseTag(cls._mbid_name, cls._mbid, tags)
-        if mbid_tag.value:
-            return mbid_tag
-        else:
-            mbid_p_tag = BaseTag(cls._mbid_name, cls._mbid_p, tags)
-            return mbid_p_tag
-
+        tag = BaseTag(cls._mbid_name, cls._mbid_p, tags)
+        if tag.value is None:
+            tag = BaseTag(cls._mbid_name, cls._mbid, tags)
+        return tag
 
     ######################
     #   track-level tags
@@ -142,19 +146,18 @@ class Format(Tag.MetadataFormat):
 
     @classmethod
     def disc_num(cls, tags):
-        tag = DiscNumberTag(cls._disc_total, cls._disc_num_name, cls._disc_num, tags)
+        tag = DiscNumberTag(cls._disc_total_picard, cls._disc_num_name, cls._disc_num, tags)
+        if tag.total is None:
+            tag = DiscNumberTag(cls._disc_total, cls._disc_num_name, cls._disc_num, tags)
         return tag
-
+           
     @classmethod
     def track_num(cls, tags):
-        tag = NumberTag(cls._track_total, cls._track_num_name, cls._track_num, tags)
+        tag = NumberTag(cls._track_total_picard, cls._track_num_name, cls._track_num, tags)
+        if tag.total is None:
+            tag = NumberTag(cls._track_total, cls._track_num_name, cls._track_num, tags)
         return tag
-
-    @classmethod
-    def length(cls, tags):
-        tag = BaseTag(cls._length_name, cls._length, tags)
-        return tag
-
+        
     #########################
     #   custom tags
     #########################

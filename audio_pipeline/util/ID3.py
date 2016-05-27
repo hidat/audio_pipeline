@@ -1,5 +1,6 @@
 from . import Tag
 import mutagen
+import re
 
 
 class BaseTag(Tag.Tag):
@@ -89,7 +90,6 @@ class CustomTag(BaseTag):
         if val:
             if self._value is None:
                 self._value = self._frame_type(encoding=self._frame_encoding, desc=self.name)
-
             self._value.text = [val]
         else:
             self._value = None
@@ -107,9 +107,9 @@ class AlbumArtistTag(BaseTag):
     _frame_type = mutagen.id3.TPE2
 
 
-class ReleaseDateTag(BaseTag):
+class ReleaseDateTag(Tag.ReleaseDateMixin, BaseTag):
     _frame_type = mutagen.id3.TDRC
-
+    
 
 class LabelTag(BaseTag):
     _frame_type = mutagen.id3.TPUB
@@ -185,13 +185,10 @@ class Format(Tag.MetadataFormat):
 
     @classmethod
     def mbid(cls, tags):
-        mbid_tag = CustomTag(cls._mbid_name, cls._mbid, tags)
-        if mbid_tag.value:
-            return mbid_tag
-        else:
-            mbid_p_tag = CustomTag(cls._mbid_name, cls._mbid_p, tags)
-            return mbid_p_tag
-
+        tag = CustomTag(cls._mbid_name, cls._mbid_p, tags)
+        if tag.value is None:
+            tag = CustomTag(cls._mbid_name, cls._mbid, tags)
+        return tag
 
     ######################
     #   track-level tags
@@ -215,11 +212,6 @@ class Format(Tag.MetadataFormat):
     @classmethod
     def track_num(cls, tags):
         tag = TrackNumberTag(cls._track_num_name, cls._track_num, tags)
-        return tag
-
-    @classmethod
-    def length(cls, tags):
-        tag = LengthTag(cls._length_name, cls._length,tags)
         return tag
 
     #########################
