@@ -341,14 +341,14 @@ class KEXP(object):
 
 class AudioFile:
 
-    def __init__(self, audiofile = MutagenAudioFile):
-        self.audiofile = audiofile
-        self.audiofiles = dict()
+    audiofile = BaseAudioFile
+    audiofiles = dict()
         
-    def get(self, file_name):
-        if file_name in self.audiofiles:
-            return self.audiofiles[file_name]
+    @staticmethod
+    def get(file_name):
+        if file_name in AudioFile.audiofiles:
+            return AudioFile.audiofiles[file_name]
         else:
-            af = self.audiofile(file_name)
-            self.audiofiles[file_name] = af
+            af = AudioFile.audiofile(file_name)
+            AudioFile.audiofiles[file_name] = af
             return af
