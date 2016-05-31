@@ -1,6 +1,5 @@
 from . import Tag
 import mutagen
-import re
 
 
 class BaseTag(Tag.Tag):
@@ -41,7 +40,6 @@ class NumberTag(Tag.NumberTagMixin, BaseTag):
         values = self._value.text[0].split('/')
         self._number = int(values[0])
         self._total = int(values[1])
-
 
     @property
     def value(self):

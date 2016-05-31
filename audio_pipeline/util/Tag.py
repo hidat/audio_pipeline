@@ -194,6 +194,7 @@ class NumberTagMixin(abc.ABC):
             
             
 class ReleaseDateMixin:
+
     def __eq__(self, other):
         if isinstance(other, Tag):
             if re.search(str(self), str(other)) or re.search(str(other), str(self)):
@@ -209,8 +210,7 @@ class LengthTag(Tag):
     min = "min"
     sec = "sec"
     _value_match = re.compile("(?P<min>\d\d?):(?P<sec>\d\d)")
-    
-    
+
     def extract(self):
         self._value = self.mutagen.info.length
         
@@ -230,7 +230,7 @@ class LengthTag(Tag):
             return self._value == other._value
         elif isinstance(other, float):
             return self._value == other
-        elif isinstance(other, string):
+        elif isinstance(other, str):
             return (self.value == other or str(self._value) == other)
             
     def __lt__(self, other):
@@ -238,7 +238,7 @@ class LengthTag(Tag):
             return self._value < other._value
         elif isinstance(other, float):
             return self._value < other
-        elif isinstance(other, string):
+        elif isinstance(other, str):
             try:
                 o = float(other)
                 return self._value < o

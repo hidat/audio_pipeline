@@ -2,7 +2,6 @@ import uuid
 import configparser
 import os
 
-        
 def minutes_seconds(length):
     # turns a floating point value into a string of (approximate)
     # minutes : seconds
@@ -39,7 +38,8 @@ def is_mbid(id):
         good = False    
     
     return good
-    
+
+
 def has_mbid(track):
     """
     Check whether or not the given track has an MBID.

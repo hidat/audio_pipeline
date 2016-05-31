@@ -4,6 +4,7 @@ import unittest
 import abc
 import mutagen
 
+
 class TestAudioFileTags(TestUtil.TestUtilMixin):
     def test_artist_name(self):
         tag = self.format.album_artist(self.meta)

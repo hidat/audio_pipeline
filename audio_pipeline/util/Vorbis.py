@@ -11,7 +11,7 @@ class BaseTag(Tag.Tag):
             self._value = self._value[0]
 
     def set(self, value=Tag.CurrentTag):
-        if value is not CurrentTag:
+        if value is not Tag.CurrentTag:
             self.value = value
             
         if self._value:

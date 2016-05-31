@@ -118,7 +118,10 @@ class Format(Tag.MetadataFormat):
     _disc_num = "disk"
     _track_num = "trkn"
     _length = "Length"
-    
+
+    # custom tag base
+    custom_tag_base = "----:com.apple.iTunes:"
+
     ################
     #   release-level tags
     ################
@@ -180,6 +183,6 @@ class Format(Tag.MetadataFormat):
 
     @classmethod
     def custom_tag(cls, name, tags):
-        serialization_name = re.sub("\s", "_", name)
+        serialization_name = cls.custom_tag_base + name
         tag = FreeformTag(name, serialization_name, tags)
         return tag
