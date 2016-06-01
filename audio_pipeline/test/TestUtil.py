@@ -1,5 +1,5 @@
-import unittest
-
+import os.path
+from ..util import MBInfo
 
 class TestUtilMixin:
 
@@ -69,3 +69,48 @@ class TestUtilMixin:
         self.assertNotEqual(aac_tag, id3_tag, msg=message)
         message = msg + "id3 and vorbis not equal"
         self.assertNotEqual(id3_tag, vorbis_tag, msg=message)
+
+        
+class TestMBinfo(MBInfo.MBInfo):
+
+    # an 'mbinfo' class to use for testing without constantly hitting musicbrainz
+    
+    def __init__(self, server, info_directory, useragent=("hidat_audio_pipeline", "0.1")):
+        """
+        An 'mbinfo' class to use when testing, without hitting musicbrainz a ton
+        :param info_directory: Directory containing artist & release mbinfo json files
+        """
+        super().__init__(server, useragent)
+        
+        self.artist_dir = os.path.join(info_directory, "actors.json")
+        self.release_dir = os.path.join(info_directory, "releases.json")
+        
+        self.artists = {}
+        self.releases = {}
+        
+        if not os.path.exists(info_directory):
+            os.mkdir(info_directory)
+        else:
+            if os.path.exists(self.artist_dir):
+                # load in artists
+                self.artists = json.load(self.artist_dir)
+            if os.path.exists(self.release_dir):
+                self.releases = json.load(self.release_dir)
+                
+    def get_release(self, release_id):
+        if release_id in self.releases:
+            return self.releases[release_id]
+        else:
+            release = super().get_release(release_id)
+            self.releases[release_id] = release
+            with open(self.release_dir, "a+") as f:
+                f.write(json.dumps(release))
+                
+    def get_artist(self, artist_id):
+        if artist_id in self.artists:
+            return self.artists[artist_id]
+        else:
+            artist = super().get_artist(artist_id)
+            self.artists[artist_id] = artist
+            with open(self.artist_dir, "a+") as f:
+                f.write(json.dumps(artist))
