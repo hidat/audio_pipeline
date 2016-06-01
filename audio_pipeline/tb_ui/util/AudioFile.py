@@ -2,12 +2,6 @@ from ... import util
 from ..view import Settings
 from ..util import Resources
 
-class UnsupportedFiletypeError(Exception):
-    def __init__(self, message):
-        self.message = message
-        
-    def __str(self):
-        return str(self.message)
 
 class AudioFile(util.AudioFile.MutagenAudioFile):
 
@@ -26,8 +20,8 @@ class AudioFile(util.AudioFile.MutagenAudioFile):
         """
         try: 
             super().__init__(file_name)
-        except util.AudioFile.UnsupportedFiletypeError:
-            raise UnsupportedFiletypeError(file_name)
+        except util.Exceptions.UnsupportedFiletypeError:
+            raise util.Exceptions.UnsupportedFiletypeError(file_name)
             
         self.track_style = self.release_style.copy()
         self.track_style['fg'] = Settings.get_text_color(self)

@@ -2,7 +2,7 @@ import os
 from ..util import AudioFile
 from ..util import Resources
 from ..util import InputPatterns
-
+from ...util import Exceptions
 
 max_af = 10000
 
@@ -116,7 +116,7 @@ class ProcessDirectory(object):
                     file_data = AudioFile.AudioFile(file, picard, mbid)
                 except IOError as e:
                     continue
-                except AudioFile.UnsupportedFiletypeError as e:
+                except Exceptions.UnsupportedFiletypeError as e:
                     print("Unsupported filetype")
                     continue
 
@@ -185,7 +185,7 @@ class ProcessDirectory(object):
                 except IOError:
                     track = False
                     continue
-                except AudioFile.UnsupportedFiletypeError:
+                except Exceptions.UnsupportedFiletypeError:
                     track = False
                     continue
                 break

@@ -3,19 +3,8 @@ from . import Resources
 from . import Util
 import uuid as UUID
 
-class NoMusicBrainzError(Exception):
-    def __init__(self, message=None):
-        self.message = message
-        
-    def __str(self):
-        m = "No MusicBrainz object"
-        
-        if self.message:
-            m = m + ": " + self.message
-            
-        return str(m)
 
-class Processor(object):
+class Processor:
     
     def __init__(self, mbinfo):
         if mbinfo:
