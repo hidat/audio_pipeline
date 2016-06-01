@@ -6,5 +6,6 @@ from . import Tag
 from . import Vorbis
 from . import ID3
 from . import AAC
+from . import Exceptions
 
-__all__ = ['AudioFile', 'AudioTag', 'MBInfo', 'Util']
+__all__ = ['AudioFile', 'AudioTag', 'MBInfo', 'Util', 'Exceptions']

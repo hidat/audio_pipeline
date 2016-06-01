@@ -108,6 +108,10 @@ class AlbumArtistTag(BaseTag):
 class ReleaseDateTag(Tag.ReleaseDateMixin, BaseTag):
     _frame_type = mutagen.id3.TDRC
     
+    def __init__(self, *args):
+        super().__init__(*args)
+        self._normalize()
+    
 
 class LabelTag(BaseTag):
     _frame_type = mutagen.id3.TPUB

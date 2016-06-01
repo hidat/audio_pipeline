@@ -1,18 +1,11 @@
 import mutagen
+from . import Exceptions
 from . import AudioTag
 from . import Util
 from . import Tag
 from . import Vorbis
 from . import ID3
 from . import AAC
-
-
-class UnsupportedFiletypeError(Exception):
-    def __init__(self, message):
-        self.message = message
-        
-    def __str(self):
-        return str(self.message)
 
 
 class Length(object):
@@ -43,7 +36,7 @@ class BaseAudioFile:
         try:
             self.audio = mutagen.File(file_name)
             if not self.audio:
-                raise UnsupportedFiletypeError(file_name)
+                raise Exceptions.UnsupportedFiletypeError(file_name)
         except IOError as e:
             # if there's an error opening the file (probably not an audio file)
             # propagate the resulting exception on up
@@ -54,12 +47,11 @@ class BaseAudioFile:
             if type in AudioTag.Formats.mime_map:
                 t = AudioTag.Formats.mime_map[type]
                 self.format = t
-                self.ignore_case = Tag.IgnoreCase(self.audio)
                 break
                 
         if not self.format:
             # Can't process this type of audio file; raise UnsupportedFileType error
-            raise UnsupportedFiletypeError(file_name)
+            raise Exceptions.UnsupportedFiletypeError(file_name)
             
         # get tags
         
@@ -67,21 +59,21 @@ class BaseAudioFile:
         #   release-level tags
         #######################
         
-        self.mbid = self.format.mbid(self.ignore_case)
-        self.album = self.format.album(self.ignore_case)
-        self.album_artist = self.format.album_artist(self.ignore_case)
-        self.release_date = self.format.release_date(self.ignore_case)
-        self.label = self.format.label(self.ignore_case)
+        self.mbid = self.format.mbid(self.audio)
+        self.album = self.format.album(self.audio)
+        self.album_artist = self.format.album_artist(self.audio)
+        self.release_date = self.format.release_date(self.audio)
+        self.label = self.format.label(self.audio)
                 
         #######################
         #   track-level tags
         #######################
 
-        self.title = self.format.title(self.ignore_case)
-        self.artist = self.format.artist(self.ignore_case)
-        self.disc_num = self.format.disc_num(self.ignore_case)
-        self.track_num = self.format.track_num(self.ignore_case)
-        self.length = self.format.length(self.ignore_case)
+        self.title = self.format.title(self.audio)
+        self.artist = self.format.artist(self.audio)
+        self.disc_num = self.format.disc_num(self.audio)
+        self.track_num = self.format.track_num(self.audio)
+        self.length = self.format.length(self.audio)
                 
     
     @property
@@ -144,7 +136,7 @@ class MutagenAudioFile(object):
         try:
             self.audio = mutagen.File(file_name)
             if not self.audio:
-                raise UnsupportedFiletypeError(file_name)
+                raise Exceptions.UnsupportedFiletypeError(file_name)
         except IOError as e:
             # if there's an error opening the file with mutagen, return None
             #print("Mutagen IO error: ", e)
@@ -158,7 +150,7 @@ class MutagenAudioFile(object):
 
         if not format:
             # we can not process this audio file type; raise an error
-            raise UnsupportedFiletypeError(file_name)
+            raise Exceptions.UnsupportedFiletypeError(file_name)
         else:
             tags = self.audio.tags
             self.format = self.formats[format]

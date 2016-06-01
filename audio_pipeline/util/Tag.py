@@ -3,18 +3,6 @@ import re
 from . import Util
 
 
-class InvalidTagValueError(Exception):
-
-    def __init__(self, message=None):
-        self.message = message
-
-    def __str(self):
-        if self.message:
-            return str("Invalid Tag Value: " + self.message)
-        else:
-            return "Invalid Tag Value"
-            
-            
 class CurrentTag:
     value = "Use the current tag value"
 
@@ -159,6 +147,7 @@ class Tag(abc.ABC):
     def __lt__(self, other):
         return str(self) < str(other)
 
+        
 class NumberTagMixin(abc.ABC):
     # just some regex to help format / extract values like "1/2"
     _num_match = re.compile("(?P<type>.+)\s*num", flags=re.I)
@@ -195,12 +184,42 @@ class NumberTagMixin(abc.ABC):
             
 class ReleaseDateMixin:
 
+    # Normalize all dates
+    
+    # dates are (generally) separated by one of \, /, :, -, " ",
+    # and we'll allow any number of spaces before and after delimeter
+    year = "year"
+    month = "month"
+    day = "day"
+    delimeters = "\s*((\\\\|/|:|-)|\s)\s*"
+    
+    dates = re.compile("(?P<" + year + ">\d\d\d\d)(" + delimeters + 
+                       "(?P<" + month + ">\d\d))?(" + delimeters + "(?P<" + day + ">\d\d))?")
+                       
+    def _normalize(self):
+        # normalize the date string
+        if self._value:
+            normalized = re.subn(self.delimeters, "-", str(self), count=3)[0]
+            self.value = normalized
+
     def __eq__(self, other):
-        if isinstance(other, Tag):
-            if re.search(str(self), str(other)) or re.search(str(other), str(self)):
-                # sometimes ID3 tags only have the year for some reason
-                # so this is kinda iffy, but. better than alternatives.
+        if isinstance(other, ReleaseDateMixin) or isinstance(other, str):
+            d1 = self.dates.search(str(self))
+            d2 = self.dates.search(str(other))
+            
+            if d1 and d2:
+                if d1.group(self.year) and d2.group(self.year) and d1.group(self.year) != d2.group(self.year):
+                    return False
+                elif d1.group(self.month) and d2.group(self.month) and d1.group(self.month) != d2.group(self.month):
+                    return False
+                elif d1.group(self.day) and d2.group(self.day) and d1.group(self.day) != d2.group(self.day):
+                    return False
+                else:
+                    return True
+            elif not (d1 and d2):
                 return True
+            else:
+                return False
         else:
             super().__eq__(other)
         

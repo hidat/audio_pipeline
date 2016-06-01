@@ -73,6 +73,7 @@ class DiscNumberTag(NumberTag):
 class ReleaseDateTag(Tag.ReleaseDateMixin, BaseTag):
     def __init__(self, *args):
         super().__init__(*args)
+        self._normalize()
         
         
 class Format(Tag.MetadataFormat):
