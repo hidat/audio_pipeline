@@ -8,6 +8,7 @@ from . import Dialog
 class App(tk.Tk):
 
     def __init__(self, input_processor, directory_selector, close_command):
+    
         self.input_processor = input_processor
         self.directory_selector = directory_selector
         self.close_command = close_command
@@ -21,6 +22,10 @@ class App(tk.Tk):
         self['width'] = 500
         self['height'] = 900
         self.title("TomatoBanana")
+        
+        self.processing_done = tk.BooleanVar()
+        self.processing_done.set(False)
+        
 
         self.release_frame = MetaFrame.ReleaseFrame()
         self.track_frame = MetaFrame.TrackFrame()
@@ -89,9 +94,10 @@ class App(tk.Tk):
     def close_info(self):
         self.info_window.destroy()
         self.info_window = None
-
-    def close_dialog(self):
-        Dialog.Check(self.app, "Processing complete", "Close TB", self.close, self.app.quit, "Close TomatoBanana?")
+        
+    def move_files(self, move):
+        if move is not None:
+            self.processing_done.set(move)
         
     def quit(self):
         self.after(40, self.destroy)

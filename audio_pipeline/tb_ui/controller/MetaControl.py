@@ -161,13 +161,21 @@ class MetaController:
         """
         Display a 'quit'? dialog
         """
-        Dialog.Check(self.app, "Processing complete", "Close TB", self.close, self.app.quit, "Close TomatoBanana?")
+        Dialog.Check(self.app, "Processing complete", "Close TB", self.app.processing_done, "Close TomatoBanana?")
+        self.app.wait_variable(self.app.processing_done)
+        move_files = self.app.processing_done.get()
+        if move_files is not None:
+            self.app.quit()
+            if move_files:
+                print('move files')
+                self.close()
 
     def close(self):
         """
         Close TomatoBanana; move files into appropriate folders
-        """
+        """        
         self.model.first()
+        
         if self.copy_dir:
             move = shutil.copy
         else:
@@ -189,17 +197,18 @@ class MetaController:
             for track in release:
                 # move to correct folder
                 move(track.file_name, track.dest_dir)
+                print("moving " + ascii(track.file_name) + " to " + ascii(track.dest_dir))
                 
                 
             try:
                 os.rmdir(picard)
             except OSError as e:
-                print("picard")
+                pass
                 
             try:
                 os.rmdir(mb)
             except OSError as e:
-                print("mb")
+                pass
                 
             try:
                 os.rmdir(release_path)
@@ -207,7 +216,6 @@ class MetaController:
                 # release directory is not empty
                 continue
                 
-        self.app.quit()
 
         
     def choose_dir(self, root_dir):

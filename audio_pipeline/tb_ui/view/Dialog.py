@@ -4,7 +4,7 @@ import tkinter.filedialog as filedialog
 
 class Check(tk.Toplevel):
 
-    def __init__(self, master, check_message, button_name, on_command, off_command, message=None, **kwargs):
+    def __init__(self, master, check_message, button_name, set_variable, message=None, **kwargs):
         """
         Create a dialog popup box with a checkbutton.
         :param master: Check's master
@@ -14,10 +14,10 @@ class Check(tk.Toplevel):
         :return:
         """
         tk.Toplevel.__init__(self, master, width=400, height=300)
-        self.master = master
+        if master:
+            self.master = master
         self.selected = tk.BooleanVar()
-        self.on_command = on_command
-        self.off_command = off_command
+        self.set_variable = set_variable
 
         if self.master:
             self.transient(master)
@@ -40,7 +40,7 @@ class Check(tk.Toplevel):
         box = tk.Frame(f)
 
         select_but = tk.Button(box, text=button_name, command=self.apply)
-        cancel_but = tk.Button(box, text="Cancel", command=self.destroy)
+        cancel_but = tk.Button(box, text="Cancel", command=self.cancel)
         select_but.bind("<Return>", select_but["command"])
         cancel_but.bind("<Return>", cancel_but["command"])
 
@@ -48,20 +48,18 @@ class Check(tk.Toplevel):
         cancel_but.pack(side=tk.LEFT, padx=5,pady=5)
         box.pack()
 
+    def cancel(self):
+        self.set_variable.set(None)
+        self.destroy()
+        
     def start(self):
         self.grab_set()
         self.master.wait_window(self)
         
     def apply(self):
         # get value of checkbox
-        on = self.selected.get()
-
-        if on:
-            self.on_command()
-        else:
-            print(self.off_command)
-            self.off_command()
-
+        self.set_variable.set(self.selected.get())
+        
         self.destroy()
 
         
@@ -80,7 +78,8 @@ class MultiCheck(tk.Toplevel):
         :return:
         """
         tk.Toplevel.__init__(self, master, width=400, height=300)
-        self.master = master
+        if master:
+            self.master = master
         self.selected = list()
         self.buttons = list()
         self.on_commands = on_commands
