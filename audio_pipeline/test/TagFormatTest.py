@@ -2,8 +2,21 @@ from .. import util
 from . import TestUtil
 import unittest
 import mutagen
+import os
 
+test_file_dir = "audio_pipeline\\test\\test_audio_files\\tag_test_files"
 
+vorbis_files = dict(t1=os.path.join(test_file_dir, "t1.flac"), 
+                    picard=os.path.join(test_file_dir, "picard.flac"),
+                    unknown=os.path.join(test_file_dir, "unknown.flac"))
+
+aac_files = dict(t1=os.path.join(test_file_dir, "t1.m4a"), 
+                 picard=os.path.join(test_file_dir, "picard.m4a"),
+                 unknown=os.path.join(test_file_dir, "unknown.m4a"))
+                 
+id3_files = dict(t1=os.path.join(test_file_dir, "t1.mp3"),
+                 picard=os.path.join(test_file_dir, "picard.mp3"), 
+                 unknown=os.path.join(test_file_dir, "unknown.mp3"))
 
 t1_tags = {'tracktotal': 12, 'album': 'Who Killed...... The Zutons?',
            'encoder settings': '-compression-level-5', 'encoder': '(FLAC 1.2.1)',
@@ -88,17 +101,17 @@ class TestTagEquality(TestUtil.TestUtilMixin, unittest.TestCase):
     id3 = util.ID3.Format
     aac = util.AAC.Format
 
-    vorbis_t1 = mutagen.File("audio_pipeline\\test\\test_audio_files\\t1.flac")
-    vorbis_picard = mutagen.File("audio_pipeline\\test\\test_audio_files\\picard.flac")
-    vorbis_unknown = mutagen.File("audio_pipeline\\test\\test_audio_files\\unknown.flac")
+    vorbis_t1 = mutagen.File(vorbis_files["t1"])
+    vorbis_picard = mutagen.File(vorbis_files["picard"])
+    vorbis_unknown = mutagen.File(vorbis_files["unknown"])
     
-    aac_t1 = mutagen.File("audio_pipeline\\test\\test_audio_files\\t1.m4a")
-    aac_picard = mutagen.File("audio_pipeline\\test\\test_audio_files\\picard.m4a")
-    aac_unknown = mutagen.File("audio_pipeline\\test\\test_audio_files\\unknown.m4a")       
+    aac_t1 = mutagen.File(aac_files["t1"])
+    aac_picard = mutagen.File(aac_files["picard"])
+    aac_unknown = mutagen.File(aac_files["unknown"])       
     
-    id3_t1 = mutagen.File("audio_pipeline\\test\\test_audio_files\\t1.mp3")
-    id3_picard = mutagen.File("audio_pipeline\\test\\test_audio_files\\picard.mp3")
-    id3_unknown = mutagen.File("audio_pipeline\\test\\test_audio_files\\unknown.mp3")
+    id3_t1 = mutagen.File(id3_files["t1"])
+    id3_picard = mutagen.File(id3_files["picard"])
+    id3_unknown = mutagen.File(id3_files["unknown"])
     
     def test_artist_name(self):
         vorbis_tag_type = self.vorbis.album_artist
@@ -183,25 +196,24 @@ class TestTagEquality(TestUtil.TestUtilMixin, unittest.TestCase):
 #############
 #   Vorbis format tests
 #############
-   
-   
+
 class TestReadGenericTagsVorbis_t1(TestReadGenericTags, unittest.TestCase):
     def setUp(self):
-        self.meta = mutagen.File("audio_pipeline\\test\\test_audio_files\\t1.flac")
+        self.meta = mutagen.File(vorbis_files["t1"])
         self.tags = t1_tags
         self.format = util.Vorbis.Format
         
         
 class TestReadGenericTagsVorbis_picard(TestReadGenericTags, unittest.TestCase):
     def setUp(self):
-        self.meta = mutagen.File("audio_pipeline\\test\\test_audio_files\\picard.flac")
+        self.meta = mutagen.File(vorbis_files["picard"])
         self.tags = picard_tags
         self.format = util.Vorbis.Format
        
        
 class TestReadGenericTagsVorbis_NOMETA(TestReadGenericTags, unittest.TestCase):
     def setUp(self):
-        self.meta = mutagen.File("audio_pipeline\\test\\test_audio_files\\unknown.flac")
+        self.meta = mutagen.File(vorbis_files["unknown"])
         self.tags = unknown_tags
         self.format = util.Vorbis.Format
 
@@ -213,21 +225,21 @@ class TestReadGenericTagsVorbis_NOMETA(TestReadGenericTags, unittest.TestCase):
         
 class TestReadGenericTagsID3_t1(TestReadGenericTags, unittest.TestCase):
     def setUp(self):
-        self.meta = mutagen.File("audio_pipeline\\test\\test_audio_files\\t1.mp3")
+        self.meta = mutagen.File(id3_files["t1"])
         self.tags = t1_tags
         self.format = util.ID3.Format
      
      
 class TestReadGenericTagsID3_picard(TestReadGenericTags, unittest.TestCase):
     def setUp(self):
-        self.meta = mutagen.File("audio_pipeline\\test\\test_audio_files\\picard.mp3")
+        self.meta = mutagen.File(id3_files["picard"])
         self.tags = picard_tags
         self.format = util.ID3.Format
 
         
 class TestReadGenericTagsID3_NOMETA(TestReadGenericTags, unittest.TestCase):
     def setUp(self):
-        self.meta = mutagen.File("audio_pipeline\\test\\test_audio_files\\unknown.MP3")
+        self.meta = mutagen.File(id3_files["unknown"])
         self.tags = unknown_tags
         self.format = util.ID3.Format
 
@@ -239,20 +251,20 @@ class TestReadGenericTagsID3_NOMETA(TestReadGenericTags, unittest.TestCase):
 
 class TestReadGenericTagsAAC_t1(TestReadGenericTags, unittest.TestCase):
     def setUp(self):
-        self.meta = mutagen.File("audio_pipeline\\test\\test_audio_files\\t1.m4a")
+        self.meta = mutagen.File(aac_files["t1"])
         self.tags = t1_tags
         self.format = util.AAC.Format
         
         
 class TestReadGenericTagsAAC_picard(TestReadGenericTags, unittest.TestCase):
     def setUp(self):
-        self.meta = mutagen.File("audio_pipeline\\test\\test_audio_files\\picard.m4a")
+        self.meta = mutagen.File(aac_files["picard"])
         self.tags = picard_tags
         self.format = util.AAC.Format
         
         
 class TestReadGenericTagsAAC_NOMETA(TestReadGenericTags, unittest.TestCase):
     def setUp(self):
-        self.meta = mutagen.File("audio_pipeline\\test\\test_audio_files\\unknown.m4a")
+        self.meta = mutagen.File(aac_files["unknown"])
         self.tags = unknown_tags
         self.format = util.AAC.Format
