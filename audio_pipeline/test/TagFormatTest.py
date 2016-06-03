@@ -88,17 +88,17 @@ class TestTagEquality(TestUtil.TestUtilMixin, unittest.TestCase):
     id3 = util.ID3.Format
     aac = util.AAC.Format
 
-    vorbis_t1 = mutagen.File("audio_pipeline\\test\\t1.flac")
-    vorbis_picard = mutagen.File("audio_pipeline\\test\\picard.flac")
-    vorbis_unknown = mutagen.File("audio_pipeline\\test\\unknown.flac")
+    vorbis_t1 = mutagen.File("audio_pipeline\\test\\test_audio_files\\t1.flac")
+    vorbis_picard = mutagen.File("audio_pipeline\\test\\test_audio_files\\picard.flac")
+    vorbis_unknown = mutagen.File("audio_pipeline\\test\\test_audio_files\\unknown.flac")
     
-    aac_t1 = mutagen.File("audio_pipeline\\test\\t1.m4a")
-    aac_picard = mutagen.File("audio_pipeline\\test\\picard.m4a")
-    aac_unknown = mutagen.File("audio_pipeline\\test\\unknown.m4a")       
+    aac_t1 = mutagen.File("audio_pipeline\\test\\test_audio_files\\t1.m4a")
+    aac_picard = mutagen.File("audio_pipeline\\test\\test_audio_files\\picard.m4a")
+    aac_unknown = mutagen.File("audio_pipeline\\test\\test_audio_files\\unknown.m4a")       
     
-    id3_t1 = mutagen.File("audio_pipeline\\test\\t1.mp3")
-    id3_picard = mutagen.File("audio_pipeline\\test\\picard.mp3")
-    id3_unknown = mutagen.File("audio_pipeline\\test\\unknown.mp3")
+    id3_t1 = mutagen.File("audio_pipeline\\test\\test_audio_files\\t1.mp3")
+    id3_picard = mutagen.File("audio_pipeline\\test\\test_audio_files\\picard.mp3")
+    id3_unknown = mutagen.File("audio_pipeline\\test\\test_audio_files\\unknown.mp3")
     
     def test_artist_name(self):
         vorbis_tag_type = self.vorbis.album_artist
@@ -239,7 +239,7 @@ class TestReadGenericTagsID3_NOMETA(TestReadGenericTags, unittest.TestCase):
 
 class TestReadGenericTagsAAC_t1(TestReadGenericTags, unittest.TestCase):
     def setUp(self):
-        self.meta = mutagen.File("audio_pipeline/test/test_audio_files/t1.m4a")
+        self.meta = mutagen.File("audio_pipeline\\test\\test_audio_files\\t1.m4a")
         self.tags = t1_tags
         self.format = util.AAC.Format
         
