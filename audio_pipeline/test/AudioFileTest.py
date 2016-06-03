@@ -45,72 +45,72 @@ class TestAudioFileTags(TestUtil.TestUtilMixin):
 
 class TestAudioFileVorbis_t1(TestAudioFileTags, unittest.TestCase):
 
-    meta = mutagen.File("audio_pipeline\\test\\t1.flac")
+    meta = mutagen.File("audio_pipeline\\test\\test_audio_files\\t1.flac")
     format = util.Vorbis.Format
 
-    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\t1.flac")
+    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\test_audio_files\\t1.flac")
     
     
 class TestAudioFileVorbis_picard(TestAudioFileTags, unittest.TestCase):
 
-    meta = mutagen.File("audio_pipeline\\test\\picard.flac")
+    meta = mutagen.File("audio_pipeline\\test\\test_audio_files\\picard.flac")
     format = util.Vorbis.Format
 
-    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\picard.flac")
+    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\test_audio_files\\picard.flac")
     
     
 class TestAudioFileVorbis_unknown(TestAudioFileTags, unittest.TestCase):
 
-    meta = mutagen.File("audio_pipeline\\test\\unknown.flac")
+    meta = mutagen.File("audio_pipeline\\test\\test_audio_files\\unknown.flac")
     format = util.Vorbis.Format
 
-    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\unknown.flac")
+    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\test_audio_files\\unknown.flac")
     
     
 class TestAudioFileAAC_t1(TestAudioFileTags, unittest.TestCase):
 
-    meta = mutagen.File("audio_pipeline\\test\\t1.m4a")
+    meta = mutagen.File("audio_pipeline\\test\\test_audio_files\\t1.m4a")
     format = util.AAC.Format
 
-    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\t1.m4a")
+    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\test_audio_files\\t1.m4a")
     
     
 class TestAudioFileAAC_picard(TestAudioFileTags, unittest.TestCase):
 
-    meta = mutagen.File("audio_pipeline\\test\\picard.m4a")
+    meta = mutagen.File("audio_pipeline\\test\\test_audio_files\\picard.m4a")
     format = util.AAC.Format
 
-    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\picard.m4a")
+    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\test_audio_files\\picard.m4a")
     
     
 class TestAudioFileAAC_unknown(TestAudioFileTags, unittest.TestCase):
 
-    meta = mutagen.File("audio_pipeline\\test\\unknown.m4a")
+    meta = mutagen.File("audio_pipeline\\test\\test_audio_files\\unknown.m4a")
     format = util.AAC.Format
 
-    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\unknown.m4a")
+    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\test_audio_files\\unknown.m4a")
     
     
     
 class TestAudioFileID3_t1(TestAudioFileTags, unittest.TestCase):
 
-    meta = mutagen.File("audio_pipeline\\test\\t1.mp3")
+    meta = mutagen.File("audio_pipeline\\test\\test_audio_files\\t1.mp3")
     format = util.ID3.Format
 
-    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\t1.mp3")
+    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\test_audio_files\\t1.mp3")
     
     
 class TestAudioFileID3_picard(TestAudioFileTags, unittest.TestCase):
 
-    meta = mutagen.File("audio_pipeline\\test\\picard.mp3")
+    meta = mutagen.File("audio_pipeline\\test\\test_audio_files\\picard.mp3")
     format = util.ID3.Format
 
-    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\picard.mp3")
+    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\test_audio_files\\picard.mp3")
     
     
 class TestAudioFileID3_unknown(TestAudioFileTags, unittest.TestCase):
 
-    meta = mutagen.File("audio_pipeline\\test\\unknown.mp3")
+    meta = mutagen.File("audio_pipeline\\test\\test_audio_files\\unknown.mp3")
     format = util.ID3.Format
 
-    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\unknown.mp3")
+    af = util.AudioFile.BaseAudioFile("audio_pipeline\\test\\test_audio_files\\unknown.mp3")

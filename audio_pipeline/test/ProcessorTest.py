@@ -9,8 +9,8 @@ import os
 from ..file_walker import Process
 
 
-release_file = "audio_pipeline/test/release_mbids.json"
-artist_file = "audio_pipeline/test/artist_mbids.json"
+release_file = "audio_pipeline/test/test_mbids/release_mbids.json"
+artist_file = "audio_pipeline/test/test_mbids/artist_mbids.json"
 
 mb_dir = "audio_pipeline/test/mb_lookups"
 
