@@ -231,7 +231,7 @@ class LengthTag(Tag):
     _value_match = re.compile("(?P<min>\d\d?):(?P<sec>\d\d)")
 
     def extract(self):
-        self._value = self.mutagen.info.length
+        self._value = round(self.mutagen.info.length)
         
     def __str__(self):
         if self._value:

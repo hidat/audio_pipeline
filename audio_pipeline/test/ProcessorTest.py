@@ -33,9 +33,12 @@ class TestReleaseProcessor(unittest.TestCase):
             picard = releases["picard"]
             
         for release in dbpoweramp:
-            self.check_release(release, processor)
+            self.check_release(release, processor, 'dbpoweramp')
+
+        for release in picard:
+            self.check_release(release, processor, 'picard')
             
-    def check_release(self, mbid, processor):
+    def check_release(self, mbid, processor, message):
         # load the appropriate release result
         result = None
         r = mbid + ".xml"
@@ -53,5 +56,41 @@ class TestReleaseProcessor(unittest.TestCase):
                 if key in release.__dict__:
                     test_value = release.__dict__[key]
                     if isinstance(value, type(test_value)):
-                        message = "PROBLEM WITH " + str(key) + "\nreal value: " + value + "\nacquired value: " + test_value
+                        message = "PROBLEM WITH " + str(key) + "\n" + message + "\nreal value: " \
+                                  + value + "\nacquired value: " + test_value
+                        self.assertEqual(value, test_value, msg=message)
+
+
+class TestArtistProcessor(unittest.TestCase):
+
+    def test_release(self):
+        mb = TestUtil.TestMBinfo(mb_dir)
+
+        processor = Process.Processor(mb)
+
+        with open(artist_file, "r") as f:
+            artists = json.load(f)
+
+        for artist in artists:
+            self.check_artist(artist, processor, 'dbpoweramp')
+
+    def check_artist(self, mbid, processor, message):
+        # load the appropriate release result
+        r = mbid + ".xml"
+        result_file = os.path.join(result_dir, r)
+
+        with open(result_file, "rb") as f:
+            result = et.parse(f).getroot()
+
+        if result:
+            processed = processor.get_artist(mbid)
+            artist = processed.artist
+            for child in result[0]:
+                key = child.tag
+                value = child.text
+                if key in artist.__dict__:
+                    test_value = artist.__dict__[key]
+                    if isinstance(value, type(test_value)):
+                        message = "PROBLEM WITH " + str(key) + "\n" + message + "\nreal value: " \
+                                  + value + "\nacquired value: " + test_value
                         self.assertEqual(value, test_value, msg=message)
