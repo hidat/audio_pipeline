@@ -1,4 +1,5 @@
 import os.path
+import json
 from ..util import MBInfo
 
 class TestUtilMixin:
@@ -75,7 +76,7 @@ class TestMBinfo(MBInfo.MBInfo):
 
     # an 'mbinfo' class to use for testing without constantly hitting musicbrainz
     
-    def __init__(self, server, info_directory, useragent=("hidat_audio_pipeline", "0.1")):
+    def __init__(self, info_directory, server=None, useragent=("hidat_audio_pipeline", "0.1")):
         """
         An 'mbinfo' class to use when testing, without hitting musicbrainz a ton
         :param info_directory: Directory containing artist & release mbinfo json files
@@ -93,9 +94,18 @@ class TestMBinfo(MBInfo.MBInfo):
         else:
             if os.path.exists(self.artist_dir):
                 # load in artists
-                self.artists = json.load(self.artist_dir)
+                with open(self.artist_dir, "r") as f:
+                    for line in f:
+                        if not (line.isspace() or line == ""):
+                            artist = json.loads(line)
+                            self.artists[artist['id']] = artist
             if os.path.exists(self.release_dir):
-                self.releases = json.load(self.release_dir)
+                # load in releases
+                with open(self.release_dir, "r") as f:
+                    for line in f:
+                        if not (line.isspace() or line == ""):
+                            release = json.loads(line)
+                            self.releases[release['id']] = release
                 
     def get_release(self, release_id):
         if release_id in self.releases:
@@ -103,8 +113,10 @@ class TestMBinfo(MBInfo.MBInfo):
         else:
             release = super().get_release(release_id)
             self.releases[release_id] = release
+            r = json.dumps(release) + "\r\n"
             with open(self.release_dir, "a+") as f:
-                f.write(json.dumps(release))
+                f.write(r)
+            return release
                 
     def get_artist(self, artist_id):
         if artist_id in self.artists:
@@ -112,5 +124,8 @@ class TestMBinfo(MBInfo.MBInfo):
         else:
             artist = super().get_artist(artist_id)
             self.artists[artist_id] = artist
+            a = json.dumps(artist) + "\r\n"
             with open(self.artist_dir, "a+") as f:
-                f.write(json.dumps(artist))
+                f.write(a)
+            return artist
+

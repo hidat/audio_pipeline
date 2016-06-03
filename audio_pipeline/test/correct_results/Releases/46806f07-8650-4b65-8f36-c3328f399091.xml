@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Titles>
+<glossary_titles>
   <GlossaryValue>
     <item_code>46806f07-8650-4b65-8f36-c3328f399091</item_code>
     <title>The Best of The Beta Band: Music</title>
@@ -10,7 +10,7 @@
     <artist>The Beta Band</artist>
     <distribution_category>Beta Band, The</distribution_category>
     <labels>c3b2ae8c-1d88-4c5e-a683-1ffb720c12f2</labels>
-    <title>The Best of The Beta Band: Music The Beta Band 2005-10-03 GB  Regal Recordings CD REG126CDX</title>
+    <glossary_title>The Best of The Beta Band: Music The Beta Band 2005-10-03 GB Regal Recordings CD REG126CDX</glossary_title>
     <country>GB</country>
     <asin></asin>
     <barcode>094634157223</barcode>
@@ -19,4 +19,4 @@
     <date>2005-10-03</date>
     <first_released>2005-10-03</first_released>
   </GlossaryValue>
-</Titles>
+</glossary_titles>

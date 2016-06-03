@@ -74,7 +74,6 @@ class TestReadGenericTags(TestUtil.TestUtilMixin):
         tag = self.format.track_num(self.meta)
         self.check_tag(tag, self.tags, "tracknumber")
         
-    @unittest.expectedFailure
     def test_length(self):
         tag = self.format.length(self.meta)
         self.check_tag(tag, self.tags, "length")

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Titles>
+<glossary_titles>
   <GlossaryValue>
     <item_code>53d04b6e-d367-3c1b-b527-c11d7ca8b450</item_code>
     <title>Voltaïc</title>
@@ -10,7 +10,7 @@
     <artist>Björk</artist>
     <distribution_category>Björk</distribution_category>
     <labels>ce24ab18-1bd6-4293-a486-546d13d6a5e2</labels>
-    <title>Voltaïc Björk 2009-04-21 XE  Polydor CD 1797269</title>
+    <glossary_title>Voltaïc Björk 2009-04-21 XE Polydor CD 1797269</glossary_title>
     <country>XE</country>
     <asin>B001T6KMFC</asin>
     <barcode>602517972698</barcode>
@@ -19,4 +19,4 @@
     <date>2009-04-21</date>
     <first_released>2009-04-21</first_released>
   </GlossaryValue>
-</Titles>
+</glossary_titles>

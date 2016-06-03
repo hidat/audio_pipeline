@@ -6,11 +6,11 @@ from . import Util
 class MBInfo():
     default_server = ngs.hostname
 
-    def __init__(self, server, useragent=("hidat_audio_pipeline", "0.1")):
-        self.server_location = server
-        
-        if server != self.default_server:
+    def __init__(self, server=None, backup_server=None, useragent=("hidat_audio_pipeline", "0.1")):
+        if server is not None and server != self.default_server:
             ngs.set_hostname(server)
+            
+        self.backup_server = backup_server
         
         ngs.set_useragent(useragent[0], useragent[1])
 

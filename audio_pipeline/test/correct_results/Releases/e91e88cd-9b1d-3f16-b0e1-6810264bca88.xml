@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Titles>
+<glossary_titles>
   <GlossaryValue>
     <item_code>e91e88cd-9b1d-3f16-b0e1-6810264bca88</item_code>
     <title>The New Transistor Heroes</title>
@@ -10,7 +10,7 @@
     <artist>bis</artist>
     <distribution_category>bis (Scottish electro-pop group) </distribution_category>
     <labels>9844e78d-d74a-4722-a28b-5f5ff840b6ad</labels>
-    <title>The New Transistor Heroes bis 1997-05-06 US  Grand Royal CD 7243 8 56007 2 2</title>
+    <glossary_title>The New Transistor Heroes bis 1997-05-06 US Grand Royal CD 7243 8 56007 2 2</glossary_title>
     <country>US</country>
     <asin>B000002UL1</asin>
     <barcode>724385600722</barcode>
@@ -19,4 +19,4 @@
     <date>1997-05-06</date>
     <first_released>1997-04-07</first_released>
   </GlossaryValue>
-</Titles>
+</glossary_titles>

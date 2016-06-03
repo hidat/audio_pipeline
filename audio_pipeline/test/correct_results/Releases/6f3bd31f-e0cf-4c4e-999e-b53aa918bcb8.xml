@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Titles>
+<glossary_titles>
   <GlossaryValue>
     <item_code>6f3bd31f-e0cf-4c4e-999e-b53aa918bcb8</item_code>
     <title>Motorcycle Jesus OST</title>
@@ -11,7 +11,7 @@
     <distribution_category>BOOTS (American rapper and producer) </distribution_category>
     <labels>50c384a2-0b44-401b-b893-8181173339c7</labels>
     <labels>d563e39c-2779-456e-ad6a-3703365ab3bc</labels>
-    <title>Motorcycle Jesus OST BOOTS 2015-03-03 US  Atlantic Canvasback Music Digital Media</title>
+    <glossary_title>Motorcycle Jesus OST BOOTS 2015-03-03 US Atlantic Canvasback Music Digital Media</glossary_title>
     <country>US</country>
     <asin></asin>
     <barcode></barcode>
@@ -20,4 +20,4 @@
     <date>2015-03-03</date>
     <first_released>2015-03-03</first_released>
   </GlossaryValue>
-</Titles>
+</glossary_titles>

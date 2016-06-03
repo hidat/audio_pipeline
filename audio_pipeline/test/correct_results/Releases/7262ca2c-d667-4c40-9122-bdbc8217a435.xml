@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Titles>
+<glossary_titles>
   <GlossaryValue>
     <Key1>7262ca2c-d667-4c40-9122-bdbc8217a435</Key1>
     <item_code>7262ca2c-d667-4c40-9122-bdbc8217a435</item_code>
@@ -11,7 +11,7 @@
     <artist>Boardwalk</artist>
     <distribution_category>Boardwalk</distribution_category>
     <labels>f1b83107-23e5-41a3-ab1b-2a36965cf77b</labels>
-    <title>Boardwalk Boardwalk 2013-10-15 US  Stones Throw Records Digital Media STH2323</title>
+    <glossary_title>Boardwalk Boardwalk 2013-10-15 US Stones Throw Records Digital Media STH2323</glossary_title>
     <country>US</country>
     <asin></asin>
     <barcode></barcode>
@@ -20,4 +20,4 @@
     <date>2013-10-15</date>
     <first_released>2013-10-15</first_released>
   </GlossaryValue>
-</Titles>
+</glossary_titles>

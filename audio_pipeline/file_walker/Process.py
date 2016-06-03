@@ -2,6 +2,7 @@ from ..util import MBInfo
 from . import Resources
 from . import Util
 import uuid as UUID
+from ..util import Exceptions
 
 
 class Processor:
@@ -10,12 +11,13 @@ class Processor:
         if mbinfo:
             self.mbinfo = mbinfo
         else:
-            raise NoMusicBrainzError("Processor needs an MBInfo Object")
+            raise Exceptions.NoMusicBrainzError("Processor needs an MBInfo Object")
             
         self.releases = dict()
         self.artists = dict()
         
     def get_release(self, mbid):
+        print(self.mbinfo)
         if mbid in self.releases:
             return self.releases[mbid]
         else:
@@ -31,20 +33,25 @@ class Processor:
             self.artists[mbid] = artist
             return artist
                
+               
 class ReleaseProcessor:
     secondary_category = "CATEGORIES/ROTATION-STAGING"
 
     def __init__(self, mbid, mbinfo):
-        self.release = None
+        self._release = None
+        
+        if mbinfo is None:
+            raise Exceptions.NoMusicBrainzError("No MBInfo object when processing artist " + str(mbid))
+
         self.mb_release = mbinfo.get_release(mbid)
         if not self.mb_release:
-            raise NoMusicBrainzError()
+            raise Exceptions.NoMusicBrainzError("Problem getting release info from musicbrainz for id " + str(mbid))
 
     def process_release(self):
         """
         Extract release metadata we care about from the raw metadata
         """
-        if not self.release:
+        if not self._release:
             meta = self.mb_release
             
             release = Resources.Release(item_code = meta['id'])
@@ -62,7 +69,7 @@ class ReleaseProcessor:
                 
             formats = ''
             for disc in meta['medium-list']:
-                if 'format' in disc:
+                if 'format' in disc and formats == '':
                     release.format.append(disc['format'])
                     formats = formats + " " + disc['format']
                     
@@ -121,18 +128,15 @@ class ReleaseProcessor:
             
             release.glossary_title = Util.stringCleanup(glossary_title)
             
-            self.release = release
+            self._release = release
         
-        
-    def get_release(self):
-        """
-        Get release metadata, processed for serialization.
-        """
-        if self.release:
-            release = self.release
+    @property
+    def release(self):
+        if self._release:
+            release = self._release
         else:
             self.process_release()
-            release = self.release
+            release = self._release
             
         return release
 
@@ -144,10 +148,10 @@ class ReleaseProcessor:
         disc_index = audio_file.disc_num.value - 1    # zero-index the disc num
         track_index = audio_file.track_num.value - 1  # zero-index the track num
         
-        if not self.release:
+        if not self._release:
             self.process_release()
             
-        release_meta = self.release
+        release_meta = self._release
         track_meta = self.mb_release['medium-list'][disc_index]['track-list'][track_index]
         recording_meta = track_meta['recording']
 
@@ -225,15 +229,19 @@ class ReleaseProcessor:
 class ArtistProcessor:
 
     def __init__(self, mbid, mbinfo):
-        self.artist = None
-        self.mb_artist = mbinfo.get_artist(mbid)
+        self._artist = None
+        
+        if mbinfo is None:
+            raise Exceptions.NoMusicBrainzError("No MBInfo object when processing artist " + str(mbid))
+
+            self.mb_artist = mbinfo.get_artist(mbid)
         if not self.mb_artist:
-            raise NoMusicBrainzError()
+            raise Exceptions.NoMusicBrainzError("Problem getting artist info from musicbrainz for id " + str(mbid))
         
     def process_artist(self):
         # make sure we haven't already processed this artist:
-        if self.artist:
-            artist = self.artist
+        if self._artist:
+            artist = self._artist
         else:
             # get MusicBrainz metadata
             meta = self.mb_artist
@@ -301,14 +309,16 @@ class ArtistProcessor:
                             and member['direction'] == 'backward':
                         artist.group_members.append(member['artist']['id'])
                         
-        return artist
-        
+        self._artist = artist
 
-    def get_artist(self):
-        if self.artist:
+    @property
+    def artist(self):
+        if self._artist:
             # already have info about this artist; don't need to do anything
-            artist = self.artist
+            artist = self._artist
         else:
             # process this artist
-            artist = self.process_artist()
+            self.process_artist()
+            artist = self._artist
+            
         return artist

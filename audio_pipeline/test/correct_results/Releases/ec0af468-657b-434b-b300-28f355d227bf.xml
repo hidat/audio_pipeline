@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Titles>
+<glossary_titles>
   <GlossaryValue>
     <item_code>ec0af468-657b-434b-b300-28f355d227bf</item_code>
     <title>El Camino</title>
@@ -10,7 +10,7 @@
     <artist>The Black Keys</artist>
     <distribution_category>Black Keys, The</distribution_category>
     <labels>c69cac59-f512-4edc-ab2c-d04c22dbce20</labels>
-    <title>El Camino The Black Keys 2011-12-06 US  Nonesuch CD 529099-2</title>
+    <glossary_title>El Camino The Black Keys 2011-12-06 US Nonesuch CD 529099-2</glossary_title>
     <country>US</country>
     <asin>B005URRCUY</asin>
     <barcode>075597963311</barcode>
@@ -19,4 +19,4 @@
     <date>2011-12-06</date>
     <first_released>2011-12-01</first_released>
   </GlossaryValue>
-</Titles>
+</glossary_titles>

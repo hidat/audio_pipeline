@@ -103,8 +103,9 @@ class Entry():
                 track_index = i + 1
                 meta = self.meta_entry.tracks.entrycget(k, track_index, 'text')
                 if InputPatterns.whitespace.match(meta):
-                    print(tag)
                     meta = None
+                if isinstance(track[tag].value, int):
+                    meta = int(meta)
                 track[tag].value = meta
             self.tracks[i].save()
 

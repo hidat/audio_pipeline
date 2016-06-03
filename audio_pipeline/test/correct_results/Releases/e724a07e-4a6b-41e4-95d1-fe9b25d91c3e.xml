@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Titles>
+<glossary_titles>
   <GlossaryValue>
     <item_code>e724a07e-4a6b-41e4-95d1-fe9b25d91c3e</item_code>
     <title>Pink</title>
@@ -10,7 +10,7 @@
     <artist>Boris</artist>
     <distribution_category>Boris (rock band from Japan) </distribution_category>
     <labels>3b78c7e5-6292-4f6b-b921-bdcbe681ea27</labels>
-    <title>Pink Boris 2006-05-16 US  Southern Lord CD SUNN55CD</title>
+    <glossary_title>Pink Boris 2006-05-16 US Southern Lord CD SUNN55CD</glossary_title>
     <country>US</country>
     <asin>B000F1HGVA</asin>
     <barcode>808720005523</barcode>
@@ -19,4 +19,4 @@
     <date>2006-05-16</date>
     <first_released>2005-11-12</first_released>
   </GlossaryValue>
-</Titles>
+</glossary_titles>

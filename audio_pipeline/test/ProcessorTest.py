@@ -3,6 +3,7 @@ from . import TestUtil
 import unittest
 import abc
 import json
+import unicodedata
 import xml.etree.ElementTree as et
 import os
 from ..file_walker import Process
@@ -11,7 +12,9 @@ from ..file_walker import Process
 release_file = "audio_pipeline/test/release_mbids.json"
 artist_file = "audio_pipeline/test/artist_mbids.json"
 
-result_dir = "audio_pipeline/test/correct_results"
+mb_dir = "audio_pipeline/test/mb_lookups"
+
+result_dir = "audio_pipeline/test/correct_results/Releases"
 
 
 class TestReleaseProcessor(unittest.TestCase):
@@ -20,7 +23,7 @@ class TestReleaseProcessor(unittest.TestCase):
         dbpoweramp = []
         picard = []
         
-        mb = TestUtil.TestMBinfo(None, result_dir)
+        mb = TestUtil.TestMBinfo(mb_dir)
         
         processor = Process.Processor(mb)
         
@@ -35,14 +38,20 @@ class TestReleaseProcessor(unittest.TestCase):
     def check_release(self, mbid, processor):
         # load the appropriate release result
         result = None
-        result_file = os.path.join(result_dir, mbid)
+        r = mbid + ".xml"
+        result_file = os.path.join(result_dir, r)
         
-        with open(result_file, "r") as f:
+        with open(result_file, "rb") as f:
             result = et.parse(f).getroot()
             
         if result:
             processed = processor.get_release(mbid)
+            release = processed.release
             for child in result[0]:
                 key = child.tag
                 value = child.text
-                assertequal(value, dict(processed)[key])
+                if key in release.__dict__:
+                    test_value = release.__dict__[key]
+                    if isinstance(value, type(test_value)):
+                        message = "PROBLEM WITH " + str(key) + "\nreal value: " + value + "\nacquired value: " + test_value
+                        self.assertEqual(value, test_value, msg=message)
