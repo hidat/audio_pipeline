@@ -2,14 +2,14 @@
 <Titles>
   <GlossaryValue>
     <Key1>0b6d04ac-d66d-43d9-b604-3b91b1a780b5</Key1>
-    <ItemCode>0b6d04ac-d66d-43d9-b604-3b91b1a780b5</ItemCode>
+    <item_code>0b6d04ac-d66d-43d9-b604-3b91b1a780b5</item_code>
     <title>Manda Rin</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>Manda Rin</KEXPName>
-    <KEXPSortName>Rin, Manda</KEXPSortName>
+    <sort_name>Rin, Manda</sort_name>
     <KEXPMBID>0b6d04ac-d66d-43d9-b604-3b91b1a780b5</KEXPMBID>
     <KEXPAlias>Amanda MacKinnon</KEXPAlias>
-    <KEXPArtistType>Person</KEXPArtistType>
+    <type>Person</type>
     <KEXPBeginDate>1977-03-22</KEXPBeginDate>
     <KEXPCountry>United Kingdom</KEXPCountry>
     <KEXPCountryMBID>8a754a16-0027-3a29-b6d7-2b40ea0481ed</KEXPCountryMBID>
@@ -22,14 +22,14 @@
   </GlossaryValue>
   <GlossaryValue>
     <Key1>3a47e636-b891-4416-b6bb-5fcce198173e</Key1>
-    <ItemCode>3a47e636-b891-4416-b6bb-5fcce198173e</ItemCode>
+    <item_code>3a47e636-b891-4416-b6bb-5fcce198173e</item_code>
     <title>John Disco</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>John Disco</KEXPName>
-    <KEXPSortName>Disco, John</KEXPSortName>
+    <sort_name>Disco, John</sort_name>
     <KEXPMBID>3a47e636-b891-4416-b6bb-5fcce198173e</KEXPMBID>
     <KEXPAlias>John Clark</KEXPAlias>
-    <KEXPArtistType>Person</KEXPArtistType>
+    <type>Person</type>
     <KEXPBeginDate>1978-08-21</KEXPBeginDate>
     <KEXPCountry>United Kingdom</KEXPCountry>
     <KEXPCountryMBID>8a754a16-0027-3a29-b6d7-2b40ea0481ed</KEXPCountryMBID>
@@ -37,15 +37,15 @@
   </GlossaryValue>
   <GlossaryValue>
     <Key1>bec1499c-a18a-44c2-98f6-8a38b63e8a8b</Key1>
-    <ItemCode>bec1499c-a18a-44c2-98f6-8a38b63e8a8b</ItemCode>
+    <item_code>bec1499c-a18a-44c2-98f6-8a38b63e8a8b</item_code>
     <title>Sci‐Fi Steven</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>Sci‐Fi Steven</KEXPName>
-    <KEXPSortName>Sci‐Fi Steven</KEXPSortName>
+    <sort_name>Sci‐Fi Steven</sort_name>
     <KEXPMBID>bec1499c-a18a-44c2-98f6-8a38b63e8a8b</KEXPMBID>
     <KEXPAlias>Sci-Fi Steve</KEXPAlias>
     <KEXPAlias>Steven Clark</KEXPAlias>
-    <KEXPArtistType>Person</KEXPArtistType>
+    <type>Person</type>
     <KEXPBeginDate>1975-03-20</KEXPBeginDate>
     <KEXPCountry>United Kingdom</KEXPCountry>
     <KEXPCountryMBID>8a754a16-0027-3a29-b6d7-2b40ea0481ed</KEXPCountryMBID>
@@ -53,16 +53,16 @@
   </GlossaryValue>
   <GlossaryValue>
     <Key1>e799a5eb-3d11-4687-b1ae-9295b44d364a</Key1>
-    <ItemCode>e799a5eb-3d11-4687-b1ae-9295b44d364a</ItemCode>
+    <item_code>e799a5eb-3d11-4687-b1ae-9295b44d364a</item_code>
     <title>bis (Scottish electro-pop group)</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>bis</KEXPName>
-    <KEXPSortName>bis</KEXPSortName>
+    <sort_name>bis</sort_name>
     <KEXPMBID>e799a5eb-3d11-4687-b1ae-9295b44d364a</KEXPMBID>
     <KEXPAlias>bis</KEXPAlias>
     <KEXPAlias>black iron skyline</KEXPAlias>
-    <KEXPDisambiguation>Scottish electro-pop group</KEXPDisambiguation>
-    <KEXPArtistType>Group</KEXPArtistType>
+    <disambiguation>Scottish electro-pop group</disambiguation>
+    <type>Group</type>
     <KEXPBeginArea>Glasgow</KEXPBeginArea>
     <KEXPBeginAreaMBID>c279f805-01f8-46f5-99cf-51f165a1adad</KEXPBeginAreaMBID>
     <KEXPBeginDate>1994</KEXPBeginDate>

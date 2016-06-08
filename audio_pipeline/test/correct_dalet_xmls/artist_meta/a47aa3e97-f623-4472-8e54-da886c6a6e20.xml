@@ -2,36 +2,36 @@
 <Titles>
   <GlossaryValue>
     <Key1>250c0087-28a5-435d-a427-b7983a948dd2</Key1>
-    <ItemCode>250c0087-28a5-435d-a427-b7983a948dd2</ItemCode>
+    <item_code>250c0087-28a5-435d-a427-b7983a948dd2</item_code>
     <title>Pete Briquette</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>Pete Briquette</KEXPName>
-    <KEXPSortName>Briquette, Pete</KEXPSortName>
+    <sort_name>Briquette, Pete</sort_name>
     <KEXPMBID>250c0087-28a5-435d-a427-b7983a948dd2</KEXPMBID>
-    <KEXPArtistType>Person</KEXPArtistType>
+    <type>Person</type>
     <KEXPLink>http://www.discogs.com/artist/337344</KEXPLink>
   </GlossaryValue>
   <GlossaryValue>
     <Key1>7f473488-6bef-4962-8858-d9e258f20aa6</Key1>
-    <ItemCode>7f473488-6bef-4962-8858-d9e258f20aa6</ItemCode>
+    <item_code>7f473488-6bef-4962-8858-d9e258f20aa6</item_code>
     <title>Gerry Cott</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>Gerry Cott</KEXPName>
-    <KEXPSortName>Cott, Gerry</KEXPSortName>
+    <sort_name>Cott, Gerry</sort_name>
     <KEXPMBID>7f473488-6bef-4962-8858-d9e258f20aa6</KEXPMBID>
-    <KEXPArtistType>Person</KEXPArtistType>
+    <type>Person</type>
     <KEXPLink>http://www.discogs.com/artist/699009</KEXPLink>
   </GlossaryValue>
   <GlossaryValue>
     <Key1>b16373b3-bae0-4926-bb17-1d68c4f7b052</Key1>
-    <ItemCode>b16373b3-bae0-4926-bb17-1d68c4f7b052</ItemCode>
+    <item_code>b16373b3-bae0-4926-bb17-1d68c4f7b052</item_code>
     <title>Bob Geldof</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>Bob Geldof</KEXPName>
-    <KEXPSortName>Geldof, Bob</KEXPSortName>
+    <sort_name>Geldof, Bob</sort_name>
     <KEXPMBID>b16373b3-bae0-4926-bb17-1d68c4f7b052</KEXPMBID>
     <KEXPAlias>Bob Geldorf</KEXPAlias>
-    <KEXPArtistType>Person</KEXPArtistType>
+    <type>Person</type>
     <KEXPBeginArea>Dún Laoghaire</KEXPBeginArea>
     <KEXPBeginAreaMBID>00de0e2a-aa9d-4f16-8b59-435d7b721879</KEXPBeginAreaMBID>
     <KEXPBeginDate>1951-10-05</KEXPBeginDate>
@@ -55,14 +55,14 @@
   </GlossaryValue>
   <GlossaryValue>
     <Key1>c2a918a2-ac02-489d-a35d-38594469f7bb</Key1>
-    <ItemCode>c2a918a2-ac02-489d-a35d-38594469f7bb</ItemCode>
+    <item_code>c2a918a2-ac02-489d-a35d-38594469f7bb</item_code>
     <title>Johnnie Fingers</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>Johnnie Fingers</KEXPName>
-    <KEXPSortName>Fingers, Johnnie</KEXPSortName>
+    <sort_name>Fingers, Johnnie</sort_name>
     <KEXPMBID>c2a918a2-ac02-489d-a35d-38594469f7bb</KEXPMBID>
     <KEXPAlias>ジョニー・フィンガーズ</KEXPAlias>
-    <KEXPArtistType>Person</KEXPArtistType>
+    <type>Person</type>
     <KEXPBeginArea>Ireland</KEXPBeginArea>
     <KEXPBeginAreaMBID>390b05d4-11ec-3bce-a343-703a366b34a5</KEXPBeginAreaMBID>
     <KEXPBeginDate>1956-09-10</KEXPBeginDate>
@@ -75,17 +75,17 @@
   </GlossaryValue>
   <GlossaryValue>
     <Key1>47aa3e97-f623-4472-8e54-da886c6a6e20</Key1>
-    <ItemCode>47aa3e97-f623-4472-8e54-da886c6a6e20</ItemCode>
+    <item_code>47aa3e97-f623-4472-8e54-da886c6a6e20</item_code>
     <title>The Boomtown Rats</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>The Boomtown Rats</KEXPName>
-    <KEXPSortName>Boomtown Rats, The</KEXPSortName>
+    <sort_name>Boomtown Rats, The</sort_name>
     <KEXPMBID>47aa3e97-f623-4472-8e54-da886c6a6e20</KEXPMBID>
     <KEXPAlias>Bob Geldof &amp; The Boomtown Rats</KEXPAlias>
     <KEXPAlias>Bob Geldof and the Boomtown Rats</KEXPAlias>
     <KEXPAlias>Boomtown Rats</KEXPAlias>
     <KEXPAlias>The Boomtowmn Rats</KEXPAlias>
-    <KEXPArtistType>Group</KEXPArtistType>
+    <type>Group</type>
     <KEXPBeginDate>1975</KEXPBeginDate>
     <KEXPEndDate>1986</KEXPEndDate>
     <KEXPEnded>1</KEXPEnded>

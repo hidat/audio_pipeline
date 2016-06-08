@@ -2,14 +2,14 @@
 <Titles>
   <GlossaryValue>
     <Key1>d02dd67e-f655-4600-bc47-f789f59e7367</Key1>
-    <ItemCode>d02dd67e-f655-4600-bc47-f789f59e7367</ItemCode>
+    <item_code>d02dd67e-f655-4600-bc47-f789f59e7367</item_code>
     <title>Anderson .Paak</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>Anderson .Paak</KEXPName>
-    <KEXPSortName>Anderson .Paak</KEXPSortName>
+    <sort_name>Anderson .Paak</sort_name>
     <KEXPMBID>d02dd67e-f655-4600-bc47-f789f59e7367</KEXPMBID>
     <KEXPAlias>Anderson .Pakk</KEXPAlias>
-    <KEXPArtistType>Person</KEXPArtistType>
+    <type>Person</type>
     <KEXPBeginArea>Oxnard</KEXPBeginArea>
     <KEXPBeginAreaMBID>57dcc070-ab3b-4391-8f8d-e4445041efcf</KEXPBeginAreaMBID>
     <KEXPBeginDate>1986</KEXPBeginDate>

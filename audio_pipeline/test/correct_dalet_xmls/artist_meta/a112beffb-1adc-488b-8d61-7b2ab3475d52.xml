@@ -2,15 +2,15 @@
 <Titles>
   <GlossaryValue>
     <Key1>112beffb-1adc-488b-8d61-7b2ab3475d52</Key1>
-    <ItemCode>112beffb-1adc-488b-8d61-7b2ab3475d52</ItemCode>
+    <item_code>112beffb-1adc-488b-8d61-7b2ab3475d52</item_code>
     <title>B.J. the Chicago Kid</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>B.J. the Chicago Kid</KEXPName>
-    <KEXPSortName>B.J. the Chicago Kid</KEXPSortName>
+    <sort_name>B.J. the Chicago Kid</sort_name>
     <KEXPMBID>112beffb-1adc-488b-8d61-7b2ab3475d52</KEXPMBID>
     <KEXPAlias>BJ</KEXPAlias>
     <KEXPAlias>BJ The Chicago Kid</KEXPAlias>
-    <KEXPArtistType>Person</KEXPArtistType>
+    <type>Person</type>
     <KEXPBeginArea>Chicago</KEXPBeginArea>
     <KEXPBeginAreaMBID>29a709d8-0320-493e-8d0c-f2c386662b7f</KEXPBeginAreaMBID>
     <KEXPBeginDate>????-11-23</KEXPBeginDate>

@@ -2,13 +2,13 @@
 <Titles>
   <GlossaryValue>
     <Key1>49619623-d031-4cec-8893-c2025ab45256</Key1>
-    <ItemCode>49619623-d031-4cec-8893-c2025ab45256</ItemCode>
+    <item_code>49619623-d031-4cec-8893-c2025ab45256</item_code>
     <title>Patrick Carney</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>Patrick Carney</KEXPName>
-    <KEXPSortName>Carney, Patrick</KEXPSortName>
+    <sort_name>Carney, Patrick</sort_name>
     <KEXPMBID>49619623-d031-4cec-8893-c2025ab45256</KEXPMBID>
-    <KEXPArtistType>Person</KEXPArtistType>
+    <type>Person</type>
     <KEXPBeginArea>Akron</KEXPBeginArea>
     <KEXPBeginAreaMBID>e12c1d82-97e2-4ec4-99b7-7ed055720437</KEXPBeginAreaMBID>
     <KEXPBeginDate>1980-04-15</KEXPBeginDate>
@@ -24,14 +24,14 @@
   </GlossaryValue>
   <GlossaryValue>
     <Key1>fa4f4b89-3ddc-4e97-88fa-0e30121f986a</Key1>
-    <ItemCode>fa4f4b89-3ddc-4e97-88fa-0e30121f986a</ItemCode>
+    <item_code>fa4f4b89-3ddc-4e97-88fa-0e30121f986a</item_code>
     <title>Dan Auerbach</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>Dan Auerbach</KEXPName>
-    <KEXPSortName>Auerbach, Dan</KEXPSortName>
+    <sort_name>Auerbach, Dan</sort_name>
     <KEXPMBID>fa4f4b89-3ddc-4e97-88fa-0e30121f986a</KEXPMBID>
     <KEXPAlias>Daniel Quine Auerbach</KEXPAlias>
-    <KEXPArtistType>Person</KEXPArtistType>
+    <type>Person</type>
     <KEXPBeginArea>Akron</KEXPBeginArea>
     <KEXPBeginAreaMBID>e12c1d82-97e2-4ec4-99b7-7ed055720437</KEXPBeginAreaMBID>
     <KEXPBeginDate>1979-05-14</KEXPBeginDate>
@@ -49,14 +49,14 @@
   </GlossaryValue>
   <GlossaryValue>
     <Key1>d15721d8-56b4-453d-b506-fc915b14cba2</Key1>
-    <ItemCode>d15721d8-56b4-453d-b506-fc915b14cba2</ItemCode>
+    <item_code>d15721d8-56b4-453d-b506-fc915b14cba2</item_code>
     <title>The Black Keys</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>The Black Keys</KEXPName>
-    <KEXPSortName>Black Keys, The</KEXPSortName>
+    <sort_name>Black Keys, The</sort_name>
     <KEXPMBID>d15721d8-56b4-453d-b506-fc915b14cba2</KEXPMBID>
     <KEXPAlias>Black Keys</KEXPAlias>
-    <KEXPArtistType>Group</KEXPArtistType>
+    <type>Group</type>
     <KEXPBeginArea>Akron</KEXPBeginArea>
     <KEXPBeginAreaMBID>e12c1d82-97e2-4ec4-99b7-7ed055720437</KEXPBeginAreaMBID>
     <KEXPBeginDate>2001</KEXPBeginDate>

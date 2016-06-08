@@ -2,15 +2,15 @@
 <Titles>
   <GlossaryValue>
     <Key1>bb3cbea2-5ad4-4917-bc84-8a1975d40315</Key1>
-    <ItemCode>bb3cbea2-5ad4-4917-bc84-8a1975d40315</ItemCode>
+    <item_code>bb3cbea2-5ad4-4917-bc84-8a1975d40315</item_code>
     <title>Talib Kweli</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>Talib Kweli</KEXPName>
-    <KEXPSortName>Talib Kweli</KEXPSortName>
+    <sort_name>Talib Kweli</sort_name>
     <KEXPMBID>bb3cbea2-5ad4-4917-bc84-8a1975d40315</KEXPMBID>
     <KEXPAlias>Talib Kwelli</KEXPAlias>
     <KEXPAlias>Tallib Kweli</KEXPAlias>
-    <KEXPArtistType>Person</KEXPArtistType>
+    <type>Person</type>
     <KEXPBeginArea>Brooklyn</KEXPBeginArea>
     <KEXPBeginAreaMBID>a71b0d32-7752-49e9-8594-2247ad6ac12c</KEXPBeginAreaMBID>
     <KEXPBeginDate>1975-10-03</KEXPBeginDate>

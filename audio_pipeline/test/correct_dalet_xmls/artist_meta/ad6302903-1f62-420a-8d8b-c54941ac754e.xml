@@ -2,14 +2,14 @@
 <Titles>
   <GlossaryValue>
     <Key1>d6302903-1f62-420a-8d8b-c54941ac754e</Key1>
-    <ItemCode>d6302903-1f62-420a-8d8b-c54941ac754e</ItemCode>
+    <item_code>d6302903-1f62-420a-8d8b-c54941ac754e</item_code>
     <title>Rapsody (female rapper from North Carolina, USA)</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>Rapsody</KEXPName>
-    <KEXPSortName>Rapsody</KEXPSortName>
+    <sort_name>Rapsody</sort_name>
     <KEXPMBID>d6302903-1f62-420a-8d8b-c54941ac754e</KEXPMBID>
-    <KEXPDisambiguation>female rapper from North Carolina, USA</KEXPDisambiguation>
-    <KEXPArtistType>Person</KEXPArtistType>
+    <disambiguation>female rapper from North Carolina, USA</disambiguation>
+    <type>Person</type>
     <KEXPBeginArea>Wilson</KEXPBeginArea>
     <KEXPBeginAreaMBID>5d33bf84-aa76-46f3-969a-55c2086ee299</KEXPBeginAreaMBID>
     <KEXPBeginDate>1983-01-21</KEXPBeginDate>

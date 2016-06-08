@@ -2,14 +2,14 @@
 <Titles>
   <GlossaryValue>
     <Key1>0f61b915-11d8-4d09-b986-42280394c4ab</Key1>
-    <ItemCode>0f61b915-11d8-4d09-b986-42280394c4ab</ItemCode>
+    <item_code>0f61b915-11d8-4d09-b986-42280394c4ab</item_code>
     <title>Wata (Member of Japanese band "Boris")</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>Wata</KEXPName>
-    <KEXPSortName>Wata</KEXPSortName>
+    <sort_name>Wata</sort_name>
     <KEXPMBID>0f61b915-11d8-4d09-b986-42280394c4ab</KEXPMBID>
-    <KEXPDisambiguation>Member of Japanese band "Boris"</KEXPDisambiguation>
-    <KEXPArtistType>Person</KEXPArtistType>
+    <disambiguation>Member of Japanese band "Boris"</disambiguation>
+    <type>Person</type>
     <KEXPCountry>Japan</KEXPCountry>
     <KEXPCountryMBID>2db42837-c832-3c27-b4a3-08198f75693c</KEXPCountryMBID>
     <KEXPLink>http://www.discogs.com/artist/431874</KEXPLink>
@@ -17,14 +17,14 @@
   </GlossaryValue>
   <GlossaryValue>
     <Key1>48d987b9-268b-4459-be2e-1c2020908c69</Key1>
-    <ItemCode>48d987b9-268b-4459-be2e-1c2020908c69</ItemCode>
+    <item_code>48d987b9-268b-4459-be2e-1c2020908c69</item_code>
     <title>Takeshi (Member of Japanese band "Boris")</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>Takeshi</KEXPName>
-    <KEXPSortName>Takeshi</KEXPSortName>
+    <sort_name>Takeshi</sort_name>
     <KEXPMBID>48d987b9-268b-4459-be2e-1c2020908c69</KEXPMBID>
-    <KEXPDisambiguation>Member of Japanese band "Boris"</KEXPDisambiguation>
-    <KEXPArtistType>Person</KEXPArtistType>
+    <disambiguation>Member of Japanese band "Boris"</disambiguation>
+    <type>Person</type>
     <KEXPCountry>Japan</KEXPCountry>
     <KEXPCountryMBID>2db42837-c832-3c27-b4a3-08198f75693c</KEXPCountryMBID>
     <KEXPLink>http://www.discogs.com/artist/360797</KEXPLink>
@@ -32,13 +32,13 @@
   </GlossaryValue>
   <GlossaryValue>
     <Key1>6adc77be-0df7-4818-ab6c-3faf11bbf709</Key1>
-    <ItemCode>6adc77be-0df7-4818-ab6c-3faf11bbf709</ItemCode>
+    <item_code>6adc77be-0df7-4818-ab6c-3faf11bbf709</item_code>
     <title>Atsuo</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>Atsuo</KEXPName>
-    <KEXPSortName>Atsuo</KEXPSortName>
+    <sort_name>Atsuo</sort_name>
     <KEXPMBID>6adc77be-0df7-4818-ab6c-3faf11bbf709</KEXPMBID>
-    <KEXPArtistType>Person</KEXPArtistType>
+    <type>Person</type>
     <KEXPCountry>Japan</KEXPCountry>
     <KEXPCountryMBID>2db42837-c832-3c27-b4a3-08198f75693c</KEXPCountryMBID>
     <KEXPLink>http://www.discogs.com/artist/431875</KEXPLink>
@@ -46,15 +46,15 @@
   </GlossaryValue>
   <GlossaryValue>
     <Key1>57652bf8-cfe8-42e7-b9a7-5572a7080d8d</Key1>
-    <ItemCode>57652bf8-cfe8-42e7-b9a7-5572a7080d8d</ItemCode>
+    <item_code>57652bf8-cfe8-42e7-b9a7-5572a7080d8d</item_code>
     <title>Boris (rock band from Japan)</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>Boris</KEXPName>
-    <KEXPSortName>Boris</KEXPSortName>
+    <sort_name>Boris</sort_name>
     <KEXPMBID>57652bf8-cfe8-42e7-b9a7-5572a7080d8d</KEXPMBID>
     <KEXPAlias>ボリス</KEXPAlias>
-    <KEXPDisambiguation>rock band from Japan</KEXPDisambiguation>
-    <KEXPArtistType>Group</KEXPArtistType>
+    <disambiguation>rock band from Japan</disambiguation>
+    <type>Group</type>
     <KEXPBeginArea>Tokyo</KEXPBeginArea>
     <KEXPBeginAreaMBID>8dc97297-ac95-4d33-82bc-e07fab26fb5f</KEXPBeginAreaMBID>
     <KEXPBeginDate>1992</KEXPBeginDate>

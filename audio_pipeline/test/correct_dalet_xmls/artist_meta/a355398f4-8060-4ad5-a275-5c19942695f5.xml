@@ -2,13 +2,13 @@
 <Titles>
   <GlossaryValue>
     <Key1>355398f4-8060-4ad5-a275-5c19942695f5</Key1>
-    <ItemCode>355398f4-8060-4ad5-a275-5c19942695f5</ItemCode>
+    <item_code>355398f4-8060-4ad5-a275-5c19942695f5</item_code>
     <title>Sonyae Elise</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>Sonyae Elise</KEXPName>
-    <KEXPSortName>Sonyae Elise</KEXPSortName>
+    <sort_name>Sonyae Elise</sort_name>
     <KEXPMBID>355398f4-8060-4ad5-a275-5c19942695f5</KEXPMBID>
-    <KEXPArtistType>Person</KEXPArtistType>
+    <type>Person</type>
     <KEXPBeginArea>New Jersey</KEXPBeginArea>
     <KEXPBeginAreaMBID>a36544c1-cb40-4f44-9e0e-7a5a69e403a8</KEXPBeginAreaMBID>
     <KEXPCountry>United States</KEXPCountry>

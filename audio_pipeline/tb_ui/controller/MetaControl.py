@@ -4,8 +4,6 @@ from ..view import Dialog
 from ...util import Util
 from . import EntryController
 from ..util import InputPatterns
-from ..util import Resources
-from ...util import Exceptions
 import shutil
 import os
 import re
@@ -215,8 +213,6 @@ class MetaController:
             except OSError as e:
                 # release directory is not empty
                 continue
-                
-
         
     def choose_dir(self, root_dir):
         if root_dir > "":

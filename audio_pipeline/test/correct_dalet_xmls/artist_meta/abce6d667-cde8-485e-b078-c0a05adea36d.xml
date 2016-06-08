@@ -2,13 +2,13 @@
 <Titles>
   <GlossaryValue>
     <Key1>bce6d667-cde8-485e-b078-c0a05adea36d</Key1>
-    <ItemCode>bce6d667-cde8-485e-b078-c0a05adea36d</ItemCode>
+    <item_code>bce6d667-cde8-485e-b078-c0a05adea36d</item_code>
     <title>ScHoolboy Q</title>
     <GlossaryType>Artist</GlossaryType>
     <KEXPName>ScHoolboy Q</KEXPName>
-    <KEXPSortName>ScHoolboy Q</KEXPSortName>
+    <sort_name>ScHoolboy Q</sort_name>
     <KEXPMBID>bce6d667-cde8-485e-b078-c0a05adea36d</KEXPMBID>
-    <KEXPArtistType>Person</KEXPArtistType>
+    <type>Person</type>
     <KEXPBeginArea>Wiesbaden</KEXPBeginArea>
     <KEXPBeginAreaMBID>00ed07a5-acd7-4217-a37a-72ebf08349b6</KEXPBeginAreaMBID>
     <KEXPBeginDate>1986-10-26</KEXPBeginDate>
