@@ -1,6 +1,6 @@
 from audio_pipeline.tb_ui.controller import MetaControl
 import argparse
-import sys
+
 
 def main():
     parser = argparse.ArgumentParser(description="Tag audio files with metadata")

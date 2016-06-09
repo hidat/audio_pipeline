@@ -10,22 +10,27 @@ max_af = 10000
 class ProcessDirectory(object):
 
     def __init__(self, root_dir, dest_dir):
-        releases = os.path.split(root_dir)[1]
         self.picard_dir = os.path.join(dest_dir, Resources.picard_directory)
-        if not os.path.exists(self.picard_dir):
-            os.mkdir(self.picard_dir)
         self.mbid_dir = os.path.join(dest_dir, Resources.mbid_directory)
-        if not os.path.exists(self.mbid_dir):
-            os.mkdir(self.mbid_dir)
+
+        dbpoweramp = True
 
         self.directories = list()
         for path, dirs, files in os.walk(root_dir):
             for directory in dirs:
                 directory = os.path.join(path, directory)
                 if self.is_release(directory):
+                    if dbpoweramp:
+                        try:
+                            int(os.path.split(directory)[1].split()[0])
+                        except ValueError:
+                            dbpoweramp = False
                     self.directories.append(directory)
 
-        self.directories.sort(key=lambda x: int(os.path.split(x)[1].split()[0]))
+        if dbpoweramp:
+            self.directories.sort(key=lambda x: int(os.path.split(x)[1].split()[0]))
+        else:
+            self.directories.sort()
 
         self.releases = [None for directory in self.directories]
 
@@ -142,7 +147,7 @@ class ProcessDirectory(object):
                 releases.pop(0)
 
             for release in releases:
-                release.sort(key=lambda x: x.track_num.value)
+                release.sort(key=lambda x: x.track_num.value if x.track_num.value is not None else 0)
                 self.af += len(release)
 
             self.releases[self.current] = releases
@@ -173,15 +178,18 @@ class ProcessDirectory(object):
     def is_release(self, directory):
         d = os.path.split(directory)[1]
         track = False
-        if InputPatterns.release_pattern.match(d):
-            picard = os.path.join(self.picard_dir, d)
-            mbid = os.path.join(self.mbid_dir, d)
+        # we'll set this to a DBPOWERAMP config later
 
-            for file in os.listdir(directory):
-                file_name = os.path.join(directory, file)
+        #if InputPatterns.release_pattern.match(d):
+        picard = os.path.join(self.picard_dir, d)
+        mbid = os.path.join(self.mbid_dir, d)
+
+        for f in os.scandir(directory):
+            if f.is_file:
+                file_name = f.name
 
                 try:
-                    track = AudioFile.AudioFile(file_name, os.path.join(picard, file), os.path.join(mbid, file))
+                    track = AudioFile.AudioFile(f.path, os.path.join(picard, file_name), os.path.join(mbid, file_name))
                 except IOError:
                     track = False
                     continue
@@ -189,7 +197,7 @@ class ProcessDirectory(object):
                     track = False
                     continue
                 break
-            return track
+        return track
 
     def valid_release_index(self, index):
         return (-1 < self.current < len(self.releases) and self.releases[self.current] is not None and

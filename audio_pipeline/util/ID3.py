@@ -38,8 +38,9 @@ class NumberTag(Tag.NumberTagMixin, BaseTag):
     def __init__(self, *args):
         super().__init__(*args)
         values = self._value.text[0].split('/')
-        self._number = int(values[0])
-        self._total = int(values[1])
+        if len(values) > 1:
+            self._number = int(values[0])
+            self._total = int(values[1])
 
     @property
     def value(self):

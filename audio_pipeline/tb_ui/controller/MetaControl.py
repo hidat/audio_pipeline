@@ -159,7 +159,7 @@ class MetaController:
         """
         Display a 'quit'? dialog
         """
-        Dialog.Check(self.app, "Processing complete", "Close TB", self.app.processing_done, "Close TomatoBanana?")
+        Dialog.Check(None, "Processing complete", "Close TB", self.app.processing_done, "Close TomatoBanana?")
         self.app.wait_variable(self.app.processing_done)
         move_files = self.app.processing_done.get()
         if move_files is not None:

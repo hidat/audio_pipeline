@@ -74,8 +74,7 @@ class BaseAudioFile:
         self.disc_num = self.format.disc_num(self.audio)
         self.track_num = self.format.track_num(self.audio)
         self.length = self.format.length(self.audio)
-                
-    
+
     @property
     def format(self):
         return self._format
