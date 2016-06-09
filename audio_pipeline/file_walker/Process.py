@@ -233,8 +233,9 @@ class ArtistProcessor:
         
         if mbinfo is None:
             raise Exceptions.NoMusicBrainzError("No MBInfo object when processing artist " + str(mbid))
-
-            self.mb_artist = mbinfo.get_artist(mbid)
+            
+        self.mb_artist = mbinfo.get_artist(mbid)
+        
         if not self.mb_artist:
             raise Exceptions.NoMusicBrainzError("Problem getting artist info from musicbrainz for id " + str(mbid))
         

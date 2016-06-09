@@ -4,7 +4,7 @@ import unittest
 import mutagen
 import os
 
-test_file_dir = "audio_pipeline\\test\\test_audio_files\\tag_test_files"
+test_file_dir = "audio_pipeline\\test\\test_files\\audio\\tag_test_files"
 
 vorbis_files = dict(t1=os.path.join(test_file_dir, "t1.flac"), 
                     picard=os.path.join(test_file_dir, "picard.flac"),

@@ -45,6 +45,7 @@ class MBInfo():
             
             try:
                 mb_artist = ngs.get_artist_by_id(artist_id, includes=include)['artist']
+                return mb_artist
             except ngs.ResponseError as e:
                 # probably a bad request / mbid
                 # propagate up
@@ -55,4 +56,3 @@ class MBInfo():
                 # propagate error up
                 raise e
                 
-            return mb_artist

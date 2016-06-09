@@ -6,15 +6,17 @@ import json
 import unicodedata
 import xml.etree.ElementTree as et
 import os
+from ..file_walker import Resources
 from ..file_walker import Process
 
 
-release_file = "audio_pipeline/test/test_mbids/release_mbids.json"
-artist_file = "audio_pipeline/test/test_mbids/artist_mbids.json"
+release_file = "audio_pipeline/test/test_files/test_mbids/release_mbids.json"
+artist_file = "audio_pipeline/test/test_files/test_mbids/artist_mbids.json"
 
-mb_dir = "audio_pipeline/test/mb_lookups"
+mb_dir = "audio_pipeline/test/test_files/mb_lookups"
 
-result_dir = "audio_pipeline/test/correct_results/Releases"
+release_results = "audio_pipeline/test/results/processed/Releases"
+artist_results = "audio_pipeline/test/results/processed/Artists"
 
 
 class TestReleaseProcessor(unittest.TestCase):
@@ -42,7 +44,7 @@ class TestReleaseProcessor(unittest.TestCase):
         # load the appropriate release result
         result = None
         r = mbid + ".xml"
-        result_file = os.path.join(result_dir, r)
+        result_file = os.path.join(release_results, r)
         
         with open(result_file, "rb") as f:
             result = et.parse(f).getroot()
@@ -77,7 +79,7 @@ class TestArtistProcessor(unittest.TestCase):
     def check_artist(self, mbid, processor, message):
         # load the appropriate release result
         r = mbid + ".xml"
-        result_file = os.path.join(result_dir, r)
+        result_file = os.path.join(artist_results, r)
 
         with open(result_file, "rb") as f:
             result = et.parse(f).getroot()
@@ -94,3 +96,8 @@ class TestArtistProcessor(unittest.TestCase):
                         message = "PROBLEM WITH " + str(key) + "\n" + message + "\nreal value: " \
                                   + value + "\nacquired value: " + test_value
                         self.assertEqual(value, test_value, msg=message)
+                    elif isinstance(value, Resources.NameId):
+                        
+                        
+    def check_name(self, processed, results):
+        if 

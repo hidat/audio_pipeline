@@ -83,7 +83,7 @@ class TestMBinfo(MBInfo.MBInfo):
         """
         super().__init__(server, useragent)
         
-        self.artist_dir = os.path.join(info_directory, "actors.json")
+        self.artist_dir = os.path.join(info_directory, "artists.json")
         self.release_dir = os.path.join(info_directory, "releases.json")
         
         self.artists = {}
