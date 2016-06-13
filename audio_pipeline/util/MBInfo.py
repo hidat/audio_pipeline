@@ -1,6 +1,7 @@
 __author__ = 'cephalopodblue'
 import musicbrainzngs as ngs
 from . import Util
+import time
 
 
 class MBInfo():
@@ -28,10 +29,15 @@ class MBInfo():
                 # propagate up
                 raise e
             except ngs.NetworkError as e:
-                # can't reach the musicbrainz server - if we have a local, try hitting it?
-                mb_release = None
-                # propagate error up
-                raise e
+                # can't reach the musicbrainz server - wait 10 seconds and try again
+                time.sleep(10)
+                try: 
+                    mb_release = ngs.get_release_by_id(release_id, includes=include)['release']
+                except ngs.NetworkError as e:
+                    # if we still can't reach it, propagate up the error
+                    mb_release = None
+                    # propagate error up
+                    raise e
             
             return mb_release
         
