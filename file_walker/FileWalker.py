@@ -363,7 +363,7 @@ def main():
     
     args = parser.parse_args()
         
-    server = args.mbhost if args.mbhost != None else args.local
+    server = args.mbhost
         
     batch_meta = {}
     batch_meta["category"] = options[args.category] if args.category != None else ""

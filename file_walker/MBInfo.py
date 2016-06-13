@@ -12,7 +12,7 @@ class MBInfo():
     def __init__(self, server, useragent=("hidat_audio_pipeline", "0.1")):
         self.server_location = server
         
-        if server != default_server:
+        if server is not None and server != default_server:
             ngs.set_hostname(server)
         
         ngs.set_useragent(useragent[0], useragent[1])
