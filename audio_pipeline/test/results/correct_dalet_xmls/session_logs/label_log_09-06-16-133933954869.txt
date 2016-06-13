@@ -1,0 +1,12 @@
+label	ce24ab18-1bd6-4293-a486-546d13d6a5e2	Polydor
+label	c3b2ae8c-1d88-4c5e-a683-1ffb720c12f2	Regal Recordings
+label	c69cac59-f512-4edc-ab2c-d04c22dbce20	Nonesuch
+label	3b78c7e5-6292-4f6b-b921-bdcbe681ea27	Southern Lord
+label	011d1192-6f65-45bd-85c4-0400dd45693e	Columbia
+label	9844e78d-d74a-4722-a28b-5f5ff840b6ad	Grand Royal
+label	f6b674ac-8c4f-4d83-b6a7-32a6b97e52a3	Steel Wool Records
+label	2c8d5348-178e-4aba-bff3-4a1d846deaa6	Stolen Recordings
+label	f1b83107-23e5-41a3-ab1b-2a36965cf77b	Stones Throw Records
+label	fc9c45f6-ff2c-4c1d-b3e3-819a3ba0c17b	Deathbomb Arc
+label	50c384a2-0b44-401b-b893-8181173339c7	Atlantic
+label	d563e39c-2779-456e-ad6a-3703365ab3bc	Canvasback Music

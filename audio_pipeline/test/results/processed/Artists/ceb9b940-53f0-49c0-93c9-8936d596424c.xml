@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Titles>
+  <GlossaryValue>
+    <Key1>965ce394-b8b3-46b7-99cd-1ef52dfa46d6</Key1>
+    <item_code>965ce394-b8b3-46b7-99cd-1ef52dfa46d6</item_code>
+    <title>Todd Drootin</title>
+    <GlossaryType>Artist</GlossaryType>
+    <KEXPName>Todd Drootin</KEXPName>
+    <sort_name>Drootin, Todd</sort_name>
+    <KEXPMBID>965ce394-b8b3-46b7-99cd-1ef52dfa46d6</KEXPMBID>
+    <type>Person</type>
+  </GlossaryValue>
+  <GlossaryValue>
+    <Key1>ceb9b940-53f0-49c0-93c9-8936d596424c</Key1>
+    <item_code>ceb9b940-53f0-49c0-93c9-8936d596424c</item_code>
+    <title>Books on Tape</title>
+    <GlossaryType>Artist</GlossaryType>
+    <KEXPName>Books on Tape</KEXPName>
+    <sort_name>Books on Tape</sort_name>
+    <KEXPMBID>ceb9b940-53f0-49c0-93c9-8936d596424c</KEXPMBID>
+    <KEXPAlias>Books on Tap</KEXPAlias>
+    <type>Group</type>
+    <KEXPCountry>United States</KEXPCountry>
+    <KEXPCountryMBID>489ce91b-6658-3307-9877-795b68554c98</KEXPCountryMBID>
+    <KEXPLink>http://en.wikipedia.org/wiki/Books_on_Tape_(artist)</KEXPLink>
+    <KEXPLink>http://www.discogs.com/artist/25106</KEXPLink>
+    <KEXPLink>http://www.wikidata.org/wiki/Q4943292</KEXPLink>
+    <KEXPLink>https://myspace.com/booksontape</KEXPLink>
+    <KEXPMember>965ce394-b8b3-46b7-99cd-1ef52dfa46d6</KEXPMember>
+  </GlossaryValue>
+</Titles>
