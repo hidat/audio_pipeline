@@ -78,6 +78,12 @@ Walks a directory structure of audio files and does the following:
     
   * *--anchor, -a*
     Set KEXPAnchorStatus field of all tracks to '1'
+    
+  * *--mbhost*
+    Set server to retrieve MusicBrainz data from. Default is musicbrainz.org; another server can be manually specified
+    
+  * *--no_artist*
+    Do not generate artist metadata XMLs.
       
 ######To Run
 
