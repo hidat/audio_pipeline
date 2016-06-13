@@ -25,6 +25,13 @@ def process_directory(source_dir, output_dir, batch_meta, generate, server, seri
     # Get location of metadata files
     track_meta_dir, artist_meta_dir, release_meta_dir = meta_directories(output_dir)
     
+    if batch_meta['no_artist']:
+        # (try to) remove artist meta dir, since we have no desire to have it
+        try:
+            os.rmdir(artist_meta_dir)
+        except OSError:
+            pass
+    
     # If copying audio (not just generating metadata), 
     # get the locations that audio files will be copied to
     if not generate:
@@ -158,31 +165,31 @@ def process_directory(source_dir, output_dir, batch_meta, generate, server, seri
                             # Make a backup of original file just in case
                             if not generate:
                                 copy_to_path = os.path.join(track_success_dir, path)                            
-                        
-                            # Add any new artist to our unique artists list
-                            for artist in track_data["artist-credit"]:
-                                if 'artist' in artist:
-                                    a = artist['artist']
-                                    artist_id = a['id']
-                                    if not (artist_id in unique_artists):
-                                        artist_meta = mbinfo.get_artist(artist_id)
-                                        unique_artists[artist_id] = artist_meta['title']
-                                        artist_members = []
-                                        if "artist-relation-list" in artist_meta:
-                                            for member in artist_meta["artist-relation-list"]:
-                                                member_id = member["artist"]["id"]
-                                                if not (member_id in unique_artists):
-                                                    if member["type"] == 'member of band' and 'direction' in member \
-                                                            and member["direction"] == "backward":
-                                                        unique_artists[member_id] = member["artist"]["name"]
-                                                        artist_members.append(mbinfo.get_artist(member_id))
-                                        
-                                        # add artist to log file
-                                        log = artist_meta["log_text"]
-                                        log_file.write(log.encode("UTF-8"))
-                                        for member in artist_members:
-                                            log_file.write(member["log_text"].encode("UTF-8"))
-                                        serializer.save_artist(artist_meta, artist_members, artist_meta_dir)
+                            if batch_meta['no_artist'] is False:
+                                # Add any new artist to our unique artists list
+                                for artist in track_data["artist-credit"]:
+                                    if 'artist' in artist:
+                                        a = artist['artist']
+                                        artist_id = a['id']
+                                        if not (artist_id in unique_artists):
+                                            artist_meta = mbinfo.get_artist(artist_id)
+                                            unique_artists[artist_id] = artist_meta['title']
+                                            artist_members = []
+                                            if "artist-relation-list" in artist_meta:
+                                                for member in artist_meta["artist-relation-list"]:
+                                                    member_id = member["artist"]["id"]
+                                                    if not (member_id in unique_artists):
+                                                        if member["type"] == 'member of band' and 'direction' in member \
+                                                                and member["direction"] == "backward":
+                                                            unique_artists[member_id] = member["artist"]["name"]
+                                                            artist_members.append(mbinfo.get_artist(member_id))
+                                            
+                                            # add artist to log file
+                                            log = artist_meta["log_text"]
+                                            log_file.write(log.encode("UTF-8"))
+                                            for member in artist_members:
+                                                log_file.write(member["log_text"].encode("UTF-8"))
+                                            serializer.save_artist(artist_meta, artist_members, artist_meta_dir)
 
                         except UnicodeDecodeError:
                             print("    ERROR: Invalid characters!")
@@ -359,6 +366,7 @@ def main():
     parser.add_argument('-g', '--generate', default=False, const=True, nargs='?')
     parser.add_argument('-i', '--gen_item_code', default=False, const=True, nargs='?', help='Generate a unique item code for all audio files.')
     parser.add_argument('-a', '--anchor', default=False, const=True, nargs='?', help='Add anchor status to track XMLs')
+    parser.add_argument('--no_artist', default=False, const=True, nargs='?', help='Do not generate artist metadata XMLs')
     parser.add_argument('--radio_edit', type=str.casefold, choices=["Radio Edit", "KEXP Radio Edit"], help='Add specified radio edit to track XMLs')
     
     args = parser.parse_args()
@@ -371,6 +379,7 @@ def main():
     batch_meta["source"] = options[args.source] if args.source != None else ""
     batch_meta['item_code'] = args.gen_item_code
     batch_meta['anchor'] = args.anchor
+    batch_meta['no_artist'] = args.no_artist
         
     process_directory(args.input_directory, args.output_directory, batch_meta, args.generate, server, DaletSerializer, args.delete)
 
