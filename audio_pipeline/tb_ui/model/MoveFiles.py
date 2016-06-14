@@ -11,7 +11,12 @@ class MoveFiles:
         :return:
         """
         self.rule = rule
-        self.copy = copy
+        if copy:
+            self.command = "COPY"
+            self.join = ["&", "COPY"]
+        else:
+            self.command = "MOVE"
+            self.join = ["&", "MOVE"]
 
     def move_files(self, files):
         """
@@ -21,54 +26,17 @@ class MoveFiles:
         :param files:
         :return:
         """
-        args = list()
         files.first()
-        if self.copy:
-            args.append("copy")
-        else:
-            args.append("move")
-
-        for f in files:
-
-
-                self.model.first()
-
-        if self.copy_dir:
-            move = shutil.copy
-        else:
-            move = shutil.move
-
-        while self.model.has_next():
-            release = self.model.next()
-
-            # get path to has-mbid and no-mbid folders once per release
-            release_path = os.path.split(release[0].file_name)[0]
-            picard = release[0].picard
-            mb = release[0].mb
-
-            if not os.path.exists(picard):
-                os.mkdir(picard)
-            if not os.path.exists(mb):
-                os.mkdir(mb)
-
-            for track in release:
-                # move to correct folder
-                move(track.file_name, track.dest_dir)
-                print("moving " + ascii(track.file_name) + " to " + ascii(track.dest_dir))
-
-
-            try:
-                os.rmdir(picard)
-            except OSError as e:
-                pass
-
-            try:
-                os.rmdir(mb)
-            except OSError as e:
-                pass
-
-            try:
-                os.rmdir(release_path)
-            except OSError as e:
-                # release directory is not empty
-                continue
+        
+        while files.has_next():
+            command = [self.command]
+            tracks = files.next()
+            for i in range(len(tracks)):
+                dest = self.rule.get_dest(tracks[i])
+                    
+                if i != 0:
+                    command += self.join
+                command.append(tracks[i].file_name)
+                command.append(dest)
+                
+            subprocess.run(command, shell=True)

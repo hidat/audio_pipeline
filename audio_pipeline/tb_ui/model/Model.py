@@ -1,17 +1,20 @@
 import os
+from ..model import MoveFiles
 from ..util import AudioFile
 from ..util import Resources
 from ..util import InputPatterns
 from ...util import Exceptions
+from . import Rules
 
 max_af = 10000
 
 
 class ProcessDirectory(object):
 
-    def __init__(self, root_dir, dest_dir):
-        self.picard_dir = os.path.join(dest_dir, Resources.picard_directory)
-        self.mbid_dir = os.path.join(dest_dir, Resources.mbid_directory)
+    def __init__(self, root_dir, dest_dir, copy):
+        rule = Rules.KEXPDestinationDirectoryRule(dest_dir)
+        
+        self.processing_complete = MoveFiles.MoveFiles(rule, copy)
 
         dbpoweramp = True
 
@@ -105,9 +108,6 @@ class ProcessDirectory(object):
             # get metadata for the 'current' release
             directory = self.directories[self.current]
 
-            picard = os.path.join(self.picard_dir, os.path.split(directory)[1])
-            mbid = os.path.join(self.mbid_dir, os.path.split(directory)[1])
-
             files = os.listdir(directory)
             indices = dict()
             releases = list()
@@ -118,7 +118,7 @@ class ProcessDirectory(object):
                 file = os.path.join(directory, f)
 
                 try:
-                    file_data = AudioFile.AudioFile(file, picard, mbid)
+                    file_data = AudioFile.AudioFile(file)
                 except IOError as e:
                     continue
                 except Exceptions.UnsupportedFiletypeError as e:
@@ -181,15 +181,13 @@ class ProcessDirectory(object):
         # we'll set this to a DBPOWERAMP config later
 
         #if InputPatterns.release_pattern.match(d):
-        picard = os.path.join(self.picard_dir, d)
-        mbid = os.path.join(self.mbid_dir, d)
 
         for f in os.scandir(directory):
             if f.is_file:
                 file_name = f.name
 
                 try:
-                    track = AudioFile.AudioFile(f.path, os.path.join(picard, file_name), os.path.join(mbid, file_name))
+                    track = AudioFile.AudioFile(f.path)
                 except IOError:
                     track = False
                     continue

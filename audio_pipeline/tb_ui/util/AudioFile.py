@@ -11,7 +11,7 @@ class AudioFile(util.AudioFile.MutagenAudioFile):
     name_style = {'anchor': 'nw', 'justify': 'left', 'background': Settings.bg_color,
                   'foreground': Settings.text_color, 'font': Settings.heading}
 
-    def __init__(self, file_name, picard, mb):
+    def __init__(self, file_name):
         """
         An AudioFile object that has all information about audiofile tags as a standard AudioFile,
         but also encodes UI formatting inforation for each tags.
@@ -42,30 +42,6 @@ class AudioFile(util.AudioFile.MutagenAudioFile):
             self.kexp.obscenity.style = self.style(20, True)
             self.kexp.primary_genre.style = self.style(20, True)
 
-        self.picard = picard
-        self.mb = mb
-
-        self.dest_dir = self.move_file()
-
-
-    def move_file(self):
-        if Resources.has_mbid(self):
-            self.dest_dir = self.mb
-        else:
-            self.dest_dir = self.picard
-
-        return self.dest_dir
-
-    def save_mbid(self, mbid):
-        super().save_mbid(mbid)
-
-        self.dest_dir = self.move_file()
-
-    def save(self):
-        super().save()
-
-        self.dest_dir = self.move_file()
-                    
     def style(self, width, track):
         if track:
             configuration = self.track_style.copy()
