@@ -4,6 +4,8 @@ from . import MetaFrame
 from . import InfoFrame
 from . import InputFrame
 from . import Dialog
+from ..util import Resources
+
 
 class App(tk.Tk):
 
@@ -23,10 +25,9 @@ class App(tk.Tk):
         self['height'] = 900
         self.title("TomatoBanana")
         
-        self.processing_done = tk.BooleanVar()
-        self.processing_done.set(False)
+        self.processing_done = tk.IntVar()
+        self.processing_done.set(Resources.cancel)
         
-
         self.release_frame = MetaFrame.ReleaseFrame()
         self.track_frame = MetaFrame.TrackFrame()
         self.input_frame = InputFrame.InputFrame(input_processor)

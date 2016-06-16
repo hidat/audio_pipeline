@@ -34,6 +34,8 @@ class EntryGrid(tk.Toplevel):
                     self.release.size_column(index=col, size=200)
                 elif name == "Album":
                     self.release.size_column(index=col, size=250)
+                elif name == "Label":
+                    self.release.size_column(index=col, size=200)
                 else:
                     self.release.size_column(index=col, size=75)
 

@@ -6,6 +6,10 @@ picard_directory = "Picard Me!"
 
 cache_limit = 30
 
+cancel = -1
+checked = 1
+unchecked = 0
+
 def has_mbid(track):
     """
     Check whether or not the given track has an MBID.

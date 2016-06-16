@@ -1,5 +1,6 @@
 import tkinter.tix as tk
 import tkinter.filedialog as filedialog
+from ..util import Resources
 
 
 class Check(tk.Toplevel):
@@ -49,7 +50,7 @@ class Check(tk.Toplevel):
         box.pack()
 
     def cancel(self):
-        self.set_variable.set(None)
+        self.set_variable.set(Resources.cancel)
         self.destroy()
         
     def start(self):
@@ -58,7 +59,10 @@ class Check(tk.Toplevel):
         
     def apply(self):
         # get value of checkbox
-        self.set_variable.set(self.selected.get())
+        if self.selected.get():
+            self.set_variable.set(Resources.checked)
+        else:
+            self.set_variable.set(Resources.unchecked)
         
         self.destroy()
 

@@ -4,6 +4,7 @@ from ..view import Dialog
 from ...util import Util
 from . import EntryController
 from ..util import InputPatterns
+from ..util import Resources
 import shutil
 import os
 import re
@@ -162,9 +163,9 @@ class MetaController:
         Dialog.Check(None, "Processing complete", "Close TB", self.app.processing_done, "Close TomatoBanana?")
         self.app.wait_variable(self.app.processing_done)
         move_files = self.app.processing_done.get()
-        if move_files is not None:
+        if move_files != Resources.cancel:
             self.app.quit()
-            if move_files:
+            if move_files > 0:
                 print('move files')
                 self.close()
 
