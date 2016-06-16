@@ -17,10 +17,11 @@ class DaletSerializer:
             os.makedirs(self.track_meta_dir)
         print("Track meta: ", self.track_meta_dir)
         
-        self.artist_meta_dir = path.join(output_dir, 'artist_meta')
-        if not path.exists(self.artist_meta_dir):
-            os.makedirs(self.artist_meta_dir)
-        print("Artist meta: ", self.artist_meta_dir)
+        if Resources.BatchConstants.artist_gen:
+            self.artist_meta_dir = path.join(output_dir, 'artist_meta')
+            if not path.exists(self.artist_meta_dir):
+                os.makedirs(self.artist_meta_dir)
+            print("Artist meta: ", self.artist_meta_dir)
         
         self.release_meta_dir = path.join(output_dir, 'release_meta')
         if not path.exists(self.release_meta_dir):
@@ -101,7 +102,10 @@ class DaletSerializer:
                 if Resources.BatchConstants.source:
                     with tag('KEXPSource'):
                         text(Resources.BatchConstants.source)
-
+                if Resources.BatchConstants.anchor or track.anchor_status == '1':
+                    with tag('KEXPAnchorStatus'):
+                        text('1')
+                        
 
         formatted_data = indent(doc.getvalue())    
         output_file = path.join(output_dir, track.item_code + ".xml")

@@ -13,6 +13,8 @@ class Hitters():
 
 
 class BatchConstants():
+    artist_gen = True
+
     obscenity = None
     category = None
     source = None
@@ -24,6 +26,7 @@ class BatchConstants():
     gen_item_code = False
     generate = False
     delete = False
+    anchor = False
     
     remote_server = None
     local_server = None
@@ -83,6 +86,9 @@ class BatchConstants():
         cls.gen_item_code = args.gen_item_code
         cls.generate = args.generate
         cls.delete = args.delete
+        cls.anchor = args.anchor
+        
+        cls.artist_gen = not args.no_artist
         
         cls.input_directory = args.input_directory
         cls.output_directory = args.output_directory
@@ -176,6 +182,8 @@ class Track():
         self.radio_edit = False
         self.artists = []
         self.artist_credit = ''
+        
+        self.anchor_status = None
         
         
 class Artist():

@@ -74,21 +74,22 @@ def process_directory(source_dir, output_dir, serializer):
                             # Make a copy of the original file (just in case)
                             copy_to_path = os.path.join(track_success_dir, path)                            
                             
-                            for artist in track.artists:
-                                # Save artist meta if we have not already.
-                                if artist not in processor.artists:
-                                
-                                    artist_meta = processor.get_artist(artist)
-                                    artist = artist_meta.artist
+                            if batch_constants.artist_gen:
+                                for artist in track.artists:
+                                    # Save artist meta if we have not already.
+                                    if artist not in processor.artists:
                                     
-                                    group_members = []
-                                    
-                                    for member in artist.group_members:
-                                        if member not in processor.artists:
-                                            member_meta = processor.get_artist(member)
-                                            group_members.append(member_meta.artist)
-                                            
-                                    serializer.save_artist(artist, group_members)
+                                        artist_meta = processor.get_artist(artist)
+                                        artist = artist_meta.artist
+                                        
+                                        group_members = []
+                                        
+                                        for member in artist.group_members:
+                                            if member not in processor.artists:
+                                                member_meta = processor.get_artist(member)
+                                                group_members.append(member_meta.artist)
+                                                
+                                        serializer.save_artist(artist, group_members)
                                     
                             # move track to success directory (if we're copying files)
                             if not batch_constants.generate:
@@ -178,23 +179,28 @@ def main():
     parser.add_argument('-r', '--rotation', type=str.casefold, metavar='',
                         choices=["heavy", "library", "light", "medium", "r/n"],
                         help="Rotation workflow value: \'heavy\', \'library\', \'light\', \'medium\' or \'r/n\'")
-    parser.add_argument('--mb_server', default="lr", type=str.casefold, metavar="\'r\': Remote only,\
-                        \'l\': local only, \'lr\': local then remote, \'rl\': remote then local",
-                        choices=["r", "l", "lr", "rl"],
-                        help='Specify what server(s) to retrive MusicBrainz meta from.' )
+    parser.add_argument('--mhost', type=str.casefold, 
+                        help="Specify the server to retrieve MusicBrainz data from. Default is musicbrainz.org; another server can be manually specified")
     parser.add_argument('--local', help="Set local MusicBrainz server address")
     parser.add_argument('--remote', help="Set remote MusicBrainz server address")
     parser.add_argument('-g', '--generate', default=False, const=True, nargs='?',
                         help="Generate metadata only; don't copy any files")
     parser.add_argument('-i', '--gen_item_code', default=False, const=True, nargs='?',
                         help="Generate a unique item code for all audio files")
+    parser.add_argument('--no_artist', default=False, const=True, nargs='?', help='Do not generate artist metadata XMLs')
+    parser.add_argument('--radio_edit', type=str.casefold, choices=["Radio Edit", "KEXP Radio Edit"], help='Add specified radio edit to track XMLs')
+    parser.add_argument('-a', '--anchor', default=False, const=True, nargs='?', help='Add anchor status to track XMLs')
+    parser.add_argument('--mb_server', default="lr", type=str.casefold, metavar="\'r\': Remote only,\
+                        \'l\': local only, \'lr\': local then remote, \'rl\': remote then local",
+                        choices=["r", "l", "lr", "rl"],
+                        help='Specify what server(s) to retrive MusicBrainz meta from.' )
     args = parser.parse_args()
     
     config_file = os.path.join(os.path.split(__file__)[0], "FileWalkerConfiguration.ini")
 
     batch_constants.config(config_file, args)
     
-    # Create the serializer (rigt now... we're just making a DaletSerializer)
+    # Create the serializer (right now... we're just making a DaletSerializer)
     serializer = serializers.DaletSerializer.DaletSerializer(batch_constants.output_directory)
         
     process_directory(args.input_directory, args.output_directory, serializer)

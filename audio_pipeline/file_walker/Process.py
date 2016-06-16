@@ -197,6 +197,7 @@ class ReleaseProcessor:
         track.track_num = audio_file.track_num.value
         track.obscenity = str(audio_file.obscenity)
         track.primary_genre = str(audio_file.category)
+        track.anchor_status = str(audio_file.anchor)
 
         #####################################
         # NEED TO ADD RADIO EDIT INFORMATION
