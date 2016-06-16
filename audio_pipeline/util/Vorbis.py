@@ -1,5 +1,6 @@
 from . import Tag
 import re
+from . import Exceptions
 
 
 class BaseTag(Tag.Tag):
@@ -15,7 +16,7 @@ class BaseTag(Tag.Tag):
             self.value = value
             
         if self._value:
-            self.mutagen[self.serialization_name] = [self._value]
+            self.mutagen[self.serialization_name] = [str(self._value)]
         else:
             if self.serialization_name in self.mutagen:
                 self.mutagen.pop(self.serialization_name)
@@ -53,9 +54,14 @@ class NumberTag(Tag.NumberTagMixin, BaseTag):
         elif isinstance(val, str) and self._value_match.match(val):
             # valid-looking num/total string
             self._value = int(val.split('/')[0])
+        elif isinstance(val, str):
+            try:
+                self._value = int(val)
+            except ValueError:
+                raise Exceptions.InvalidTagValueError(str(val) + " is not a valid " + self.name)
         else:
-            raise Tag.InvalidTagValueError(str(val) + " is not a valid " + self.name)
-            
+            raise Exceptions.InvalidTagValueError(str(val) + " is not a valid " + self.name)
+        
 
 class DiscNumberTag(NumberTag):
 

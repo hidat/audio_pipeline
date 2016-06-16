@@ -2,13 +2,10 @@ import os
 import configparser
 from .. import util
 
-audiofile_options = {"kexp": util.KEXPAudioFile.KEXPAudioFile}
-
 config_defaults = {"LocalServer": "",
                    "RemoteServer": 'musicbrainz.org',
                    "Delete": "no",
                    "Generate": "no"}
-
 
 class Hitters():
     artist = "(Various Artists) - "
@@ -76,7 +73,7 @@ class BatchConstants():
         cls.delete = settings.getboolean("Delete")
         
         # set AudioFile from config file
-        util.AudioFile.AudioFileFactory.audiofile = audiofile_options[settings.get("AudioFile")] if settings.get("AudioFile") in audiofile_options else util.AudioFile.BaseAudioFile
+        util.AudioFileFactory.AudioFileFactory.set(settings.get("audiofile"))
         
         # set batch constants from batch arguments
         cls.category = options[args.category] if args.category != None else ""

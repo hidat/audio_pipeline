@@ -1,13 +1,12 @@
 import os
 from ..model import MoveFiles
-from ..util import AudioFile
+from ...util.AudioFileFactory import AudioFileFactory
 from ..util import Resources
 from ..util import InputPatterns
 from ...util import Exceptions
 from . import Rules
 
 max_af = 10000
-
 
 class ProcessDirectory(object):
 
@@ -118,7 +117,7 @@ class ProcessDirectory(object):
                 file = os.path.join(directory, f)
 
                 try:
-                    file_data = AudioFile.AudioFile(file)
+                    file_data = AudioFileFactory.get(file)
                 except IOError as e:
                     continue
                 except Exceptions.UnsupportedFiletypeError as e:
@@ -187,7 +186,7 @@ class ProcessDirectory(object):
                 file_name = f.name
 
                 try:
-                    track = AudioFile.AudioFile(f.path)
+                    track = AudioFileFactory.get(f.path)
                 except IOError:
                     track = False
                     continue

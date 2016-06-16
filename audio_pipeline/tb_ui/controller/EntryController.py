@@ -7,7 +7,14 @@ class Entry():
 
     def __init__(self, release, app, update):
         self.tracks = release
-        self.release = release[0]
+        self.release = release[0].release()
+        self.track = release[0].track()
+        self.track = [self.tracks[0].track_num, self.tracks[0].title, self.tracks[0].artist, self.tracks[0].length]
+        try:
+            self.track.append(self.tracks[0].obscenity)
+        except AttributeError:
+            pass
+            
         self.update = update
         
         self.entry = app.input_frame
@@ -26,7 +33,9 @@ class Entry():
                     False otherwise
         """
 
-        new_meta = self.check_meta(meta, self.release.as_dict(), self.meta_entry.release_categories[index[0]])
+        release_dict = {tag.name: tag for tag in self.release}
+        
+        new_meta = self.check_meta(meta, release_dict, self.meta_entry.release_categories[index[0]])
         return new_meta
 
     def check_track(self, index, meta):
@@ -40,9 +49,10 @@ class Entry():
         """
 
         # track nums will come in 1-off, so correct that
-        track = self.tracks[index[1] - 1].as_dict()
-
-        new_meta = self.check_meta(meta, track, self.meta_entry.track_categories[index[0]])
+        track = self.tracks[index[1] - 1].track()
+        track_dict = {tag.name: tag for tag in track}
+        
+        new_meta = self.check_meta(meta, track_dict, self.meta_entry.track_categories[index[0]])
         return new_meta
 
     def check_meta(self, meta, audio_file, tag_name):
@@ -90,7 +100,7 @@ class Entry():
     def save(self):
         # update all tracks with new metadata
         for i in range(0, len(self.tracks)):
-            track = self.tracks[i].as_dict()
+            track = {tag.name: tag for tag in self.tracks[i]}
 
             for k in range(0, len(self.meta_entry.release_categories)):
                 tag = self.meta_entry.release_categories[k]

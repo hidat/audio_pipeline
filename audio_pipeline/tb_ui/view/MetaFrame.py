@@ -5,6 +5,11 @@ class MetaFrame(tk.Frame):
 
     meta_padding = {'sticky': "w", 'padx': 10, 'pady': 3}
     name_padding = {'sticky': "w", 'padx': 10, 'pady': 5}
+    tag_style = {'anchor': 'nw', 'bg': Settings.bg_color, 'foreground': Settings.text_color, 
+                                 'font': Settings.standard, 'activeforeground': Settings.active_fg,
+                                 'activebackground': Settings.active_bg, 'justify': 'left'}
+    name_style = {'anchor': 'nw', 'justify': 'left', 'background': Settings.bg_color,
+                  'foreground': Settings.text_color, 'font': Settings.heading}
 
     def __init__(self, master=None):
         """
@@ -19,6 +24,7 @@ class MetaFrame(tk.Frame):
         self.attributes = {}
         self.labels = {}
         self.attribute_text = {}
+        self.attribute_widths = []
 
         self.active = []
 
@@ -42,36 +48,80 @@ class ReleaseFrame(MetaFrame):
         :param metadata: A list of [audiofiles] to display the metadata of
         :return:
         """
-        release = metadata[0]
+        track = metadata[0]
         rowval = 0
         colval = 0
 
         super().display_meta(metadata)
-
-        for name, tag in release:
-            if tag.release:
-                if name not in self.labels:
-                    self.attribute_text[name] = tk.StringVar()
-                    self.labels[name] = tk.Label(self, release.name_style, text=name)
-                    self.labels[name].grid(self.name_padding, row=rowval, column=colval)
-                rowval += 1
-                if tag.value:
-                    self.attribute_text[name].set(tag.value)
-                else:
-                    self.attribute_text[name].set("")
-                self.attributes[name] = tk.Label(self, tag.style, textvariable=self.attribute_text[name])
-                self.attributes[name].grid(self.meta_padding, row=rowval, column=colval)
-                colval += 1
-                rowval = 0
+        
+        try:
+            w = 25
+            tag = track.album_artist
+            self.attribute_text[tag.name] = tk.StringVar()
+            self.labels[tag.name] = tk.Label(self, self.name_style, text=tag.name)
+            self.labels[tag.name].grid(self.name_padding, row=rowval, column=colval)
+            colval += 1
+            self.attribute_widths.append(w)
+        
+            w = 30
+            tag = track.album
+            self.attribute_text[tag.name] = tk.StringVar()
+            self.labels[tag.name] = tk.Label(self, self.name_style, text=tag.name)
+            self.labels[tag.name].grid(self.name_padding, row=rowval, column=colval)
+            colval += 1
+            self.attribute_widths.append(w)
+        
+            w = 20
+            tag = track.label
+            self.attribute_text[tag.name] = tk.StringVar()
+            self.labels[tag.name] = tk.Label(self, self.name_style, text=tag.name)
+            self.labels[tag.name].grid(self.name_padding, row=rowval, column=colval)
+            colval += 1
+            self.attribute_widths.append(w)    
+            
+            w = 10
+            tag = track.disc_num
+            self.attribute_text[tag.name] = tk.StringVar()
+            self.labels[tag.name] = tk.Label(self, self.name_style, text=tag.name)
+            self.labels[tag.name].grid(self.name_padding, row=rowval, column=colval)
+            colval += 1
+            self.attribute_widths.append(w)    
+            
+            w = 15
+            tag = track.release_date
+            self.attribute_text[tag.name] = tk.StringVar()
+            self.labels[tag.name] = tk.Label(self, self.name_style, text=tag.name)
+            self.labels[tag.name].grid(self.name_padding, row=rowval, column=colval)
+            colval += 1
+            self.attribute_widths.append(w)      
+            
+            w = 30
+            tag = track.mbid
+            self.attribute_text[tag.name] = tk.StringVar()
+            self.labels[tag.name] = tk.Label(self, self.name_style, text=tag.name)
+            self.labels[tag.name].grid(self.name_padding, row=rowval, column=colval)
+            colval += 1
+            self.attribute_widths.append(w)  
+        except AttributeError:
+            pass
+            
+        colval = 0
+        rowval += 1
+        width_index = 0
+        for tag in track.release():
+            name = tag.name
+            self.attribute_text[name].set(str(tag))
+            self.attributes[name] = tk.Label(self, self.tag_style, width=self.attribute_widths[width_index], 
+                                             wraplength=(self.attribute_widths[width_index] * 8),
+                                             textvariable=self.attribute_text[name])
+            self.attributes[name].grid(self.meta_padding, row=rowval, column=colval)
+            colval += 1
+            width_index += 1
 
     def update(self, audio_file):
-        for name, tag in audio_file:
-            if tag.release:
-                if tag.value:
-                    self.attribute_text[name].set(tag.value)
-                else:
-                    self.attribute_text[name].set("")
-                self.attributes[name].config(fg=Settings.text_color)
+        for tag in audio_file.release():
+            self.attribute_text[tag.name].set(str(tag))
+            self.attributes[tag.name].config(fg=Settings.text_color)
 
     def select_release(self):
         self.active.clear()
@@ -80,6 +130,8 @@ class ReleaseFrame(MetaFrame):
 
 class TrackFrame(MetaFrame):
 
+    unused_tags = {"kexpprimarygenre", "kexpanchorstatus", "kexpradioedit"}
+    
     def display_meta(self, metadata):
         super().display_meta(metadata)
 
@@ -91,12 +143,49 @@ class TrackFrame(MetaFrame):
         # Model will give us a list of audio_files already sorted by tracknum
 
         if not len(self.labels) > 0:
-            for tag, value in metadata[0]:
-                if not value.release:
-                    self.labels[tag] = tk.Label(self, metadata[0].name_style, text=tag)
-                    self.labels[tag].grid(self.name_padding, row=rowval, column = colval)
-                    colval += 1
-
+            
+            track = metadata[0]
+            
+            try:
+                w = 5
+                tag = track.track_num
+                self.labels[tag.name] = tk.Label(self, self.name_style, text=tag.name)
+                self.labels[tag.name].grid(self.name_padding, row=rowval, column=colval)
+                colval += 1
+                self.attribute_widths.append(w)
+                
+                w = 30
+                tag = track.title
+                self.labels[tag.name] = tk.Label(self, self.name_style, text=tag.name)
+                self.labels[tag.name].grid(self.name_padding, row=rowval, column=colval)
+                colval += 1
+                self.attribute_widths.append(w)
+                
+                w = 25
+                tag = track.artist
+                self.labels[tag.name] = tk.Label(self, self.name_style, text=tag.name)
+                self.labels[tag.name].grid(self.name_padding, row=rowval, column=colval)
+                colval += 1
+                self.attribute_widths.append(w)
+                
+                w = 10
+                tag = track.length
+                self.labels[tag.name] = tk.Label(self, self.name_style, text=tag.name)
+                self.labels[tag.name].grid(self.name_padding, row=rowval, column=colval)
+                colval += 1
+                self.attribute_widths.append(w)
+                
+                w = 25
+                tag = track.obscenity
+                self.labels[tag.name] = tk.Label(self, self.name_style, width=w, wraplength=8*w,
+                                                    text=tag.name)
+                self.labels[tag.name].grid(self.name_padding, row=rowval, column=colval)
+                colval += 1
+                self.attribute_widths.append(w)
+            except AttributeError:
+                # this should only happen on the obscenity rating - pass
+                pass
+                
         colval = 1
         rowval = 1
 
@@ -104,19 +193,19 @@ class TrackFrame(MetaFrame):
             name = track.file_name
             self.attributes[name] = dict()
             self.attribute_text[name] = dict()
-
+                    
             color = Settings.get_text_color(track)
-
-            for tag, value in track:
-                if not value.release:
-                    self.attribute_text[name][tag] = tk.StringVar()
-                    if value.value:
-                        self.attribute_text[name][tag].set(value.value)
-                    else:
-                        self.attribute_text[name][tag].set(" ")
-                    self.attributes[name][tag] = tk.Label(self, value.style, foreground=color,
-                                                          textvariable=self.attribute_text[name][tag])
-                    self.attributes[name][tag].grid(self.meta_padding, row=rowval, column=colval)
+            width_index = 0
+            for tag in track.track():
+                if width_index < len(self.attribute_widths):
+                    self.attribute_text[name][tag.name] = tk.StringVar()
+                    self.attribute_text[name][tag.name].set(tag)
+                    self.attributes[name][tag.name] = tk.Label(self, self.tag_style, foreground=color,
+                                                          width=self.attribute_widths[width_index], 
+                                                          wraplength=(self.attribute_widths[width_index]*8),
+                                                          textvariable=self.attribute_text[name][tag.name])
+                    self.attributes[name][tag.name].grid(self.meta_padding, row=rowval, column=colval)
+                    width_index += 1
                     colval += 1
             rowval += 1
             colval = 1
@@ -129,13 +218,12 @@ class TrackFrame(MetaFrame):
     def update(self, audio_file):
         name = audio_file.file_name
         color = Settings.get_text_color(audio_file)
-        for tag, value in audio_file:
-            if not value.release:
-                if value.value:
-                    self.attribute_text[name][tag].set(value.value)
-                else:
-                    self.attribute_text[name][tag].set(" ")
-                self.attributes[name][tag].config(fg=color)
+        i = 0
+        for tag in audio_file.track():
+            if i < len(self.attribute_widths):
+                self.attribute_text[name][tag.name].set(tag)
+                self.attributes[name][tag.name].config(fg=color)
+                i += 1
 
     def select_tracks(self, tracks):
         self.active.clear()

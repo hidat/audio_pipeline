@@ -17,8 +17,8 @@ class EntryGrid(tk.Toplevel):
         self.title("Metadata Entry Friend")
         self.__save = control.save
         self.the_end = control.quit
-        self.release_categories = [key for key, value in control.release if value.release]
-        self.track_categories = [key for key, value in control.tracks[0] if not value.release]
+        self.release_categories = [tag.name for tag in control.release]
+        self.track_categories = [tag.name for tag in control.track]
 
         # set up grid for the release metadata
         self.release = MetaGrid.MetaGrid(update_command=control.check_release, last_command=self.release_end, bindings=self.bind_release,
@@ -27,25 +27,25 @@ class EntryGrid(tk.Toplevel):
                                 height=2, selectunit="cell")
 
         # set up the release grid
-        for name, tag in control.release:
-            if tag.release:
-                col = self.release_categories.index(name)
-                if name == "Album Artist" or name == "MBID":
-                    self.release.size_column(index=col, size=200)
-                elif name == "Album":
-                    self.release.size_column(index=col, size=250)
-                elif name == "Label":
-                    self.release.size_column(index=col, size=200)
-                else:
-                    self.release.size_column(index=col, size=75)
+        for tag in control.release:
+            name = tag.name
+            col = self.release_categories.index(name)
+            if name == "Album Artist" or name == "MBID":
+                self.release.size_column(index=col, size=200)
+            elif name == "Album":
+                self.release.size_column(index=col, size=250)
+            elif name == "Label":
+                self.release.size_column(index=col, size=200)
+            else:
+                self.release.size_column(index=col, size=75)
 
-                self.release.size_column(index=col, pad0=5, pad1=5)
+            self.release.size_column(index=col, pad0=5, pad1=5)
 
-                self.release.set(col, 0, text=name)
-                if tag.value:
-                    self.release.set(col, 1, text=str(tag.value))
-                else:
-                    self.release.set(col, 1, text=str(" "))
+            self.release.set(col, 0, text=name)
+            if tag.value:
+                self.release.set(col, 1, text=str(tag.value))
+            else:
+                self.release.set(col, 1, text=str(" "))
 
         # set up the track grid
         self.tracks = MetaGrid.MetaGrid(update_command=control.check_track, last_command=self.track_end, bindings=self.bind_tracks,
@@ -71,8 +71,8 @@ class EntryGrid(tk.Toplevel):
         row = 1
         for track in control.tracks:
             col = 0
-            for name, tag in track:
-                if not tag.release:
+            for tag in track.track():
+                if tag.name in self.track_categories:
                     if tag.value:
                         self.tracks.set(col, row, text=str(tag.value))
                     else:

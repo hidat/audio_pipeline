@@ -85,13 +85,13 @@ class MetaController:
             if track.track_num.value in track_nums:
                 # update this track's metadata
                 if red:
-                    track.kexp.save_obscenity(Util.Obscenity.red)
+                    track.obscenity.save(Util.Obscenity.red)
                 elif yellow:
-                    track.kexp.save_obscenity(Util.Obscenity.yellow)
+                    track.obscenity.save(Util.Obscenity.yellow)
                 elif clean:
-                    track.kexp.save_obscenity(Util.Obscenity.clean)
+                    track.obscenity.save(Util.Obscenity.clean)
                 elif clear:
-                    track.kexp.save_obscenity(None)
+                    track.obscenity.save(None)
                 self.app.update_meta(track)
                 track_nums.remove(track.track_num.value)
 

@@ -42,11 +42,16 @@ commands = [Command("<track_num>[[,][ ]<track_num>...][ ]<meta_command>", "Add t
 
 def get_text_color(audio_file):
     color = text_color
-    if audio_file.kexp.obscenity.value:
-        if InputPatterns.yellow_dot.match(audio_file.kexp.obscenity.value):
-            color = yellow
-        elif InputPatterns.red_dot.match(audio_file.kexp.obscenity.value):
-            color = red
-        elif InputPatterns.clean_edit.match(audio_file.kexp.obscenity.value):
-            color = blue
+    
+    try:
+        if audio_file.obscenity.value:
+            if InputPatterns.yellow_dot.match(audio_file.obscenity.value):
+                color = yellow
+            elif InputPatterns.red_dot.match(audio_file.obscenity.value):
+                color = red
+            elif InputPatterns.clean_edit.match(audio_file.obscenity.value):
+                color = blue
+    except AttributeError:
+        pass
+        
     return color

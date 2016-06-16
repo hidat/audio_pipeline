@@ -1,5 +1,5 @@
 from . import AudioFile
-from . import AudioTag
+from . import Tag
 from . import MBInfo
 from . import Util
 from . import Tag
@@ -8,5 +8,6 @@ from . import ID3
 from . import AAC
 from . import Exceptions
 from . import KEXPAudioFile
+from . import AudioFileFactory
 
-__all__ = ['AudioFile', 'AudioTag', 'MBInfo', 'Util', 'Exceptions']
+__all__ = ['AudioFile', 'Tag', 'MBInfo', 'Util', 'Exceptions', 'AudioFileFactory']

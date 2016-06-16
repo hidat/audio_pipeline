@@ -1,5 +1,7 @@
 from . import Tag
 import mutagen
+import mutagen.id3
+from . import Exceptions
 
 
 class BaseTag(Tag.Tag):
@@ -61,8 +63,13 @@ class NumberTag(Tag.NumberTagMixin, BaseTag):
             elif isinstance(val, str) and self._value_match.match(val):
                 # valid-looking num/total string
                 self._number = int(val.split('/')[0])
+            elif isinstance(val, str):
+                try:
+                    self._number = int(val)
+                except ValueError:
+                    raise Exceptions.InvalidTagValueError(str(val) + " is not a valid " + self.name)
             else:
-                raise Tag.InvalidTagValueError(str(val) + " is not a valid " + self.name)
+                raise Exceptions.InvalidTagValueError(str(val) + " is not a valid " + self.name)
 
             if self._value is None:
                 self._value = self._frame_type(encoding=self._frame_encoding)

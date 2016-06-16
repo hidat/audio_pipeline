@@ -2,6 +2,7 @@ import os
 from audio_pipeline.util import Util
 from audio_pipeline.util import MBInfo
 from audio_pipeline.util import AudioFile
+from audio_pipeline.util import AudioFileFactory
 from audio_pipeline.util import Exceptions
 from audio_pipeline.file_walker import Process as Processor
 from audio_pipeline.file_walker.Resources import BatchConstants as batch_constants
@@ -26,7 +27,7 @@ def process_directory(source_dir, output_dir, serializer):
     # Set the (metadata) processor's mbinfo object
     processor = Processor.Processor(mbinfo)
     
-    af = AudioFile.AudioFileFactory
+    af = AudioFileFactory.AudioFileFactory
     
     path_start = len(source_dir) + 1
     for root, dir, files in os.walk(source_dir):

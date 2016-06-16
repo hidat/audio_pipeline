@@ -16,7 +16,7 @@ class KEXPAudioFile(AudioFile.BaseAudioFile):
         self.obscenity = self.format.custom_tag(Tags.obscenity, self.audio)
         self.category = self.format.custom_tag(Tags.category, self.audio)
         self.anchor = self.format.custom_tag(Tags.anchor, self.audio)
-        self.radio_edit = self.format.custom_tag(Tags.anchor, self.audio)
+        self.radio_edit = self.format.custom_tag(Tags.radio_edit, self.audio)
 
     def track(self):
         track = super().track()

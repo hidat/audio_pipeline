@@ -1,4 +1,5 @@
 from . import Tag
+from . import Exceptions
 
 
 class BaseTag(Tag.Tag):
@@ -75,7 +76,14 @@ class NumberTag(Tag.NumberTagMixin, BaseTag):
         elif isinstance(val, str) and self._value_match.match(val):
             self._value = int(val.split('/')[0])
             self._total = int(val.split('/')[1])
-            
+        elif isinstance(val, str):
+            try:
+                self._value = int(val)
+            except ValueError:
+                raise Exceptions.InvalidTagValueError(str(val) + " is not a valid " + self.name)
+        else:
+            raise Exceptions.InvalidTagValueError(str(val) + " is not a valid " + self.name)
+
     def __str__(self):
         if self._value:
             return str(self.value)

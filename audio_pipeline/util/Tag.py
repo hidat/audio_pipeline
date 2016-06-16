@@ -3,6 +3,36 @@ import re
 from . import Util
 
 
+class BaseFormats(object):
+    formats = []    # list of supported metadata formats
+    mime_formats = []   # list of supported formats mime types
+    mime_map = {} # mapping of mime types -> supported formats
+
+
+class Formats(BaseFormats):
+    aac = "aac"
+    id3 = "id3"
+    vorbis = "vorbis"
+    
+    mime_mp4 = 'audio/mp4'
+    mime_m4a = 'audio/mpeg4'
+    mime_aac = 'audio/aac'
+
+    mime_mp3 = 'audio/mp3'
+    mime_mpg = 'audio/mpg'
+    mime_mpeg = 'audio/mpeg'
+
+    mime_flac = 'audio/x-flac'
+
+    formats = [aac, id3, vorbis]
+    mime_formats = [mime_mp4, mime_m4a, mime_aac, mime_mp3, mime_mpg,
+                    mime_mpeg, mime_flac]
+    mime_map = {mime_mp4: aac, mime_m4a : aac, mime_aac: aac,
+                mime_mp3: id3, mime_mpg: id3, mime_mpeg: id3,
+                mime_flac: vorbis}
+
+                
+
 class CurrentTag:
     value = "Use the current tag value"
 
@@ -106,8 +136,8 @@ class Tag(abc.ABC):
             self.mutagen.pop(self.serialization_name)
         self.mutagen.save()
     
-    def save(self):
-        self.set()
+    def save(self, value=CurrentTag):
+        self.set(value)
         self.mutagen.save()
         
     def set(self, value=CurrentTag):
@@ -238,11 +268,18 @@ class LengthTag(Tag):
             return Util.minutes_seconds(self._value)
         else:
             return ""
+            
+    def set(self, value=CurrentTag):
+        pass
 
     @property
     def value(self):
         if self._value:
             return Util.minutes_seconds(self._value)
+            
+    @value.setter
+    def value(self, val):
+        pass
             
     def __eq__(self, other):
         if (isinstance(other, LengthTag)):
