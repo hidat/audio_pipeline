@@ -1,5 +1,8 @@
 import os
 import configparser
+from .. import util
+
+audiofile_options = {"kexp": util.KEXPAudioFile.KEXPAudioFile}
 
 config_defaults = {"LocalServer": "",
                    "RemoteServer": 'musicbrainz.org',
@@ -72,6 +75,9 @@ class BatchConstants():
         cls.generate = settings.getboolean("Generate")
         cls.delete = settings.getboolean("Delete")
         
+        # set AudioFile from config file
+        util.AudioFile.AudioFileFactory.audiofile = audiofile_options[settings.get("AudioFile")] if settings.get("AudioFile") in audiofile_options else util.AudioFile.BaseAudioFile
+        
         # set batch constants from batch arguments
         cls.category = options[args.category] if args.category != None else ""
         cls.rotation = options[args.rotation] if args.rotation != None else ""
@@ -103,6 +109,9 @@ class BatchConstants():
         elif cls.remote_server:
             cls.initial_server = cls.remote_server
             cls.backup_server = cls.remote_server
+            
+        # set which AudioFile we use
+        
 
                 
 class Release():

@@ -334,16 +334,16 @@ class KEXP(object):
         self.audio.save()
 
 
-class AudioFile:
+class AudioFileFactory:
 
     audiofile = BaseAudioFile
     audiofiles = dict()
         
     @staticmethod
     def get(file_name):
-        if file_name in AudioFile.audiofiles:
-            return AudioFile.audiofiles[file_name]
+        if file_name in AudioFileFactory.audiofiles:
+            return AudioFileFactory.audiofiles[file_name]
         else:
-            af = AudioFile.audiofile(file_name)
-            AudioFile.audiofiles[file_name] = af
+            af = AudioFileFactory.audiofile(file_name)
+            AudioFileFactory.audiofiles[file_name] = af
             return af

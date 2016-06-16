@@ -17,7 +17,6 @@ class Processor:
         self.artists = dict()
         
     def get_release(self, mbid):
-        print(self.mbinfo)
         if mbid in self.releases:
             return self.releases[mbid]
         else:
@@ -156,7 +155,9 @@ class ReleaseProcessor:
         recording_meta = track_meta['recording']
 
         # if generating unique item codes, do that
-        if Resources.BatchConstants.gen_item_code or audio_file.kexp.obscenity.value.casefold() == "kexp clean edit":
+        if Resources.BatchConstants.gen_item_code or \
+            (audio_file.obscenity.value is not None and \
+             audio_file.obscenity.value.casefold() == "kexp clean edit"):
             item_code = str(UUID.uuid4())
             track_type = "track with filewalker itemcode"
         else:
@@ -194,8 +195,8 @@ class ReleaseProcessor:
         # fields straight from the AudioFile
         track.disc_num = audio_file.disc_num.value
         track.track_num = audio_file.track_num.value
-        track.obscenity = audio_file.kexp.obscenity.value
-        track.primary_genre = audio_file.kexp.primary_genre.value
+        track.obscenity = str(audio_file.obscenity)
+        track.primary_genre = str(audio_file.category)
 
         #####################################
         # NEED TO ADD RADIO EDIT INFORMATION

@@ -2,6 +2,7 @@ import os
 from audio_pipeline.util import Util
 from audio_pipeline.util import MBInfo
 from audio_pipeline.util import AudioFile
+from audio_pipeline.util import Exceptions
 from audio_pipeline.file_walker import Process as Processor
 from audio_pipeline.file_walker.Resources import BatchConstants as batch_constants
 from audio_pipeline import serializers
@@ -25,7 +26,7 @@ def process_directory(source_dir, output_dir, serializer):
     # Set the (metadata) processor's mbinfo object
     processor = Processor.Processor(mbinfo)
     
-    af = AudioFile.AudioFile()
+    af = AudioFile.AudioFileFactory
     
     path_start = len(source_dir) + 1
     for root, dir, files in os.walk(source_dir):
@@ -57,10 +58,10 @@ def process_directory(source_dir, output_dir, serializer):
                             # process track's metadata:
                             if audio_file.mbid.value in processor.releases:
                                 release_meta = processor.get_release(audio_file.mbid.value)
-                                release = release_meta.get_release()
+                                release = release_meta.release
                             else:
                                 release_meta = processor.get_release(audio_file.mbid.value)
-                                release = release_meta.get_release()
+                                release = release_meta.release
 
                                 # serialize the release
                                 serializer.save_release(release)
@@ -77,14 +78,14 @@ def process_directory(source_dir, output_dir, serializer):
                                 if artist not in processor.artists:
                                 
                                     artist_meta = processor.get_artist(artist)
-                                    artist = artist_meta.get_artist()
+                                    artist = artist_meta.artist
                                     
                                     group_members = []
                                     
                                     for member in artist.group_members:
                                         if member not in processor.artists:
                                             member_meta = processor.get_artist(member)
-                                            group_members.append(member_meta.get_artist())
+                                            group_members.append(member_meta.artist)
                                             
                                     serializer.save_artist(artist, group_members)
                                     
@@ -102,7 +103,7 @@ def process_directory(source_dir, output_dir, serializer):
                     with open(hash_file, 'w+') as hash_file_d:
                         hash_file_d.write(ascii(file_name))
 
-            except AudioFile.UnsupportedFiletypeError as e:
+            except Exceptions.UnsupportedFiletypeError as e:
                 # just skip unsupported filetypes??
                 print("Skipping " + ascii(file_name))
                 copy_to_path = os.path.join(track_fail_dir, path)
@@ -188,7 +189,7 @@ def main():
                         help="Generate a unique item code for all audio files")
     args = parser.parse_args()
     
-    config_file = os.path.split(__file__)[0] + "FileWalkerConfiguration.ini"
+    config_file = os.path.join(os.path.split(__file__)[0], "FileWalkerConfiguration.ini")
 
     batch_constants.config(config_file, args)
     
