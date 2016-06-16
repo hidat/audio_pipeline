@@ -93,6 +93,9 @@ class BatchConstants():
         cls.input_directory = args.input_directory
         cls.output_directory = args.output_directory
         
+        if args.mbhost:
+            cls.local_server = args.mbhost
+        
         # set initial / backup server
         order = args.mb_server
         first = order[0]

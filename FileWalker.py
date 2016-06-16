@@ -179,7 +179,7 @@ def main():
     parser.add_argument('-r', '--rotation', type=str.casefold, metavar='',
                         choices=["heavy", "library", "light", "medium", "r/n"],
                         help="Rotation workflow value: \'heavy\', \'library\', \'light\', \'medium\' or \'r/n\'")
-    parser.add_argument('--mhost', type=str.casefold, 
+    parser.add_argument('--mbhost', type=str.casefold, 
                         help="Specify the server to retrieve MusicBrainz data from. Default is musicbrainz.org; another server can be manually specified")
     parser.add_argument('--local', help="Set local MusicBrainz server address")
     parser.add_argument('--remote', help="Set remote MusicBrainz server address")
