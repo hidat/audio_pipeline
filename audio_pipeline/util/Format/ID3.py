@@ -1,7 +1,7 @@
-from . import Tag
+from audio_pipeline.util import Tag
 import mutagen
 import mutagen.id3
-from . import Exceptions
+from audio_pipeline.util import Exceptions
 
 
 class BaseTag(Tag.Tag):
@@ -40,8 +40,8 @@ class NumberTag(Tag.NumberTagMixin, BaseTag):
     def __init__(self, *args):
         super().__init__(*args)
         values = self._value.text[0].split('/')
+        self._number = int(values[0])
         if len(values) > 1:
-            self._number = int(values[0])
             self._total = int(values[1])
 
     @property

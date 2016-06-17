@@ -1,6 +1,6 @@
-from . import Tag
+from audio_pipeline.util import Tag
 import re
-from . import Exceptions
+from audio_pipeline.util import Exceptions
 
 
 class BaseTag(Tag.Tag):

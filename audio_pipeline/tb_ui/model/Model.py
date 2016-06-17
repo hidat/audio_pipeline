@@ -124,7 +124,7 @@ class ProcessDirectory(object):
                     print("Unsupported filetype")
                     continue
 
-                if not Resources.has_mbid(file_data) and file_data.album_artist.value <= '' and file_data.album.value <= '':
+                if not Resources.has_mbid(file_data) and file_data.album_artist.value is None and file_data.album.value is None:
                     index = 0
                 else:
                     if (file_data.mbid.value, file_data.disc_num.value) in indices:

@@ -1,10 +1,10 @@
-from .. import util
-from . import TestUtil
-import unittest
-import abc
-import mutagen
 import os
+import unittest
 
+import mutagen
+
+from . import TestUtil
+from .. import util
 
 test_files = "audio_pipeline\\test\\test_files\\audio\\tag_test_files"
 
@@ -49,7 +49,7 @@ class TestAudioFileTags(TestUtil.TestUtilMixin):
 class TestAudioFileVorbis_t1(TestAudioFileTags, unittest.TestCase):
 
     meta = mutagen.File(os.path.join(test_files, "t1.flac"))
-    format = util.Vorbis.Format
+    format = util.format.Vorbis.Format
 
     af = util.AudioFile.BaseAudioFile(os.path.join(test_files, "t1.flac"))
     
@@ -57,7 +57,7 @@ class TestAudioFileVorbis_t1(TestAudioFileTags, unittest.TestCase):
 class TestAudioFileVorbis_picard(TestAudioFileTags, unittest.TestCase):
 
     meta = mutagen.File(os.path.join(test_files, "picard.flac"))
-    format = util.Vorbis.Format
+    format = util.format.Vorbis.Format
 
     af = util.AudioFile.BaseAudioFile(os.path.join(test_files, "picard.flac"))
     
@@ -65,7 +65,7 @@ class TestAudioFileVorbis_picard(TestAudioFileTags, unittest.TestCase):
 class TestAudioFileVorbis_unknown(TestAudioFileTags, unittest.TestCase):
 
     meta = mutagen.File(os.path.join(test_files, "unknown.flac"))
-    format = util.Vorbis.Format
+    format = util.format.Vorbis.Format
 
     af = util.AudioFile.BaseAudioFile(os.path.join(test_files, "unknown.flac"))
     
@@ -73,7 +73,7 @@ class TestAudioFileVorbis_unknown(TestAudioFileTags, unittest.TestCase):
 class TestAudioFileAAC_t1(TestAudioFileTags, unittest.TestCase):
 
     meta = mutagen.File(os.path.join(test_files, "t1.m4a"))
-    format = util.AAC.Format
+    format = util.format.AAC.Format
 
     af = util.AudioFile.BaseAudioFile(os.path.join(test_files, "t1.m4a"))
     
@@ -81,7 +81,7 @@ class TestAudioFileAAC_t1(TestAudioFileTags, unittest.TestCase):
 class TestAudioFileAAC_picard(TestAudioFileTags, unittest.TestCase):
 
     meta = mutagen.File(os.path.join(test_files, "picard.m4a"))
-    format = util.AAC.Format
+    format = util.format.AAC.Format
 
     af = util.AudioFile.BaseAudioFile(os.path.join(test_files, "picard.m4a"))
     
@@ -89,7 +89,7 @@ class TestAudioFileAAC_picard(TestAudioFileTags, unittest.TestCase):
 class TestAudioFileAAC_unknown(TestAudioFileTags, unittest.TestCase):
 
     meta = mutagen.File(os.path.join(test_files, "unknown.m4a"))
-    format = util.AAC.Format
+    format = util.format.AAC.Format
 
     af = util.AudioFile.BaseAudioFile(os.path.join(test_files, "unknown.m4a"))
     
@@ -97,7 +97,7 @@ class TestAudioFileAAC_unknown(TestAudioFileTags, unittest.TestCase):
 class TestAudioFileID3_t1(TestAudioFileTags, unittest.TestCase):
 
     meta = mutagen.File(os.path.join(test_files, "t1.mp3"))
-    format = util.ID3.Format
+    format = util.format.ID3.Format
 
     af = util.AudioFile.BaseAudioFile(os.path.join(test_files, "t1.mp3"))
     
@@ -105,7 +105,7 @@ class TestAudioFileID3_t1(TestAudioFileTags, unittest.TestCase):
 class TestAudioFileID3_picard(TestAudioFileTags, unittest.TestCase):
 
     meta = mutagen.File(os.path.join(test_files, "picard.mp3"))
-    format = util.ID3.Format
+    format = util.format.ID3.Format
 
     af = util.AudioFile.BaseAudioFile(os.path.join(test_files, "picard.mp3"))
     
@@ -113,6 +113,6 @@ class TestAudioFileID3_picard(TestAudioFileTags, unittest.TestCase):
 class TestAudioFileID3_unknown(TestAudioFileTags, unittest.TestCase):
 
     meta = mutagen.File(os.path.join(test_files, "unknown.mp3"))
-    format = util.ID3.Format
+    format = util.format.ID3.Format
 
     af = util.AudioFile.BaseAudioFile(os.path.join(test_files, "unknown.mp3"))

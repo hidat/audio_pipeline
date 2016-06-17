@@ -1,13 +1,11 @@
 from . import AudioFile
-from . import Tag
-from . import MBInfo
-from . import Util
-from . import Tag
-from . import Vorbis
-from . import ID3
-from . import AAC
+from . import AudioFileFactory
 from . import Exceptions
 from . import KEXPAudioFile
-from . import AudioFileFactory
+from . import MBInfo
+from . import Tag
+from . import Tag
+from . import Util
+from . import format
 
 __all__ = ['AudioFile', 'Tag', 'MBInfo', 'Util', 'Exceptions', 'AudioFileFactory']

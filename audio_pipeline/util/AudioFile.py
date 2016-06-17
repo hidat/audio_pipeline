@@ -1,10 +1,10 @@
 import mutagen
+
+from .format import Vorbis
+from .format import AAC
+from .format import ID3
 from . import Exceptions
-from . import Util
 from . import Tag
-from . import Vorbis
-from . import ID3
-from . import AAC
 
 
 class BaseAudioFile:
