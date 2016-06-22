@@ -164,8 +164,8 @@ class MetaController:
         self.app.wait_variable(self.app.processing_done)
         move_files = self.app.processing_done.get()
         if move_files != Resources.cancel:
-            self.app.after(40, self.app.destroy)
-            time.sleep(1)
+            self.app.destroy()
+            time.sleep(.5)
             if move_files > 0:
                 print('move files')
                 self.close()

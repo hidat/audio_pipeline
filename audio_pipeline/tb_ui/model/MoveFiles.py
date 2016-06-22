@@ -41,8 +41,8 @@ class MoveFiles:
                 command.append(tracks[i].file_name)
                 command.append(dest)
                 
-            dir = os.path.split(tracks[0].file_name)[0]                
-            print(command)
+            dir = os.path.split(tracks[0].file_name)[0]      
+            print("Moving " + dir)
             subprocess.run(command, shell=True)
             try:
                 os.rmdir(dir)
