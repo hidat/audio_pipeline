@@ -5,7 +5,7 @@ from ...util import Util
 from . import EntryController
 from ..util import InputPatterns
 from ..util import Resources
-import shutil
+import time
 import os
 import re
 
@@ -164,7 +164,8 @@ class MetaController:
         self.app.wait_variable(self.app.processing_done)
         move_files = self.app.processing_done.get()
         if move_files != Resources.cancel:
-            self.app.quit()
+            self.app.after(40, self.app.destroy)
+            time.sleep(1)
             if move_files > 0:
                 print('move files')
                 self.close()

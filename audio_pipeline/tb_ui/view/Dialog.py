@@ -55,7 +55,6 @@ class Check(tk.Toplevel):
         
     def start(self):
         self.grab_set()
-        self.master.wait_window(self)
         
     def apply(self):
         # get value of checkbox
@@ -124,7 +123,6 @@ class MultiCheck(tk.Toplevel):
 
     def start(self):
         self.grab_set()
-        self.master.wait_window(self)
         
     def apply(self):
         # get value of checkbox

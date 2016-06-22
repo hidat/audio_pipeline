@@ -1,6 +1,7 @@
 import os
 import subprocess
 
+
 class MoveFiles:
 
     def __init__(self, rule, copy):
@@ -31,6 +32,7 @@ class MoveFiles:
         while files.has_next():
             command = [self.command]
             tracks = files.next()
+            dir = ""
             for i in range(len(tracks)):
                 dest = self.rule.get_dest(tracks[i])
                     
@@ -39,4 +41,11 @@ class MoveFiles:
                 command.append(tracks[i].file_name)
                 command.append(dest)
                 
+            dir = os.path.split(tracks[0].file_name)[0]                
+            print(command)
             subprocess.run(command, shell=True)
+            try:
+                os.rmdir(dir)
+            except OSError:
+                # couldn't remove directory b/c not empty - carry on
+                continue
