@@ -1,4 +1,6 @@
-{audiofile: !!python/name:audio_pipeline.kexp.KEXPAudioFile.KEXPAudioFile '', processor: !!python/name:audio_pipeline.file_walker.Process '',
+{audiofile: !!python/name:audio_pipeline.kexp.KEXPAudioFile.KEXPAudioFile '',
+ processor: !!python/name:audio_pipeline.file_walker.Process '',
  batch constants: !!python/name:audio_pipeline.kexp.Resources.BatchConstants '',
- serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '', argument_config: !!python/name:audio_pipeline.kexp.argument_config '',
+ serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '',
+ argument_config: !!python/name:audio_pipeline.kexp.argument_config '',
   user: kexp}

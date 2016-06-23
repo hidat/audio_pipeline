@@ -42,7 +42,7 @@ class BatchConstants(default_resources.BatchConstants):
         self.anchor = args.anchor
 
 
-class Release():
+class Release(default_resources.Release):
 
     glossary_type = 'Release'
 
@@ -50,34 +50,14 @@ class Release():
         """
         Holds release metadata
         """
-
-        self.item_code = item_code
-
-        self.id = ""
-        self.title = ""
-        self.release_group_id = ""
-        self.disc_count = None
-        self.first_released = ""
-        self.tags = []
-        self.format = []
-        self.disambiguation = ""
-        self.labels = []
-
-        self.artist_ids = []
-        self.artist = ''
-        self.artist_sort_names = []
-
-        self.date = ""
-        self.country = ""
-        self.barcode = ""
-        self.asin = ""
-        self.packaging = ""
+        super().__init__(item_code)
+        
         self.distribution_category = ""
 
         self.glossary_title = ''
 
 
-class Track():
+class Track(default_resources.Track):
 
     content_type = "music library track"
 
@@ -85,19 +65,8 @@ class Track():
         """
         Holds track metadata
         """
-        self.disc_num = None
-        self.track_num = None
-        self.disc_count = None
-        self.track_count = None
-
-        self.release_id = ""
-        self.recording_id = ""
-        self.id = ""
-        self.title = ""
-        self.length = None
+        super().__init__(item_code)
         self.secondary_category = None
-        self.item_code = item_code
-        self.isrc_list = []
         self.artist_dist_rule = ""
         self.various_artist_dist_rule = ""
         self.obscenity = ""
@@ -105,13 +74,11 @@ class Track():
         self.type = ""
 
         self.radio_edit = False
-        self.artists = []
-        self.artist_credit = ''
 
         self.anchor_status = None
 
 
-class Artist():
+class Artist(default_resources.Artist):
 
     glossary_type = 'Artist'
 
@@ -119,44 +86,23 @@ class Artist():
         """
         Holds artist metadata
         """
-
-        self.item_code = item_code
-        self.disambiguation = ''
-        self.title = ''
-        self.name = ''
-        self.sort_name = ''
-        self.id = ''
-        self.annotation = ''
+        super().__init__(item_code)
         self.type = ''
 
-        self.begin_area = NameId('', '')
-        self.end_area = NameId('', '')
-        self.begin_date = ''
-        self.end_date = ''
-        self.ended = None
 
-        self.country = NameId('', '')
-
-        self.alias_list = []
-        self.ipi_list = []
-        self.isni_list = []
-        self.url_relation_list = []
-
-        self.group_members = []
-
-
-class NameId:
+class NameId(default_resources.NameId):
 
     def __init__(self, name='', id=''):
         """
         Holds information about something that has a 'name'
         and an 'id'
         """
-        self.name = name
-        self.id = id
-
-class Label(NameId):
+        super().__init__(name, id)
+        
+        
+class Label(default_resources.Label):
 
     def __init__(self, name='', id='', catalog_num=''):
         super().__init__(name, id)
         self.catalog_num = catalog_num
+        
