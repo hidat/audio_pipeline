@@ -87,7 +87,7 @@ Walks a directory structure of audio files and does the following:
       
 ######To Run
 
-1. Change to the `file_walker` directory
+1. Navigate to the top-level audio_pipeline directory
 2. run `FileWalker.py source_directory destination_directory options`
 
 IMPORTANT: Audio files must have release MBID, as well as track number and disc number associated with that MBID, for FileWalker to succeed. 
@@ -99,3 +99,7 @@ A program to assist in reviewing the metadata of ripped audio discs
  * Displays this metadata onscreen in an easily human-readable format for review
  * Current metadata entry options:
    * KEXPFCCOBSCENITYRATING can be set to YELLOW DOT or RED DOT directly
+
+######To Run
+1. Navigate to the top-level audio_pipeline directory
+2. run 'TomatoBanana.py <optional release source dir>'
