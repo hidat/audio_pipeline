@@ -158,7 +158,6 @@ class EntryGrid(tk.Toplevel):
         return release
         
     def track_artist_set(self, album_artist):
-        print('this is dumb')
         # should probably change this because strings are terrible
         artist_column = self.track_categories.index('Artist')
         aa = re.compile("\s*" + self.release.curr_meta + "\s*") # will do this better, sometime, probably
