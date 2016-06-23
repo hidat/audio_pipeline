@@ -1,5 +1,6 @@
 import os
 import subprocess
+import time
 
 
 class MoveFiles:
@@ -42,7 +43,7 @@ class MoveFiles:
                 command.append(dest)
                 
             dir = os.path.split(tracks[0].file_name)[0]      
-            print("Moving " + dir)
+            print("Moving " + ascii(dir))
             subprocess.run(command, shell=True)
             try:
                 os.rmdir(dir)
