@@ -29,13 +29,10 @@ def load_config(config_directory):
 
         if "default" in config:
             default_file = os.path.join(config_dir, config["default"] + '.yml')
-            print(default_file)
             if os.path.exists(default_file):
-                print(default_file)
                 with open(default_file, "r") as f:
                     default_config = yaml.load(f)
                     config.update(default_config)
-                    print(default_config)
 
             if "batch constants" in config:
                 global batch_constants_def
@@ -57,7 +54,9 @@ def load_config(config_directory):
 def setup(args, user=None):
     global batch_constants
     if user is not None:
+        print(user)
         user_file = os.path.join(config_dir, user + ".yml")
+        print(user_file)
         if os.path.exists(user_file):
             with open(user_file, "r") as f:
                 user_config = yaml.load(f)
@@ -65,6 +64,9 @@ def setup(args, user=None):
             batch_constants.set(args)
         else:
             batch_constants = batch_constants_def(args)
+            with open(user_file, "w+") as f:
+                user_constants = {'user constants': batch_constants}
+                yaml.dump(user_constants, f)
     else:
         batch_constants = batch_constants_def(args)
 

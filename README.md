@@ -1,5 +1,5 @@
 # Audio Pipeline
-A set of audio processing tools used to process and prepare audio file for ingestion into asset management systems.
+A set of audio processing tools used to process and prepare audio files for ingestion into asset management systems.
 
 ### To Install
 It is assumed that you already have Python 3.4 or greater installed, and it is in your path.
@@ -8,6 +8,7 @@ It is assumed that you already have Python 3.4 or greater installed, and it is i
 2. Install musicbrainzngs  `pip install musicbrainzngs`
 3. Install mutagen  `pip install mutagen`
 4. Install yattag  `pip install yattag`
+4. Install yaml  `pip install pyyaml`
 5. Profit!
  
 ### Programs
@@ -18,18 +19,24 @@ Walks a directory structure of audio files and does the following:
  * Querys MusicBrainz based on the Artist ID of all artist's in the album's Artist Credit, and return the metadata for each Artist
  * Writes this information out to the destination directory:
    * File are written to a directory structure of the form:
-     *found*: Backup copy of all succesfully processed audio files
-     *not_found*: Copy of all tracks that filewalker did not process successfully
-     *artist_meta*: Dalet-compatible XML files of artist metadata
-     *release_meta*: Dalet-compatible XML files of release metadata
-     *track_meta*: Dalet-compatible XML files of track metadata
-     *track*: All successfully processed audio files, renamed to match the track ItemCode
-     *session_logs*: Tab separated text file of all release, track, artist, and labels processed this session
-        Log format: <Item Type>   <ItemCode OR Item MBID (labels only)>    <Item Name>
+     *found*: Backup copy of all succesfully processed audio files  
+     *not_found*: Copy of all tracks that filewalker did not process successfully  
+     *artist_meta*: Serialized artist metadata files  
+     *release_meta*: Serialized release metadata files  
+     *track_meta*: Serialized track metadata files  
+     *track*: All successfully processed audio files, renamed to match the track ItemCode  
+     *session_logs*: Tab separated text files of the form:  
+        All logs have the format: `<Item Type>   <ItemCode>  <Item Name>`  
+        Currently produced logs:  
+            * *filewalker_log*: all releases, tracks, artists, and labels
+            * *label_log*: all labels
+            * *release_log*: all releases
    * XML files are named according to their ItemCode. Release and Artist XML filenames are given prefix 'r'.
    * Currently files can only be written as Dalet-compatible XML
    
 ######Options:
+
+ 
 
  * *--source, -s*  
     Passes in the source of audio files, to be recorded in XML.
@@ -102,4 +109,4 @@ A program to assist in reviewing the metadata of ripped audio discs
 
 ######To Run
 1. Navigate to the top-level audio_pipeline directory
-2. run 'TomatoBanana.py <optional release source dir>'
+2. Run `TomatoBanana.py`
