@@ -1,54 +1,10 @@
-import audio_pipeline
 from audio_pipeline.file_walker import Resources
 from audio_pipeline.file_walker import Util
+from ..file_walker import Process
 import uuid
-from audio_pipeline.util import Exceptions
 
 
-class Processor:
-
-    def __init__(self, mbinfo, processor):
-        self.processor = processor
-        if mbinfo:
-            self.mbinfo = mbinfo
-        else:
-            raise Exceptions.NoMusicBrainzError("Processor needs an MBInfo Object")
-            
-        self.releases = dict()
-        self.artists = dict()
-        
-    def get_release(self, mbid):
-        if self.mbinfo is None:
-            raise Exceptions.NoMusicBrainzError("No MBInfo object when processing release " + str(mbid))
-
-        if mbid in self.releases:
-            return self.releases[mbid]
-        else:
-            mb_release = self.mbinfo.get_release(mbid)
-            if not mb_release:
-                raise Exceptions.NoMusicBrainzError("Problem getting release info from musicbrainz for id " + str(mbid))
-
-            release = self.processor.ReleaseProcessor(mb_release)
-            self.releases[mbid] = release
-            return release
-
-    def get_artist(self, mbid):
-        if self.mbinfo is None:
-            raise Exceptions.NoMusicBrainzError("No MBInfo object when processing artist " + str(mbid))
-
-        if mbid in self.artists:
-            return self.artists[mbid]
-        else:
-            mb_artist = self.mbinfo.get_artist(mbid)
-            if not mb_artist:
-                raise Exceptions.NoMusicBrainzError("Problem getting artist info from musicbrainz for id " + str(mbid))
-
-            artist = self.processor.ArtistProcessor(mb_artist)
-            self.artists[mbid] = artist
-            return artist
-
-
-class ReleaseProcessor:
+class ReleaseProcessor(Process.ReleaseProcessor):
     secondary_category = "CATEGORIES/ROTATION-STAGING"
 
     def __init__(self, mb_release):
@@ -164,7 +120,7 @@ class ReleaseProcessor:
         recording_meta = track_meta['recording']
 
         # if generating unique item codes, do that
-        if audio_pipeline.batch_constants.gen_item_code or \
+        if Resources.BatchConstants.gen_item_code or \
             (audio_file.obscenity.value is not None and \
              audio_file.obscenity.value.casefold() == "kexp clean edit"):
             item_code = str(uuid.uuid4())
@@ -217,12 +173,12 @@ class ReleaseProcessor:
         for artist in release_meta.artist_sort_names:
            sort_names.append(artist)
        
-        if audio_pipeline.batch_constants.source == Resources.Hitters.source:
-            track.secondary_category = Resources.Hitters.artist + audio_pipeline.batch_constants.rotation + " Hitters"
-        elif audio_pipeline.batch_constants.rotation:
+        if Resources.BatchConstants.source == Resources.Hitters.source:
+            track.secondary_category = Resources.Hitters.artist + Resources.BatchConstants.rotation + " Hitters"
+        elif Resources.BatchConstants.rotation:
             cat = release_meta.artist
             cat += " - " + release_meta.title
-            cat = self.secondary_category + "/" + Util.stringCleanup(audio_pipeline.batch_constants.rotation) + \
+            cat = self.secondary_category + "/" + Util.stringCleanup(Resources.BatchConstants.rotation) + \
                     "/" + Util.stringCleanup(cat)
             track.secondary_category = cat
             

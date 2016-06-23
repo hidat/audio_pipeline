@@ -1,31 +1,31 @@
+import argparse
+import hashlib
 import os
-from audio_pipeline.util import Util
-from audio_pipeline.util import MBInfo
-from audio_pipeline.util import AudioFile
+import shutil
+
+import audio_pipeline
+from audio_pipeline.file_walker import Process as Processor
 from audio_pipeline.util import AudioFileFactory
 from audio_pipeline.util import Exceptions
-from audio_pipeline.file_walker import Process as Processor
-from audio_pipeline.file_walker.Resources import BatchConstants as batch_constants
-from audio_pipeline import serializers
-import argparse
-import shutil
-import hashlib
+from audio_pipeline.util import MBInfo
+from audio_pipeline.util import Util
 
 
-def process_directory(source_dir, output_dir, serializer):
+def process_directory(source_dir, output_dir):
     # If copying audio (not just generating metadata),
     # get the locations that audio files will be copied to
+    serializer = audio_pipeline.serializer(output_dir)
     track_dir, track_success_dir, track_fail_dir = '', '', ''
-    if not batch_constants.generate:
+    if not audio_pipeline.batch_constants.meta_only:
         track_dir, track_success_dir, track_fail_dir = audio_directories(output_dir)
 
     # Get directories for processed hashes
     processed_hashes = info_directories(output_dir)
     
     # create a MBInfo object to get MusicBrainz metadata
-    mbinfo = MBInfo.MBInfo(batch_constants.initial_server)
+    mbinfo = MBInfo.MBInfo(audio_pipeline.batch_constants.initial_server)
     # Set the (metadata) processor's mbinfo object
-    processor = Processor.Processor(mbinfo)
+    processor = Processor.Processor(mbinfo, audio_pipeline.processor)
     
     af = AudioFileFactory.AudioFileFactory
     
@@ -74,7 +74,7 @@ def process_directory(source_dir, output_dir, serializer):
                             # Make a copy of the original file (just in case)
                             copy_to_path = os.path.join(track_success_dir, path)                            
                             
-                            if batch_constants.artist_gen:
+                            if audio_pipeline.batch_constants.artist_gen:
                                 for artist in track.artists:
                                     # Save artist meta if we have not already.
                                     if artist not in processor.artists:
@@ -92,7 +92,7 @@ def process_directory(source_dir, output_dir, serializer):
                                         serializer.save_artist(artist, group_members)
                                     
                             # move track to success directory (if we're copying files)
-                            if not batch_constants.generate:
+                            if not audio_pipeline.batch_constants.meta_only:
                                 ext = os.path.splitext(file_name)[1].lower()
                                 target = os.path.join(track_dir, track.item_code + ext)
                                 shutil.copy(file_name, target)
@@ -114,13 +114,13 @@ def process_directory(source_dir, output_dir, serializer):
                 print("Skipping " + ascii(file_name))
                 copy_to_path = os.path.join(track_fail_dir, path)
 
-            if not batch_constants.generate and copy_to_path > '':
+            if not audio_pipeline.batch_constants.meta_only and copy_to_path > '':
                 # If we aren't just generating metadata, make backup of original file just in case
                 if not os.path.exists(copy_to_path):
                     os.makedirs(copy_to_path)
                     
                 target = os.path.join(copy_to_path, src_name)
-                if batch_constants.delete:
+                if audio_pipeline.batch_constants.delete:
                     shutil.move(file_name, target)
                 else:
                     shutil.copy(file_name, target)
@@ -162,48 +162,40 @@ def main():
     and metadata from MusicBrainz.
     For success, audio file must have a release MBID in metadata.
     """
-               
+
+    config_dir = os.path.split(os.path.abspath(__file__))[0]
+    audio_pipeline.load_config(config_dir)
+
     parser = argparse.ArgumentParser(description='Get metadata from files.')
+
+    if audio_pipeline.argument_config:
+        parser = audio_pipeline.argument_config(parser)
+
+    parser.add_argument('-p', '--profile', type=str.casefold, help="Specify a user profile. If a profile with this"
+                                                                   " name does not exist, it will be created.")
+
     parser.add_argument('input_directory', help="Input audio file.")
     parser.add_argument('output_directory', help="Directory to store output files.")
-    parser.add_argument('-d', '--delete', metavar='', default=False, const=True, nargs='?', help="Delete audio files from input_directory after processing")
-    parser.add_argument('-c', '--category', type=str.casefold, metavar='',
-                        choices=["recent acquisitions", "acq", "electronic", "ele", "experimental", 
-                        "exp", "hip hop", "hip", "jaz", "jazz", "live on kexp", "liv", 
-                        "local", "reggae", "reg", "rock", "pop", "rock/pop", "roc", "roots", 
-                        "roo", "rotation", "rot", "shows around town", "sho", "soundtracks", 
-                        "sou", "world", "wor"], help="Category or genre of releases being filewalked.")
-    parser.add_argument('-s', '--source', type=str.casefold, metavar='',
-                        choices=["cd library", "melly", "hitters"], 
-                        help="KEXPSource value - 'Melly', 'CD Library', or 'Hitters'")
-    parser.add_argument('-r', '--rotation', type=str.casefold, metavar='',
-                        choices=["heavy", "library", "light", "medium", "r/n"],
-                        help="Rotation workflow value: \'heavy\', \'library\', \'light\', \'medium\' or \'r/n\'")
-    parser.add_argument('--mbhost', type=str.casefold, 
-                        help="Specify the server to retrieve MusicBrainz data from. Default is musicbrainz.org; another server can be manually specified")
+    parser.add_argument('-d', '--delete', metavar='', default=False, const=True, nargs='?',
+                        help="Delete audio files from input_directory after processing")
     parser.add_argument('--local', help="Set local MusicBrainz server address")
     parser.add_argument('--remote', help="Set remote MusicBrainz server address")
+    parser.add_argument('--mbhost', type=str.casefold,
+                        help="Specify the server to retrieve MusicBrainz data from. Default is musicbrainz.org; "
+                             "another server can be manually specified")
     parser.add_argument('-g', '--generate', default=False, const=True, nargs='?',
                         help="Generate metadata only; don't copy any files")
     parser.add_argument('-i', '--gen_item_code', default=False, const=True, nargs='?',
                         help="Generate a unique item code for all audio files")
-    parser.add_argument('--no_artist', default=False, const=True, nargs='?', help='Do not generate artist metadata XMLs')
-    parser.add_argument('--radio_edit', type=str.casefold, choices=["Radio Edit", "KEXP Radio Edit"], help='Add specified radio edit to track XMLs')
-    parser.add_argument('-a', '--anchor', default=False, const=True, nargs='?', help='Add anchor status to track XMLs')
     parser.add_argument('--mb_server', default="lr", type=str.casefold, metavar="\'r\': Remote only,\
                         \'l\': local only, \'lr\': local then remote, \'rl\': remote then local",
                         choices=["r", "l", "lr", "rl"],
                         help='Specify what server(s) to retrive MusicBrainz meta from.' )
     args = parser.parse_args()
-    
-    config_file = os.path.join(os.path.split(__file__)[0], "FileWalkerConfiguration.ini")
 
-    batch_constants.config(config_file, args)
-    
-    # Create the serializer (right now... we're just making a DaletSerializer)
-    serializer = serializers.DaletSerializer.DaletSerializer(batch_constants.output_directory)
-        
-    process_directory(args.input_directory, args.output_directory, serializer)
+    audio_pipeline.setup(args, args.profile)
+
+    process_directory(args.input_directory, args.output_directory)
 
 if __name__ == "__main__":
     main()

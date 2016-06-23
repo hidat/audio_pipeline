@@ -1,0 +1,1 @@
+{default: kexp, audiofile: !!python/name:audio_pipeline.file_walker.Resources.BatchConstants '', processor: !!python/name:audio_pipeline.file_walker.Process.Processor '', serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer ''}

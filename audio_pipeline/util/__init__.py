@@ -1,7 +1,6 @@
 from . import AudioFile
 from . import AudioFileFactory
 from . import Exceptions
-from . import KEXPAudioFile
 from . import MBInfo
 from . import Tag
 from . import Tag

@@ -1,9 +1,9 @@
 import datetime
 import os
 
+
 class ProcessLog:
 
-    
     def __init__(self, output_dir, release=True, label=True):
         """
         Writes logs for releases, tracks, labels, and artists.
@@ -36,7 +36,6 @@ class ProcessLog:
         self.tracks = set([])
         self.artists = set([])
         self.labels = set([])
-
         
     def log_release(self, release):
         if release.item_code not in self.releases:

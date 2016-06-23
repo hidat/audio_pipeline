@@ -1,4 +1,4 @@
-from . import AudioFile
+from audio_pipeline.util import AudioFile
 
 
 class Tags:

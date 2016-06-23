@@ -1,8 +1,10 @@
-from yattag import Doc, indent
-import os.path as path
 import os
-from ..file_walker import ProcessLog
-from ..file_walker import Resources
+import os.path as path
+import audio_pipeline
+
+from yattag import Doc, indent
+
+from audio_pipeline.file_walker import ProcessLog
 from ..file_walker import Util
 
 __author__ = 'hidat'
@@ -17,7 +19,7 @@ class DaletSerializer:
             os.makedirs(self.track_meta_dir)
         print("Track meta: ", self.track_meta_dir)
         
-        if Resources.BatchConstants.artist_gen:
+        if audio_pipeline.batch_constants.artist_gen:
             self.artist_meta_dir = path.join(output_dir, 'artist_meta')
             if not path.exists(self.artist_meta_dir):
                 os.makedirs(self.artist_meta_dir)
@@ -99,10 +101,10 @@ class DaletSerializer:
                 with tag('KEXPContentType'):
                     text(track.content_type)
                 
-                if Resources.BatchConstants.source:
+                if audio_pipeline.batch_constants.source:
                     with tag('KEXPSource'):
-                        text(Resources.BatchConstants.source)
-                if Resources.BatchConstants.anchor or track.anchor_status == '1':
+                        text(audio_pipeline.batch_constants.source)
+                if audio_pipeline.batch_constants.anchor or track.anchor_status == '1':
                     with tag('KEXPAnchorStatus'):
                         text('1')
                         
@@ -206,13 +208,13 @@ class DaletSerializer:
                     with tag('KEXPTag'):
                         text(item)
                         
-                if Resources.BatchConstants.rotation:
-                    r_status = Util.stringCleanup(Resources.BatchConstants.rotation)
+                if audio_pipeline.batch_constants.rotation:
+                    r_status = Util.stringCleanup(audio_pipeline.batch_constants.rotation)
                     with tag('KEXPReleaseRotationStatus'):
                         text(r_status)
-                if Resources.BatchConstants.category:
+                if audio_pipeline.batch_constants.category:
                     with tag('KEXPPrimaryGenre'):
-                        text(Resources.BatchConstants.category)
+                        text(audio_pipeline.batch_constants.category)
 
         formatted_data = indent(doc.getvalue())
         

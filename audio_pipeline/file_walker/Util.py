@@ -1,5 +1,6 @@
 import unicodedata
 
+
 def distRuleCleanup(rule):
     cleanRule = rule
     if not rule.isalpha():
@@ -9,7 +10,8 @@ def distRuleCleanup(rule):
         if len(rule) > 0:
             cleanRule = rule
     return cleanRule
-    
+
+
 def stringCleanup(text):
     clean = {'\\': '-', '/': '-', '\"': '\''}
     for character, replacement in clean.items():

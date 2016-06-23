@@ -1,14 +1,11 @@
-from .. import util
-from . import TestUtil
-import unittest
-import abc
 import json
-import unicodedata
-import xml.etree.ElementTree as et
 import os
-from ..file_walker import Resources
-from ..file_walker import Process
+import unittest
+import xml.etree.ElementTree as et
 
+from audio_pipeline.file_walker import Process
+from . import TestUtil
+from ..file_walker import Resources
 
 release_file = "audio_pipeline/test/test_files/test_mbids/release_mbids.json"
 artist_file = "audio_pipeline/test/test_files/test_mbids/artist_mbids.json"

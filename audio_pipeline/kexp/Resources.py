@@ -1,73 +1,47 @@
+import audio_pipeline.file_walker.Resources as default_resources
+
+
 class Hitters:
     artist = "(Various Artists) - "
     source = "Hitters"
 
 
-class BatchConstants:
+class BatchConstants(default_resources.BatchConstants):
+    category_options = {"acq": "Recent Acquisitions", "recent acquisitions": "Recent Acquisitions", "electronic": "Electronic",
+               "ele": "Electronic", "exp": "Experimental", "experimental": "Experimental", "hip": "Hip Hop",
+               "hip hop": "Hip Hop", "jaz": "Jazz", "jazz": "Jazz", "liv": "Live on KEXP", "live on kexp": "Live on Kexp",
+               "loc": "Local", "local": "Local", "reg": "Reggae", "reggae": "Reggae", "roc": "Rock/Pop", "rock": "Rock/Pop",
+               "pop": "Rock/Pop", "rock/pop": "Rock/Pop", "roo": "Roots", "roots": "Roots",
+               "rot": "Rotation", "rotation": "Rotation", "sho": "Shows Around Town", "shows around town": "Shows Around Town",
+               "sou": "Soundtracks", "soundtracks": "Soundtracks", "wor": "World", "world": "World"}
 
-    input_directory = ""
-    output_directory = ""
+    source_options = {"cd library": "CD Library", "melly": "Melly", "hitters": "Hitters"}
+
+    rotation_options = {"heavy": "Heavy", "library": "Library", "light": "Light", "medium": "Medium", "r/n": "R/N"}
 
     def __init__(self, args):
-        self.artist_gen = True
+        super().__init__(args)
 
-        self.input_directory = ''
-        self.output_directory = ''
+        self.obscenity = None
+        self.category = None
+        self.source = None
+        self.rotation = None
 
-        self.meta_only = False
-        self.delete = False
-
-        self.remote_server = None
-        self.local_server = None
-
-        self.initial_server = None
-        self.backup_server = None
+        self.gen_item_code = False
+        self.anchor = False
 
         self.set(args)
 
     def set(self, args):
-        """
-        Set the batch constants
-
-        :param args: Batch constants from the command line
-        :return:
-        """
-        self.input_directory = args.input_directory
-        self.output_directory = args.output_directory
-
-        self.artist_gen = not args.no_artist
+        super().set(args)
+        self.category = self.category_options[args.category] if args.category != None else ""
+        self.rotation = self.rotation_options[args.rotation] if args.rotation != None else ""
+        self.source = self.source_options[args.source] if args.source != None else ""
 
         self.gen_item_code = args.gen_item_code
-        self.meta_only = args.generate
-        self.delete = args.delete
+        self.anchor = args.anchor
 
-        BatchConstants.input_directory = args.input_directory
-        BatchConstants.output_directory = args.output_directory
 
-        if args.mbhost:
-            self.local_server = args.mbhost
-
-        # set initial / backup server
-        order = args.mb_server
-        first = order[0]
-        second = order[1] if len(order) > 1 else None
-
-        if self.local_server:
-            if first == 'l':
-                self.initial_server = self.local_server
-            else:
-                self.initial_server = self.remote_server
-
-            if second:
-                if second == 'l':
-                    self.backup_server = self.local_server
-                else:
-                    self.backup_server = self.remote_server
-        elif self.remote_server:
-            self.initial_server = self.remote_server
-            self.backup_server = self.remote_server
-
-                
 class Release():
 
     glossary_type = 'Release'
@@ -76,9 +50,9 @@ class Release():
         """
         Holds release metadata
         """
-        
+
         self.item_code = item_code
-        
+
         self.id = ""
         self.title = ""
         self.release_group_id = ""
@@ -88,25 +62,25 @@ class Release():
         self.format = []
         self.disambiguation = ""
         self.labels = []
-        
+
         self.artist_ids = []
         self.artist = ''
         self.artist_sort_names = []
-        
+
         self.date = ""
         self.country = ""
         self.barcode = ""
         self.asin = ""
         self.packaging = ""
         self.distribution_category = ""
-        
+
         self.glossary_title = ''
 
 
 class Track():
-    
+
     content_type = "music library track"
-    
+
     def __init__(self, item_code):
         """
         Holds track metadata
@@ -129,23 +103,23 @@ class Track():
         self.obscenity = ""
         self.primary_genre = ""
         self.type = ""
-        
+
         self.radio_edit = False
         self.artists = []
         self.artist_credit = ''
-        
+
         self.anchor_status = None
-        
-        
+
+
 class Artist():
 
     glossary_type = 'Artist'
-    
+
     def __init__(self, item_code):
         """
         Holds artist metadata
         """
-        
+
         self.item_code = item_code
         self.disambiguation = ''
         self.title = ''
@@ -154,24 +128,24 @@ class Artist():
         self.id = ''
         self.annotation = ''
         self.type = ''
-        
+
         self.begin_area = NameId('', '')
         self.end_area = NameId('', '')
         self.begin_date = ''
         self.end_date = ''
         self.ended = None
-        
+
         self.country = NameId('', '')
-        
+
         self.alias_list = []
         self.ipi_list = []
         self.isni_list = []
         self.url_relation_list = []
-        
-        self.group_members = []
-        
 
-class NameId():
+        self.group_members = []
+
+
+class NameId:
 
     def __init__(self, name='', id=''):
         """
@@ -180,14 +154,9 @@ class NameId():
         """
         self.name = name
         self.id = id
-        
+
 class Label(NameId):
-    
+
     def __init__(self, name='', id='', catalog_num=''):
         super().__init__(name, id)
         self.catalog_num = catalog_num
-
-
-_batch_constants_def = BatchConstants
-_batch_constants = None
-
