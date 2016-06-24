@@ -1,3 +1,5 @@
+import yaml
+
 class Hitters:
     artist = "(Various Artists) - "
     source = "Hitters"
@@ -24,7 +26,7 @@ class BatchConstants:
         self.backup_server = None
 
         self.set(args)
-
+        
     def set(self, args):
         """
         Set the batch constants
@@ -35,11 +37,15 @@ class BatchConstants:
         self.input_directory = args.input_directory
         self.output_directory = args.output_directory
 
-        self.artist_gen = not args.no_artist
+        if args.no_artist:
+            self.artist_gen = not args.no_artist
 
-        self.gen_item_code = args.gen_item_code
-        self.meta_only = args.generate
-        self.delete = args.delete
+        if args.gen_item_code:
+            self.gen_item_code = args.gen_item_code
+        if args.generate:
+            self.meta_only = args.generate
+        if args.delete:
+            self.delete = args.delete
 
         BatchConstants.input_directory = args.input_directory
         BatchConstants.output_directory = args.output_directory
@@ -48,24 +54,25 @@ class BatchConstants:
             self.local_server = args.mbhost
 
         # set initial / backup server
-        order = args.mb_server
-        first = order[0]
-        second = order[1] if len(order) > 1 else None
+        if (args.mb_server != 'lr'):
+            order = args.mb_server
+            first = order[0]
+            second = order[1] if len(order) > 1 else None
 
-        if self.local_server:
-            if first == 'l':
-                self.initial_server = self.local_server
-            else:
-                self.initial_server = self.remote_server
-
-            if second:
-                if second == 'l':
-                    self.backup_server = self.local_server
+            if self.local_server:
+                if first == 'l':
+                    self.initial_server = self.local_server
                 else:
-                    self.backup_server = self.remote_server
-        elif self.remote_server:
-            self.initial_server = self.remote_server
-            self.backup_server = self.remote_server
+                    self.initial_server = self.remote_server
+
+                if second:
+                    if second == 'l':
+                        self.backup_server = self.local_server
+                    else:
+                        self.backup_server = self.remote_server
+            elif self.remote_server:
+                self.initial_server = self.remote_server
+                self.backup_server = self.remote_server
 
                 
 class Release():

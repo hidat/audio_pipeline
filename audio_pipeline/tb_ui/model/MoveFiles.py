@@ -1,7 +1,9 @@
+import shutil
 import os
 import subprocess
 import time
 
+from . import Model
 
 class MoveFiles:
 
@@ -20,7 +22,7 @@ class MoveFiles:
             self.command = "MOVE"
             self.join = ["&", "MOVE"]
 
-    def move_files(self, files):
+    def move_files(self, files, src_dir=None):
         """
         Iterate over the elements of a ProcessDirectory object, and move them to the correct directory,
         using python subprocess
@@ -33,7 +35,7 @@ class MoveFiles:
         while files.has_next():
             command = [self.command]
             tracks = files.next()
-            dir = ""
+            directory = ""
             for i in range(len(tracks)):
                 dest = self.rule.get_dest(tracks[i])
                     
@@ -42,11 +44,10 @@ class MoveFiles:
                 command.append(tracks[i].file_name)
                 command.append(dest)
                 
-            dir = os.path.split(tracks[0].file_name)[0]      
-            print("Moving " + ascii(dir))
+            directory = os.path.split(tracks[0].file_name)[0]      
+            print("Moving " + ascii(directory))
             subprocess.run(command, shell=True)
-            try:
-                os.rmdir(dir)
-            except OSError:
-                # couldn't remove directory b/c not empty - carry on
-                continue
+            
+            if not Model.ProcessDirectory.is_release(directory):
+                shutil.rmtree(directory)
+                

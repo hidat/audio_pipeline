@@ -1,6 +1,7 @@
 from audio_pipeline.tb_ui.controller import MetaControl
+from audio_pipeline import Constants
+
 import argparse
-import audio_pipeline
 import os
 
 config_defaults = {"audiofile": ""}
@@ -13,7 +14,7 @@ def main():
 
     config_dir = os.path.split(os.path.abspath(__file__))[0]
 
-    audio_pipeline.load_config(config_dir)
+    Constants.load_config(config_dir)
 
     controller = MetaControl.MetaController(args.release_directory, args.copy)
     

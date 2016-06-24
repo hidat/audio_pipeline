@@ -23,9 +23,9 @@ class BatchConstants(default_resources.BatchConstants):
         super().__init__(args)
 
         self.obscenity = None
-        self.category = None
-        self.source = None
-        self.rotation = None
+        self.category = ""
+        self.source = ""
+        self.rotation = ""
 
         self.gen_item_code = False
         self.anchor = False
@@ -34,12 +34,15 @@ class BatchConstants(default_resources.BatchConstants):
 
     def set(self, args):
         super().set(args)
-        self.category = self.category_options[args.category] if args.category != None else ""
-        self.rotation = self.rotation_options[args.rotation] if args.rotation != None else ""
-        self.source = self.source_options[args.source] if args.source != None else ""
+        if args.category is not None:
+            self.category = self.category_options[args.category]
+        if args.rotation is not None:
+            self.rotation = self.rotation_options[args.rotation]
+        if args.source is not None:
+            self.source = self.source_options[args.source]
 
-        self.gen_item_code = args.gen_item_code
-        self.anchor = args.anchor
+        if args.anchor:
+            self.anchor = args.anchor
 
 
 class Release(default_resources.Release):

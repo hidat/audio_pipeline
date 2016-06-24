@@ -3,7 +3,7 @@ import hashlib
 import os
 import shutil
 
-import audio_pipeline
+from audio_pipeline import Constants
 from audio_pipeline.file_walker import Process as Processor
 from audio_pipeline.util import AudioFileFactory
 from audio_pipeline.util import Exceptions
@@ -12,20 +12,22 @@ from audio_pipeline.util import Util
 
 
 def process_directory(source_dir, output_dir):
+    batch_constants = Constants.batch_constants
+
     # If copying audio (not just generating metadata),
     # get the locations that audio files will be copied to
-    serializer = audio_pipeline.serializer(output_dir)
+    serializer = Constants.serializer(output_dir)
     track_dir, track_success_dir, track_fail_dir = '', '', ''
-    if not audio_pipeline.batch_constants.meta_only:
+    if not batch_constants.meta_only:
         track_dir, track_success_dir, track_fail_dir = audio_directories(output_dir)
 
     # Get directories for processed hashes
     processed_hashes = info_directories(output_dir)
     
     # create a MBInfo object to get MusicBrainz metadata
-    mbinfo = MBInfo.MBInfo(audio_pipeline.batch_constants.initial_server)
+    mbinfo = MBInfo.MBInfo(batch_constants.initial_server)
     # Set the (metadata) processor's mbinfo object
-    processor = Processor.Processor(mbinfo, audio_pipeline.processor)
+    processor = Processor.Processor(mbinfo, Constants.processor)
     
     af = AudioFileFactory.AudioFileFactory
     
@@ -74,7 +76,7 @@ def process_directory(source_dir, output_dir):
                             # Make a copy of the original file (just in case)
                             copy_to_path = os.path.join(track_success_dir, path)                            
                             
-                            if audio_pipeline.batch_constants.artist_gen:
+                            if batch_constants.artist_gen:
                                 for artist in track.artists:
                                     # Save artist meta if we have not already.
                                     if artist not in processor.artists:
@@ -92,7 +94,7 @@ def process_directory(source_dir, output_dir):
                                         serializer.save_artist(artist, group_members)
                                     
                             # move track to success directory (if we're copying files)
-                            if not audio_pipeline.batch_constants.meta_only:
+                            if not batch_constants.meta_only:
                                 ext = os.path.splitext(file_name)[1].lower()
                                 target = os.path.join(track_dir, track.item_code + ext)
                                 shutil.copy(file_name, target)
@@ -114,13 +116,13 @@ def process_directory(source_dir, output_dir):
                 print("Skipping " + ascii(file_name))
                 copy_to_path = os.path.join(track_fail_dir, path)
 
-            if not audio_pipeline.batch_constants.meta_only and copy_to_path > '':
+            if not batch_constants.meta_only and copy_to_path > '':
                 # If we aren't just generating metadata, make backup of original file just in case
                 if not os.path.exists(copy_to_path):
                     os.makedirs(copy_to_path)
                     
                 target = os.path.join(copy_to_path, src_name)
-                if audio_pipeline.batch_constants.delete:
+                if batch_constants.delete:
                     shutil.move(file_name, target)
                 else:
                     shutil.copy(file_name, target)
@@ -164,12 +166,12 @@ def main():
     """
 
     config_dir = os.path.split(os.path.abspath(__file__))[0]
-    audio_pipeline.load_config(config_dir)
+    Constants.load_config(config_dir)
 
     parser = argparse.ArgumentParser(description='Get metadata from files.')
-
-    if audio_pipeline.argument_config:
-        parser = audio_pipeline.argument_config(parser)
+    
+    if Constants.argument_config:
+        parser = Constants.argument_config(parser)
 
     parser.add_argument('-p', '--profile', type=str.casefold, help="Specify a user profile. If a profile with this"
                                                                    " name does not exist, it will be created.")
@@ -193,7 +195,7 @@ def main():
                         help='Specify what server(s) to retrive MusicBrainz meta from.' )
     args = parser.parse_args()
 
-    audio_pipeline.setup(args, args.profile)
+    Constants.setup(args, args.profile)
 
     process_directory(args.input_directory, args.output_directory)
 

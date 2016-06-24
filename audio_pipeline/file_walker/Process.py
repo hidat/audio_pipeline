@@ -1,7 +1,8 @@
-import audio_pipeline
-from audio_pipeline.file_walker import Resources
-from audio_pipeline.file_walker import Util
 import uuid
+
+from audio_pipeline import Constants
+from audio_pipeline.file_walker import Resources, Util
+from audio_pipeline.file_walker import Util
 from audio_pipeline.util import Exceptions
 
 
@@ -164,7 +165,7 @@ class ReleaseProcessor:
         recording_meta = track_meta['recording']
 
         # if generating unique item codes, do that
-        if audio_pipeline.batch_constants.gen_item_code or \
+        if Constants.batch_constants.gen_item_code or \
             (audio_file.obscenity.value is not None and \
              audio_file.obscenity.value.casefold() == "kexp clean edit"):
             item_code = str(uuid.uuid4())
@@ -217,12 +218,12 @@ class ReleaseProcessor:
         for artist in release_meta.artist_sort_names:
            sort_names.append(artist)
        
-        if audio_pipeline.batch_constants.source == Resources.Hitters.source:
-            track.secondary_category = Resources.Hitters.artist + audio_pipeline.batch_constants.rotation + " Hitters"
-        elif audio_pipeline.batch_constants.rotation:
+        if Constants.batch_constants.source == Resources.Hitters.source:
+            track.secondary_category = Resources.Hitters.artist + Constants.batch_constants.rotation + " Hitters"
+        elif Constants.batch_constants.rotation:
             cat = release_meta.artist
             cat += " - " + release_meta.title
-            cat = self.secondary_category + "/" + Util.stringCleanup(audio_pipeline.batch_constants.rotation) + \
+            cat = self.secondary_category + "/" + Util.stringCleanup(Constants.batch_constants.rotation) + \
                     "/" + Util.stringCleanup(cat)
             track.secondary_category = cat
             

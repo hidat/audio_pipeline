@@ -174,7 +174,8 @@ class ProcessDirectory(object):
     def has_prev(self):
         return (self.current > 0) or (self.release > 0)
 
-    def is_release(self, directory):
+    @staticmethod
+    def is_release(directory):
         d = os.path.split(directory)[1]
         track = False
         # we'll set this to a DBPOWERAMP config later

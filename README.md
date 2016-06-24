@@ -40,19 +40,19 @@ Walks a directory structure of audio files and does the following:
 
 ######General:
  
-  * *--delete, -d*
+  * *--delete, -d*  
     Delete source audio files after processing
  
-  * *--generate, -g*
+  * *--generate, -g*  
     Generate metadata only, without copying audio 
 
-  * *--mbhost*
+  * *--mbhost*  
     Set server to retrieve MusicBrainz data from. Default is musicbrainz.org; another server can be manually specified
 
-  * *--no_artist*
+  * *--no_artist*  
     Do not generate artist metadata XMLs.
             
-  * *--i, --gen_item_code*
+  * *--i, --gen_item_code*  
     Generate a unique item code for all audio files
         
 ######KEXP-specific:
@@ -87,13 +87,13 @@ Walks a directory structure of audio files and does the following:
         
     **Allowed values:**
     
-    - Heavy   
+    - Heavy  
     - Library  
     - Light  
     - Medium  
     - R/N
 
-  * *--anchor, -a*
+  * *--anchor, -a*  
     Set KEXPAnchorStatus field of all tracks to '1'
       
 #####To Run

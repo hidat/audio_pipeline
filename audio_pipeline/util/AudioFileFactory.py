@@ -1,4 +1,4 @@
-import audio_pipeline
+from audio_pipeline import Constants
 
 
 class AudioFileFactory:
@@ -10,6 +10,6 @@ class AudioFileFactory:
         if file_name in cls.audiofiles:
             return cls.audiofiles[file_name]
         else:
-            af = audio_pipeline.audiofile(file_name)
+            af = Constants.audiofile(file_name)
             cls.audiofiles[file_name] = af
             return af
