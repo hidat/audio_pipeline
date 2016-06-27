@@ -168,7 +168,7 @@ class ReleaseProcessor:
         elif audio_file.item_code.value is not None:
             item_code = audio_file.item_code.value
         elif (audio_file.obscenity.value is not None and \
-             audio_file.obscenity.value.casefold() == "KEXP clean edit":
+             audio_file.obscenity.value.casefold() == "kexp clean edit"):
             item_code = str(uuid.uuid4())
         else:
             item_code = track_meta['id']
@@ -182,10 +182,6 @@ class ReleaseProcessor:
         
         # fields from track_meta
         track.id = track_meta['id']
-        
-        print(audio_file.item_code.value)
-        print(track.id)
-        print(track.item_code)
         
         track.set_type()
         
