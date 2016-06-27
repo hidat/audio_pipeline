@@ -1,8 +1,8 @@
 import uuid
 
 from audio_pipeline import Constants
-from audio_pipeline.file_walker import Resources, Util
-from audio_pipeline.file_walker import Util
+from audio_pipeline.file_walker import Resources
+from audio_pipeline.util import Util
 from audio_pipeline.util import Exceptions
 
 
@@ -92,10 +92,8 @@ class ReleaseProcessor:
             if 'label-info-list' in meta:
                 for l in meta['label-info-list']:
                     if 'label' in l:
-                        label = Resources.Label()
-                        label.name = l['label']['name']
-                        label.id = l['label']['id']
-                        labels = labels + " " + label.name
+                        label = Resources.Label(l['label']['id'], l['label']['id'], l['label']['name'])
+                        labels = labels + " " + label.title
                         if 'catalog-number' in l:
                             label.catalog_num = l['catalog-number']
                             cat_nums = cat_nums + " " + label.catalog_num
@@ -165,21 +163,31 @@ class ReleaseProcessor:
         recording_meta = track_meta['recording']
 
         # if generating unique item codes, do that
-        if Constants.batch_constants.gen_item_code or \
-            (audio_file.obscenity.value is not None and \
-             audio_file.obscenity.value.casefold() == "kexp clean edit"):
+        if Constants.batch_constants.gen_item_code:
             item_code = str(uuid.uuid4())
-            track_type = "track with filewalker itemcode"
+        elif audio_file.item_code.value is not None:
+            item_code = audio_file.item_code.value
+        elif (audio_file.obscenity.value is not None and \
+             audio_file.obscenity.value.casefold() == Util.Obscenity.clean.casefold()):
+            item_code = str(uuid.uuid4())
         else:
             item_code = track_meta['id']
-            track_type = "track"
+            
+        # set the item_code value in the audio file
+        audio_file.item_code.value = item_code
+        audio_file.item_code.save()
                         
         # create the track object
         track = Resources.Track(item_code)
-        track.type = track_type
         
         # fields from track_meta
         track.id = track_meta['id']
+        
+        print(audio_file.item_code.value)
+        print(track.id)
+        print(track.item_code)
+        
+        track.set_type()
         
         for artist in track_meta['artist-credit']:
             if 'artist' in artist:
@@ -188,9 +196,13 @@ class ReleaseProcessor:
             else:
                 track.artist_credit = track.artist_credit + artist
 
-        # fields from the recording
-        track.title = recording_meta['title']
+        # get the track title
+        if 'title' in track_meta:
+            track.title = track_meta['title']
+        else:
+            track.title = recording_meta['title']
         
+        # fields from the recording
         track.recording_id = recording_meta['id']
         if 'length' in recording_meta:
             track.length = recording_meta['length']

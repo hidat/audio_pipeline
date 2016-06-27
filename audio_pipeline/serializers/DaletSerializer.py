@@ -3,7 +3,7 @@ import os.path as path
 from yattag import Doc, indent
 from audio_pipeline import Constants
 from audio_pipeline.file_walker import ProcessLog
-from ..file_walker import Util
+from audio_pipeline.util import Util
 
 __author__ = 'hidat'
 

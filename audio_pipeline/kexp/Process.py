@@ -152,17 +152,17 @@ class ReleaseProcessor(Process.ReleaseProcessor):
         if 'isrc-list' in recording_meta:
             track.isrc_list = recording_meta['isrc-list']
 
-        # fields from release_meta
-        track.release_id = release_meta.id
-        
-        track.track_count = len(self.mb_release["medium-list"][disc_index]["track-list"])
-        
         # fields straight from the AudioFile
         track.disc_num = audio_file.disc_num.value
         track.track_num = audio_file.track_num.value
         track.obscenity = str(audio_file.obscenity)
         track.primary_genre = str(audio_file.category)
         track.anchor_status = str(audio_file.anchor)
+
+        # fields from release_meta
+        track.release_id = release_meta.id
+        
+        track.track_count = len(self.mb_release["medium-list"][disc_index]["track-list"])
 
         #####################################
         # NEED TO ADD RADIO EDIT INFORMATION

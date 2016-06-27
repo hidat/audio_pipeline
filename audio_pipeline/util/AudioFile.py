@@ -7,6 +7,10 @@ from . import Exceptions
 from . import Tag
 
 
+class CustomTags:
+    item_code = "ITEMCODE"
+
+
 class BaseAudioFile:
 
     vorbis = Vorbis.Format
@@ -58,6 +62,8 @@ class BaseAudioFile:
         self.disc_num = self.format.disc_num(self.audio)
         self.track_num = self.format.track_num(self.audio)
         self.length = self.format.length(self.audio)
+        
+        self.item_code = self.format.custom_tag(CustomTags.item_code, self.audio)
 
     @property
     def format(self):
@@ -85,7 +91,7 @@ class BaseAudioFile:
         track = self.track()
         for item in track:
             yield item
-        
+            
     def track(self):
         return [self.track_num, self.title, self.artist, self.length]
     

@@ -75,19 +75,31 @@ class BatchConstants:
                 self.backup_server = self.remote_server
 
                 
-class Release():
+class Content:
 
-    glossary_type = 'Release'
-
-    def __init__(self, item_code):
+    glossary_type = "content"
+    
+    def __init__(self, item_code, id="", title=""):
         """
-        Holds release metadata
+        Hold the metadata for a piece of content
         """
         
         self.item_code = item_code
         
-        self.id = ""
-        self.title = ""
+        self.id = id
+        self.title = title
+                
+                
+class Release(Content):
+
+    glossary_type = 'Release'
+
+    def __init__(self, item_code, id="", title=""):
+        """
+        Holds release metadata
+        """
+        super().__init__(item_code, id, title)
+        
         self.release_group_id = ""
         self.disc_count = None
         self.first_released = ""
@@ -110,14 +122,17 @@ class Release():
         self.glossary_title = ''
 
 
-class Track():
+class Track(Content):
     
-    content_type = "music library track"
+    glossary_type = "music library track"
+    content_type = glossary_type
     
-    def __init__(self, item_code):
+    def __init__(self, item_code, id="", title=""):
         """
         Holds track metadata
         """
+        super().__init__(item_code, id, title)
+
         self.disc_num = None
         self.track_num = None
         self.disc_count = None
@@ -125,11 +140,8 @@ class Track():
 
         self.release_id = ""
         self.recording_id = ""
-        self.id = ""
-        self.title = ""
         self.length = None
         self.secondary_category = None
-        self.item_code = item_code
         self.isrc_list = []
         self.artist_dist_rule = ""
         self.various_artist_dist_rule = ""
@@ -143,22 +155,26 @@ class Track():
         
         self.anchor_status = None
         
+    def set_type(self):
+        if (self.item_code != self.id):
+            self.type = "track with filewalker mbid"
+        else:
+            self.type = "track"
         
-class Artist():
+        
+class Artist(Content):
 
     glossary_type = 'Artist'
     
-    def __init__(self, item_code):
+    def __init__(self, item_code, id="", title=""):
         """
         Holds artist metadata
         """
+        super().__init__(item_code, id, title)
         
-        self.item_code = item_code
         self.disambiguation = ''
-        self.title = ''
         self.name = ''
         self.sort_name = ''
-        self.id = ''
         self.annotation = ''
         self.type = ''
         
@@ -178,6 +194,17 @@ class Artist():
         self.group_members = []
         
 
+class Label(Content):
+
+    glossary_type = 'label'
+    
+    def __init__(self, item_code, id="", title=""):
+    
+        super().__init__(item_code, id, title)
+    
+        self.catalog_num = ""
+
+        
 class NameId():
 
     def __init__(self, name='', id=''):
@@ -187,14 +214,4 @@ class NameId():
         """
         self.name = name
         self.id = id
-        
-class Label(NameId):
-    
-    def __init__(self, name='', id='', catalog_num=''):
-        super().__init__(name, id)
-        self.catalog_num = catalog_num
-
-
-_batch_constants_def = BatchConstants
-_batch_constants = None
-
+                

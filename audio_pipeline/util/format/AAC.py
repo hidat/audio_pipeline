@@ -64,6 +64,20 @@ class NumberTag(Tag.NumberTagMixin, BaseTag):
         
         if self._value:
             self._value, self._total = self._value[0]
+
+    def set(self, value=Tag.CurrentTag):
+        if value is not Tag.CurrentTag:
+            self.value = value
+        
+        if self._value:
+            if self._total:
+                val = (self._value, self._total)
+            else:
+                val = (self._value, )
+            self.mutagen[self.serialization_name] = val
+        else:
+            if self.serialization_name in self.mutagen:
+                self.mutagen.pop(self.serialization_name)
             
     @property
     def value(self):
