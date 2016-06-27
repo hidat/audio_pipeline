@@ -54,7 +54,6 @@ class MetaController:
                 value = tracks.group(InputPatterns.meta_acc)
                 self.new_meta_input(track_nums, value)
             except ValueError as e:
-                print(e)
                 err_msg = "Invalid input " + str(input_string)
                 Dialog.err_message(err_msg, None, parent=self.app)
         elif nav:
