@@ -41,6 +41,7 @@ class NumberTag(Tag.NumberTagMixin, BaseTag):
         super().__init__(*args)
         values = self._value.text[0].split('/')
         self._number = int(values[0])
+        self._total = None
         if len(values) > 1:
             self._total = int(values[1])
 
@@ -63,6 +64,7 @@ class NumberTag(Tag.NumberTagMixin, BaseTag):
             elif isinstance(val, str) and self._value_match.match(val):
                 # valid-looking num/total string
                 self._number = int(val.split('/')[0])
+                self._total = int(val.split('/')[1])
             elif isinstance(val, str):
                 try:
                     self._number = int(val)
@@ -119,6 +121,21 @@ class ReleaseDateTag(Tag.ReleaseDateMixin, BaseTag):
     def __init__(self, *args):
         super().__init__(*args)
         self._normalize()
+
+    @property
+    def value(self):
+        return super().value
+
+        
+    @value.setter
+    def value(self, val):
+        if val:
+            if self._value is None:
+                self._value = self._frame_type(self._frame_encoding, val)
+
+            self._value.text[0].text = val
+        else:
+            self._value = None
     
 
 class LabelTag(BaseTag):

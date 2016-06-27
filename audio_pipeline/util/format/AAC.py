@@ -9,10 +9,7 @@ class BaseTag(Tag.Tag):
             self.value = value
             
         if self._value:
-            values = list()
-            for val in self._value:
-                values.append(val)
-            self.mutagen[self.serialization_name] = values
+            self.mutagen[self.serialization_name] = self._value
         else:
             if self.serialization_name in self.mutagen:
                 self.mutagen.pop(self.serialization_name)
