@@ -183,10 +183,6 @@ class ReleaseProcessor:
         # fields from track_meta
         track.id = track_meta['id']
         
-        print(audio_file.item_code.value)
-        print(track.id)
-        print(track.item_code)
-        
         track.set_type()
         
         for artist in track_meta['artist-credit']:
