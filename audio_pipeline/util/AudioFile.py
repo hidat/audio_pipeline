@@ -96,4 +96,4 @@ class BaseAudioFile:
         return [self.track_num, self.title, self.artist, self.length]
     
     def release(self):
-        return [self.album_artist, self.album, self.label, self.disc_num, self.release_date, self.mbid]
+        return [self.album_artist, self.album, self.label, self.disc_num, self.release_date, self.mbid, self.item_code]

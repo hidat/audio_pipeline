@@ -55,7 +55,6 @@ def process_directory(source_dir, output_dir):
                 if not os.path.exists(hash_file):
                     # Get the MusicBrainz Release ID from the file
                     if Util.has_mbid(audio_file):
-                        print("Processing " + ascii(file_name))
 
                         try:
                             # process track's metadata:

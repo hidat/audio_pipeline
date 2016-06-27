@@ -42,6 +42,19 @@ class BaseTag(Tag.Tag):
                 
         
 class FreeformTag(BaseTag):
+
+    def set(self, value=Tag.CurrentTag):
+        if value is not Tag.CurrentTag:
+            self.value = value
+            
+        if self._value:
+            values = list()
+            for val in self._value:
+                values.append(val.encode('utf-8'))
+            self.mutagen[self.serialization_name] = values
+        else:
+            if self.serialization_name in self.mutagen:
+                self.mutagen.pop(self.serialization_name)
     
     def extract(self):
         super().extract()
@@ -74,7 +87,7 @@ class NumberTag(Tag.NumberTagMixin, BaseTag):
                 val = (self._value, self._total)
             else:
                 val = (self._value, )
-            self.mutagen[self.serialization_name] = val
+            self.mutagen[self.serialization_name] = [val]
         else:
             if self.serialization_name in self.mutagen:
                 self.mutagen.pop(self.serialization_name)
