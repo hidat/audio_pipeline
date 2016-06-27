@@ -160,10 +160,12 @@ class EntryGrid(tk.Toplevel):
     def track_artist_set(self, album_artist):
         # should probably change this because strings are terrible
         artist_column = self.track_categories.index('Artist')
-        aa = re.compile("\s*" + self.release.curr_meta + "\s*") # will do this better, sometime, probably
+        aa = self.release.curr_meta # will do this better, sometime, probably
         for y in range(0, int(self.tracks['height'])):
             artist = self.tracks.entrycget(artist_column, y, 'text')
-            if aa.match(artist) or InputPatterns.whitespace.match(artist) or\
+            if re.match(aa, artist):
+                self.tracks.set(artist_column, y, text=(re.sub(aa, album_artist, artist)))
+            elif InputPatterns.whitespace.match(artist) or\
                InputPatterns.unknown.match(artist):
                 # set track artist to album artist
                 self.tracks.set(artist_column, y, text=album_artist)

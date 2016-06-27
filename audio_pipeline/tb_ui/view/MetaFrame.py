@@ -110,18 +110,20 @@ class ReleaseFrame(MetaFrame):
         width_index = 0
         for tag in track.release():
             name = tag.name
-            self.attribute_text[name].set(str(tag))
-            self.attributes[name] = tk.Label(self, self.tag_style, width=self.attribute_widths[width_index], 
-                                             wraplength=(self.attribute_widths[width_index] * 8),
-                                             textvariable=self.attribute_text[name])
-            self.attributes[name].grid(self.meta_padding, row=rowval, column=colval)
-            colval += 1
-            width_index += 1
+            if name in self.labels and width_index < len(self.attribute_widths):
+                self.attribute_text[name].set(str(tag))
+                self.attributes[name] = tk.Label(self, self.tag_style, width=self.attribute_widths[width_index], 
+                                                 wraplength=(self.attribute_widths[width_index] * 8),
+                                                 textvariable=self.attribute_text[name])
+                self.attributes[name].grid(self.meta_padding, row=rowval, column=colval)
+                colval += 1
+                width_index += 1
 
     def update(self, audio_file):
         for tag in audio_file.release():
-            self.attribute_text[tag.name].set(str(tag))
-            self.attributes[tag.name].config(fg=Settings.text_color)
+            if tag.name in self.labels:
+                self.attribute_text[tag.name].set(str(tag))
+                self.attributes[tag.name].config(fg=Settings.text_color)
 
     def select_release(self):
         self.active.clear()
@@ -197,7 +199,7 @@ class TrackFrame(MetaFrame):
             color = Settings.get_text_color(track)
             width_index = 0
             for tag in track.track():
-                if width_index < len(self.attribute_widths):
+                if tag.name in self.labels and width_index < len(self.attribute_widths):
                     self.attribute_text[name][tag.name] = tk.StringVar()
                     self.attribute_text[name][tag.name].set(tag)
                     self.attributes[name][tag.name] = tk.Label(self, self.tag_style, foreground=color,
@@ -220,7 +222,7 @@ class TrackFrame(MetaFrame):
         color = Settings.get_text_color(audio_file)
         i = 0
         for tag in audio_file.track():
-            if i < len(self.attribute_widths):
+            if tag.name in self.labels and i < len(self.attribute_widths):
                 self.attribute_text[name][tag.name].set(tag)
                 self.attributes[name][tag.name].config(fg=color)
                 i += 1

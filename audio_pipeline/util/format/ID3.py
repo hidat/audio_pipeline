@@ -21,7 +21,7 @@ class BaseTag(Tag.Tag):
     def value(self, val):
         if val:
             if self._value is None:
-                self._value = self._frame_type(encoding=self._frame_encoding)
+                self._value = self._frame_type(self._frame_encoding, val)
 
             self._value.text = [val]
         else:
@@ -74,7 +74,7 @@ class NumberTag(Tag.NumberTagMixin, BaseTag):
                 raise Exceptions.InvalidTagValueError(str(val) + " is not a valid " + self.name)
 
             if self._value is None:
-                self._value = self._frame_type(encoding=self._frame_encoding)
+                self._value = self._frame_type(self._frame_encoding, val)
 
             self._value.text = [val]
 
@@ -97,7 +97,7 @@ class CustomTag(BaseTag):
     def value(self, val):
         if val:
             if self._value is None:
-                self._value = self._frame_type(encoding=self._frame_encoding, desc=self.name)
+                self._value = self._frame_type(self._frame_encoding, self.name, val)
             self._value.text = [val]
         else:
             self._value = None
@@ -125,7 +125,6 @@ class ReleaseDateTag(Tag.ReleaseDateMixin, BaseTag):
     @property
     def value(self):
         return super().value
-
         
     @value.setter
     def value(self, val):

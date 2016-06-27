@@ -1,5 +1,6 @@
 import abc
 import re
+import copy
 from . import Util
 
 
@@ -167,7 +168,7 @@ class Tag(abc.ABC):
 
     def extract(self):
         if self.serialization_name in self.mutagen:
-            self._value = self.mutagen[self.serialization_name]
+            self._value = copy.deepcopy(self.mutagen[self.serialization_name])
         else:
             self._value = None
             

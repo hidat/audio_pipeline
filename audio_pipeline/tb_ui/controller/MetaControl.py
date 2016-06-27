@@ -43,7 +43,7 @@ class MetaController:
         popup = InputPatterns.popup_pattern.match(input_string)
         self.app.select_input()
         if tracks:
-            # input is (probably) track metadata (currently only RED DOT, YELLOW DOT, CLEAN EDIT, clear)
+            # input is (probably) track metadata (currently only RED DOT, YELLOW DOT, CLEAN EDIT, clear (l))
             try:
                 track_nums = tracks.group(InputPatterns.tracknum_acc)
                 if re.search("all", track_nums):
