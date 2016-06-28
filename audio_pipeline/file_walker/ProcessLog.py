@@ -41,6 +41,7 @@ class ProcessLog:
     def log_release(self, release):
         log_text = self.log_string(release)
         if log_text:
+            log_text = log_text.strip() + "\t" + release.glossary_title + "\r\n"
             self.save_log(self.log_file, log_text)
             if self.release_log:
                 self.save_log(self.release_log, log_text)
