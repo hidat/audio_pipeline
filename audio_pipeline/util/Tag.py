@@ -211,7 +211,7 @@ class NumberTagMixin(abc.ABC):
             return self.value < other
         else:
             return str(self) < str(other)
-            
+
             
 class ReleaseDateMixin:
 

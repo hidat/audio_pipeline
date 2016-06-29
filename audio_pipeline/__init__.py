@@ -3,6 +3,7 @@ import yaml
 import copy
 import re
 
+
 class Constants:
     batch_constants_def = None
     batch_constants = None

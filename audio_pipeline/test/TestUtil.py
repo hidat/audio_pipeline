@@ -43,8 +43,7 @@ class TestUtilMixin:
         self.assertEqual(af_1.track_num, af_2.track_num)
         self.assertEqual(af_1.length, af_2.length)
         
-        self.assertEqual(af_1, af_2)
-        
+
     def check_equality(self, vorbis_tag, aac_tag, id3_tag, msg=None):
         if msg is None:
             msg = ""
