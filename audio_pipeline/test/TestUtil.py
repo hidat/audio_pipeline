@@ -2,21 +2,22 @@ import os.path
 import json
 from ..util import MBInfo
 
+
 class TestUtilMixin:
 
-    def check_tag(self, tag, tag_collection, tag_name):
+    def check_tag(self, tag_builder, correct):
+        tag = tag_builder(self.meta)
+        
         self.assertIsNot(tag, None)
         
-        if tag_name in tag_collection:
-            self.assertIsNot(tag.value, None)
+        if correct is not None:
+            self.assertIsNot(tag.value, None, msg="correct tag: " + str(correct))
             self.assertIsNot(tag.value, '')
             # check name & check serialization name
-            self.assertEqual(tag.value, tag_collection[tag_name])
+            self.assertEqual(tag.value, correct)
         else:
             self.assertIs(tag.value, None)
             self.assertIs(str(tag), '')
-            self.assertNotIn(tag_name, tag_collection)
-            
             
     def check_af_tag(self, af_tag, real_tag):
         self.assertIsNot(af_tag, None)
@@ -41,6 +42,8 @@ class TestUtilMixin:
         self.assertEqual(af_1.disc_num, af_2.disc_num)
         self.assertEqual(af_1.track_num, af_2.track_num)
         self.assertEqual(af_1.length, af_2.length)
+        
+        self.assertEqual(af_1, af_2)
         
     def check_equality(self, vorbis_tag, aac_tag, id3_tag, msg=None):
         if msg is None:
@@ -70,7 +73,7 @@ class TestUtilMixin:
         self.assertNotEqual(aac_tag, id3_tag, msg=message)
         message = msg + "id3 and vorbis not equal"
         self.assertNotEqual(id3_tag, vorbis_tag, msg=message)
-
+        
         
 class TestMBinfo(MBInfo.MBInfo):
 

@@ -2,97 +2,59 @@ import os
 import unittest
 
 import mutagen
+import shutil
 
+import audio_pipeline.test.References as ref
 from . import TestUtil
 from ..util import format
 
-test_file_dir = "audio_pipeline\\test\\test_files\\audio\\tag_test_files"
+vorbis_files = dict(t1=os.path.join(ref.format_testing_audio, "t1.flac"), 
+                    picard=os.path.join(ref.format_testing_audio, "picard.flac"),
+                    unknown=os.path.join(ref.format_testing_audio, "unknown.flac"),
+                    to_write=os.path.join(ref.write_testing_audio, "unknown.flac"),
+                    copy_to=os.path.join(ref.write_testing_audio, "unknown_copy.flac"))
 
-vorbis_files = dict(t1=os.path.join(test_file_dir, "t1.flac"), 
-                    picard=os.path.join(test_file_dir, "picard.flac"),
-                    unknown=os.path.join(test_file_dir, "unknown.flac"))
-
-aac_files = dict(t1=os.path.join(test_file_dir, "t1.m4a"), 
-                 picard=os.path.join(test_file_dir, "picard.m4a"),
-                 unknown=os.path.join(test_file_dir, "unknown.m4a"))
+aac_files = dict(t1=os.path.join(ref.format_testing_audio, "t1.m4a"), 
+                 picard=os.path.join(ref.format_testing_audio, "picard.m4a"),
+                 unknown=os.path.join(ref.format_testing_audio, "unknown.m4a"),
+                 to_write=os.path.join(ref.write_testing_audio, "unknown.m4a"),
+                 copy_to=os.path.join(ref.write_testing_audio, "unknown_copy.m4a"))
                  
-id3_files = dict(t1=os.path.join(test_file_dir, "t1.mp3"),
-                 picard=os.path.join(test_file_dir, "picard.mp3"), 
-                 unknown=os.path.join(test_file_dir, "unknown.mp3"))
-
-t1_tags = {'tracktotal': 12, 'album': 'Who Killed...... The Zutons?',
-           'encoder settings': '-compression-level-5', 'encoder': '(FLAC 1.2.1)',
-           'albumartist': 'The Zutons', 'label': 'Deltasonic', 'date': '2004-04-19',
-           'source': 'CD (Lossless)', 'discnumber': 1,
-           'accurateripdiscid': '012-0011f4ba-00a8233b-8809700c-4', 'batchid': '50024',
-           'encoded by': 'dBpoweramp Release 14.4', 'title': 'Confusion',
-           'accurateripresult': 'AccurateRip: Accurate (confidence 62)   [37DEB629]', 
-           'artist': 'The Zutons', 'tracknumber': 4, 'disctotal': 1,
-           'genre': 'Rock', 'mbid': '5560ffa9-3824-44f4-b2bf-a96ae4864187', 'length': '0:07'}
-
- 
-picard_tags = {'tracknumber': 6, 'totaltracks': 13, 'encoded by': 'dBpoweramp Release 14.4', 
-            'media': 'CD', 'source': 'CD (Lossless)', 'releasestatus': 'official', 
-            'script': 'Latn', 'accurateripresult': 'AccurateRip: Not in database   7CF59426',
-            'musicbrainz_trackid': '89715e73-cfa8-487f-8aa1-18c3b7d965b9', 'releasecountry': 'GB',
-            'mbid': '232775fc-277d-46e5-af86-5e01764abe5a', 
-            'musicbrainz_releasetrackid': 'fe85af54-9982-34cc-9e0a-8d4d13a12350', 'disctotal': 1, 
-            'artist': 'Rudi Zygadlo', 'discnumber': 1, 'artists': 'Rudi Zygadlo', 
-            'albumartistsort': 'Zygadlo, Rudi', 
-            'musicbrainz_albumartistid': '48f12b43-153e-42c3-b67c-212372cbfe2b', 
-            'releasetype': 'album', 'batchid': '50024', 
-            'accurateripdiscid': '013-0014462a-00cb7579-bf0a3e0d-6', 'tracktotal': 13, 
-            'catalognumber': 'ZIQ320CD', 'artistsort': 'Zygadlo, Rudi', 
-            'encoder': '(FLAC 1.2.1)', 'musicbrainz_releasegroupid': '06d97cd5-75a4-4ec8-afe3-1127b688c6ee',
-            'musicbrainz_artistid': '48f12b43-153e-42c3-b67c-212372cbfe2b', 'totaldiscs': 1, 
-            'album': 'Tragicomedies', 'originaldate': '2012-09-17', 'label': 'Planet Mu', 
-            'date': '2012-09-17', 'title': 'The Domino Quivers', 'albumartist': 'Rudi Zygadlo', 
-            'encoder settings': '-compression-level-5', 'originalyear': '2012', 'length': '0:07'}
- 
-unknown_tags = {'accurateripresult': 'AccurateRip: Not in database   7A470C62', 
-                'source': 'CD (Lossless) >> Perfect (Lossless) m4a', 
-                'artist': 'Unknown Artist', 'disctotal': 1, 'tracktotal': 12,
-                'accurateripdiscid': '012-0010ae26-009c5221-8e08ec0c-4',
-                'encoded by': 'dBpoweramp Release 14.4', 'encoder': '(FLAC 1.2.1)',
-                'title': 'Track04', 'tracknumber': 4, 'discnumber': 1, 'length': '0:07'}
+id3_files = dict(t1=os.path.join(ref.format_testing_audio, "t1.mp3"),
+                 picard=os.path.join(ref.format_testing_audio, "picard.mp3"), 
+                 unknown=os.path.join(ref.format_testing_audio, "unknown.mp3"),
+                 to_write=os.path.join(ref.write_testing_audio, "unknown.mp3"),
+                 copy_to=os.path.join(ref.write_testing_audio, "unknown_copy.mp3"))
 
 class TestReadGenericTags(TestUtil.TestUtilMixin):
     def test_artist_name(self):
-        tag = self.format.album_artist(self.meta)
-        self.check_tag(tag, self.tags, "albumartist")
+        self.check_tag(self.format.album_artist, self.tags.get("albumartist"))
 
     def test_mbid(self):
-        tag = self.format.mbid(self.meta)
-        self.check_tag(tag, self.tags, "mbid")
+        self.check_tag(self.format.mbid, self.tags.get("mbid"))
         
     def test_album(self):
-        tag = self.format.album(self.meta)
-        self.check_tag(tag, self.tags, "album")
+        self.check_tag(self.format.album, self.tags.get("album"))
         
     def test_release_date(self):
-        tag = self.format.release_date(self.meta)
-        self.check_tag(tag, self.tags, "date")
+        self.check_tag(self.format.release_date, self.tags.get("date"))
         
     def test_title(self):
-        tag = self.format.title(self.meta)
-        self.check_tag(tag, self.tags, "title")
+        self.check_tag(self.format.title, self.tags.get("title"))
         
     def test_artist(self):
-        tag = self.format.artist(self.meta)
-        self.check_tag(tag, self.tags, "artist")
+        self.check_tag(self.format.artist, self.tags.get("artist"))
         
     def test_disc_num(self):
-        tag = self.format.disc_num(self.meta)
-        self.check_tag(tag, self.tags, "discnumber")
+        self.check_tag(self.format.disc_num, self.tags.get("discnumber"))
         
     def test_track_num(self):
-        tag = self.format.track_num(self.meta)
-        self.check_tag(tag, self.tags, "tracknumber")
+        self.check_tag(self.format.track_num, self.tags.get("tracknumber"))
         
     def test_length(self):
-        tag = self.format.length(self.meta)
-        self.check_tag(tag, self.tags, "length")
-       
+        self.check_tag(self.format.length, self.tags.get("length"))
+
+        
 #################
 #   test tag equality
 #################
@@ -109,7 +71,7 @@ class TestTagEquality(TestUtil.TestUtilMixin, unittest.TestCase):
     
     aac_t1 = mutagen.File(aac_files["t1"])
     aac_picard = mutagen.File(aac_files["picard"])
-    aac_unknown = mutagen.File(aac_files["unknown"])       
+    aac_unknown = mutagen.File(aac_files["unknown"])
     
     id3_t1 = mutagen.File(id3_files["t1"])
     id3_picard = mutagen.File(id3_files["picard"])
@@ -194,32 +156,107 @@ class TestTagEquality(TestUtil.TestUtilMixin, unittest.TestCase):
         msg = "Testing equality of unknown " + vorbis_tag.name + ": "
         self.check_equality(vorbis_tag, aac_tag, id3_tag, msg)
            
+           
+###################
+#   Test writing tags
+###################
+
+class TestTagWriteToEmptyFile(TestUtil.TestUtilMixin):
+    def test_artist_name(self):
+        self.write_test(self.format.album_artist, "albumartist")
+
+    def test_mbid(self):
+        self.write_test(self.format.mbid, "mbid")
+        
+    def test_album(self):
+        self.write_test(self.format.album, "album")
+        
+    def test_release_date(self):
+        self.write_test(self.format.release_date, "date")
+        
+    def test_title(self):
+        self.write_test(self.format.title, "title")
+        
+    def test_artist(self):
+        self.write_test(self.format.artist, "artist")
+        
+    def test_disc_num(self):
+        self.write_test(self.format.disc_num, "discnumber")
+        
+    def test_track_num(self):
+        self.write_test(self.format.track_num, "tracknumber")
+                
+    def write_test(self, tag_builder, tag_name):
+        correct_tag = self.tags.get(tag_name)
+    
+        tag = tag_builder(self.meta)
+        self.check_tag(tag_builder, None)
+        
+        tag.value = correct_tag
+        tag.save()
+        self.meta = mutagen.File(self.file_name)
+        
+        self.check_tag(tag_builder, correct_tag)
+
        
 #############
 #   Vorbis format tests
 #############
 
 class TestReadGenericTagsVorbis_t1(TestReadGenericTags, unittest.TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.meta = mutagen.File(vorbis_files["t1"])
-        self.tags = t1_tags
+        self.tags = ref.t1_tags
         self.format = format.Vorbis.Format
         
         
 class TestReadGenericTagsVorbis_picard(TestReadGenericTags, unittest.TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.meta = mutagen.File(vorbis_files["picard"])
-        self.tags = picard_tags
+        self.tags = ref.picard_tags
         self.format = format.Vorbis.Format
        
        
 class TestReadGenericTagsVorbis_NOMETA(TestReadGenericTags, unittest.TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.meta = mutagen.File(vorbis_files["unknown"])
-        self.tags = unknown_tags
+        self.tags = ref.unknown_tags
         self.format = format.Vorbis.Format
-
         
+class TestWriteVorbisTags_t1(TestTagWriteToEmptyFile, unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        shutil.copy(vorbis_files["to_write"], vorbis_files["copy_to"])
+        
+        cls.file_name = vorbis_files["copy_to"]
+        cls.meta = mutagen.File(cls.file_name)
+        cls.tags = ref.t1_tags
+        cls.format = format.Vorbis.Format
+        
+    @classmethod
+    def tearDownClass(cls):
+        os.remove(cls.file_name)
+
+
+class TestWriteVorbisTags_picard(TestTagWriteToEmptyFile, unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        shutil.copy(vorbis_files["to_write"], vorbis_files["copy_to"])
+        
+        cls.file_name = vorbis_files["copy_to"]
+        cls.meta = mutagen.File(cls.file_name)
+        cls.tags = ref.picard_tags
+        cls.format = format.Vorbis.Format
+        
+    @classmethod
+    def tearDownClass(cls):
+        os.remove(cls.file_name)
+
 #############
 #   ID3 format tests
 #############
@@ -228,23 +265,54 @@ class TestReadGenericTagsVorbis_NOMETA(TestReadGenericTags, unittest.TestCase):
 class TestReadGenericTagsID3_t1(TestReadGenericTags, unittest.TestCase):
     def setUp(self):
         self.meta = mutagen.File(id3_files["t1"])
-        self.tags = t1_tags
+        self.tags = ref.t1_tags
         self.format = format.ID3.Format
      
      
 class TestReadGenericTagsID3_picard(TestReadGenericTags, unittest.TestCase):
     def setUp(self):
         self.meta = mutagen.File(id3_files["picard"])
-        self.tags = picard_tags
+        self.tags = ref.picard_tags
         self.format = format.ID3.Format
 
         
 class TestReadGenericTagsID3_NOMETA(TestReadGenericTags, unittest.TestCase):
     def setUp(self):
         self.meta = mutagen.File(id3_files["unknown"])
-        self.tags = unknown_tags
+        self.tags = ref.unknown_tags
         self.format = format.ID3.Format
 
+        
+class TestWriteId3Tags_t1(TestTagWriteToEmptyFile, unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        shutil.copy(id3_files["to_write"], id3_files["copy_to"])
+        
+        cls.file_name = id3_files["copy_to"]
+        cls.meta = mutagen.File(cls.file_name)
+        cls.tags = ref.t1_tags
+        cls.format = format.ID3.Format
+
+    @classmethod
+    def tearDownClass(cls):
+        os.remove(cls.file_name)
+    
+
+class TestWriteId3Tags_picard(TestTagWriteToEmptyFile, unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        shutil.copy(id3_files["to_write"], id3_files["copy_to"])
+        
+        cls.file_name = id3_files["copy_to"]
+        cls.meta = mutagen.File(cls.file_name)
+        cls.tags = ref.picard_tags
+        cls.format = format.ID3.Format
+
+    @classmethod
+    def tearDownClass(cls):
+        os.remove(cls.file_name)
         
 #############
 #   AAC format tests
@@ -254,19 +322,51 @@ class TestReadGenericTagsID3_NOMETA(TestReadGenericTags, unittest.TestCase):
 class TestReadGenericTagsAAC_t1(TestReadGenericTags, unittest.TestCase):
     def setUp(self):
         self.meta = mutagen.File(aac_files["t1"])
-        self.tags = t1_tags
+        self.tags = ref.t1_tags
         self.format = format.AAC.Format
         
         
 class TestReadGenericTagsAAC_picard(TestReadGenericTags, unittest.TestCase):
     def setUp(self):
         self.meta = mutagen.File(aac_files["picard"])
-        self.tags = picard_tags
+        self.tags = ref.picard_tags
         self.format = format.AAC.Format
         
         
 class TestReadGenericTagsAAC_NOMETA(TestReadGenericTags, unittest.TestCase):
     def setUp(self):
         self.meta = mutagen.File(aac_files["unknown"])
-        self.tags = unknown_tags
+        self.tags = ref.unknown_tags
         self.format = format.AAC.Format
+
+        
+class TestWriteAACTags_t1(TestTagWriteToEmptyFile, unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        shutil.copy(aac_files["to_write"], aac_files["copy_to"])
+        
+        cls.file_name = aac_files["copy_to"]
+        cls.meta = mutagen.File(cls.file_name)
+        cls.tags = ref.t1_tags
+        cls.format = format.AAC.Format
+        
+    @classmethod
+    def tearDownClass(cls):
+        os.remove(cls.file_name)
+
+        
+class TestWriteAACTags_picard(TestTagWriteToEmptyFile, unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        shutil.copy(aac_files["to_write"], aac_files["copy_to"])
+        
+        cls.file_name = aac_files["copy_to"]
+        cls.meta = mutagen.File(cls.file_name)
+        cls.tags = ref.picard_tags
+        cls.format = format.AAC.Format
+        
+    @classmethod
+    def tearDownClass(cls):
+        os.remove(cls.file_name)

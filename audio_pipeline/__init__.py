@@ -11,6 +11,7 @@ class Constants:
     audiofile = None
     processor = None
     serializer = None
+    custom_tags = {}
 
     argument_config = None
 

@@ -9,6 +9,7 @@ class BaseTag(Tag.Tag):
             self.value = value
             
         if self._value:
+            values = list()
             for val in self._value:
                 values.append(val)
             self.mutagen[self.serialization_name] = values
@@ -85,7 +86,7 @@ class NumberTag(Tag.NumberTagMixin, BaseTag):
             if self._total:
                 val = (self._value, self._total)
             else:
-                val = (self._value, )
+                val = (self._value, 0)
             self.mutagen[self.serialization_name] = [val]
         else:
             if self.serialization_name in self.mutagen:
