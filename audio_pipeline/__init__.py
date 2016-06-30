@@ -3,7 +3,6 @@ import yaml
 import copy
 import re
 
-
 class Constants:
     batch_constants_def = None
     batch_constants = None
@@ -12,12 +11,14 @@ class Constants:
     audiofile = None
     processor = None
     serializer = None
-    custom_tags = {}
-
+    custom_tags = None
+    
     argument_config = None
 
     @classmethod
     def load_config(cls, config_directory):
+        cls.custom_tags = {"item_code": "ITEMCODE", "obscenity": "OBSCENITYRATING",
+                           "category": "CATEGORY"}
         cls.config_dir = config_directory
         config_file = os.path.join(cls.config_dir, "default.yml")
 
@@ -42,6 +43,8 @@ class Constants:
                     cls.serializer = config["serializer"]
                 if "argument_config" in config:
                     cls.argument_config = config["argument_config"]
+                if "custom_tags" in config:
+                    cls.custom_tags = config["custom_tags"]
                     
     @classmethod
     def setup(cls, args, user=None):

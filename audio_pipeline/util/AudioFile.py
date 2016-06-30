@@ -1,15 +1,12 @@
 import mutagen
 import copy
 
+from audio_pipeline import Constants
 from .format import Vorbis
 from .format import AAC
 from .format import ID3
 from . import Exceptions
 from . import Tag
-
-
-class CustomTags:
-    item_code = "ITEMCODE"
 
 
 class BaseAudioFile:
@@ -48,7 +45,7 @@ class BaseAudioFile:
         #   release-level tags
         #######################
 
-        self._mbid = None
+        self._mbid = None        
         self._album = None
         self._album_artist = None
         self._release_date = None
@@ -63,8 +60,11 @@ class BaseAudioFile:
         self._disc_num = None
         self._track_num = None
         self._length = None
-        self._item_code = "ITEMCODE"
         self.custom_tags = {}
+        
+    #######################
+    #   release-level tags
+    #######################
 
     @property
     def mbid(self):
@@ -106,6 +106,10 @@ class BaseAudioFile:
     def label(self, val):
         self._set_tag_(self._label, self.format.label, val)
 
+    #######################
+    #   track-level tags
+    #######################
+    
     @property
     def title(self):
         return self._get_tag_(self._title, self.format.title)
@@ -146,13 +150,34 @@ class BaseAudioFile:
     def length(self, val):
         self._set_tag_(self._length, self.format.length, val)
 
+
+    ##################
+    # Custom Tags
+    ##################
+    
     @property
     def item_code(self):
-        return self._get_custom_tag(self._item_code)
+        return self._get_custom_tag_(Constants.custom_tags["item_code"])
 
     @item_code.setter
     def item_code(self, val):
-        self._set_custom_tag(self._item_code, val)
+        self._set_custom_tag_(Constants.custom_tags["item_code"], val)
+    
+    @property
+    def obscenity(self):
+        return self._get_custom_tag_(Constants.custom_tags["obscenity"])
+
+    @obscenity.setter
+    def obscenity(self, val):
+        self._set_custom_tag_(Constants.custom_tags["obscenity"], val)
+
+    @property
+    def category(self):
+        return self._get_custom_tag_(Constants.custom_tags["category"])
+
+    @category.setter
+    def category(self, val):
+        self._set_custom_tag_(Constants.custom_tags["category"], val)
 
     def _get_tag_(self, local_tag, format_tag):
         if not local_tag:
@@ -168,12 +193,12 @@ class BaseAudioFile:
             local_tag = format_tag({})
             local_tag.value = val
 
-    def _get_custom_tag(self, local_tag_name):
+    def _get_custom_tag_(self, local_tag_name):
         if not self.custom_tags.get(local_tag_name):
             self.custom_tags[local_tag_name] = self.format.custom_tag(local_tag_name, self.audio)
         return self.custom_tags[local_tag_name]
 
-    def _set_custom_tag(self, local_tag_name, val):
+    def _set_custom_tag_(self, local_tag_name, val):
         if isinstance(val, type(self.custom_tags[local_tag_name])):
             self.custom_tags[local_tag_name] = copy.deepcopy(val)
         elif self.custom_tags.get(local_tag_name):
@@ -210,7 +235,7 @@ class BaseAudioFile:
             yield item
             
     def track(self):
-        return [self.track_num, self.title, self.artist, self.length]
+        return [self.track_num, self.title, self.artist, self.length, self.obscenity, self.category, self.item_code]
     
     def release(self):
-        return [self.album_artist, self.album, self.label, self.disc_num, self.release_date, self.mbid, self.item_code]
+        return [self.album_artist, self.album, self.label, self.disc_num, self.release_date, self.mbid]
