@@ -33,6 +33,7 @@ def mergeReviewsAndReleases(reviews, releases):
         r = findRelease(review, releases)
         if r is not None:
             review.mbID = r.mbID
+            review.daletGlossaryName = r.daletGlossaryName
     return reviews
 
 def getMbIdFromUser(review):

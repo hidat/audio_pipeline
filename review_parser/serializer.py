@@ -33,6 +33,8 @@ class DaletSerializer:
                     text(release.mbID)
                 with tag('ItemCode'):
                     text(release.mbID)
+                with tag('title'):
+                    text(release.daletGlossaryName)
                 with tag('KEXPReviewRich'):
                     text(release.review)
         formatted_data = indent(doc.getvalue())
