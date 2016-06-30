@@ -3,4 +3,5 @@
  batch constants: !!python/name:audio_pipeline.kexp.Resources.BatchConstants '',
  serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '',
  argument_config: !!python/name:audio_pipeline.kexp.argument_config '',
+ custom_tags: {category: KEXPPRIMARYGENRE, item_code: ITEMCODE, obscenity: KEXPFCCOBSCENITYRATING},
   user: kexp}
