@@ -133,10 +133,9 @@ class DocParser:
 
     @staticmethod
     def processFile(filename, reviews):
-        style_map = "u => em"
 
         with open(filename, "rb") as docx_file:
-            result = mammoth.convert_to_html(docx_file, style_map=style_map)
+            result = mammoth.convert_to_html(docx_file)
             html = result.value # The generated HTML
             paras = html.split('<p>')
             currentRotation = None
