@@ -26,7 +26,7 @@ class DaletSerializer:
 
         review = release.review
         # Convert <strong> into <strong><font size=5> and </strong> to </font></strong>
-        review = review.replace('<strong>', '<strong><font size=5>').replace('</strong>', '</font></strong>')
+        review = review.replace('<strong>', '<strong><font size=2>').replace('</strong>', '</font></strong>')
 
         doc.asis('<?xml version="1.0" encoding="UTF-8"?>')
         with tag('Titles'):
