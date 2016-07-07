@@ -24,6 +24,10 @@ class DaletSerializer:
 
         doc, tag, text = Doc().tagtext()
 
+        review = release.review
+        # Convert <strong> into <strong><font size=5> and </strong> to </font></strong>
+        review = review.replace('<strong>', '<strong><font size=2>').replace('</strong>', '</font></strong>')
+
         doc.asis('<?xml version="1.0" encoding="UTF-8"?>')
         with tag('Titles'):
             with tag('GlossaryValue'):
@@ -33,8 +37,10 @@ class DaletSerializer:
                     text(release.mbID)
                 with tag('ItemCode'):
                     text(release.mbID)
+                with tag('title'):
+                    text(release.daletGlossaryName)
                 with tag('KEXPReviewRich'):
-                    text(release.review)
+                    text(review)
         formatted_data = indent(doc.getvalue())
 
         output_file = path.join(output_dir, 'r' + release.mbID + ".xml")

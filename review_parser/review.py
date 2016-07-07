@@ -8,6 +8,7 @@ class Review:
         self.filename = None
         self.rotation = None
         self.mbID = None
+        self.daletGlossaryName = None
         self.name = None
         self.artistCredit = None
         self.label = None

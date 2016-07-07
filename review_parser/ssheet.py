@@ -1,6 +1,11 @@
 import smartsheet
 import unicodedata
 
+####
+# Smartsheet Release
+# Holds the information for a single row from the smartsheet.
+# Knows the column ordering of the smartsheet, so we can copy the values from the 'cells' array into the class
+####
 class SSRelease:
     def __init__(self, cells):
         self.title = cells[3].value
@@ -10,7 +15,11 @@ class SSRelease:
         self.rotation = cells[1].value
         self.obscenityRating = cells[6].value
         self.mbID = cells[9].value
+        self.daletGlossaryName = cells[10].value
 
+####
+# Very simple wrapper around the Smartsheet SDK used to read the contents of a sheet that is assumed to be our weekly release sheet
+####
 class SDK:
     def __init__(self, apiKey):
         self.apiKey = apiKey

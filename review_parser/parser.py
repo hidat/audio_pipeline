@@ -133,7 +133,7 @@ class DocParser:
 
     @staticmethod
     def processFile(filename, reviews):
-        style_map = "u => em"
+        style_map = "u => u"
 
         with open(filename, "rb") as docx_file:
             result = mammoth.convert_to_html(docx_file, style_map=style_map)
