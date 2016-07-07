@@ -30,7 +30,7 @@ class MBInfo():
                 raise e
             except ngs.NetworkError as e:
                 # can't reach the musicbrainz server - wait 10 seconds and try again
-                time.sleep(10)
+                time.sleep(.01)
                 try: 
                     mb_release = ngs.get_release_by_id(release_id, includes=include)['release']
                 except ngs.NetworkError as e:
@@ -61,4 +61,3 @@ class MBInfo():
                 mb_artist = None
                 # propagate error up
                 raise e
-                

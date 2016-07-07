@@ -18,7 +18,7 @@ class BaseAudioFile:
     aac = AAC.Format
     
     def __init__(self, file_name):
-        self._format = None
+        self.format = None
         self.file_name = file_name
         
         try:
@@ -34,7 +34,12 @@ class BaseAudioFile:
             # get the appropriate tag Format for this file type
             if type in Tag.Formats.mime_map:
                 t = Tag.Formats.mime_map[type]
-                self.format = t
+                if t.casefold() == "aac":
+                    self.format = self.aac
+                elif t.casefold() == "id3":
+                    self.format = self.id3
+                elif t.casefold() == "vorbis":
+                    self.format = self.vorbis
                 break
                 
         if not self.format:
@@ -64,19 +69,6 @@ class BaseAudioFile:
         self.length = self.format.length(self.audio)
         
         self.item_code = self.format.custom_tag(CustomTags.item_code, self.audio)
-
-    @property
-    def format(self):
-        return self._format
-        
-    @format.setter
-    def format(self, val):
-        if val.casefold() == "aac":
-            self._format = self.aac
-        elif val.casefold() == "id3":
-            self._format = self.id3
-        elif val.casefold() == "vorbis":
-            self._format = self.vorbis
 
     def save(self):
         for item in self:

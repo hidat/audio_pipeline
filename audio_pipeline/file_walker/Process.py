@@ -317,7 +317,7 @@ class ArtistProcessor:
                     if 'target' in link:
                         artist.url_relation_list.append(link['target'])
 
-            if 'artist-relation-list' in meta:
+            if 'artist-relation-list' in meta and artist.type == 'Group':
                 for member in meta['artist-relation-list']:
                     if member['type'] == 'member of band' and 'direction' in member \
                             and member['direction'] == 'backward':

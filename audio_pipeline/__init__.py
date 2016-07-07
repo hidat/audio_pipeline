@@ -3,6 +3,7 @@ import yaml
 import copy
 import re
 
+
 class Constants:
     batch_constants_def = None
     batch_constants = None
@@ -70,8 +71,6 @@ class Constants:
                     
         else:
             cls.batch_constants = cls.batch_constants_def(args)
-
-
 
 
 __all__ = ['file_walker', 'serializers', 'tb_ui', 'util', 'FileWalker', 'TomatoBanana']
