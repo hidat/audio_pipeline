@@ -1,9 +1,8 @@
 import acoustid
 
 class ReleaseLookup:
-    TEMP_API_KEY = None
     
-    api_key = TEMP_API_KEY
+    api_key = "kz7oZf3Wbc"
     
     def __init__(self, client_key):
         self.client_key = client_key
@@ -13,9 +12,8 @@ class Release:
     """
     Relevent data - release name, release artist, 
     """
-    TEMP_API_KEY = None
     
-    api_key = TEMP_API_KEY
+    api_key = "kz7oZf3Wbc"
 
     meta = "releasegroups recordings releases tracks compress"
     
@@ -30,23 +28,25 @@ class Release:
         self.results = list()
         self.releases = dict()
         self.common_releases = dict()
-        
+        self.max_score = 0
+        self.likely_release = None
+
     def weight(self, track, fingerprint_score, releasegroup):
         base_score = 0
         if "type" in releasegroup:
-            for type, weight in self.weights["type"].items():
-                if releasegroup["type"] == type:
+            for release_type, weight in self.weights["type"].items():
+                if releasegroup["type"] == release_type:
                     base_score += weight
                     
         if "releases" in releasegroup:
             for release in releasegroup["releases"]:
                 score = base_score
-                id = release["id"]
-                
+                release_id = release["id"]
+
                 if "mediums" in release:
                     medium = release["mediums"][0]
-                    for format, weight in self.weights["format"].items():
-                        if medium.get("format") == format:
+                    for media_format, weight in self.weights["format"].items():
+                        if medium.get("format") == media_format:
                             score += weight
                     if medium.get("position") == track.disc_num.value:
                         score += self.weights["medium"]
@@ -67,11 +67,11 @@ class Release:
                         
                 score = score if score > 1 else 1
                         
-                if id in self.common_releases:
-                    self.common_releases[id] += fingerprint_score * score
+                if release_id in self.common_releases:
+                    self.common_releases[release_id] += fingerprint_score * score
                 else:
-                    self.releases[id] = release
-                    self.common_releases[id] = fingerprint_score * score
+                    self.releases[release_id] = release
+                    self.common_releases[release_id] = fingerprint_score * score
         
     def lookup(self):
         # gonna want to look into some actual clever stuff for here, but for now:
@@ -91,8 +91,6 @@ class Release:
                             self.weight(track, trackId["score"], releasegroup)
                             
         print(self.common_releases)
-        self.max_score = 0
-        self.likely_release = None
         for release, score in self.common_releases.items():
             if score > self.max_score:
                 self.likely_release = release
