@@ -21,6 +21,11 @@ def seconds(min_sec):
     return seconds
 
     
+class Edits:
+    radio_edit = "RADIO EDIT"
+    kexp_edit = "KEXP RADIO EDIT"
+    
+    
 class Obscenity:
     red = "RED DOT"
     yellow = "YELLOW DOT"

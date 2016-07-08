@@ -44,7 +44,7 @@ class TestAudioFileTags(TestUtil.TestUtilMixin):
     def test_length(self):
         tag = self.format.length(self.meta)
         self.check_af_tag(tag, self.af.length)
-    
+        
 
 class TestAudioFileVorbis_t1(TestAudioFileTags, unittest.TestCase):
 

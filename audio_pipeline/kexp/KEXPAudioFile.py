@@ -20,5 +20,5 @@ class KEXPAudioFile(AudioFile.BaseAudioFile):
 
     def track(self):
         track = super().track()
-        track += [self.obscenity, self.category, self.anchor, self.radio_edit]
+        track += [self.obscenity, self.radio_edit, self.category, self.anchor]
         return track

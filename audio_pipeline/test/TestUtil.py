@@ -19,7 +19,7 @@ class TestUtilMixin:
             self.assertIs(tag.value, None)
             self.assertIs(str(tag), '')
             
-    def check_af_tag(self, af_tag, real_tag):
+    def check_af_tag(self, real_tag, af_tag):
         self.assertIsNot(af_tag, None)
         self.assertIsNot(real_tag, None)
         
@@ -29,6 +29,7 @@ class TestUtilMixin:
         self.assertEqual(af_tag.name, real_tag.name)
         self.assertEqual(af_tag.serialization_name, real_tag.serialization_name)
         self.assertEqual(af_tag._value, real_tag._value)
+        self.assertEqual(str(af_tag), str(real_tag))
         
     def check_af_equality(self, af_1, af_2):
         self.assertEqual(af_1.album, af_2.album)

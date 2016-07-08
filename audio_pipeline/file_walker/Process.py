@@ -168,7 +168,9 @@ class ReleaseProcessor:
         elif audio_file.item_code.value is not None:
             item_code = audio_file.item_code.value
         elif (audio_file.obscenity.value is not None and \
-             audio_file.obscenity.value.casefold() == "kexp clean edit"):
+             audio_file.obscenity.value.casefold() == "kexp clean edit") or \
+             (audio_file.radio_edit.value is not None and \
+             audio_file.radio_edit.value.casefold() == "kexpradioedit"):
             item_code = str(uuid.uuid4())
         else:
             item_code = track_meta['id']

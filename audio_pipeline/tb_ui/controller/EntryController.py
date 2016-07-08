@@ -12,6 +12,7 @@ class Entry():
         self.track = [self.tracks[0].track_num, self.tracks[0].title, self.tracks[0].artist, self.tracks[0].length]
         try:
             self.track.append(self.tracks[0].obscenity)
+            self.track.append(self.tracks[0].radio_edit)
         except AttributeError:
             pass
             
@@ -91,6 +92,13 @@ class Entry():
                 # fill in empty track artists with entered album artist
                 new_meta = meta
                 self.meta_entry.track_artist_set(new_meta)
+            elif tag_name == "KEXPRadioEdit":
+                if InputPatterns.radio_edit.match(meta):
+                    new_meta = Util.Edits.radio_edit
+                elif InputPatterns.kexp_radio_edit.match(meta):
+                    new_meta = Util.Edits.kexp_edit
+                elif InputPatterns.whitespace.match(meta):
+                    new_meta = " "
             else:
                 new_meta = meta
         else:

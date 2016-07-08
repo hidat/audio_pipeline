@@ -45,6 +45,8 @@ release_pattern = re.compile("\d+ -.*")
 # patterns to choose which track metadata to change
 
 # change obscenity rating pattern
+radio_edit = re.compile("\s*r", flags=re.I)
+kexp_radio_edit = re.compile("\s*k", flags=re.I)
 yellow_dot = re.compile("\s*y(ellow)?\s*(dot)?", flags=re.I)
 red_dot = re.compile("\s*r(ed)?\s*(dot)?", flags=re.I)
 clean_edit = re.compile("\s*s*c(lean)?\s*(edit)?\s*", flags=re.I)
