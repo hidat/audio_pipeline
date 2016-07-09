@@ -14,13 +14,6 @@ It is assumed that you already have Python 3.4 or greater installed, and it is i
 7. Install yaml  `pip install pyyaml`
 8. Profit!
 
-Programs
------------
-### File Walker
-5. Install mammoth  `pip install mommoth`
-6. Install smartsheet  `pip install smartsheet-python-sdk`
-7. Install mammoth  `pip install pyyaml`
-
 ### Programs
 #### File Walker
 Walks a directory structure of audio files and does the following:
@@ -114,7 +107,7 @@ IMPORTANT: Audio files must have release MBID, as well as track number and disc 
    
 ### TomatoBanana
 A program to assist in the review and entry of metadata of ripped audio discs
- * Pulls relevent metadata from audio files
+ * Pulls relevant metadata from audio files
  * Displays release metadata onscreen in an easily human-readable format for review
  * Releases are displayed in the same order that they were ripped, for easy processing when returning discs to cases
  * Allows the easy entry of obscenity rating values for individual tracks
@@ -124,4 +117,22 @@ A program to assist in the review and entry of metadata of ripped audio discs
 1. Navigate to the top-level audio_pipeline directory
 2. Run `TomatoBanana.py`
 
-#### Review Parser
+### Review Parser
+A program used to push the weekly album reviews into Dalet
+ * Reads the reviews from a MS Word docx file
+ * Matches the albums in the review sheet to either albums in a specially formatted Smartsheet or a Filewalker Release log in order to get each releases MusicBrainz ID
+ * Generates a set of XML documents used by Dalet to update the releases with the reviews.
+
+#####To Run
+1. Navigate to the top-level audio_pipeline directory
+2. Run `review_parser.py input_file options`
+
+#####Options:
+ * *--api_key, -k*
+   Your Smartsheet API Key
+  
+ * *--worksheet, -w*
+   Smartsheet Worksheet ID that contains the reviews associated MusicBrainz ID's
+      
+ * *--dalet, -d*
+   Directory to put Dalet Impex files in.
