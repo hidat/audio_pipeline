@@ -1,4 +1,5 @@
 import acoustid
+import random
 
 class ReleaseLookup:
     
@@ -17,8 +18,8 @@ class Release:
 
     meta = "releasegroups recordings releases tracks compress"
     
-    weights = {"type": {"Album": .5}, "medium_count": .5, "medium": .5, "track_count": .5, 
-               "track_position": .5, "country": {"US": .5}, "format": {"CD": .5}}
+    weights = {"type": {"Album": .5}, "medium_count": .5, "medium": .4, "track_count": .7, 
+               "track_position": .7, "country": {"US": .6}, "format": {"CD": .4}}
     
     features = ["track_num", "disc_num", "release_artist", "release", "country", "format", "type"]
     
@@ -77,7 +78,12 @@ class Release:
         # gonna want to look into some actual clever stuff for here, but for now:
         self.releases = dict()
         self.common_releases = dict()
-        for track in self.tracks:
+        
+        # for now, let's just take ~four releases haha
+        for i in range(4):
+            track = random.choice(self.tracks)
+        
+        #for track in self.tracks:
             # fingerprint & lookup each track in the AcoustID database
             fingerprint = acoustid.fingerprint_file(track.file_name)
             result = acoustid.lookup(self.api_key, fingerprint[1], fingerprint[0], self.meta)
