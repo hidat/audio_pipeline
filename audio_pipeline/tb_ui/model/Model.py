@@ -40,53 +40,46 @@ class ProcessDirectory(object):
 
         self.releases = [None for directory in self.directories]
 
-        self.__current_release = None
-
-        self.release_info = LoadReleases.CurrentReleases(self.directories)
+        self.__current_release = LoadReleases.CurrentReleases(self.directories)
         
         self.next_buffer = collections.deque()
         self.prev_buffer = collections.deque()
         
-        LoadReleases.LoadReleases(self.prev_buffer, self.next_buffer, self.release_info).start()
+        LoadReleases.LoadReleases(self.prev_buffer, self.next_buffer, self.__current_release).start()
 
+    def __del__(self):
+        print("is this called.")
+        self.__current_release.current = None
+        
     @property
     def current_release(self):
-        if self.__current_release:
-            return self.__current_release[1]
+        if self.__current_release.current is not None:
+            return self.__current_release.current[1]
         else:
-            return self.__current_release
+            return self.__current_release.current
+            
+    def move_files(self):
+        self.processing_complete.move_files(self)
             
     def first(self):
         self.next_buffer.extend(self.prev_buffer)
         self.prev_buffer.clear()
             
     def next(self):
-        if self.__current_release is not None:
-           self.prev_buffer.append(self.__current_release)
+        if self.current_release is not None:
+           self.prev_buffer.append(self.__current_release.current)
 
-        self.__current_release = self.next_buffer.pop()
-        self.release_info.current = self.__current_release
+        self.__current_release.current = self.next_buffer.pop()
 
-        print("next_buffer")
-        for item in self.next_buffer:
-            print("index: " + str(item[0]))
-            print("\t" + str(item[1][0]))
-
-        print("prev_buffer")
-        for item in self.prev_buffer:
-            print("index: " + str(item[0]))
-            print("\t" + str(item[1][0]))
-
-        print("current release: ")
-        print("index: " + str(self.__current_release[0]))
-        print("\t" + str(self.__current_release[1]))
+        print("next buffer: " + str(len(self.next_buffer)))
+        print("prev buffer: " + str(len(self.prev_buffer)))
         return self.current_release
 
     def prev(self):
-        if self.__current_release is not None:
-            self.next_buffer.append(self.__current_release)
-        self.__current_release = self.prev_buffer.pop()
-        self.release_info.current = self.__current_release
+        if self.current_release is not None:
+           self.next_buffer.append(self.__current_release.current)
+
+        self.__current_release.current = self.prev_buffer.pop()
         
         return self.current_release
         
@@ -131,10 +124,6 @@ class ProcessDirectory(object):
                     continue
                 break
         return track
-
-    def valid_release_index(self, index):
-        return (-1 < self.current < len(self.releases) and self.releases[self.current] is not None and
-                                        0 <= index < len(self.releases[self.current]))
 
     def track_nums(self):
         tn = set([af.track_num.value for af in self.current_release])

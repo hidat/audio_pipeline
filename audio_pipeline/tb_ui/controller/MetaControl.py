@@ -167,7 +167,9 @@ class MetaController:
             time.sleep(.5)
             if move_files > 0:
                 print('move files')
+                self.model.processing_complete.move_files(self.model)
                 self.close()
+            del self.model
 
     def close(self):
         """

@@ -5,7 +5,7 @@ from ...util.AudioFileFactory import AudioFileFactory
 from ..util import Resources
 from ...util import Exceptions
 
-MAX_RELEASES = 4
+MAX_RELEASES = 30
 
 
 class LoadReleases(threading.Thread):
@@ -30,20 +30,23 @@ class LoadReleases(threading.Thread):
 
     def run(self):
         time.sleep(.1)
-        print(self.current_release.current)
-        while self.loaded < len(self.current_release.directories):
+        
+        num_dirs = len(self.current_release.directories)
+        
+        next_limit = num_dirs - self.max_buffer
+        prev_limit = self.max_buffer
+        
+        while self.current_release.current is not None and self.loaded < num_dirs:
 
             # if buffers are full, wait for a signal from the model proper to load more releases,
             # rather than constantly looping and wasting resources
-            if self.current_release.current is None:
-                    break
-            elif len(self.next_buffer) and len(self.prev_buffer) > self.max_buffer and \
-                    self.current_release.current[0] > self.max_buffer:
-                self.current_release.wait()
-
-            if len(self.next_buffer) > self.max_buffer + self.fuzz:
+            
+            self.current_release.cond.acquire()
+            if len(self.next_buffer) >= self.max_buffer + self.fuzz:
                 self.trim_releases(self.next_buffer)
-            elif self.loaded < len(self.current_release.directories):
+            elif len(self.next_buffer) < self.max_buffer and \
+                 (next_limit < 0 or self.current_release.current[0] < next_limit):
+                print("loading next")
                 # haven't filled in next_buffer / have moved forward
                 # get next value
                 last_release = self.next_buffer.popleft()
@@ -53,10 +56,11 @@ class LoadReleases(threading.Thread):
                 self.load_release(self.next_buffer, i)
                 self.loaded += 1
 
-            if len(self.prev_buffer) > self.max_buffer + self.fuzz:
+            if len(self.prev_buffer) >= self.max_buffer + self.fuzz:
                 self.trim_releases(self.prev_buffer)
-            elif self.loaded < len(self.current_release.directories) and \
-                    self.current_release.current[0] > self.max_buffer:
+            elif len(self.prev_buffer) < self.max_buffer and \
+                 self.current_release.current[0] > self.max_buffer:
+                print("loading prev")
                 # haven't filled in prev_buffer / have moved forward
                 # so get next buffer
                 last_release = self.prev_buffer.popleft()
@@ -65,41 +69,50 @@ class LoadReleases(threading.Thread):
                 i = last_release[0] - 1
                 self.load_release(self.prev_buffer, i)
                 self.loaded += 1
-
-                # prev_release = self.current_release.prev
-                # if prev_release is not None:
-                #    self.prev_buffer.append(prev_release)
-            # if len(self.prev_buffer) < self.max_buffer:
-                # haven't filled in buffer / have moved backwards
-                # get next value
-                # if len(self.prev_buffer) > 0:
-                    # last_release = self.prev_buffer.popleft()
-                    # self.prev_buffer.appendleft(last_release)
                 
-                # next_release = self.current_release.prev
-                # if next_release is not None:
-                    # self.next_buffer.append(next_release)
-                    
-                # i = last_release -= 1
-                # self.load_release(self.prev_buffer, i)
+                
+            while (len(self.next_buffer) >= self.max_buffer or \
+                (next_limit > 0 and self.current_release.current[0] >= next_limit)) and \
+                (len(self.prev_buffer) >= self.max_buffer or \
+                    self.current_release.current[0] <= prev_limit) or \
+                 self.loaded % 7 == 0:
+                 
+                print("waiting (for a miracle)")
+                self.current_release.cond.wait()
+                
+                if self.current_release.current is None or self.loaded % 7 == 0:
+                    break
+            self.current_release.cond.release()
 
+
+            
+        print("Loaded: " + str(self.loaded))
+        print("Number of directories: " + str(len(self.current_release.directories)))
+        print("Maximum loaded releases: " + str(self.max_buffer))
+
+        
     def trim_releases(self, buffer):
         # remove releases from the end of the buffer,
         # preventing the removal of partial directories.
+        print("trimming release????")
         last_directory = list()
         last_release = buffer.popleft()
         last_directory.append(last_release)
-
+        
         index = last_release[0]
         last_release = buffer.popleft()
 
         while index == last_release[0] and len(buffer) >= self.max_buffer + (self.fuzz / 2):
             last_directory.append(last_release)
             last_release = buffer.popleft()
+            
+        buffer.appendleft(last_release)
 
         if len(buffer) < self.max_buffer + (self.fuzz / 2):
             # don't want some sort of 50-release directory getting constantly deleted and reloaded
             buffer.extendleft(last_directory)
+        else:
+            self.loaded -= len(last_directory)
                         
     def load_release(self, buffer, dir_index):
         if len(buffer) >= self.max_buffer:
@@ -156,27 +169,22 @@ class CurrentReleases:
         self.directories = directories
         self.__current = (None, None)
         self.__prev = (None, None)
-        self.__cond = threading.Condition()
-
-    def wait(self):
-        self.__cond.acquire()
-        self.__cond.wait()
-        self.__cond.release()
+        self.cond = threading.Condition()
         
     @property
     def current(self):
-        self.__cond.acquire()
+        self.cond.acquire()
         v = self.__current
-        self.__cond.notify()
-        self.__cond.release()
+        self.cond.notify()
+        self.cond.release()
         return v
                 
     @current.setter
     def current(self, value):
-        self.__cond.acquire()
+        self.cond.acquire()
         self.__current = value
-        self.__cond.notify()
-        self.__cond.release()
+        self.cond.notify()
+        self.cond.release()
         
     @property
     def prev(self):
@@ -188,7 +196,7 @@ class CurrentReleases:
         
     @prev.setter
     def prev(self, value):
-        self.__cond.acquire()
-        self.__prev = value
-        self.__cond.notify()
-        self.__cond.release()
+        self.cond.acquire()
+        self.prev = value
+        self.cond.notify()
+        self.cond.release()
