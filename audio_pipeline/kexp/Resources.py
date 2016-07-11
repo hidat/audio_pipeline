@@ -1,4 +1,4 @@
-import audio_pipeline.file_walker.Resources as default_resources
+import audio_pipeline.util.Resources as default_resources
 
 
 class Hitters:

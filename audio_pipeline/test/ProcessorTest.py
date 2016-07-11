@@ -4,8 +4,8 @@ import unittest
 import xml.etree.ElementTree as et
 
 from audio_pipeline.file_walker import Process
+from audio_pipeline.util import Resources
 from . import TestUtil
-from ..file_walker import Resources
 
 release_file = "audio_pipeline/test/test_files/test_mbids/release_mbids.json"
 artist_file = "audio_pipeline/test/test_files/test_mbids/artist_mbids.json"

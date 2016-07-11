@@ -1,6 +1,7 @@
 import threading
 import os
 import time
+from ..util import InputPatterns
 from ...util.AudioFileFactory import AudioFileFactory
 from ..util import Resources
 from ...util import Exceptions
@@ -137,7 +138,9 @@ class LoadReleases(threading.Thread):
                 print("Unsupported filetype")
                 continue
 
-            if not Resources.has_mbid(file_data) and file_data.album_artist.value is None and file_data.album.value is None:
+            if not Resources.has_mbid(file_data) and \
+                    (InputPatterns.unknown_artist.match(str(file_data.album_artist))) and \
+                    not str(file_data.album_artist):
                 index = 0
             else:
                 if (file_data.mbid.value, file_data.disc_num.value) in indices:
@@ -188,10 +191,10 @@ class CurrentReleases:
         
     @property
     def prev(self):
-        self.__cond.acquire()
+        self.cond.acquire()
         v = self.__prev
-        self.__cond.notify()
-        self.__cond.release()
+        self.cond.notify()
+        self.cond.release()
         return v
         
     @prev.setter

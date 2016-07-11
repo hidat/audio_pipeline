@@ -1,9 +1,8 @@
 import uuid
 
 from audio_pipeline import Constants
-from audio_pipeline.file_walker import Resources
-from audio_pipeline.util import Util
 from audio_pipeline.util import Exceptions
+from audio_pipeline.util import Util, Resources
 
 
 class Processor:
