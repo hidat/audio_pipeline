@@ -41,8 +41,6 @@ class ProcessDirectory(object):
         self.releases = [None for directory in self.directories]
 
         self.__current_release = None
-        self.current = -1 # current directory index
-        self.release = -1 # index of current release in current index (will probably mostly be 0)
 
         self.release_info = LoadReleases.CurrentReleases(self.directories)
         
@@ -63,17 +61,30 @@ class ProcessDirectory(object):
         self.prev_buffer.clear()
             
     def next(self):
-        self.prev_buffer.append(self.__current_release)
+        if self.__current_release is not None:
+           self.prev_buffer.append(self.__current_release)
+
         self.__current_release = self.next_buffer.pop()
         self.release_info.current = self.__current_release
-        
-        print(len(self.next_buffer))
-        print(len(self.prev_buffer))
-        
+
+        print("next_buffer")
+        for item in self.next_buffer:
+            print("index: " + str(item[0]))
+            print("\t" + str(item[1][0]))
+
+        print("prev_buffer")
+        for item in self.prev_buffer:
+            print("index: " + str(item[0]))
+            print("\t" + str(item[1][0]))
+
+        print("current release: ")
+        print("index: " + str(self.__current_release[0]))
+        print("\t" + str(self.__current_release[1]))
         return self.current_release
 
     def prev(self):
-        self.next_buffer.append(self.__current_release)
+        if self.__current_release is not None:
+            self.next_buffer.append(self.__current_release)
         self.__current_release = self.prev_buffer.pop()
         self.release_info.current = self.__current_release
         

@@ -3,13 +3,14 @@ import os
 import time
 from ...util.AudioFileFactory import AudioFileFactory
 from ..util import Resources
-from ..util import InputPatterns
 from ...util import Exceptions
 
-MAX_RELEASES = 20
+MAX_RELEASES = 4
 
 
 class LoadReleases(threading.Thread):
+
+    fuzz = 3
 
     def __init__(self, prev_buffer, next_buffer, current_release, max_releases=MAX_RELEASES):
         """
@@ -20,26 +21,51 @@ class LoadReleases(threading.Thread):
         self.next_buffer = next_buffer
         self.max_buffer = max_releases
         self.current_release = current_release
+        self.loaded = 0
         
         # make sure there are two releases pre-loaded
-        for i in range(5):
+        for i in range(self.fuzz):
             self.load_release(self.next_buffer, i)
-        
+            self.loaded += 1
+
     def run(self):
-        buffered_length = len(self.next_buffer) + len(self.prev_buffer)
-        while buffered_length < len(self.current_release.directories):
-                       
-            if len(self.next_buffer) < self.max_buffer and buffered_length < len(self.current_release.directories):
+        time.sleep(.1)
+        print(self.current_release.current)
+        while self.loaded < len(self.current_release.directories):
+
+            # if buffers are full, wait for a signal from the model proper to load more releases,
+            # rather than constantly looping and wasting resources
+            if self.current_release.current is None:
+                    break
+            elif len(self.next_buffer) and len(self.prev_buffer) > self.max_buffer and \
+                    self.current_release.current[0] > self.max_buffer:
+                self.current_release.wait()
+
+            if len(self.next_buffer) > self.max_buffer + self.fuzz:
+                self.trim_releases(self.next_buffer)
+            elif self.loaded < len(self.current_release.directories):
                 # haven't filled in next_buffer / have moved forward
                 # get next value
                 last_release = self.next_buffer.popleft()
                 self.next_buffer.appendleft(last_release)
-                    
+
                 i = last_release[0] + 1
                 self.load_release(self.next_buffer, i)
-                
-            buffered_length = len(self.next_buffer) + len(self.prev_buffer)
-                
+                self.loaded += 1
+
+            if len(self.prev_buffer) > self.max_buffer + self.fuzz:
+                self.trim_releases(self.prev_buffer)
+            elif self.loaded < len(self.current_release.directories) and \
+                    self.current_release.current[0] > self.max_buffer:
+                # haven't filled in prev_buffer / have moved forward
+                # so get next buffer
+                last_release = self.prev_buffer.popleft()
+                self.prev_buffer.appendleft(last_release)
+
+                i = last_release[0] - 1
+                self.load_release(self.prev_buffer, i)
+                self.loaded += 1
+
                 # prev_release = self.current_release.prev
                 # if prev_release is not None:
                 #    self.prev_buffer.append(prev_release)
@@ -56,12 +82,30 @@ class LoadReleases(threading.Thread):
                     
                 # i = last_release -= 1
                 # self.load_release(self.prev_buffer, i)
+
+    def trim_releases(self, buffer):
+        # remove releases from the end of the buffer,
+        # preventing the removal of partial directories.
+        last_directory = list()
+        last_release = buffer.popleft()
+        last_directory.append(last_release)
+
+        index = last_release[0]
+        last_release = buffer.popleft()
+
+        while index == last_release[0] and len(buffer) >= self.max_buffer + (self.fuzz / 2):
+            last_directory.append(last_release)
+            last_release = buffer.popleft()
+
+        if len(buffer) < self.max_buffer + (self.fuzz / 2):
+            # don't want some sort of 50-release directory getting constantly deleted and reloaded
+            buffer.extendleft(last_directory)
                         
-    def load_release(self, buffer, index):
+    def load_release(self, buffer, dir_index):
         if len(buffer) >= self.max_buffer:
             return None
             
-        directory = self.current_release.directories[index]
+        directory = self.current_release.directories[dir_index]
 
         files = os.listdir(directory)
         indices = dict()
@@ -103,7 +147,7 @@ class LoadReleases(threading.Thread):
 
         for release in releases:
             release.sort(key=lambda x: x.track_num.value if x.track_num.value is not None else 0)
-            buffer.append((index, release))
+            buffer.appendleft((dir_index, release))
 
             
 class CurrentReleases:
@@ -113,6 +157,11 @@ class CurrentReleases:
         self.__current = (None, None)
         self.__prev = (None, None)
         self.__cond = threading.Condition()
+
+    def wait(self):
+        self.__cond.acquire()
+        self.__cond.wait()
+        self.__cond.release()
         
     @property
     def current(self):
