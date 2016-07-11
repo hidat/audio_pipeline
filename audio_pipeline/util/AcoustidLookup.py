@@ -1,5 +1,6 @@
 import acoustid
 import random
+from . import MBInfo
 
 class ReleaseLookup:
     
@@ -105,3 +106,17 @@ class Release:
         print(self.likely_release)
         print(self.max_score)
         print(self.releases[self.likely_release])
+        
+    def stuff_meta(self):
+        self.lookup()
+        if self.likely_release:
+            meta = MBInfo.MBInfo().get_release(self.likely_release)
+            
+            # stuff audiofiles using values from musicbrainz
+            for track in self.tracks:
+                track.mbid.value = meta["id"]
+                track.album.value = meta["title"]
+                if "artist-credit" in meta:
+                    a = meta["artist-credit"][0]
+                    if "artist" in a:
+                        track.album_artist.value = a["artist"]["name"]

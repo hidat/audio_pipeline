@@ -1,6 +1,7 @@
 import threading
 import os
 import time
+from audio_pipeline.util import AcoustidLookup as lookup
 from ...util.AudioFileFactory import AudioFileFactory
 from ..util import Resources
 from ...util import Exceptions
@@ -53,7 +54,9 @@ class LoadReleases(threading.Thread):
                 self.next_buffer.appendleft(last_release)
 
                 i = last_release[0] + 1
+                self.current_release.cond.release()
                 self.load_release(self.next_buffer, i)
+                self.current_release.cond.acquire()
                 self.loaded += 1
 
             if len(self.prev_buffer) >= self.max_buffer + self.fuzz:
@@ -67,7 +70,9 @@ class LoadReleases(threading.Thread):
                 self.prev_buffer.appendleft(last_release)
 
                 i = last_release[0] - 1
+                self.current_release.cond.release()
                 self.load_release(self.prev_buffer, i)
+                self.current_release.cond.acquire()
                 self.loaded += 1
                 
                 
@@ -157,7 +162,9 @@ class LoadReleases(threading.Thread):
 
         if len(releases[0]) <= 0:
             releases.pop(0)
-
+        else:
+            lookup.Release(releases[0]).stuff_meta()
+            
         for release in releases:
             release.sort(key=lambda x: x.track_num.value if x.track_num.value is not None else 0)
             buffer.appendleft((dir_index, release))
