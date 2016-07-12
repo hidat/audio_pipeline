@@ -185,7 +185,10 @@ class ReleaseProcessor:
         track.id = track_meta['id']
         
         track.set_type()
-        
+
+        if "artist-credit-phrase" in track_meta:
+            track.artist_phrase = track_meta["artist-credit-phrase"]
+
         for artist in track_meta['artist-credit']:
             if 'artist' in artist:
                 track.artist_credit = track.artist_credit + artist['artist']['name']

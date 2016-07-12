@@ -1,8 +1,8 @@
 import uuid
 
-from audio_pipeline.util import Util
 from audio_pipeline.util import Resources
-from ..file_walker import Process
+from audio_pipeline.util import Util
+from ..util import Process
 
 
 class ReleaseProcessor(Process.ReleaseProcessor):

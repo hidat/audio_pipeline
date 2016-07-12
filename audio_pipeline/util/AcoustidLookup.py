@@ -1,5 +1,7 @@
 import acoustid
 import random
+from audio_pipeline import Constants
+from . import Process
 from . import MBInfo
 
 class ReleaseLookup:
@@ -89,13 +91,14 @@ class Release:
             fingerprint = acoustid.fingerprint_file(track.file_name)
             result = acoustid.lookup(self.api_key, fingerprint[1], fingerprint[0], self.meta)
             self.results.append(result)
-            
+
             for trackId in result["results"]:
-                for recording in trackId["recordings"]:
-                    # start out just keeping track of all common releases
-                    if "releasegroups" in recording:
-                        for releasegroup in recording["releasegroups"]:
-                            self.weight(track, trackId["score"], releasegroup)
+                if "recordings" in trackId:
+                    for recording in trackId["recordings"]:
+                        # start out just keeping track of all common releases
+                        if "releasegroups" in recording:
+                            for releasegroup in recording["releasegroups"]:
+                                self.weight(track, trackId["score"], releasegroup)
                             
         print(self.common_releases)
         for release, score in self.common_releases.items():
@@ -110,13 +113,25 @@ class Release:
     def stuff_meta(self):
         self.lookup()
         if self.likely_release:
-            meta = MBInfo.MBInfo().get_release(self.likely_release)
-            
+            processor = Process.Processor(MBInfo.MBInfo(), Constants.processor)
+            release = processor.get_release(self.likely_release)
+
             # stuff audiofiles using values from musicbrainz
             for track in self.tracks:
-                track.mbid.value = meta["id"]
-                track.album.value = meta["title"]
-                if "artist-credit" in meta:
-                    a = meta["artist-credit"][0]
-                    if "artist" in a:
-                        track.album_artist.value = a["artist"]["name"]
+                meta = release.release
+                track.mbid.value = meta.id
+                track.album.value = meta.title
+                track.album_artist.value = meta.artist
+                track.release_date.value = meta.date
+                if len(meta.labels) > 0:
+                    track.label.value = meta.labels[0]
+
+                track_meta = release.get_track(track)
+                track.title.value = track_meta.title
+                if track_meta.artist_phrase:
+                    track.artist.value = track_meta.artist_phrase
+                else:
+                    track.artist.value = track_meta.artist_credit
+
+                track.save()
+

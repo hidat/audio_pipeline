@@ -3,8 +3,7 @@ import os
 import unittest
 import xml.etree.ElementTree as et
 
-from audio_pipeline.file_walker import Process
-from audio_pipeline.util import Resources
+from audio_pipeline.util import Resources, Process
 from . import TestUtil
 
 release_file = "audio_pipeline/test/test_files/test_mbids/release_mbids.json"

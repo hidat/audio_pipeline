@@ -1,5 +1,5 @@
 {audiofile: !!python/name:audio_pipeline.kexp.KEXPAudioFile.KEXPAudioFile '',
- processor: !!python/name:audio_pipeline.file_walker.Process '',
+ processor: !!python/name:audio_pipeline.util.Process '',
  batch constants: !!python/name:audio_pipeline.kexp.Resources.BatchConstants '',
  serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '',
  argument_config: !!python/name:audio_pipeline.kexp.argument_config '',

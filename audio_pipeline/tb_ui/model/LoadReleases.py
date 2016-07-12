@@ -24,6 +24,7 @@ class LoadReleases(threading.Thread):
         self.max_buffer = max_releases
         self.current_release = current_release
         self.loaded = 0
+        self.scanned = 0
         
         # make sure there are two releases pre-loaded
         for i in range(self.fuzz):
@@ -62,8 +63,7 @@ class LoadReleases(threading.Thread):
 
             if len(self.prev_buffer) >= self.max_buffer + self.fuzz:
                 self.trim_releases(self.prev_buffer)
-            elif len(self.prev_buffer) < self.max_buffer and \
-                 self.current_release.current[0] > self.max_buffer:
+            elif len(self.prev_buffer) < self.max_buffer < self.current_release.current[0]:
                 print("loading prev")
                 # haven't filled in prev_buffer / have moved forward
                 # so get next buffer
@@ -76,12 +76,10 @@ class LoadReleases(threading.Thread):
                 self.current_release.cond.acquire()
                 self.loaded += 1
                 
-                
-            while (len(self.next_buffer) >= self.max_buffer or \
-                (next_limit > 0 and self.current_release.current[0] >= next_limit)) and \
-                (len(self.prev_buffer) >= self.max_buffer or \
-                    self.current_release.current[0] <= prev_limit) or \
-                 self.loaded % 7 == 0:
+            while len(self.next_buffer) >= self.max_buffer or \
+                (0 < next_limit <= self.current_release.current[0]) and \
+                (len(self.prev_buffer) >= self.max_buffer or
+                    self.current_release.current[0] <= prev_limit) or self.loaded % 7 == 0:
                  
                 print("waiting (for a miracle)")
                 self.current_release.cond.wait()
@@ -90,12 +88,8 @@ class LoadReleases(threading.Thread):
                     break
             self.current_release.cond.release()
 
-
-            
         print("Loaded: " + str(self.loaded))
-        print("Number of directories: " + str(len(self.current_release.directories)))
-        print("Maximum loaded releases: " + str(self.max_buffer))
-
+        print("Scanned: " + str(self.scanned))
         
     def trim_releases(self, buffer):
         # remove releases from the end of the buffer,
@@ -167,6 +161,7 @@ class LoadReleases(threading.Thread):
             releases.pop(0)
         else:
             lookup.Release(releases[0]).stuff_meta()
+            self.scanned += 1
 
         for release in releases:
             release.sort(key=lambda x: x.track_num.value if x.track_num.value is not None else 0)

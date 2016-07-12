@@ -25,6 +25,8 @@ class BatchConstants:
         self.initial_server = None
         self.backup_server = None
 
+        self.gen_item_code = None
+
         self.set(args)
         
     def set(self, args):
@@ -152,6 +154,7 @@ class Track(Content):
         self.radio_edit = False
         self.artists = []
         self.artist_credit = ''
+        self.artist_phrase = ''
         
         self.anchor_status = None
         
