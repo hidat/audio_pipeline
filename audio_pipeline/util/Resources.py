@@ -10,7 +10,7 @@ class BatchConstants:
     input_directory = ""
     output_directory = ""
 
-    def __init__(self, args):
+    def __init__(self, args=None):
         self.artist_gen = True
 
         self.input_directory = ''
@@ -27,7 +27,8 @@ class BatchConstants:
 
         self.gen_item_code = None
 
-        self.set(args)
+        if args:
+            self.set(args)
         
     def set(self, args):
         """

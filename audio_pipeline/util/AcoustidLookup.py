@@ -124,7 +124,7 @@ class Release:
                 track.album_artist.value = meta.artist
                 track.release_date.value = meta.date
                 if len(meta.labels) > 0:
-                    track.label.value = meta.labels[0]
+                    track.label.value = meta.labels[0].title
 
                 track_meta = release.get_track(track)
                 track.title.value = track_meta.title

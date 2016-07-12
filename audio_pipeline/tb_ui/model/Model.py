@@ -71,8 +71,6 @@ class ProcessDirectory(object):
 
         self.__current_release.current = self.next_buffer.pop()
 
-        print("next buffer: " + str(len(self.next_buffer)))
-        print("prev buffer: " + str(len(self.prev_buffer)))
         return self.current_release
 
     def prev(self):

@@ -30,7 +30,8 @@ class BatchConstants(default_resources.BatchConstants):
         self.gen_item_code = False
         self.anchor = False
 
-        self.set(args)
+        if args:
+            self.set(args)
 
     def set(self, args):
         super().set(args)

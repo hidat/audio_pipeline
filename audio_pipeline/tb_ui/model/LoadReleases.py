@@ -122,6 +122,7 @@ class LoadReleases(threading.Thread):
 
         files = os.listdir(directory)
         indices = dict()
+        to_scan = set()
         releases = list()
         releases.append([])
         i = 1
@@ -141,6 +142,7 @@ class LoadReleases(threading.Thread):
                     (InputPatterns.unknown_artist.match(str(file_data.album_artist))) and \
                     not str(file_data.album_artist):
                 index = 0
+                to_scan.add(index)
             else:
                 if (file_data.mbid.value, file_data.disc_num.value) in indices:
                     index = indices[(file_data.mbid.value, file_data.disc_num.value)]
@@ -154,15 +156,20 @@ class LoadReleases(threading.Thread):
                     else:
                         indices[(file_data.album.value, file_data.album_artist.value,
                                  file_data.disc_num.value)] = index
+                        to_scan.add(index)
 
             releases[index].append(file_data)
+            
+
+        for i in to_scan:
+            print(i)
+            lookup.Release(releases[i]).stuff_meta
+            self.scanned += 1
 
         if len(releases[0]) <= 0:
             releases.pop(0)
-        else:
-            lookup.Release(releases[0]).stuff_meta()
-            self.scanned += 1
-
+            
+            
         for release in releases:
             release.sort(key=lambda x: x.track_num.value if x.track_num.value is not None else 0)
             buffer.appendleft((dir_index, release))
