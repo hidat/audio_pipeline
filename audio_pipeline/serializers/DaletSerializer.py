@@ -277,7 +277,7 @@ class DaletSerializer:
         with tag('ItemCode'):
             text(artist.item_code)
         with tag('title'):
-            text(Util.StringCleanup(artist.title))
+            text(Util.stringCleanup(artist.title))
         with tag('GlossaryType'):
             text(artist.glossary_type)
         with tag('KEXPName'):
