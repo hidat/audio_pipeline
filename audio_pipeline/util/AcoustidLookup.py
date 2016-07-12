@@ -108,7 +108,6 @@ class Release:
                 
         print(self.likely_release)
         print(self.max_score)
-        print(self.releases[self.likely_release])
         
     def stuff_meta(self):
         self.lookup()

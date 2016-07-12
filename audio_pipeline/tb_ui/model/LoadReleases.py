@@ -163,7 +163,7 @@ class LoadReleases(threading.Thread):
 
         for i in to_scan:
             print(i)
-            lookup.Release(releases[i]).stuff_meta
+            lookup.Release(releases[i]).stuff_meta()
             self.scanned += 1
 
         if len(releases[0]) <= 0:
