@@ -37,11 +37,9 @@ class ProcessDirectory(object):
             self.directories.sort(key=lambda x: int(os.path.split(x)[1].split()[0]))
         else:
             self.directories.sort()
-
-        self.releases = [None for directory in self.directories]
-
-        self.__current_release = LoadReleases.CurrentReleases(self.directories)
         
+        self.__current_release = LoadReleases.CurrentReleases(self.directories)
+                
         self.next_buffer = collections.deque()
         self.prev_buffer = collections.deque()
         

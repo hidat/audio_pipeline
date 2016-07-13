@@ -1,4 +1,6 @@
 import yaml
+import os.path as path
+
 
 class Hitters:
     artist = "(Various Artists) - "
@@ -37,8 +39,10 @@ class BatchConstants:
         :param args: Batch constants from the command line
         :return:
         """
-        self.input_directory = args.input_directory
-        self.output_directory = args.output_directory
+        if path.exists(args.input_directory):
+            self.input_directory = args.input_directory
+        if path.exists(args.output_directory):
+            self.output_directory = args.output_directory
 
         if args.no_artist:
             self.artist_gen = not args.no_artist
@@ -95,8 +99,9 @@ class Content:
                 
 class Release(Content):
 
-    glossary_type = 'Release'
-
+    content_type = 'Release'
+    glossary_type = content_type
+    
     def __init__(self, item_code, id="", title=""):
         """
         Holds release metadata
@@ -127,8 +132,7 @@ class Release(Content):
 
 class Track(Content):
     
-    glossary_type = "music library track"
-    content_type = glossary_type
+    content_type = "music library track"
     
     def __init__(self, item_code, id="", title=""):
         """
@@ -168,7 +172,8 @@ class Track(Content):
         
 class Artist(Content):
 
-    glossary_type = 'Artist'
+    content_type = 'Artist'
+    glossary_type = content_type
     
     def __init__(self, item_code, id="", title=""):
         """
@@ -200,7 +205,8 @@ class Artist(Content):
 
 class Label(Content):
 
-    glossary_type = 'label'
+    content_type = 'label'
+    glossary_type = content_type
     
     def __init__(self, item_code, id="", title=""):
     

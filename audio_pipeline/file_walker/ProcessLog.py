@@ -4,6 +4,10 @@ import os
 
 class ProcessLog:
 
+    type_index = 0
+    id_index = 1
+    name_index = 2
+
     def __init__(self, output_dir, release=True, label=True):
         """
         Writes logs for releases, tracks, labels, and artists.
@@ -38,48 +42,73 @@ class ProcessLog:
         self.glossaries = set([])
         
         
-    def log_release(self, release):
-        log_text = self.log_string(release)
-        if log_text:
-            log_text = log_text.strip() + "\t" + release.glossary_title + "\r\n"
-            self.save_log(self.log_file, log_text)
-            if self.release_log:
-                self.save_log(self.release_log, log_text)
+    ######################
+    #   Release log has the format
+    #       <type>  <item_code> <name>  <release_artist>    <glossary_title>
+    ######################
         
+    def log_release(self, release):
+        log_items = self.log_list(release)
+        if log_items:
+            log_items.insert(self.id_index + 1, release.artist)
+            log_items.append(release.glossary_title)
+            self.save_log(self.log_file, log_items)
+            if self.release_log:
+                self.save_log(self.release_log, log_items)
+        
+    
+    ####################
+    #   Track, Artist, Label all have format
+    #           <type>  <item_code>  <name>
+    ####################
+    
+    
     def log_track(self, track):
-        log_text = self.log_string(track)
-        if log_text:
-            self.save_log(self.log_file, log_text)
+        log_items = self.log_list(track)
+        if log_items:
+            self.save_log(self.log_file, log_items)
     
     def log_artist(self, artist, group_members = []):
-        log_text = self.log_string(artist)
-        if log_text:
-            self.save_log(self.log_file, log_text)
-        with open(self.log_file, 'ab') as file:
-            for member in group_members:
-                log_text = self.log_string(artist)
-                if log_text:
-                    self.save_log(self.log_file, log_text)
-                    file.write(log_text.encode('UTF-8'))
+        logs = list()
+        log = self.log_list(artist)
+        if log:
+            logs.append(log)
+        for member in group_members:
+            log = self.log_list(member)
+            if log:
+                logs.append(log)
+        self.save_log(self.log_file, logs)
                     
     def log_label(self, label):
-        log_text = self.log_string(label)
-        if log_text:
-            self.save_log(self.log_file, log_text)
+        log_items = self.log_list(label)
+        if log_items:
+            self.save_log(self.log_file, log_items)
             if self.label_log:
-                self.save_log(self.label_log, log_text)
+                self.save_log(self.label_log, log_items)
             
     def log_fail(self, glossary):
-        log_text = log_string(glossary)
-        self.save_log(self.failure_log, log_text)
+        log_items = log_list(glossary)
+        self.save_log(self.failure_log, log_items)
             
-    def log_string(self, glossary):
-        if glossary.item_code not in self.glossaries:
-            log_text = str(glossary.glossary_type) + "\t" + str(glossary.item_code) + "\t" + str(glossary.title) + "\r\n"
-            return log_text
+    def log_list(self, content):
+        """
+        Returns a list of the format
+            <content.type>  <content.item_code> <content.name>
+        """
+        if content.item_code not in self.glossaries:
+            log_items = [str(content.content_type), str(content.item_code), str(content.title)]
+            return log_items
         return None
             
-    def save_log(self, log_file, log_text):
-        with open(log_file, 'ab') as file:
-            file.write(log_text.encode('UTF-8'))
-        
+    def save_log(self, log_file, log_items):
+        if len(log_items) > 0:
+            with open(log_file, 'ab') as file:
+                if isinstance(log_items[0], str):
+                    log = "\t".join(log_items)
+                    log += "\r\n"
+                    file.write(log.encode('UTF-8'))
+                else:
+                    for log in log_items:
+                        log = "\t".join(log)
+                        log += "\r\n"
+                        file.write(log.encode('UTF-8'))

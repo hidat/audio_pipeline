@@ -174,6 +174,7 @@ class LoadReleases(threading.Thread):
             release.sort(key=lambda x: x.track_num.value if x.track_num.value is not None else 0)
             buffer.appendleft((dir_index, release))
 
+
             
 class CurrentReleases:
 

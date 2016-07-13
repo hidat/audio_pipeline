@@ -1,5 +1,6 @@
 import acoustid
 import random
+import difflib
 from audio_pipeline import Constants
 from . import Process
 from . import MBInfo
@@ -17,6 +18,8 @@ class Release:
     Relevent data - release name, release artist, 
     """
     
+    
+    sequence_matcher = difflib.SequenceMatcher(None, None, None)
     api_key = "kz7oZf3Wbc"
 
     meta = "releasegroups recordings releases tracks compress"
@@ -34,7 +37,9 @@ class Release:
         self.common_releases = dict()
         self.max_score = 0
         self.likely_release = None
-
+        self.processor = Process.Processor(MBInfo.MBInfo(), Constants.processor)
+        self.release = None
+        
     def weight(self, track, fingerprint_score, releasegroup):
         base_score = 0
         if "type" in releasegroup:
@@ -77,13 +82,13 @@ class Release:
                     self.releases[release_id] = release
                     self.common_releases[release_id] = fingerprint_score * score
         
-    def lookup(self):
+    def lookup(self, num_lookups=4):
         # gonna want to look into some actual clever stuff for here, but for now:
         self.releases = dict()
         self.common_releases = dict()
         
         # for now, let's just take ~four releases haha
-        for i in range(4):
+        for i in range(num_lookups):
             track = random.choice(self.tracks)
         
         #for track in self.tracks:
@@ -100,7 +105,6 @@ class Release:
                             for releasegroup in recording["releasegroups"]:
                                 self.weight(track, trackId["score"], releasegroup)
                             
-        print(self.common_releases)
         for release, score in self.common_releases.items():
             if score > self.max_score:
                 self.likely_release = release
@@ -112,12 +116,12 @@ class Release:
     def stuff_meta(self):
         self.lookup()
         if self.likely_release:
-            processor = Process.Processor(MBInfo.MBInfo(), Constants.processor)
-            release = processor.get_release(self.likely_release)
+            if not self.release:
+                self.release = self.processor.get_release(self.likely_release)
+            meta = self.release.release
 
             # stuff audiofiles using values from musicbrainz
             for track in self.tracks:
-                meta = release.release
                 track.mbid.value = meta.id
                 track.album.value = meta.title
                 track.album_artist.value = meta.artist
@@ -125,7 +129,7 @@ class Release:
                 if len(meta.labels) > 0:
                     track.label.value = meta.labels[0].title
 
-                track_meta = release.get_track(track)
+                track_meta = self.release.get_track(track)
                 track.title.value = track_meta.title
                 if track_meta.artist_phrase:
                     track.artist.value = track_meta.artist_phrase
@@ -134,3 +138,44 @@ class Release:
 
                 track.save()
 
+    def mbid_comp(self, ignore_mbid=False):
+        if not ignore_mbid:
+            track = self.tracks[0]
+            if track.mbid.value != None:
+                return 0
+            
+        if not self.likely_release:
+            self.lookup(num_lookups=2)
+        if self.likely_release:
+            # get & process MB metadata
+            if not self.release:
+                self.release = self.processor.get_release(self.likely_release)
+            meta = self.release.release
+
+            calc_ratio = self.calc_ratio(None, None)
+            calc_ratio.send(None)
+            for track in self.tracks:
+                ratio = calc_ratio.send((track.album, meta.title))
+                ratio = calc_ratio.send((track.album_artist, meta.title))
+                ratio = calc_ratio.send((track.release_date, meta.date))
+                if len(meta.labels) > 0:
+                    track.label.value = meta.labels[0].title
+                    
+                track_meta = self.release.get_track(track)
+                ratio = calc_ratio.send((track.title, track_meta.title))
+                if track_meta.artist_phrase:
+                    ratio = calc_ratio.send((track.artist, track_meta.artist_phrase))
+                else:
+                    ratio = calc_ratio.send((track.artist, track_meta.artist_credit))
+            print(ratio)
+                        
+    def calc_ratio(self, track_tag, meta_val):
+        ratio = 1
+        i = 1
+
+        while True:
+            if track_tag != None and track_tag.value != None:
+                self.sequence_matcher.set_seqs(str(track_tag), str(meta_val))
+                ratio = ratio * (i - 1) / i + (1 / i) * self.sequence_matcher.ratio()
+                i += 1
+            track_tag, meta_val = yield ratio

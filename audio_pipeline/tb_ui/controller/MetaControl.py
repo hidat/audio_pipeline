@@ -202,9 +202,4 @@ class MetaController:
                     Dialog.DialogBox("Please select a valid directory.", buttons=[{"name": "OK", "command": self.app.choose_dir},
                                      {"name": "Cancel"}], master=self.app)
         else:
-            if not self.root_dir:
-                Dialog.DialogBox("Please select a valid directory.", buttons=[{"name": "OK", "command": self.app.choose_dir},
-                                  {"name": "Cancel", "command": self.app.quit}])
-            else:
-                Dialog.DialogBox("Please select a valid directory.", buttons=[{"name": "OK", "command": self.app.choose_dir},
-                                 {"name": "Cancel"}], master=self.app)
+            self.app.destroy()
