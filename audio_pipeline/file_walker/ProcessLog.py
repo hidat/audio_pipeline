@@ -87,7 +87,7 @@ class ProcessLog:
                 self.save_log(self.label_log, log_items)
             
     def log_fail(self, glossary):
-        log_items = log_list(glossary)
+        log_items = self.log_list(glossary)
         self.save_log(self.failure_log, log_items)
             
     def log_list(self, content):
