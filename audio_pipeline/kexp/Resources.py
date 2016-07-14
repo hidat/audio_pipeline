@@ -1,4 +1,4 @@
-import audio_pipeline.file_walker.Resources as default_resources
+import audio_pipeline.util.Resources as default_resources
 
 
 class Hitters:
@@ -30,7 +30,8 @@ class BatchConstants(default_resources.BatchConstants):
         self.gen_item_code = False
         self.anchor = False
 
-        self.set(args)
+        if args:
+            self.set(args)
 
     def set(self, args):
         super().set(args)

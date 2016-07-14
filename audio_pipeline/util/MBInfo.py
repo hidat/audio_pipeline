@@ -4,7 +4,7 @@ from . import Util
 import time
 
 
-class MBInfo():
+class MBInfo:
     default_server = ngs.hostname
 
     def __init__(self, server=None, backup_server=None, useragent=("hidat_audio_pipeline", "0.1")):

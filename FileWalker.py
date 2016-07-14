@@ -4,7 +4,7 @@ import os
 import shutil
 
 from audio_pipeline import Constants
-from audio_pipeline.file_walker import Process as Processor
+from audio_pipeline.util import Process as Processor
 from audio_pipeline.util import AudioFileFactory
 from audio_pipeline.util import Exceptions
 from audio_pipeline.util import MBInfo
@@ -173,11 +173,13 @@ def main():
     if Constants.argument_config:
         parser = Constants.argument_config(parser)
 
+    parser.add_argument('input_directory', help="Input audio file.")
+    parser.add_argument('output_directory', help="Directory to store output files.")
+
+        
     parser.add_argument('-p', '--profile', type=str.casefold, help="Specify a user profile. If a profile with this"
                                                                    " name does not exist, it will be created.")
 
-    parser.add_argument('input_directory', help="Input audio file.")
-    parser.add_argument('output_directory', help="Directory to store output files.")
     parser.add_argument('-d', '--delete', metavar='', default=False, const=True, nargs='?',
                         help="Delete audio files from input_directory after processing")
     parser.add_argument('--local', help="Set local MusicBrainz server address")
@@ -197,7 +199,7 @@ def main():
 
     Constants.setup(args, args.profile)
 
-    process_directory(args.input_directory, args.output_directory)
+    process_directory(Constants.batch_constants.input_directory, Constants.batch_constants.output_directory)
 
 if __name__ == "__main__":
     main()

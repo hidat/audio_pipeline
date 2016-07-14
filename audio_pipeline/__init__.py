@@ -36,6 +36,7 @@ class Constants:
 
                 if "batch constants" in config:
                     cls.batch_constants_def = config["batch constants"]
+                    cls.batch_constants = cls.batch_constants_def(None)
                 if "audiofile" in config:
                     cls.audiofile = config["audiofile"]
                 if "processor" in config:
@@ -69,8 +70,5 @@ class Constants:
                         exit()
                     answer = input("Please enter 'y' or 'n': ")
                     
-        else:
-            cls.batch_constants = cls.batch_constants_def(args)
-
 
 __all__ = ['file_walker', 'serializers', 'tb_ui', 'util', 'FileWalker', 'TomatoBanana']
