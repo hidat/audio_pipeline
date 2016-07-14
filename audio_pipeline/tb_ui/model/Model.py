@@ -46,7 +46,6 @@ class ProcessDirectory(object):
         LoadReleases.LoadReleases(self.prev_buffer, self.next_buffer, self.__current_release).start()
 
     def __del__(self):
-        print("is this called.")
         self.__current_release.current = None
         
     @property

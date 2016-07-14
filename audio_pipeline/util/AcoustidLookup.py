@@ -18,7 +18,6 @@ class Release:
     Relevent data - release name, release artist, 
     """
     
-    
     sequence_matcher = difflib.SequenceMatcher(None, None, None)
     api_key = "kz7oZf3Wbc"
 
@@ -26,7 +25,7 @@ class Release:
     
     weights = {"type": {"Album": .5}, "medium_count": .5, "medium": .4, "track_count": .7, 
                "track_position": .7, "country": {"US": .6}, "format": {"CD": .4}}
-    
+               
     features = ["track_num", "disc_num", "release_artist", "release", "country", "format", "type"]
     
     def __init__(self, audio_files):
@@ -42,6 +41,7 @@ class Release:
         
     def weight(self, track, fingerprint_score, releasegroup):
         base_score = 0
+        
         if "type" in releasegroup:
             for release_type, weight in self.weights["type"].items():
                 if releasegroup["type"] == release_type:
@@ -49,6 +49,10 @@ class Release:
                     
         if "releases" in releasegroup:
             for release in releasegroup["releases"]:
+                calc_ratio = self.calc_ratio(None, None)
+                ratio = 0
+                calc_ratio.send(None)
+                
                 score = base_score
                 release_id = release["id"]
 
@@ -57,8 +61,6 @@ class Release:
                     for media_format, weight in self.weights["format"].items():
                         if medium.get("format") == media_format:
                             score += weight
-                    if medium.get("position") == track.disc_num.value:
-                        score += self.weights["medium"]
                     if medium.get("tracks"):
                         if medium["tracks"][0].get("position") == track.track_num.value:
                             score += self.weights["track_position"]
@@ -68,13 +70,20 @@ class Release:
                     if release.get("track_count") == self.num_tracks:
                         score += self.weights["track_count"]
                         
-                if release.get("medium_count") == track.disc_num.total:
-                    score += self.weights["medium_count"]
                 for country, weight in self.weights["country"].items():
                     if release.get("country") == country:
                         score += weight
                         
+                if track.album.value is not None:
+                    if "title" in releasegroup:
+                        ratio = calc_ratio.send((track.album, releasegroup.get("title")))
+                    if "mediums" in release:
+                        medium = release["mediums"][0]
+                        ratio = calc_ratio.send((track.disc_num, medium.get("position")))
+                    # ratio = calc_ratio.send((track.total_discs, release.get("medium_count")))
+                        
                 score = score if score > 1 else 1
+                score *= ratio + 1
                         
                 if release_id in self.common_releases:
                     self.common_releases[release_id] += fingerprint_score * score
@@ -114,7 +123,8 @@ class Release:
         print(self.max_score)
         
     def stuff_meta(self):
-        self.lookup()
+        if not self.likely_release:
+            self.lookup()
         if self.likely_release:
             if not self.release:
                 self.release = self.processor.get_release(self.likely_release)
@@ -129,12 +139,17 @@ class Release:
                 if len(meta.labels) > 0:
                     track.label.value = meta.labels[0].title
 
-                track_meta = self.release.get_track(track)
-                track.title.value = track_meta.title
-                if track_meta.artist_phrase:
-                    track.artist.value = track_meta.artist_phrase
+                if meta.disc_count is None:
+                    pass
+                elif track.disc_num.value <= meta.disc_count:
+                    track_meta = self.release.get_track(track)
+                    track.title.value = track_meta.title
+                    if track_meta.artist_phrase:
+                        track.artist.value = track_meta.artist_phrase
+                    else:
+                        track.artist.value = track_meta.artist_credit
                 else:
-                    track.artist.value = track_meta.artist_credit
+                    track.artist.value = meta.artist
 
                 track.save()
 
@@ -145,7 +160,7 @@ class Release:
                 return 0
             
         if not self.likely_release:
-            self.lookup(num_lookups=2)
+            self.lookup()
         if self.likely_release:
             # get & process MB metadata
             if not self.release:
@@ -155,19 +170,22 @@ class Release:
             calc_ratio = self.calc_ratio(None, None)
             calc_ratio.send(None)
             for track in self.tracks:
-                ratio = calc_ratio.send((track.album, meta.title))
-                ratio = calc_ratio.send((track.album_artist, meta.title))
-                ratio = calc_ratio.send((track.release_date, meta.date))
+                calc_ratio.send((track.album, meta.title))
+                calc_ratio.send((track.album_artist, meta.artist))
+                calc_ratio.send((track.release_date, meta.date))
                 if len(meta.labels) > 0:
                     track.label.value = meta.labels[0].title
                     
-                track_meta = self.release.get_track(track)
-                ratio = calc_ratio.send((track.title, track_meta.title))
-                if track_meta.artist_phrase:
-                    ratio = calc_ratio.send((track.artist, track_meta.artist_phrase))
-                else:
-                    ratio = calc_ratio.send((track.artist, track_meta.artist_credit))
-            print(ratio)
+                if meta.disc_count is not None and \
+                    track.disc_num.value <= meta.disc_count:
+                    track_meta = self.release.get_track(track)
+                    calc_ratio.send((track.title, track_meta.title))
+                    if track_meta.artist_phrase:
+                        calc_ratio.send((track.artist, track_meta.artist_phrase))
+                    else:
+                        calc_ratio.send((track.artist, track_meta.artist_credit))
+            ratio = calc_ratio.send((None, None))
+            return(ratio)
                         
     def calc_ratio(self, track_tag, meta_val):
         ratio = 1
@@ -176,6 +194,10 @@ class Release:
         while True:
             if track_tag != None and track_tag.value != None:
                 self.sequence_matcher.set_seqs(str(track_tag), str(meta_val))
+                curr = self.sequence_matcher.ratio()
+                if (curr < .7):
+                    print("current tag: " + str(track_tag.name) + " with value " + str(track_tag))
+                    print("acquired meta: " + str(meta_val))
                 ratio = ratio * (i - 1) / i + (1 / i) * self.sequence_matcher.ratio()
                 i += 1
             track_tag, meta_val = yield ratio
