@@ -3,7 +3,6 @@ import yaml
 import copy
 import re
 
-
 class Constants:
     batch_constants_def = None
     batch_constants = None
@@ -70,5 +69,9 @@ class Constants:
                         exit()
                     answer = input("Please enter 'y' or 'n': ")
                     
+                    
+default_config = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
+Constants.load_config(default_config)
+
 
 __all__ = ['file_walker', 'serializers', 'tb_ui', 'util', 'FileWalker', 'TomatoBanana']

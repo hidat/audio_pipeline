@@ -7,7 +7,10 @@ from ...util.AudioFileFactory import AudioFileFactory
 from ..util import Resources
 from ...util import Exceptions
 
-MAX_RELEASES = 30
+MAX_RELEASES = 500
+MATCHING_RATIO = .75
+FEW_TRACKS = 3
+WRONG_SINGLE = .4
 
 
 class LoadReleases(threading.Thread):
@@ -79,12 +82,12 @@ class LoadReleases(threading.Thread):
             while len(self.next_buffer) >= self.max_buffer or \
                 (0 < next_limit <= self.current_release.current[0]) and \
                 (len(self.prev_buffer) >= self.max_buffer or
-                    self.current_release.current[0] <= prev_limit) or self.loaded % 7 == 0:
+                    self.current_release.current[0] <= prev_limit):
                  
                 print("waiting (for a miracle)")
                 self.current_release.cond.wait()
                 
-                if self.current_release.current is None or self.loaded % 7 == 0:
+                if self.current_release.current is None:
                     break
             self.current_release.cond.release()
 
@@ -142,7 +145,6 @@ class LoadReleases(threading.Thread):
                     (InputPatterns.unknown_artist.match(str(file_data.album_artist))) and \
                     not str(file_data.album_artist):
                 index = 0
-                to_scan.add(index)
             else:
                 if (file_data.mbid.value, file_data.disc_num.value) in indices:
                     index = indices[(file_data.mbid.value, file_data.disc_num.value)]
@@ -160,15 +162,21 @@ class LoadReleases(threading.Thread):
 
             releases[index].append(file_data)
             
-
-        for i in to_scan:
-            print(i)
-            lookup.Release(releases[i]).stuff_meta()
-            self.scanned += 1
+        for i in range(len(releases)):
+            if i in to_scan or 0 < len(releases[i]) <= FEW_TRACKS:
+                print(releases[i])
+                r = lookup.Release(releases[i])
+                match = r.mbid_comp()
+                print(match)
+                if match is not None and (match > MATCHING_RATIO or
+                    (len(releases[i]) < FEW_TRACKS and match < WRONG_SINGLE)):
+                    r.stuff_meta()
+                self.scanned += 1
 
         if len(releases[0]) <= 0:
             releases.pop(0)
-            
+        else:
+            lookup.Release(releases[0]).stuff_meta()
             
         for release in releases:
             release.sort(key=lambda x: x.track_num.value if x.track_num.value is not None else 0)
