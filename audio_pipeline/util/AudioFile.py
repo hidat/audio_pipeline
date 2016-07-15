@@ -85,7 +85,7 @@ class BaseAudioFile:
             yield item
             
     def track(self):
-        return [self.track_num, self.title, self.artist, self.length]
+        return [self.track_num, self.title, self.artist, self.length, self.item_code]
     
     def release(self):
-        return [self.album_artist, self.album, self.label, self.disc_num, self.release_date, self.mbid, self.item_code]
+        return [self.album_artist, self.album, self.label, self.disc_num, self.release_date, self.mbid]

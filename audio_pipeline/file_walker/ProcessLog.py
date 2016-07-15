@@ -2,13 +2,33 @@ import datetime
 import os
 
 
+# class JsonLog:
+
+    # def __init__(self, output_file):
+        # """
+        # Writes a JSON-formatted log to use in review processing
+        # """
+        
+        # self.log_file = output_file
+        # self.json_log = None
+        # self.items = []
+        
+    # def log_item(self, release, tracks=None):
+        # self.items[]
+        
+        
+    # def add_track(self, release, track):
+        
+    # def track_log(self, track):
+    
+            
 class ProcessLog:
 
     type_index = 0
     id_index = 1
     name_index = 2
 
-    def __init__(self, output_dir, release=True, label=True):
+    def __init__(self, output_dir, json_log=True, release=True, label=True):
         """
         Writes logs for releases, tracks, labels, and artists.
         
@@ -37,6 +57,9 @@ class ProcessLog:
         
         if label:
             self.label_log = os.path.join(self.log_dir, now.strftime("label_log_%d-%m-%y-%H%M%S%f.txt"))
+            
+        # if json_log:
+            # self.json_log = JsonLog(os.path.join(self.log_dir, now.strftime("review_json_log_%d-%m-%y-%H%M%S%f.txt"))
 
         # to prevent duplicates, we'll keep a set of release, artist, track, and label item codes
         self.glossaries = set([])
@@ -112,3 +135,4 @@ class ProcessLog:
                         log = "\t".join(log)
                         log += "\r\n"
                         file.write(log.encode('UTF-8'))
+                        

@@ -164,7 +164,6 @@ class LoadReleases(threading.Thread):
             
         for i in range(len(releases)):
             if i in to_scan or 0 < len(releases[i]) <= FEW_TRACKS:
-                print(releases[i])
                 r = lookup.Release(releases[i])
                 match = r.mbid_comp()
                 print(match)
@@ -177,6 +176,7 @@ class LoadReleases(threading.Thread):
             releases.pop(0)
         else:
             lookup.Release(releases[0]).stuff_meta()
+            self.scanned += 1
             
         for release in releases:
             release.sort(key=lambda x: x.track_num.value if x.track_num.value is not None else 0)
