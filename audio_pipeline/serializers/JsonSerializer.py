@@ -1,50 +1,47 @@
 __author__ = 'cephalopodblue'
 import json
-import os.path as path
+import os
+from . import Serializer
 
-def serialize(metadata, release_data, track_data, old_file):
-    """
-    Produces a json-formatted string of all metadata
+class JsonSerializer:
+        
+    @staticmethod
+    def release_json(release):
+        """
+        Get a dictionary that we like & json also likes
+        """
+        release_data = {"glossary_title": release.glossary_title, "item_code": release.item_code, \
+                        "name": release.title, "artist": release.artist}
+        return json.dumps(release_data)
+    
+    @staticmethod
+    def track_json(track):
+        track_data = {"track_num": track.track_num, "track_name": track.title, \
+                      "item_code": track.item_code}
+        return json.dumps(track_data)
 
-    :param metadata: The raw metadata
-    :param release_data: The release metadata from musicbrainz
-    :param track_data: The track metadata from musicbrainz
-    :param old_file: The name of the original file
-    :return: A json-formatted string with all metadata
-    """
-    assets = dict()
-    assets["file"] = str(track_data["track_id"])
-    assets["old_file"] = path.basename(old_file)
+    @staticmethod
+    def artist_json(artist):
+        artist_data = {"name": artist.name, "item_code": artist.item_code}
+        return json.dumps(artist_data)
 
-    raw_meta = {}
-    for tag_name, tag_value in metadata.iteritems():
-        try:
-            json.dumps(tag_value)
-        except TypeError:
-            tag_value = str(tag_value)
-        raw_meta[tag_name] = tag_value
-
-    assets["raw_meta"] = raw_meta
-    assets["release"] = release_data
-    assets["track"] = track_data
-
-    return json.dumps({"assets": assets})
-
-
-def to_file(metadata, release_data, track_data, old_file, output_dir):
-    """
-    Prints json-formatted metadata to a file
-
-    :param metadata: The raw metadata
-    :param release_data: The release metadata from musicbrainz
-    :param track_data: Track metadata from musicbrainz
-    :param old_file: Original name of the audio file
-    :param output_dir: The directory that file is being written to
-    :return:
-    """
-    output_file = path.join(output_dir, track_data["track_id"] + ".json")
-    curr_file = open(output_file, "w+")
-
-    formatted_data = serialize(metadata, release_data, track_data, old_file)
-
-    curr_file.write(formatted_data)
+        
+class JsonLogger:
+    
+    def __init__(self, output_dir):
+        self.releases = os.path.join(output_dir, "releases.json")
+        self.track_dir = os.path.join(output_dir, "tracks")
+        
+        if not os.path.exists(self.track_dir):
+            os.makedirs(self.track_dir)
+            
+    def log_release(self, release):
+        with open(self.releases, "a+") as f:
+            f.write(JsonSerializer.release_json(release))
+            f.write("\n")
+            
+    def log_track(self, track):
+        track_file = os.path.join(self.track_dir, (track.release_id + ".json"))
+        with open(track_file, "a+") as f:
+            f.write(JsonSerializer.track_json(track))
+            f.write("\n")

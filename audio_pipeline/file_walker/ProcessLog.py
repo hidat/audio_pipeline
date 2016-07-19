@@ -1,26 +1,7 @@
 import datetime
 import os
+from audio_pipeline.serializers.JsonSerializer import JsonLogger
 
-
-# class JsonLog:
-
-    # def __init__(self, output_file):
-        # """
-        # Writes a JSON-formatted log to use in review processing
-        # """
-        
-        # self.log_file = output_file
-        # self.json_log = None
-        # self.items = []
-        
-    # def log_item(self, release, tracks=None):
-        # self.items[]
-        
-        
-    # def add_track(self, release, track):
-        
-    # def track_log(self, track):
-    
             
 class ProcessLog:
 
@@ -41,6 +22,7 @@ class ProcessLog:
         self.log_dir = output_dir
         self.release_log = None
         self.label_log = None
+        self.json_log = json_log
         
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
@@ -58,9 +40,10 @@ class ProcessLog:
         if label:
             self.label_log = os.path.join(self.log_dir, now.strftime("label_log_%d-%m-%y-%H%M%S%f.txt"))
             
-        # if json_log:
-            # self.json_log = JsonLog(os.path.join(self.log_dir, now.strftime("review_json_log_%d-%m-%y-%H%M%S%f.txt"))
-
+        if self.json_log:
+            json_dir = os.path.join(self.log_dir, now.strftime("review_json_log_%d-%m-%y-%H%M%S%f"))
+            self.json_log = JsonLogger(json_dir)
+            
         # to prevent duplicates, we'll keep a set of release, artist, track, and label item codes
         self.glossaries = set([])
         
@@ -78,7 +61,8 @@ class ProcessLog:
             self.save_log(self.log_file, log_items)
             if self.release_log:
                 self.save_log(self.release_log, log_items)
-        
+            if self.json_log:
+                self.json_log.log_release(release)
     
     ####################
     #   Track, Artist, Label all have format
@@ -90,6 +74,8 @@ class ProcessLog:
         log_items = self.log_list(track)
         if log_items:
             self.save_log(self.log_file, log_items)
+            if self.json_log:
+                self.json_log.log_track(track)
     
     def log_artist(self, artist, group_members = []):
         logs = list()

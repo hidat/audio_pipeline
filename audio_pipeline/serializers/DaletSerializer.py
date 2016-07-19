@@ -4,45 +4,19 @@ from yattag import Doc, indent
 from audio_pipeline import Constants
 from audio_pipeline.file_walker import ProcessLog
 from audio_pipeline.util import Util
+from . import Serializer
 
 __author__ = 'hidat'
 
 
-class DaletSerializer:
-
-    def __init__(self, output_dir):
-        # Set up metadata directories
-        self.track_meta_dir = path.join(output_dir, 'track_meta')
-        if not path.exists(self.track_meta_dir):
-            os.makedirs(self.track_meta_dir)
-        print("Track meta: ", self.track_meta_dir)
-        
-        if Constants.batch_constants.artist_gen:
-            self.artist_meta_dir = path.join(output_dir, 'artist_meta')
-            if not path.exists(self.artist_meta_dir):
-                os.makedirs(self.artist_meta_dir)
-            print("Artist meta: ", self.artist_meta_dir)
-        
-        self.release_meta_dir = path.join(output_dir, 'release_meta')
-        if not path.exists(self.release_meta_dir):
-            os.makedirs(self.release_meta_dir)
-        print("Release meta: ", self.release_meta_dir)
-        
-        log_dir = path.join(output_dir, 'session_logs')
-        if not path.exists(log_dir):
-            os.makedirs(log_dir)
-        self.logs = ProcessLog.ProcessLog(log_dir, release=True, label=True)
-        print("Logs: ", self.logs.log_dir)
-
-        
+class DaletSerializer(Serializer.Serializer):
+    
     def save_track(self, release, track):
         """
         Create an XML file of track metadata that Dalet will be happy with
 
-        :param release_data: Processed release metadata from MusicBrainz
-        :param track_data: Processed track metadata from MusicBrainz
-        :param batch_meta: Batch metadata (from command line)
-        :param output_dir: Output directory to write XML file to
+        :param release: Processed release metadata
+        :pram track: Processed track metadata
         """
         doc, tag, text = Doc().tagtext()
         
@@ -221,7 +195,7 @@ class DaletSerializer:
             f.write(formatted_data.encode("UTF-8"))
 
             
-    def save_artist(self, artist, artist_members):
+    def save_artist(self, artist, members):
         """
         Create an XML file of artist metadata that Dalet will be happy with.
         
@@ -229,7 +203,7 @@ class DaletSerializer:
         all member metadata (for artists new to this batch) will also be generated.
         
         :param artist: Processed metadata from MusicBrainz for 'main' artist
-        :param artist_members: Processed artist metadata from MusicBrainz for any members of 'artist'
+        :param members: Processed artist metadata from MusicBrainz for any members of 'artist'
         :param output_dir: Output directory to write XML file to
         """
 
@@ -238,13 +212,13 @@ class DaletSerializer:
         # get metadata for artist and, if artist is a group
         # all group members (that have not yet had metadata generated this batch)
         
-        self.logs.log_artist(artist, artist_members)
+        self.logs.log_artist(artist, members)
         
         doc, tag, text = Doc().tagtext()
 
         doc.asis('<?xml version="1.0" encoding="UTF-8"?>')
         with tag('Titles'):
-            for member in artist_members:
+            for member in members:
                 with tag('GlossaryValue'):
                     self.save_one_artist(member, tag, text)
 
