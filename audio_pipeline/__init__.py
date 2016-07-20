@@ -3,6 +3,12 @@ import yaml
 import copy
 import re
 
+# from audio_pipeline.util.AudioFile import BaseAudioFile as audiofile
+# from audio_pipeline.util.Process import Processor as processor
+# import audio_pipeline.serializers.DaletSerializer as serializer
+# from audio_pipeline.util.Resources import BatchConstants as batch_constants
+
+
 class Constants:
     batch_constants_def = None
     batch_constants = None
@@ -25,28 +31,31 @@ class Constants:
         if os.path.exists(config_file):
             with open(config_file, "r") as f:
                 config = yaml.load(f)
+                cls.load(config)
 
-            if "default" in config:
-                default_file = os.path.join(cls.config_dir, config["default"] + '.yml')
-                if os.path.exists(default_file):
-                    with open(default_file, "r") as f:
-                        default_config = yaml.load(f)
-                        config.update(default_config)
+    @classmethod
+    def load(cls, config):
+        if "default" in config:
+            default_file = os.path.join(cls.config_dir, config["default"] + '.yml')
+            if os.path.exists(default_file):
+                with open(default_file, "r") as f:
+                    default_config = yaml.load(f)
+                    config.update(default_config)
 
-                if "batch constants" in config:
-                    cls.batch_constants_def = config["batch constants"]
-                    cls.batch_constants = cls.batch_constants_def(None)
-                if "audiofile" in config:
-                    cls.audiofile = config["audiofile"]
-                if "processor" in config:
-                    cls.processor = config["processor"]
-                if "serializer" in config:
-                    cls.serializer = config["serializer"]
-                if "argument_config" in config:
-                    cls.argument_config = config["argument_config"]
-                if "custom_tags" in config:
-                    cls.custom_tags = config["custom_tags"]
-                    
+        if "batch constants" in config:
+            cls.batch_constants_def = config["batch constants"]
+            cls.batch_constants = cls.batch_constants_def(None)
+        if "audiofile" in config:
+            cls.audiofile = config["audiofile"]
+        if "processor" in config:
+            cls.processor = config["processor"]
+        if "serializer" in config:
+            cls.serializer = config["serializer"]
+        if "argument_config" in config:
+            cls.argument_config = config["argument_config"]
+        if "custom_tags" in config:
+            cls.custom_tags = config["custom_tags"]
+
     @classmethod
     def setup(cls, args, user=None):
         if user is not None:
@@ -69,7 +78,7 @@ class Constants:
                         exit()
                     answer = input("Please enter 'y' or 'n': ")
                     
-                    
+
 default_config = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
 Constants.load_config(default_config)
 

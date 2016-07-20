@@ -2,15 +2,10 @@ import os
 import collections
 from ..model import MoveFiles
 from ...util.AudioFileFactory import AudioFileFactory
-from ..util import Resources
-from ..util import InputPatterns
 from ...util import Exceptions
 from . import Rules
 from . import LoadReleases
 
-max_af = 700
-
-max_queued = 20
 
 class ProcessDirectory(object):
 
