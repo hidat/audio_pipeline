@@ -45,12 +45,9 @@ class MetaController:
         if tracks:
             # input is (probably) track metadata (currently only RED DOT, YELLOW DOT, CLEAN EDIT, clear (l))
             try:
-                track_nums = tracks.group(InputPatterns.tracknum_acc)
-                if re.search("all", track_nums):
+                track_nums = InputPatterns.get_track_numbers(tracks.group())
+                if "all" in track_nums:
                     track_nums = self.model.track_nums()
-                else:
-                    track_nums = re.findall("\d+", track_nums)
-                    track_nums = set([int(track_num) for track_num in track_nums])
                 value = tracks.group(InputPatterns.meta_acc)
                 self.new_meta_input(track_nums, value)
             except ValueError as e:
@@ -175,7 +172,6 @@ class MetaController:
         Close TomatoBanana; move files into appropriate folders
         """
         self.model.processing_complete.move_files(self.model)
-        
         
     def choose_dir(self, root_dir):
         if root_dir > "":

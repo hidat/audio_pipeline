@@ -5,12 +5,6 @@ from audio_pipeline import Constants
 from . import Process
 from . import MBInfo
 
-class ReleaseLookup:
-    
-    api_key = "kz7oZf3Wbc"
-    
-    def __init__(self, client_key):
-        self.client_key = client_key
         
 class Release:
 
@@ -38,6 +32,7 @@ class Release:
         self.likely_release = None
         self.processor = Process.Processor(MBInfo.MBInfo(), Constants.processor)
         self.release = None
+        self.can_lookup = True
         
     def weight(self, track, fingerprint_score, releasegroup):
         base_score = 0
@@ -95,33 +90,39 @@ class Release:
         # gonna want to look into some actual clever stuff for here, but for now:
         self.releases = dict()
         self.common_releases = dict()
-        
-        if num_lookups > len(self.tracks):
-            num_lookups = len(self.tracks) 
-            
-        # for now, let's just take ~four releases haha
-        for track in random.sample(self.tracks, num_lookups):
-        
-            # fingerprint & lookup each track in the AcoustID database
-            fingerprint = acoustid.fingerprint_file(track.file_name)
-            result = acoustid.lookup(self.api_key, fingerprint[1], fingerprint[0], self.meta)
-            self.results.append(result)
 
-            for trackId in result["results"]:
-                if "recordings" in trackId:
-                    for recording in trackId["recordings"]:
-                        # start out just keeping track of all common releases
-                        if "releasegroups" in recording:
-                            for releasegroup in recording["releasegroups"]:
-                                self.weight(track, trackId["score"], releasegroup)
-                            
-        for release, score in self.common_releases.items():
-            if score > self.max_score:
-                self.likely_release = release
-                self.max_score = score
-                
-        print("likely release: " + str(self.likely_release))
-        print("max score: " + str(self.max_score))
+        if self.can_lookup:
+            if num_lookups > len(self.tracks):
+                num_lookups = len(self.tracks)
+
+            # for now, let's just take ~four releases haha
+            for track in random.sample(self.tracks, num_lookups):
+
+                # fingerprint & lookup each track in the AcoustID database
+                try:
+                    fingerprint = acoustid.fingerprint_file(track.file_name)
+                except acoustid.FingerprintGenerationError:
+                    print("no way to generate fingerprint")
+                    self.can_lookup = False
+                    return
+                result = acoustid.lookup(self.api_key, fingerprint[1], fingerprint[0], self.meta)
+                self.results.append(result)
+
+                for trackId in result["results"]:
+                    if "recordings" in trackId:
+                        for recording in trackId["recordings"]:
+                            # start out just keeping track of all common releases
+                            if "releasegroups" in recording:
+                                for releasegroup in recording["releasegroups"]:
+                                    self.weight(track, trackId["score"], releasegroup)
+
+            for release, score in self.common_releases.items():
+                if score > self.max_score:
+                    self.likely_release = release
+                    self.max_score = score
+
+            print("likely release: " + str(self.likely_release))
+            print("max score: " + str(self.max_score))
         
     def stuff_meta(self):
         if not self.likely_release:
@@ -131,8 +132,8 @@ class Release:
                 self.release = self.processor.get_release(self.likely_release)
             meta = self.release.release
 
-            
-            
+
+
             # stuff audiofiles using values from musicbrainz
             for track in self.tracks:
                 track.mbid.value = meta.id
@@ -157,7 +158,7 @@ class Release:
                     track.artist.value = meta.artist
                     track.title.value = ""
 
-                    
+
                 track.save()
 
     def mbid_comp(self, ignore_mbid=False):
@@ -181,10 +182,10 @@ class Release:
                 ratio = calc_ratio.send((track.album_artist, meta.artist))
                 ratio = calc_ratio.send((track.release_date, meta.date))
                 ratio = calc_ratio.send((track.disc_num, meta.disc_count))
-                
+
                 if len(meta.labels) > 0:
                     track.label.value = meta.labels[0].title
-                    
+
                 if meta.disc_count is not None and \
                     track.disc_num.value <= meta.disc_count:
                     track_meta = self.release.get_track(track)
@@ -200,17 +201,16 @@ class Release:
                     # this release will not work at all
                     ratio = 0
                     break
-            return(ratio)
+            return ratio
                         
     def calc_ratio(self, track_tag, meta_val):
         ratio = 1
         i = 1
 
         while True:
-            if track_tag != None and track_tag.value != None:
+            if not (track_tag is None or track_tag.value is None):
                 self.sequence_matcher.set_seqs(str(track_tag), str(meta_val))
                 curr = self.sequence_matcher.quick_ratio()
-                #if (curr < .7):
                 ratio = ratio * (i - 1) / i + (1 / i) * self.sequence_matcher.ratio()
                 i += 1
             track_tag, meta_val = yield ratio

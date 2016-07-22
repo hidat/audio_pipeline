@@ -67,8 +67,9 @@ class BaseAudioFile:
         self.disc_num = self.format.disc_num(self.audio)
         self.track_num = self.format.track_num(self.audio)
         self.length = self.format.length(self.audio)
-        
+
         self.item_code = self.format.custom_tag(CustomTags.item_code, self.audio)
+        self.scanned = self.format.custom_tag("scanned", self.audio)
 
     def save(self):
         for item in self:
