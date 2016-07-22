@@ -1,3 +1,5 @@
+from . import Serializer
+
 from . import DaletSerializer
 from . import JsonSerializer
 

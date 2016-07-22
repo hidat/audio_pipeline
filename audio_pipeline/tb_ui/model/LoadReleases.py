@@ -55,8 +55,11 @@ class LoadReleases(threading.Thread):
                 print("loading next")
                 # haven't filled in next_buffer / have moved forward
                 # get next value
-                last_release = self.next_buffer.popleft()
-                self.next_buffer.appendleft(last_release)
+                if len(self.next_buffer) > 0:
+                    last_release = self.next_buffer.popleft()
+                    self.next_buffer.appendleft(last_release)
+                else:
+                    last_release = self.current_release.current[0]
 
                 i = last_release[0] + 1
                 self.current_release.cond.release()
@@ -183,7 +186,6 @@ class LoadReleases(threading.Thread):
             buffer.appendleft((dir_index, release))
 
 
-            
 class CurrentReleases:
 
     def __init__(self, directories, timeout=.01):

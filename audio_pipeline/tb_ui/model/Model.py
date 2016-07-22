@@ -1,5 +1,6 @@
 import os
 import collections
+import time
 from ..model import MoveFiles
 from ...util.AudioFileFactory import AudioFileFactory
 from ...util import Exceptions
@@ -59,16 +60,21 @@ class ProcessDirectory(object):
             
     def next(self):
         if self.current_release is not None:
-           self.prev_buffer.append(self.__current_release.current)
+            self.prev_buffer.append(self.__current_release.current)
 
+        while len(self.next_buffer) <= 0:
+            time.sleep(.02)
+            print("waiting: " + str(len(self.next_buffer)))
         self.__current_release.current = self.next_buffer.pop()
 
         return self.current_release
 
     def prev(self):
         if self.current_release is not None:
-           self.next_buffer.append(self.__current_release.current)
+            self.next_buffer.append(self.__current_release.current)
 
+        while len(self.prev_buffer) <= 0:
+            time.sleep(.02)
         self.__current_release.current = self.prev_buffer.pop()
         
         return self.current_release
@@ -85,12 +91,11 @@ class ProcessDirectory(object):
                     
         return self.current_release
 
-        
     def has_next(self):
-        return len(self.next_buffer) != 0
+        return len(self.next_buffer) > 0 or self.__current_release.current[0] < len(self.__current_release.directories) - 1
 
     def has_prev(self):
-        return len(self.prev_buffer) != 0
+        return len(self.prev_buffer) > 0 or self.__current_release.current[0] > 0
 
     @staticmethod
     def is_release(directory):

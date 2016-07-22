@@ -1,9 +1,14 @@
-import acoustid
+try:
+    import acoustid
+    have_acoustid = True
+except ImportError:
+    have_acoustid = False
 import random
 import difflib
 from audio_pipeline import Constants
 from . import Process
 from . import MBInfo
+import os
 
         
 class Release:
@@ -32,8 +37,23 @@ class Release:
         self.likely_release = None
         self.processor = Process.Processor(MBInfo.MBInfo(), Constants.processor)
         self.release = None
-        self.can_lookup = True
-        
+        self.can_lookup = False
+
+        # figure out just putting an fpcalc exe in here & then setting the environment variable from there
+        # if acoustid.FPCALC_ENVVAR not in os.environ:
+        #     os.environ[acoustid.FPCALC_ENVVAR]
+
+        # this is terrible (but not as terrible as just tellin' you to set your FPCALC variable??)
+        fpcalc_name = os.path.join("MusicBrainz Picard", "fpcalc.exe")
+        fpcalc_path = os.path.join(os.environ["ProgramFiles"], fpcalc_name)
+        if os.path.exists(fpcalc_path):
+            os.environ[acoustid.FPCALC_ENVVAR] = fpcalc_path
+        fpcalc_path = os.path.join(os.environ["ProgramFiles(x86)"], fpcalc_name)
+        if os.path.exists(fpcalc_path):
+            os.environ[acoustid.FPCALC_ENVVAR] = fpcalc_path
+        if os.path.exists(os.environ[acoustid.FPCALC_ENVVAR]):
+            self.can_lookup = True
+
     def weight(self, track, fingerprint_score, releasegroup):
         base_score = 0
         
@@ -91,7 +111,7 @@ class Release:
         self.releases = dict()
         self.common_releases = dict()
 
-        if self.can_lookup:
+        if have_acoustid and self.can_lookup:
             if num_lookups > len(self.tracks):
                 num_lookups = len(self.tracks)
 

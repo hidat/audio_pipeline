@@ -41,8 +41,7 @@ class BatchConstants:
         """
         if path.exists(args.input_directory):
             self.input_directory = args.input_directory
-        if path.exists(args.output_directory):
-            self.output_directory = args.output_directory
+        self.output_directory = args.output_directory
 
         if args.no_artist:
             self.artist_gen = not args.no_artist

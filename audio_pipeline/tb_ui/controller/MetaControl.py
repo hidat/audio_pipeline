@@ -7,7 +7,6 @@ from ..util import InputPatterns
 from ..util import Resources
 import time
 import os
-import re
 
 
 class MetaController:
