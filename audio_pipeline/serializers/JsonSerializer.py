@@ -1,7 +1,6 @@
 __author__ = 'cephalopodblue'
 import json
 import os
-from . import Serializer
 
 class JsonSerializer:
         

@@ -1,7 +1,9 @@
 import re
 
-
-class Track:
+###
+# Review Track
+###
+class ReviewTrack:
     reNumberExtract = re.compile(r"(\d+)")
 
     def __init__(self, rawTrack):

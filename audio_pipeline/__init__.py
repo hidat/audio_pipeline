@@ -77,6 +77,8 @@ class Constants:
                     elif re.match(answer, "no") or re.match("no", answer):
                         exit()
                     answer = input("Please enter 'y' or 'n': ")
+        else:
+            cls.batch_constants.set(args)
                     
 
 default_config = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]

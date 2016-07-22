@@ -6,7 +6,7 @@ import html
 import csv
 import os
 from .review import Review
-from .track import Track
+from .reviewtrack import ReviewTrack
 
 
 class ReviewParser:
@@ -101,7 +101,7 @@ class ReviewParser:
             self.review.tracks = []
             rawTracks = self.reTrackSplit.split(self.review.trackList)
             for t in rawTracks:
-                track = Track(t)
+                track = ReviewTrack(t)
                 self.review.tracks.append(track)
                 if track.stars == 3:
                     self.review.threeStarTracks.append(track)

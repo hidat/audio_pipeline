@@ -1,7 +1,9 @@
 import re
 import html
 
-
+###
+# Holds a single review
+###
 class Review:
 
     def __init__(self):

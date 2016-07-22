@@ -16,6 +16,7 @@ class SSRelease:
         self.obscenityRating = cells[6].value
         self.mbID = cells[9].value
         self.daletGlossaryName = cells[10].value
+        self.tracks = None
 
 ####
 # Very simple wrapper around the Smartsheet SDK used to read the contents of a sheet that is assumed to be our weekly release sheet
