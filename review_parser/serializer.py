@@ -49,7 +49,7 @@ class DaletSerializer:
         with open(output_file, "wb") as f:
             f.write(formatted_data.encode("UTF-8"))
 
-    def save_track(self, track):
+    def saveTrack(self, track):
         """
         Create an XML file of track metadata that Dalet will be happy with
 
@@ -66,13 +66,13 @@ class DaletSerializer:
         with tag('titles'):
             with tag('title'):
                 with tag('ItemCode'):
-                    text(track.item_code)
+                    text(track.itemCode)
                 with tag('Key1'):
-                    text(track.item_code)
+                    text(track.itemCode)
                 with tag('KEXPStarRating'):
                     text(track.stars)
-                with tag('Title'):
-                    text(track.title)
+                #with tag('Title'):
+                #    text(track.title)
 
         formatted_data = indent(doc.getvalue())
         output_file = path.join(output_dir, track.item_code + ".xml")

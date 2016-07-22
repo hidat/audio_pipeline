@@ -30,10 +30,19 @@ def findRelease(review,  releases):
 
 def mergeReviewsAndReleases(reviews, releases):
     for review in reviews:
-        r = findRelease(review, releases)
-        if r is not None:
-            review.mbID = r.mbID
-            review.daletGlossaryName = r.daletGlossaryName
+        release = findRelease(review, releases)
+        if release is not None:
+            review.mbID = release.mbID
+            review.daletGlossaryName = release.daletGlossaryName
+            if release.tracks:
+                for track in review.tracks:
+                    if track.trackNum is not None:
+                        trackNum = int(track.trackNum)
+                        if trackNum in release.tracks:
+                            releaseTrack = release.tracks[trackNum]
+                            track.itemCode = releaseTrack.itemCode
+                            track.title = releaseTrack.title
+
     return reviews
 
 def getMbIdFromUser(review):
@@ -85,7 +94,7 @@ def exportReviews(reviews, outputDirectory):
 def main():
     argParser = argparse.ArgumentParser(description='Processes a KEXP weekly review documents and generate Dalet review import.')
     argParser.add_argument('input_file', help="Word document to process.  Only docx files are supported.")
-    argParser.add_argument('-l', '--log_file', help="JSON Release Log File")
+    argParser.add_argument('-l', '--log_dir', help="JSON Release Log File")
     argParser.add_argument('-k', '--api_key', help="Your Smartsheet API Key")
     argParser.add_argument('-d', '--dalet', help="Directory to put Dalet Impex files in.")
     argParser.add_argument('-w', '--worksheet', help="Smartsheet Worksheet ID that contains the reviews associated MusicBrainz ID's")
@@ -101,7 +110,7 @@ def main():
     else:
         config = {}
 
-    jsonLogFile = args.log_file
+    jsonLogDir = args.log_dir
 
     if args.worksheet is None:
         if 'worksheet' in config:
@@ -121,7 +130,7 @@ def main():
     else:
         daletDirectory = args.dalet
 
-    if jsonLogFile is None:
+    if jsonLogDir is None:
         if apiKey is None:
             print("No API key provided.  Please specify your Smartsheet API key using the '-k' option, or set it in your 'review_parser.yml' file.")
             return
@@ -140,11 +149,11 @@ def main():
 
     if len(reviews) > 0:
         exportCount = 0
-        if jsonLogFile is None:
+        if jsonLogDir is None:
             sdk = ssheet.SDK(apiKey)
             releases = sdk.readWeeklySheet(sheetId)
         else:
-            releases = mb_release.readReleaseLog(jsonLogFile)
+            releases = mb_release.readReleaseLog(jsonLogDir)
 
         mergedReviews = mergeReviewsAndReleases(reviews, releases)
         foundCount = printReviews(mergedReviews)

@@ -9,6 +9,10 @@ class ReviewTrack:
     def __init__(self, rawTrack):
         self.rawTrack = rawTrack
         self.stars = 1
+        self.title = None
+        self.itemCode = None
+        self.title = None
+
         m = self.reNumberExtract.search(rawTrack)
 
         if m:

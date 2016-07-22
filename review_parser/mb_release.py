@@ -19,16 +19,44 @@ class MBRelease:
             if 'tracks' in jsonDict:
                 self.tracks = jsonDict['tracks']
 
+class MBTrack:
+    def __init__(self, jsonDict):
+        if jsonDict is not None:
+            self.trackNum = jsonDict['track_num']
+            self.title = jsonDict['track_name']
+            self.itemCode = jsonDict['item_code']
+
+
 ###
 # Reads the given release log, creating a array of MBRelease  objects
 ###
-def readReleaseLog(filename):
+def readReleaseLog(dirname):
     releases = []
+    tracksDirectory = path.join(dirname, 'tracks')
+    filename = path.join(dirname, 'releases.json')
     if path.isfile(filename):
         fp = open(filename)
         for rs in fp:
             parsedRelease = json.loads(rs)
             if parsedRelease is not None:
                 release = MBRelease(parsedRelease)
+
+                # Try and find the associated tracks log
+                trackLog = path.join(tracksDirectory, release.mbID + '.json')
+                release.tracks = readTrackLog(trackLog)
+
                 releases.append(release)
+
     return releases
+
+def readTrackLog(filename):
+    tracks = {}
+    if path.isfile(filename):
+        fp = open(filename)
+        for rs in fp:
+            parsedTracks = json.loads(rs)
+            if parsedTracks is not None:
+                track = MBTrack(parsedTracks)
+                tracks[track.trackNum] = track
+
+    return tracks
