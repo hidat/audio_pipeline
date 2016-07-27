@@ -24,7 +24,7 @@ forward = "forward"
 tracknum_acc = "track_num"
 meta_acc = "meta"
 
-track_num_pattern = re.compile('(((?P<start>(\\d+))\\s*-\\s*(?P<end>(\\d+)))|(?P<single>\\d+)|(?P<all>all))')
+track_num_pattern = re.compile('((((?P<start>(\\d+))\\s*-\\s*(?P<end>(\\d+)))|(?P<single>\\d+))\s*,*\s*|(?P<all>all))')
 
 #track_meta_pattern = re.compile('(?P<red>r+(ed)?)|(?P<yellow>y+(ellow)?)|(?P<clean>clear|l+)|(?P<clean>c+(lear))')
 
