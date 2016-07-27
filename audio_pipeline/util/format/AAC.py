@@ -148,6 +148,9 @@ class Format(Tag.MetadataFormat):
     _label = "----:com.apple.iTunes:Label"
     _mbid = "----:com.apple.iTunes:MBID"
     _mbid_p = "----:com.apple.iTunes:MusicBrainz Album Id"
+    _media_format = "media"
+    _country = "MusicBrainz Album Release Country"
+    _release_type = "MusicBrainz Album Type"
     
     # track-level serialization names
     _title = "\xa9nam"
@@ -155,6 +158,7 @@ class Format(Tag.MetadataFormat):
     _disc_num = "disk"
     _track_num = "trkn"
     _length = "Length"
+    _acoustid = "Acoustid Id"
 
     # custom tag base
     custom_tag_base = "----:com.apple.iTunes:"
@@ -190,6 +194,21 @@ class Format(Tag.MetadataFormat):
             tag = FreeformTag(cls._mbid_name, cls._mbid, tags)
         return tag
 
+    @classmethod
+    def country(cls, tags):
+        tag = FreeformTag(cls._country_name, cls._country, tags)
+        return tag
+
+    @classmethod
+    def media_format(cls, tags):
+        tag = FreeformTag(cls._media_format_name, cls._media_format, tags)
+        return tag
+
+    @classmethod
+    def release_type(cls, tags):
+        tag = FreeformTag(cls._type_name, cls._release_type, tags)
+        return tag
+
     ######################
     #   track-level tags
     ######################
@@ -212,6 +231,11 @@ class Format(Tag.MetadataFormat):
     @classmethod
     def track_num(cls, tags):
         tag = NumberTag(cls._track_num_name, cls._track_num, tags)
+        return tag
+
+    @classmethod
+    def acoustid(cls, tags):
+        tag = cls.custom_tag(cls._acoustid, tags)
         return tag
 
     #########################

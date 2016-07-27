@@ -30,6 +30,7 @@ class Obscenity:
     red = "RED DOT"
     yellow = "YELLOW DOT"
     clean = "CLEAN EDIT"
+    kexp_clean = "KEXP CLEAN EDIT"
     
 
 def is_mbid(id):

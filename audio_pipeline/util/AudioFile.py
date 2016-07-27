@@ -57,7 +57,10 @@ class BaseAudioFile:
         self.album_artist = self.format.album_artist(self.audio)
         self.release_date = self.format.release_date(self.audio)
         self.label = self.format.label(self.audio)
-                
+        self.country = self.format.country(self.audio)
+        self.release_type = self.format.release_type(self.audio)
+        self.media_format = self.format.media_format(self.audio)
+
         #######################
         #   track-level tags
         #######################
@@ -67,6 +70,7 @@ class BaseAudioFile:
         self.disc_num = self.format.disc_num(self.audio)
         self.track_num = self.format.track_num(self.audio)
         self.length = self.format.length(self.audio)
+        self.acoustid = self.format.acoustid(self.audio)
 
         self.item_code = self.format.custom_tag(CustomTags.item_code, self.audio)
         self.scanned = self.format.custom_tag("scanned", self.audio)
@@ -84,9 +88,23 @@ class BaseAudioFile:
         track = self.track()
         for item in track:
             yield item
+
+    def stuff_release(self, release):
+        self.mbid.value = release.id
+        self.album.value = release.title
+        self.album_artist.value = release.artist
+        self.release_date.value = release.date
+        if len(release.labels) > 0:
+            self.label.value = release.labels[0].title
+        self.country.value = release.country
+        if len(release.release_type) > 0:
+            self.release_type.value = release.release_type
+        if len(release.format) > 0:
+            self.media_format.value = release.format[0]
             
     def track(self):
         return [self.track_num, self.title, self.artist, self.length, self.item_code]
     
     def release(self):
-        return [self.album_artist, self.album, self.label, self.disc_num, self.release_date, self.mbid]
+        return [self.album_artist, self.album, self.label, self.disc_num, self.release_date, self.mbid,
+                self.country, self.release_type, self.media_format]

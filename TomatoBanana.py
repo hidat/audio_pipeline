@@ -1,4 +1,4 @@
-from audio_pipeline.tb_ui.controller import MetaControl
+from audio_pipeline.tb_ui.controller import TBController
 from audio_pipeline import Constants
 
 import argparse
@@ -16,7 +16,7 @@ def main():
 
     Constants.load_config(config_dir)
 
-    controller = MetaControl.MetaController(args.release_directory, args.copy)
+    controller = TBController.TBController(args.release_directory, args.copy)
     
     controller.app.mainloop()
 

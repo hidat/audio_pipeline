@@ -114,6 +114,7 @@ class Release(Content):
         self.format = []
         self.disambiguation = ""
         self.labels = []
+        self.release_type = ""
         
         self.artist_ids = []
         self.artist = ''

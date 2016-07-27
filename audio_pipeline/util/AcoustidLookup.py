@@ -119,22 +119,29 @@ class Release:
             for track in random.sample(self.tracks, num_lookups):
 
                 # fingerprint & lookup each track in the AcoustID database
+                print(track.acoustid)
+                if track.acoustid.value is not None:
+                    continue
                 try:
                     fingerprint = acoustid.fingerprint_file(track.file_name)
                 except acoustid.FingerprintGenerationError:
                     print("no way to generate fingerprint")
                     self.can_lookup = False
                     return
+
+                track.acoustid.value = "NOT_FOUND"
                 result = acoustid.lookup(self.api_key, fingerprint[1], fingerprint[0], self.meta)
                 self.results.append(result)
 
                 for trackId in result["results"]:
                     if "recordings" in trackId:
+                        track.acoustid.value = trackId["id"]
                         for recording in trackId["recordings"]:
                             # start out just keeping track of all common releases
                             if "releasegroups" in recording:
                                 for releasegroup in recording["releasegroups"]:
                                     self.weight(track, trackId["score"], releasegroup)
+                track.acoustid.save()
 
             for release, score in self.common_releases.items():
                 if score > self.max_score:
@@ -152,23 +159,15 @@ class Release:
                 self.release = self.processor.get_release(self.likely_release)
             meta = self.release.release
 
-
-
             # stuff audiofiles using values from musicbrainz
             for track in self.tracks:
-                track.mbid.value = meta.id
-                track.album.value = meta.title
-                track.album_artist.value = meta.artist
-                track.release_date.value = meta.date
-                if len(meta.labels) > 0:
-                    track.label.value = meta.labels[0].title
+                track.stuff_release(meta)
 
                 if meta.disc_count is None:
                     pass
                 elif track.disc_num.value <= meta.disc_count:
                     track_meta = self.release.get_track(track)
                     # need to create new processor w/ no item_code save - for now, just kill it here.
-                    track.item_code.value = None
                     track.title.value = track_meta.title
                     if track_meta.artist_phrase:
                         track.artist.value = track_meta.artist_phrase
@@ -178,7 +177,7 @@ class Release:
                     track.artist.value = meta.artist
                     track.title.value = ""
 
-
+                track.item_code.value = None
                 track.save()
 
     def mbid_comp(self, ignore_mbid=False):

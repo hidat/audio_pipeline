@@ -71,6 +71,8 @@ class ReleaseProcessor:
             release.title = meta['title']
             release.release_group_id = rg['id']
             release.first_released = rg['first-release-date']
+            if 'primary-type' in rg:
+                release.release_type = rg['primary-type']
             
             if 'tag-list' in rg:
                 release.tags = rg['tag-list']
@@ -169,7 +171,7 @@ class ReleaseProcessor:
         elif (audio_file.obscenity.value is not None and \
              audio_file.obscenity.value.casefold() == "kexp clean edit") or \
              (audio_file.radio_edit.value is not None and \
-             audio_file.radio_edit.value.casefold() == "kexpradioedit"):
+             audio_file.radio_edit.value.casefold() == "kexp radio edit"):
             item_code = str(uuid.uuid4())
         else:
             item_code = track_meta['id']

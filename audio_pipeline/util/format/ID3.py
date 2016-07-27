@@ -92,6 +92,10 @@ class NumberTag(Tag.NumberTagMixin, BaseTag):
 class CustomTag(BaseTag):
     _frame_type = mutagen.id3.TXXX
 
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.desc = self.serialization_name[5:]
+
     @property
     def value(self):
         return super().value
@@ -100,7 +104,7 @@ class CustomTag(BaseTag):
     def value(self, val):
         if val:
             if self._value is None:
-                self._value = self._frame_type(self._frame_encoding, self.name, val)
+                self._value = self._frame_type(self._frame_encoding, self.desc, val)
             self._value.text = [val]
         else:
             self._value = None
@@ -152,6 +156,10 @@ class ArtistTag(BaseTag):
     _frame_type = mutagen.id3.TPE1
 
 
+class FormatTag(BaseTag):
+    _frame_type = mutagen.id3.TMED
+
+
 class DiscNumberTag(NumberTag):
     _frame_type = mutagen.id3.TPOS
 
@@ -180,6 +188,9 @@ class Format(Tag.MetadataFormat):
     _label = "TPUB"
     _mbid = "TXXX:MBID"
     _mbid_p = "TXXX:MusicBrainz Album Id"
+    _release_type = "TXXX:MusicBrainz Album Type"
+    _country = "TXXX:MusicBrainz Album Release Country"
+    _media_format = "TMED"
 
     # track-level serialization names
     _title = "TIT2"
@@ -187,6 +198,7 @@ class Format(Tag.MetadataFormat):
     _disc_num = "TPOS"
     _track_num = "TRCK"
     _length = "TLEN"
+    _acoustid = "TXXX:Acoustid Id"
 
     ################
     #   release-level tags
@@ -219,6 +231,25 @@ class Format(Tag.MetadataFormat):
             tag = CustomTag(cls._mbid_name, cls._mbid, tags)
         return tag
 
+    @classmethod
+    def release_type(cls, tags):
+        tag = CustomTag(cls._type_name, cls._release_type, tags)
+        # if not tag.value:
+        #     tag = cls.custom_tag(cls._type_name, tags)
+        return tag
+
+    @classmethod
+    def country(cls, tags):
+        tag = CustomTag(cls._country_name, cls._country, tags)
+        # if not tag.value:
+        #     tag = cls.custom_tag(cls._country_name, tags)
+        return tag
+
+    @classmethod
+    def media_format(cls, tags):
+        tag = FormatTag(cls._media_format_name, cls._media_format, tags)
+        return tag
+
     ######################
     #   track-level tags
     ######################
@@ -241,6 +272,11 @@ class Format(Tag.MetadataFormat):
     @classmethod
     def track_num(cls, tags):
         tag = TrackNumberTag(cls._track_num_name, cls._track_num, tags)
+        return tag
+
+    @classmethod
+    def acoustid(cls, tags):
+        tag = CustomTag(cls._acoustid_name, cls._acoustid, tags)
         return tag
 
     #########################

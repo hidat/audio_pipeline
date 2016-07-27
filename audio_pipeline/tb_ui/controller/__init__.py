@@ -1,3 +1,3 @@
-from . import MetaControl
+from . import TBController
 
-__all__ = ['MetaControl']
+__all__ = ['MainTBController.py']

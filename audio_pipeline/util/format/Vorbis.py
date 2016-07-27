@@ -94,6 +94,9 @@ class Format(Tag.MetadataFormat):
     _label = "label"
     _mbid = "mbid"
     _mbid_p = "musicbrainz_albumid"
+    _country = "releasecountry"
+    _release_type = "releasetype"
+    _media_format = "media"
     
     # track-level serialization names
     _title = "title"
@@ -105,6 +108,7 @@ class Format(Tag.MetadataFormat):
     _track_total_picard = "totaltracks"
     _track_num = "tracknumber"
     _length = "Length"
+    _acoustid = "ACOUSTID_ID"
     
     ################
     #   release-level tags
@@ -137,6 +141,22 @@ class Format(Tag.MetadataFormat):
             tag = BaseTag(cls._mbid_name, cls._mbid, tags)
         return tag
 
+    @classmethod
+    def country(cls, tags):
+        tag = BaseTag(cls._country_name, cls._country, tags)
+        return tag
+
+    @classmethod
+    def release_type(cls, tags):
+        tag = BaseTag(cls._type_name, cls._release_type, tags)
+        return tag
+
+    @classmethod
+    def media_format(cls, tags):
+        tag = BaseTag(cls._media_format_name, cls._media_format, tags)
+        return tag
+
+
     ######################
     #   track-level tags
     ######################
@@ -164,7 +184,12 @@ class Format(Tag.MetadataFormat):
         if tag.total is None:
             tag = NumberTag(cls._track_total, cls._track_num_name, cls._track_num, tags)
         return tag
-        
+
+    @classmethod
+    def acoustid(cls, tags):
+        tag = BaseTag(cls._acoustid_name, cls._acoustid, tags)
+        return tag
+
     #########################
     #   custom tags
     #########################

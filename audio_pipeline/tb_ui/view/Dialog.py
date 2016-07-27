@@ -34,7 +34,7 @@ class Check(tk.Toplevel):
 
         c = tk.Checkbutton(f, text=check_message, variable=self.selected)
         c.pack()
-        c.select()
+        #c.select()
         c.focus_set()
         c.bind("<Return>", lambda x: c.toggle())
 
