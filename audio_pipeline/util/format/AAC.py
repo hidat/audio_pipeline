@@ -50,8 +50,12 @@ class FreeformTag(BaseTag):
         if self._value:
             values = list()
             for val in self._value:
+                #values.append(val)
                 values.append(val.encode('utf-8'))
-            self.mutagen[self.serialization_name] = values
+            try:
+                self.mutagen[self.serialization_name] = values
+            except TypeError:
+                self.mutagen[self.serialization_name] = [val for val in self._value]
         else:
             if self.serialization_name in self.mutagen:
                 self.mutagen.pop(self.serialization_name)

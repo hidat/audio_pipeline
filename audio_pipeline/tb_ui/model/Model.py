@@ -63,7 +63,7 @@ class ProcessDirectory(object):
             self.prev_buffer.append(self.__current_release.current)
 
         while len(self.next_buffer) <= 0:
-            time.sleep(.02)
+            time.sleep(.15)
             print("waiting: " + str(len(self.next_buffer)))
         self.__current_release.current = self.next_buffer.pop()
 

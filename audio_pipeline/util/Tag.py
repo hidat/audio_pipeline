@@ -174,6 +174,8 @@ class Tag(abc.ABC):
 
     def __str__(self):
         if self._value:
+            if isinstance(self._value, list):
+                return "\n".join(self._value)
             return str(self._value)
         else:
             return ""

@@ -9,6 +9,8 @@ from . import Tag
 
 class CustomTags:
     item_code = "ITEMCODE"
+    barcode = "BARCODE"
+    catalog_num = "CATALOGNUMBER"
 
 
 class BaseAudioFile:
@@ -73,6 +75,8 @@ class BaseAudioFile:
         self.acoustid = self.format.acoustid(self.audio)
 
         self.item_code = self.format.custom_tag(CustomTags.item_code, self.audio)
+        self.barcode = self.format.custom_tag(CustomTags.barcode, self.audio)
+        self.catalog_num = self.format.custom_tag(CustomTags.catalog_num, self.audio)
         self.scanned = self.format.custom_tag("scanned", self.audio)
 
     def save(self):
@@ -90,13 +94,17 @@ class BaseAudioFile:
             yield item
 
     def stuff_release(self, release):
+
         self.mbid.value = release.id
         self.album.value = release.title
         self.album_artist.value = release.artist
         self.release_date.value = release.date
         if len(release.labels) > 0:
-            self.label.value = release.labels[0].title
+            self.label.value = [label.title for label in release.labels]
+            self.catalog_num.value = [label.catalog_num for label in release.labels]
         self.country.value = release.country
+        if len(release.barcode) > 0:
+            self.barcode.value = release.barcode
         if len(release.release_type) > 0:
             self.release_type.value = release.release_type
         if len(release.format) > 0:
@@ -107,4 +115,4 @@ class BaseAudioFile:
     
     def release(self):
         return [self.album_artist, self.album, self.label, self.disc_num, self.release_date, self.mbid,
-                self.country, self.release_type, self.media_format]
+                self.country, self.release_type, self.media_format, self.barcode, self.catalog_num]

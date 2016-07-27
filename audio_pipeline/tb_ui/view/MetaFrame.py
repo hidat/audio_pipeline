@@ -138,6 +138,22 @@ class ReleaseFrame(MetaFrame):
             colval += 1
             self.attribute_widths.append(w)
 
+            w = 15
+            tag = track.barcode
+            self.attribute_text[tag.name] = tk.StringVar()
+            self.labels[1][tag.name] = tk.Label(self, self.name_style, text=tag.name)
+            self.labels[1][tag.name].grid(self.name_padding, row=rowval, column=colval)
+            colval += 1
+            self.attribute_widths.append(w)
+
+            w = 15
+            tag = track.catalog_num
+            self.attribute_text[tag.name] = tk.StringVar()
+            self.labels[1][tag.name] = tk.Label(self, self.name_style, text=tag.name)
+            self.labels[1][tag.name].grid(self.name_padding, row=rowval, column=colval)
+            colval += 1
+            self.attribute_widths.append(w)
+
         except AttributeError:
             pass
             

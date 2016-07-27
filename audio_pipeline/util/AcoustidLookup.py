@@ -44,15 +44,16 @@ class Release:
         #     os.environ[acoustid.FPCALC_ENVVAR]
 
         # this is terrible (but not as terrible as just tellin' you to set your FPCALC variable??)
-        fpcalc_name = os.path.join("MusicBrainz Picard", "fpcalc.exe")
-        fpcalc_path = os.path.join(os.environ["ProgramFiles"], fpcalc_name)
-        if os.path.exists(fpcalc_path):
-            os.environ[acoustid.FPCALC_ENVVAR] = fpcalc_path
-        fpcalc_path = os.path.join(os.environ["ProgramFiles(x86)"], fpcalc_name)
-        if os.path.exists(fpcalc_path):
-            os.environ[acoustid.FPCALC_ENVVAR] = fpcalc_path
-        if os.path.exists(os.environ[acoustid.FPCALC_ENVVAR]):
-            self.can_lookup = True
+        if have_acoustid:
+            fpcalc_name = os.path.join("MusicBrainz Picard", "fpcalc.exe")
+            fpcalc_path = os.path.join(os.environ["ProgramFiles"], fpcalc_name)
+            if os.path.exists(fpcalc_path):
+                os.environ[acoustid.FPCALC_ENVVAR] = fpcalc_path
+            fpcalc_path = os.path.join(os.environ["ProgramFiles(x86)"], fpcalc_name)
+            if os.path.exists(fpcalc_path):
+                os.environ[acoustid.FPCALC_ENVVAR] = fpcalc_path
+            if os.path.exists(os.environ[acoustid.FPCALC_ENVVAR]):
+                self.can_lookup = True
 
     def weight(self, track, fingerprint_score, releasegroup):
         base_score = 0
@@ -111,7 +112,7 @@ class Release:
         self.releases = dict()
         self.common_releases = dict()
 
-        if have_acoustid and self.can_lookup:
+        if self.can_lookup:
             if num_lookups > len(self.tracks):
                 num_lookups = len(self.tracks)
 
@@ -119,7 +120,6 @@ class Release:
             for track in random.sample(self.tracks, num_lookups):
 
                 # fingerprint & lookup each track in the AcoustID database
-                print(track.acoustid)
                 if track.acoustid.value is not None:
                     continue
                 try:
@@ -151,34 +151,12 @@ class Release:
             print("likely release: " + str(self.likely_release))
             print("max score: " + str(self.max_score))
         
-    def stuff_meta(self):
+    def save_mbid(self):
         if not self.likely_release:
             self.lookup()
         if self.likely_release:
-            if not self.release:
-                self.release = self.processor.get_release(self.likely_release)
-            meta = self.release.release
-
-            # stuff audiofiles using values from musicbrainz
             for track in self.tracks:
-                track.stuff_release(meta)
-
-                if meta.disc_count is None:
-                    pass
-                elif track.disc_num.value <= meta.disc_count:
-                    track_meta = self.release.get_track(track)
-                    # need to create new processor w/ no item_code save - for now, just kill it here.
-                    track.title.value = track_meta.title
-                    if track_meta.artist_phrase:
-                        track.artist.value = track_meta.artist_phrase
-                    else:
-                        track.artist.value = track_meta.artist_credit
-                else:
-                    track.artist.value = meta.artist
-                    track.title.value = ""
-
-                track.item_code.value = None
-                track.save()
+                track.mbid.value = self.likely_release
 
     def mbid_comp(self, ignore_mbid=False):
         if not ignore_mbid:

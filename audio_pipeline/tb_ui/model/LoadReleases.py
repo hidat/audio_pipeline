@@ -2,6 +2,10 @@ import threading
 import os
 import time
 from audio_pipeline.util import AcoustidLookup as lookup
+from audio_pipeline.util import Process
+from audio_pipeline.util import MBInfo
+from audio_pipeline.util import Util
+from audio_pipeline import Constants
 from ..util import InputPatterns
 from ...util.AudioFileFactory import AudioFileFactory
 from ..util import Resources
@@ -28,7 +32,8 @@ class LoadReleases(threading.Thread):
         self.current_release = current_release
         self.loaded = 0
         self.scanned = 0
-        
+        self.processor = Process.Processor(MBInfo.MBInfo(), Constants.processor)
+
         # make sure there are two releases pre-loaded
         for i in range(self.fuzz):
             self.load_release(self.next_buffer, i)
@@ -172,16 +177,41 @@ class LoadReleases(threading.Thread):
                 print(match)
                 if match is not None and (match > MATCHING_RATIO or
                     (len(releases[i]) < FEW_TRACKS and match < WRONG_SINGLE)):
-                    r.stuff_meta()
+                    r.save_mbid()
                 self.scanned += 1
 
         if len(releases[0]) <= 0:
             releases.pop(0)
         else:
-            lookup.Release(releases[0]).stuff_meta()
+            lookup.Release(releases[0]).save_mbid()
             self.scanned += 1
 
         for release in releases:
+
+            if Util.has_mbid(release[0]):
+                release_meta = self.processor.get_release(release[0].mbid.value)
+                meta = release_meta.release
+                # stuff any additional MB metadata
+                for track in release:
+                    track.stuff_release(meta)
+                    if meta.disc_count is None:
+                        track.mbid.value = None
+                        pass
+                    elif track.disc_num.value <= meta.disc_count:
+                        track_meta = release_meta.get_track(track)
+                        # need to create new processor w/ no item_code save - for now, just kill it here.
+                        track.title.value = track_meta.title
+                        if track_meta.artist_phrase:
+                            track.artist.value = track_meta.artist_phrase
+                        else:
+                            track.artist.value = track_meta.artist_credit
+                    else:
+                        track.artist.value = meta.artist
+                        track.title.value = ""
+
+                    track.item_code.value = None
+                    track.save()
+
             release.sort(key=lambda x: x.track_num.value if x.track_num.value is not None else 0)
             buffer.appendleft((dir_index, release))
 

@@ -7,16 +7,16 @@ from audio_pipeline.util import Util, Resources
 
 class Processor:
 
+    releases = dict()
+    artists = dict()
+
     def __init__(self, mbinfo, processor):
         self.processor = processor
         if mbinfo:
             self.mbinfo = mbinfo
         else:
             raise Exceptions.NoMusicBrainzError("Processor needs an MBInfo Object")
-            
-        self.releases = dict()
-        self.artists = dict()
-        
+
     def get_release(self, mbid):
         if self.mbinfo is None:
             raise Exceptions.NoMusicBrainzError("No MBInfo object when processing release " + str(mbid))
