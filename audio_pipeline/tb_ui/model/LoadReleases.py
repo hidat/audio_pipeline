@@ -64,7 +64,7 @@ class LoadReleases(threading.Thread):
                     last_release = self.next_buffer.popleft()
                     self.next_buffer.appendleft(last_release)
                 else:
-                    last_release = self.current_release.current[0]
+                    last_release = self.current_release.current
 
                 i = last_release[0] + 1
                 self.current_release.cond.release()
@@ -78,8 +78,11 @@ class LoadReleases(threading.Thread):
                 print("loading prev")
                 # haven't filled in prev_buffer / have moved forward
                 # so get next buffer
-                last_release = self.prev_buffer.popleft()
-                self.prev_buffer.appendleft(last_release)
+                if len(self.prev_buffer) > 0:
+                    last_release = self.prev_buffer.popleft()
+                    self.prev_buffer.appendleft(last_release)
+                else:
+                    last_release = self.current_release.current
 
                 i = last_release[0] - 1
                 self.current_release.cond.release()
