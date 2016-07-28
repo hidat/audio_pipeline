@@ -72,12 +72,7 @@ class Entry():
         old_meta = audio_file[tag_name].value
         new_meta = None
         if meta:
-            if type(old_meta) is int:
-                try:
-                    new_meta = int(meta)
-                except ValueError:
-                    new_meta = None
-            elif InputPatterns.whitespace.match(meta):
+            if InputPatterns.whitespace.match(meta):
                 new_meta = " "
             elif tag_name == "KEXPFCCOBSCENITYRATING":
                 obscenity_meta = InputPatterns.track_meta_pattern.match()
