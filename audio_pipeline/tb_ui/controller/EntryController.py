@@ -75,16 +75,17 @@ class Entry():
             if InputPatterns.whitespace.match(meta):
                 new_meta = " "
             elif tag_name == "KEXPFCCOBSCENITYRATING":
-                obscenity_meta = InputPatterns.track_meta_pattern.match()
+                obscenity_meta = InputPatterns.obscenity_rating.match(meta)
                 # figure out the appropriate tag to put here (to deal with misspellings, etc)
-                if obscenity_meta.group(InputPatterns.yellow):
-                    new_meta = Util.Obscenity.yellow
-                elif obscenity_meta.group(InputPatterns.red):
-                    new_meta = Util.Obscenity.red
-                elif obscenity_meta.group(InputPatterns.clean):
-                    new_meta = Util.Obscenity.clean
-                elif obscenity_meta.group(InputPatterns.kexp):
-                    new_meta = Util.Obscenity.kexp_clean
+                if obscenity_meta:
+                  if obscenity_meta.group(InputPatterns.yellow):
+                      new_meta = Util.Obscenity.yellow
+                  elif obscenity_meta.group(InputPatterns.red):
+                      new_meta = Util.Obscenity.red
+                  elif obscenity_meta.group(InputPatterns.standard):
+                      new_meta = Util.Obscenity.clean
+                  elif obscenity_meta.group(InputPatterns.kexp):
+                      new_meta = Util.Obscenity.kexp_clean
                 elif InputPatterns.whitespace.match(meta):
                     new_meta = " "
             elif tag_name == "Album Artist":
@@ -93,10 +94,11 @@ class Entry():
                 self.meta_entry.track_artist_set(new_meta)
             elif tag_name == "KEXPRadioEdit":
                 edit_meta = InputPatterns.radio_edit.match(meta)
-                if edit_meta.group(InputPatterns.radio_edit):
-                    new_meta = Util.Edits.radio_edit
-                elif edit_meta.group(InputPatterns.kexp):
-                    new_meta = Util.Edits.kexp_edit
+                if edit_meta:
+                  if edit_meta.group(InputPatterns.standard):
+                      new_meta = Util.Edits.radio_edit
+                  elif edit_meta.group(InputPatterns.kexp):
+                      new_meta = Util.Edits.kexp_edit
                 elif InputPatterns.whitespace.match(meta):
                     new_meta = " "
             else:
