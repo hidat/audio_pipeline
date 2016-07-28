@@ -109,7 +109,7 @@ class Entry():
         else:
             new_meta = " "
 
-        if not InputPatterns.whitespace.match(new_meta):
+        if new_meta and not InputPatterns.whitespace.match(new_meta):
             try:
                 audio_file[tag_name].value = new_meta
             except Exceptions.InvalidTagValueError:
