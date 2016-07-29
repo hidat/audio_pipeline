@@ -1,4 +1,4 @@
-import yaml
+from audio_pipeline.util import MBInfo
 import os.path as path
 
 
@@ -21,16 +21,11 @@ class BatchConstants:
         self.meta_only = False
         self.delete = False
 
-        self.remote_server = None
-        self.local_server = None
-
-        self.initial_server = None
-        self.backup_server = None
+        self.mb = None
 
         self.gen_item_code = None
 
-        if args:
-            self.set(args)
+        self.set(None)
         
     def set(self, args):
         """
@@ -39,46 +34,31 @@ class BatchConstants:
         :param args: Batch constants from the command line
         :return:
         """
-        if path.exists(args.input_directory):
-            self.input_directory = args.input_directory
-        self.output_directory = args.output_directory
+        if args:
+            if path.exists(args.input_directory):
+                self.input_directory = args.input_directory
+            self.output_directory = args.output_directory
 
-        if args.no_artist:
-            self.artist_gen = not args.no_artist
+            if args.no_artist:
+                self.artist_gen = not args.no_artist
 
-        if args.gen_item_code:
-            self.gen_item_code = args.gen_item_code
-        if args.generate:
-            self.meta_only = args.generate
-        if args.delete:
-            self.delete = args.delete
+            if args.gen_item_code:
+                self.gen_item_code = args.gen_item_code
+            if args.generate:
+                self.meta_only = args.generate
+            if args.delete:
+                self.delete = args.delete
 
-        BatchConstants.input_directory = args.input_directory
-        BatchConstants.output_directory = args.output_directory
+            BatchConstants.input_directory = args.input_directory
+            BatchConstants.output_directory = args.output_directory
 
-        if args.mbhost:
-            self.local_server = args.mbhost
+            if args.mbhost:
+                self.mb.set_mbhost(args.mbhost)
+            if args.backup:
+                self.mb.set_remote(args.backup)
 
-        # set initial / backup server
-        if (args.mb_server != 'lr'):
-            order = args.mb_server
-            first = order[0]
-            second = order[1] if len(order) > 1 else None
-
-            if self.local_server:
-                if first == 'l':
-                    self.initial_server = self.local_server
-                else:
-                    self.initial_server = self.remote_server
-
-                if second:
-                    if second == 'l':
-                        self.backup_server = self.local_server
-                    else:
-                        self.backup_server = self.remote_server
-            elif self.remote_server:
-                self.initial_server = self.remote_server
-                self.backup_server = self.remote_server
+        if not self.mb:
+            self.mb = MBInfo.MBInfo()
 
                 
 class Content:
@@ -95,7 +75,7 @@ class Content:
         self.id = id
         self.title = title
                 
-                
+
 class Release(Content):
 
     content_type = 'Release'
@@ -114,6 +94,7 @@ class Release(Content):
         self.format = []
         self.disambiguation = ""
         self.labels = []
+        self.media = []
         self.release_type = ""
         
         self.artist_ids = []
@@ -128,6 +109,14 @@ class Release(Content):
         self.distribution_category = ""
         
         self.glossary_title = ''
+
+
+class Disc:
+
+    def __init__(self, disc_num, tracks):
+        self.disc_num = disc_num
+        self.count = count
+        self.tracks = tracks
 
 
 class Track(Content):

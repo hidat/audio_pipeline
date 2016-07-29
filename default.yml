@@ -1,7 +1,6 @@
 {default: kexp,
 audiofile: !!python/name:audio_pipeline.util.AudioFile.BaseAudioFile '',
 batch constants: !!python/name:audio_pipeline.util.Resources.BatchConstants '',
-processor: !!python/name:audio_pipeline.util.Process.Processor '',
 serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '',
 custom_tags: {category: CATEGORY, item_code: ITEMCODE, obscenity: OBSCENITYRATING}
 }

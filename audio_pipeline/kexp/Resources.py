@@ -30,20 +30,18 @@ class BatchConstants(default_resources.BatchConstants):
         self.gen_item_code = False
         self.anchor = False
 
-        if args:
-            self.set(args)
-
     def set(self, args):
         super().set(args)
-        if args.category is not None:
-            self.category = self.category_options[args.category]
-        if args.rotation is not None:
-            self.rotation = self.rotation_options[args.rotation]
-        if args.source is not None:
-            self.source = self.source_options[args.source]
+        if args:
+            if args.category is not None:
+                self.category = self.category_options[args.category]
+            if args.rotation is not None:
+                self.rotation = self.rotation_options[args.rotation]
+            if args.source is not None:
+                self.source = self.source_options[args.source]
 
-        if args.anchor:
-            self.anchor = args.anchor
+            if args.anchor:
+                self.anchor = args.anchor
 
 
 class Release(default_resources.Release):

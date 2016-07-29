@@ -3,8 +3,8 @@ import os
 import time
 from audio_pipeline.util import AcoustidLookup as lookup
 from audio_pipeline.util import Process
-from audio_pipeline.util import MBInfo
 from audio_pipeline.util import Util
+from audio_pipeline.util.MusicBrainz import PreferredRelease
 from audio_pipeline import Constants
 from ..util import InputPatterns
 from ...util.AudioFileFactory import AudioFileFactory
@@ -32,7 +32,7 @@ class LoadReleases(threading.Thread):
         self.current_release = current_release
         self.loaded = 0
         self.scanned = 0
-        self.processor = Process.Processor(MBInfo.MBInfo(), Constants.processor)
+        self.processor = Process.Processor(Constants.processor, Constants.batch_constants.mb)
 
         # make sure there are two releases pre-loaded
         for i in range(self.fuzz):
@@ -103,8 +103,8 @@ class LoadReleases(threading.Thread):
             self.current_release.cond.release()
 
         print("Loaded: " + str(self.loaded))
-        print("Scanned: " + str(self.scanned))
-        
+        print("All releases loaded")
+
     def trim_releases(self, buffer):
         # remove releases from the end of the buffer,
         # preventing the removal of partial directories.
@@ -176,17 +176,26 @@ class LoadReleases(threading.Thread):
         for i in range(len(releases)):
             if i in to_scan or 0 < len(releases[i]) <= FEW_TRACKS:
                 r = lookup.Release(releases[i])
-                match = r.mbid_comp()
-                print(match)
-                if match is not None and (match > MATCHING_RATIO or
-                    (len(releases[i]) < FEW_TRACKS and match < WRONG_SINGLE)):
-                    r.save_mbid()
-                self.scanned += 1
+                r.lookup()
+                if r.best_group:
+                    p = PreferredRelease.BestRelease(r)
+
+                    if len(releases[i]) <= FEW_TRACKS:
+                        p.choose_release()
+                        p.save_mbid(p.best_release)
+                        self.scanned += 1
+                    else:
+                        match = max(p.mb_comparison(True))
+                        if match is not None and (match > MATCHING_RATIO):
+                            p.save_mbid(p.best_release)
+                            self.scanned += 1
 
         if len(releases[0]) <= 0:
             releases.pop(0)
         else:
-            lookup.Release(releases[0]).save_mbid()
+            p = PreferredRelease.BestRelease(lookup.Release(releases[0]))
+            p.choose_release()
+            p.save_mbid(p.best_release)
             self.scanned += 1
 
         for release in releases:
@@ -196,7 +205,10 @@ class LoadReleases(threading.Thread):
                 meta = release_meta.release
                 # stuff any additional MB metadata
                 for track in release:
+                    if track.meta_stuffed.value:
+                        continue
                     track.stuff_release(meta)
+                    track.meta_stuffed.value = "yep"
                     if meta.disc_count is None:
                         track.mbid.value = None
                         pass

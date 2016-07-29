@@ -77,7 +77,7 @@ class BaseAudioFile:
         self.item_code = self.format.custom_tag(CustomTags.item_code, self.audio)
         self.barcode = self.format.custom_tag(CustomTags.barcode, self.audio)
         self.catalog_num = self.format.custom_tag(CustomTags.catalog_num, self.audio)
-        self.scanned = self.format.custom_tag("scanned", self.audio)
+        self.meta_stuffed = self.format.custom_tag("meta_stuffed", self.audio)
 
     def save(self):
         for item in self:

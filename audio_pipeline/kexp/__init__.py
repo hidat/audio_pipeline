@@ -1,3 +1,5 @@
+from . import Process
+
 def argument_config(parser):
     parser.add_argument('-c', '--category', type=str.casefold, metavar='',
                         choices=["recent acquisitions", "acq", "electronic", "ele", "experimental",

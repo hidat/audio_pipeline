@@ -3,11 +3,6 @@ import yaml
 import copy
 import re
 
-# from audio_pipeline.util.AudioFile import BaseAudioFile as audiofile
-# from audio_pipeline.util.Process import Processor as processor
-# import audio_pipeline.serializers.DaletSerializer as serializer
-# from audio_pipeline.util.Resources import BatchConstants as batch_constants
-
 
 class Constants:
     batch_constants_def = None
@@ -79,10 +74,9 @@ class Constants:
                     answer = input("Please enter 'y' or 'n': ")
         else:
             cls.batch_constants.set(args)
-                    
+
 
 default_config = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
 Constants.load_config(default_config)
-
 
 __all__ = ['file_walker', 'serializers', 'tb_ui', 'util', 'FileWalker', 'TomatoBanana']

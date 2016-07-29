@@ -25,7 +25,7 @@ def process_directory(source_dir, output_dir):
     processed_hashes = info_directories(output_dir)
     
     # create a MBInfo object to get MusicBrainz metadata
-    mbinfo = MBInfo.MBInfo(batch_constants.initial_server)
+    mbinfo = batch_constants.mb
     # Set the (metadata) processor's mbinfo object
     processor = Processor.Processor(mbinfo, Constants.processor)
     
@@ -182,8 +182,7 @@ def main():
 
     parser.add_argument('-d', '--delete', metavar='', default=False, const=True, nargs='?',
                         help="Delete audio files from input_directory after processing")
-    parser.add_argument('--local', help="Set local MusicBrainz server address")
-    parser.add_argument('--remote', help="Set remote MusicBrainz server address")
+    parser.add_argument('--backup', help="Set backup MusicBrainz server address")
     parser.add_argument('--mbhost', type=str.casefold,
                         help="Specify the server to retrieve MusicBrainz data from. Default is musicbrainz.org; "
                              "another server can be manually specified")

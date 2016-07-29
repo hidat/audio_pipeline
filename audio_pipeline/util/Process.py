@@ -7,44 +7,69 @@ from audio_pipeline.util import Util, Resources
 
 class Processor:
 
+    release_groups = dict()
     releases = dict()
     artists = dict()
+    mbinfo = None
+    processor = None
 
-    def __init__(self, mbinfo, processor):
-        self.processor = processor
-        if mbinfo:
-            self.mbinfo = mbinfo
+    def __init__(self, *args):
+        Processor.mbinfo = Constants.batch_constants.mb
+        Processor.processor = Constants.processor
+
+    @classmethod
+    def get_releases(cls, mbid):
+        if cls.mbinfo is None:
+            raise Exceptions.NoMusicBrainzError("No MBInfo object when processing release group " + str(mbid))
+
+        if mbid in cls.release_groups:
+            results = [cls.releases[release_id] for release_id in cls.release_groups[mbid]]
+            return results
         else:
-            raise Exceptions.NoMusicBrainzError("Processor needs an MBInfo Object")
+            mb_releases = cls.mbinfo.get_group_releases(mbid)
+            cls.release_groups[mbid] = list()
+            results = list()
+            if not mb_releases:
+                raise Exceptions.NoMusicBrainzError("Problem getting release info from musicbrainz for id " + str(mbid))
 
-    def get_release(self, mbid):
-        if self.mbinfo is None:
+            for mb_release in mb_releases:
+                release = cls.processor.ReleaseProcessor(mb_release)
+                release_id = release.release.id
+                cls.release_groups[mbid].append(release_id)
+                results.append(release)
+                cls.releases[release_id] = release
+            return results
+
+    @classmethod
+    def get_release(cls, mbid):
+        if cls.mbinfo is None:
             raise Exceptions.NoMusicBrainzError("No MBInfo object when processing release " + str(mbid))
 
-        if mbid in self.releases:
-            return self.releases[mbid]
+        if mbid in cls.releases:
+            return cls.releases[mbid]
         else:
-            mb_release = self.mbinfo.get_release(mbid)
+            mb_release = cls.mbinfo.get_release(mbid)
             if not mb_release:
                 raise Exceptions.NoMusicBrainzError("Problem getting release info from musicbrainz for id " + str(mbid))
 
-            release = self.processor.ReleaseProcessor(mb_release)
-            self.releases[mbid] = release
+            release = cls.processor.ReleaseProcessor(mb_release)
+            cls.releases[mbid] = release
             return release
 
-    def get_artist(self, mbid):
-        if self.mbinfo is None:
+    @classmethod
+    def get_artist(cls, mbid):
+        if cls.mbinfo is None:
             raise Exceptions.NoMusicBrainzError("No MBInfo object when processing artist " + str(mbid))
 
-        if mbid in self.artists:
-            return self.artists[mbid]
+        if mbid in cls.artists:
+            return cls.artists[mbid]
         else:
-            mb_artist = self.mbinfo.get_artist(mbid)
+            mb_artist = cls.mbinfo.get_artist(mbid)
             if not mb_artist:
                 raise Exceptions.NoMusicBrainzError("Problem getting artist info from musicbrainz for id " + str(mbid))
 
-            artist = self.processor.ArtistProcessor(mb_artist)
-            self.artists[mbid] = artist
+            artist = cls.processor.ArtistProcessor(mb_artist)
+            cls.artists[mbid] = artist
             return artist
 
 
@@ -71,6 +96,7 @@ class ReleaseProcessor:
             release.title = meta['title']
             release.release_group_id = rg['id']
             release.first_released = rg['first-release-date']
+
             if 'primary-type' in rg:
                 release.release_type = rg['primary-type']
             
@@ -79,25 +105,22 @@ class ReleaseProcessor:
                 
             formats = ''
             for disc in meta['medium-list']:
-                if 'format' in disc and formats == '':
+                release.media.append(Resources.Disc(disc['position'], len(disc['track-list'])))
+                if 'format' in disc:
                     release.format.append(disc['format'])
                     formats = formats + " " + disc['format']
-                    
+
             release.artist_credit = meta['artist-credit']
             
             if 'disambiguation' in meta:
                 release.disambiguation = meta['disambiguation']
                 
-            labels = ''
-            cat_nums = ''
             if 'label-info-list' in meta:
                 for l in meta['label-info-list']:
                     if 'label' in l:
                         label = Resources.Label(l['label']['id'], l['label']['id'], l['label']['name'])
-                        labels = labels + " " + label.title
                         if 'catalog-number' in l:
                             label.catalog_num = l['catalog-number']
-                            cat_nums = cat_nums + " " + label.catalog_num
                         release.labels.append(label)
 
             if 'date' in meta:
@@ -111,7 +134,6 @@ class ReleaseProcessor:
             if 'packaging' in meta:
                 release.packaging = meta['packaging']
                 
-            dist_cat = ''
             full_name = ''
             for artist in meta['artist-credit']:
                 if 'artist' in artist:
@@ -119,23 +141,11 @@ class ReleaseProcessor:
                     full_name = full_name + a['name']
                     release.artist_ids.append(a['id'])
                     release.artist_sort_names.append(a['sort-name'])
-                    
-                    dist_cat = dist_cat + a['sort-name']
-                    if 'disambiguation' in a:
-                        dist_cat = dist_cat + ' (' + a['disambiguation'] + ') '
                 else:
                     full_name = full_name + artist
-                    dist_cat = dist_cat + artist
-                    
+
             release.artist = full_name 
-            dist_cat = Util.stringCleanup(dist_cat)
-            release.distribution_category = dist_cat
-            
-            glossary_title = release.title + " " + release.artist + " " + \
-                release.date + " " + release.country + labels + formats + cat_nums
-            
-            release.glossary_title = Util.stringCleanup(glossary_title)
-            
+
             self._release = release
         
     @property
