@@ -34,6 +34,12 @@ class BatchConstants:
         :param args: Batch constants from the command line
         :return:
         """
+        try:
+            if not self.mb:
+                self.mb = MBInfo.MBInfo()
+        except AttributeError:
+            self.mb = MBInfo.MBInfo()
+            
         if args:
             if path.exists(args.input_directory):
                 self.input_directory = args.input_directory
@@ -56,9 +62,6 @@ class BatchConstants:
                 self.mb.set_mbhost(args.mbhost)
             if args.backup:
                 self.mb.set_remote(args.backup)
-
-        if not self.mb:
-            self.mb = MBInfo.MBInfo()
 
                 
 class Content:
