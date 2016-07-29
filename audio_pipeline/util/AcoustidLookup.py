@@ -68,14 +68,17 @@ class Release:
 
                 lookups += 1
                 track.acoustid.value = "NOT_FOUND"
+                track_score = 0
                 result = acoustid.lookup(self.api_key, fingerprint[1], fingerprint[0], Release.meta)
 
                 for trackId in result["results"]:
+                    if trackId["score"] > track_score:
+                        track.acoustid.value = trackId["id"]
                     if "recordings" in trackId:
                         for recording in trackId["recordings"]:
                             recording_id = recording["id"]
                             if recording_id in self.recordings:
-                                self.recordings[recording_id] = max([self.recordings[recording_id], recording["score"]])
+                                self.recordings[recording_id] = max([self.recordings[recording_id], trackId["score"]])
                             else:
                                 self.recordings[recording_id] = trackId['score']
                                 if "releasegroups" in recording:
@@ -89,3 +92,5 @@ class Release:
                         if max_count / lookups >= CUTOFF:
                             self.best_group = group_counts[max_count]
                             break
+							
+                track.acoustid.save()

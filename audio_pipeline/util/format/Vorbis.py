@@ -15,7 +15,9 @@ class BaseTag(Tag.Tag):
         if value is not Tag.CurrentTag:
             self.value = value
             
-        if self._value:
+        if isinstance(self._value, list):
+            self.mutagen[self.serialization_name] = [str(val) for val in self._value]
+        elif self._value:
             self.mutagen[self.serialization_name] = [str(self._value)]
         else:
             if self.serialization_name in self.mutagen:

@@ -78,6 +78,8 @@ class BaseAudioFile:
         self.barcode = self.format.custom_tag(CustomTags.barcode, self.audio)
         self.catalog_num = self.format.custom_tag(CustomTags.catalog_num, self.audio)
         self.meta_stuffed = self.format.custom_tag("meta_stuffed", self.audio)
+        
+        self.custom_tags = [self.meta_stuffed]
 
     def save(self):
         for item in self:
@@ -91,6 +93,9 @@ class BaseAudioFile:
             
         track = self.track()
         for item in track:
+            yield item
+            
+        for item in self.custom_tags:
             yield item
 
     def stuff_release(self, release):

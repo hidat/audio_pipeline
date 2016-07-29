@@ -115,7 +115,6 @@ class Disc:
 
     def __init__(self, disc_num, tracks):
         self.disc_num = disc_num
-        self.count = count
         self.tracks = tracks
 
 
