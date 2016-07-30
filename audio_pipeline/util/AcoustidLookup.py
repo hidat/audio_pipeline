@@ -56,6 +56,7 @@ class Release:
             lookups = 0
 
             while len(track_nums) > 0:
+                lookups += 1
                 track = self.tracks[track_nums.pop()]
                 if track.acoustid.value or track.meta_stuffed.value:
                     continue
@@ -66,7 +67,6 @@ class Release:
                     self.can_lookup = False
                     return
 
-                lookups += 1
                 track.acoustid.value = "NOT_FOUND"
                 track_score = 0
                 result = acoustid.lookup(self.api_key, fingerprint[1], fingerprint[0], Release.meta)

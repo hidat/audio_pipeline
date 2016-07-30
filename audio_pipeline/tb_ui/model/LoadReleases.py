@@ -185,9 +185,10 @@ class LoadReleases(threading.Thread):
                         p.save_mbid(p.best_release)
                         self.scanned += 1
                     else:
-                        match = max(p.mb_comparison(True))
+                        match = p.mb_comparison(True)
+                        print(match)
                         if match is not None and (match > MATCHING_RATIO):
-                            p.save_mbid(p.best_release)
+                            p.set_mbid(p.best_release)
                             self.scanned += 1
 
         if len(releases[0]) <= 0:

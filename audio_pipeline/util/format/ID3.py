@@ -105,6 +105,10 @@ class CustomTag(BaseTag):
         if val:
             if self._value is None:
                 self._value = self._frame_type(self._frame_encoding, self.desc, val)
+            if isinstance(val, list):
+                self._value.text = val
+            else:
+                self._value.text = [val]
         else:
             self._value = None
 

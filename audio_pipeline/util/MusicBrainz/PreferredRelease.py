@@ -1,5 +1,6 @@
 import difflib
 
+from audio_pipeline.util import Util
 from audio_pipeline.util import Process
 
 
@@ -56,13 +57,13 @@ class BestRelease:
     def mb_comparison(self, ignore_mbid=False):
         if not ignore_mbid:
             track = self.results.track[0]
-            if track.mbid.value:
+            if Util.has_mbid(track):
                 return 0
 
         # get & process MB metadata
         ratios = dict()
         for group in self.results.releasegroups:
-            releases = self.processor.get_releases(group)
+            releases = self.process.get_releases(group)
             for release in releases:
                 meta = release.release
 
@@ -92,7 +93,11 @@ class BestRelease:
                         # this release will not work at all
                         ratios[meta.id] = 0
                         break
-        return ratios
+        max_ratio = max(ratios.values())
+        for release, ratio in ratios.items():
+            if ratio == max_ratio:
+                self.best_release = release
+        return max_ratio
 
     def calc_ratio(self, track_tag, meta_val):
         ratio = 1
@@ -106,6 +111,8 @@ class BestRelease:
                 i += 1
             track_tag, meta_val = yield ratio
 
-    def save_mbid(self, release_id):
+    def set_mbid(self, release_id):
+        print("Setting MBIDs")
         for track in self.results.tracks:
             track.mbid.value = release_id
+            

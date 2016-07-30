@@ -10,9 +10,13 @@ class BaseTag(Tag.Tag):
             
         if self._value:
             values = list()
-            for val in self._value:
-                values.append(val)
-            self.mutagen[self.serialization_name] = values
+            # for val in self._value:
+                # values.append(val)
+                # values.append(val.encode('utf-8'))
+            # try:
+                # self.mutagen[self.serialization_name] = values
+            # except TypeError:
+            self.mutagen[self.serialization_name] = self._value
         else:
             if self.serialization_name in self.mutagen:
                 self.mutagen.pop(self.serialization_name)
@@ -50,12 +54,12 @@ class FreeformTag(BaseTag):
         if self._value:
             values = list()
             for val in self._value:
-                #values.append(val)
+                # values.append(val)
                 values.append(val.encode('utf-8'))
             try:
                 self.mutagen[self.serialization_name] = values
             except TypeError:
-                self.mutagen[self.serialization_name] = [val for val in self._value]
+                self.mutagen[self.serialization_name] = [str(val) for val in self._value]
         else:
             if self.serialization_name in self.mutagen:
                 self.mutagen.pop(self.serialization_name)
@@ -152,9 +156,9 @@ class Format(Tag.MetadataFormat):
     _label = "----:com.apple.iTunes:Label"
     _mbid = "----:com.apple.iTunes:MBID"
     _mbid_p = "----:com.apple.iTunes:MusicBrainz Album Id"
-    _media_format = "media"
-    _country = "MusicBrainz Album Release Country"
-    _release_type = "MusicBrainz Album Type"
+    _media_format = "----:com.apple.iTunes:media"
+    _country = "----:com.apple.iTunes:MusicBrainz Album Release Country"
+    _release_type = "----:com.apple.iTunes:MusicBrainz Album Type"
     
     # track-level serialization names
     _title = "\xa9nam"
