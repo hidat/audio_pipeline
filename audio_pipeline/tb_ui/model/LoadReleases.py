@@ -183,7 +183,7 @@ class LoadReleases(threading.Thread):
 
                     if len(releases[i]) <= FEW_TRACKS:
                         p.choose_release()
-                        p.save_mbid(p.best_release)
+                        p.set_mbid(p.best_release)
                         self.scanned += 1
                     else:
                         match = p.mb_comparison(True)
@@ -197,7 +197,7 @@ class LoadReleases(threading.Thread):
         else:
             p = PreferredRelease.BestRelease(lookup.Release(releases[0]))
             p.choose_release()
-            p.save_mbid(p.best_release)
+            p.set_mbid(p.best_release)
             self.scanned += 1
 
         for release in releases:

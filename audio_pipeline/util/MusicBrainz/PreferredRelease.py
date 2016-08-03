@@ -117,4 +117,3 @@ class BestRelease:
         print("Setting MBIDs")
         for track in self.results.tracks:
             track.mbid.value = release_id
-            
