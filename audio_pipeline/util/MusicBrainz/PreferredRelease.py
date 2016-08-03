@@ -62,7 +62,7 @@ class BestRelease:
                 return max_ratio
 
         # get & process MB metadata
-        if len(self.results.releasegoups) > 0:
+        if len(self.results.releasegroups) > 0:
             ratios = dict()
             for group in self.results.releasegroups:
                 releases = self.process.get_releases(group)
@@ -108,7 +108,6 @@ class BestRelease:
         while True:
             if not (track_tag is None or track_tag.value is None):
                 self.sequence_matcher.set_seqs(str(track_tag), str(meta_val))
-                curr = self.sequence_matcher.quick_ratio()
                 ratio = ratio * (i - 1) / i + (1 / i) * self.sequence_matcher.ratio()
                 i += 1
             track_tag, meta_val = yield ratio
