@@ -55,48 +55,50 @@ class BestRelease:
 
 
     def mb_comparison(self, ignore_mbid=False):
+        max_ratio = 0
         if not ignore_mbid:
             track = self.results.track[0]
             if Util.has_mbid(track):
-                return 0
+                return max_ratio
 
         # get & process MB metadata
-        ratios = dict()
-        for group in self.results.releasegroups:
-            releases = self.process.get_releases(group)
-            for release in releases:
-                meta = release.release
+        if len(self.results.releasegoups) > 0:
+            ratios = dict()
+            for group in self.results.releasegroups:
+                releases = self.process.get_releases(group)
+                for release in releases:
+                    meta = release.release
 
-                calc_ratio = self.calc_ratio(None, None)
-                ratios[meta.id] = calc_ratio.send(None)
-                for track in self.results.tracks:
-                    ratios[meta.id] = calc_ratio.send((track.album, meta.title))
-                    ratios[meta.id] = calc_ratio.send((track.album_artist, meta.artist))
-                    ratios[meta.id] = calc_ratio.send((track.release_date, meta.date))
-                    ratios[meta.id] = calc_ratio.send((track.disc_num, meta.disc_count))
+                    calc_ratio = self.calc_ratio(None, None)
+                    ratios[meta.id] = calc_ratio.send(None)
+                    for track in self.results.tracks:
+                        ratios[meta.id] = calc_ratio.send((track.album, meta.title))
+                        ratios[meta.id] = calc_ratio.send((track.album_artist, meta.artist))
+                        ratios[meta.id] = calc_ratio.send((track.release_date, meta.date))
+                        ratios[meta.id] = calc_ratio.send((track.disc_num, meta.disc_count))
 
-                    if len(meta.labels) > 0:
-                        track.label.value = meta.labels[0].title
+                        if len(meta.labels) > 0:
+                            track.label.value = meta.labels[0].title
 
-                    if meta.disc_count is not None and \
-                        track.disc_num.value <= meta.disc_count:
-                        track_meta = release.get_track(track)
-                        # need to create new processor w/ no item_code save - for now, just kill it here.
-                        track.item_code.value = None
-                        track.item_code.save()
-                        ratios[meta.id] = calc_ratio.send((track.title, track_meta.title))
-                        if track_meta.artist_phrase:
-                            ratios[meta.id] = calc_ratio.send((track.artist, track_meta.artist_phrase))
+                        if meta.disc_count is not None and \
+                            track.disc_num.value <= meta.disc_count:
+                            track_meta = release.get_track(track)
+                            # need to create new processor w/ no item_code save - for now, just kill it here.
+                            track.item_code.value = None
+                            track.item_code.save()
+                            ratios[meta.id] = calc_ratio.send((track.title, track_meta.title))
+                            if track_meta.artist_phrase:
+                                ratios[meta.id] = calc_ratio.send((track.artist, track_meta.artist_phrase))
+                            else:
+                                ratios[meta.id] = calc_ratio.send((track.artist, track_meta.artist_credit))
                         else:
-                            ratios[meta.id] = calc_ratio.send((track.artist, track_meta.artist_credit))
-                    else:
-                        # this release will not work at all
-                        ratios[meta.id] = 0
-                        break
-        max_ratio = max(ratios.values())
-        for release, ratio in ratios.items():
-            if ratio == max_ratio:
-                self.best_release = release
+                            # this release will not work at all
+                            ratios[meta.id] = 0
+                            break
+            max_ratio = max(ratios.values())
+            for release, ratio in ratios.items():
+                if ratio == max_ratio:
+                    self.best_release = release
         return max_ratio
 
     def calc_ratio(self, track_tag, meta_val):

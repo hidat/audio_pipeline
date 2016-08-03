@@ -36,8 +36,9 @@ class LoadReleases(threading.Thread):
 
         # make sure there are two releases pre-loaded
         for i in range(self.fuzz):
-            self.load_release(self.next_buffer, i)
-            self.loaded += 1
+            if i < len(self.current_release.directories):
+                self.load_release(self.next_buffer, i)
+                self.loaded += 1
 
     def run(self):
         time.sleep(.1)
