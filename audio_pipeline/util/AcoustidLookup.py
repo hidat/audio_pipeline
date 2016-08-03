@@ -48,7 +48,6 @@ class Release:
         if self.can_lookup:
             num_releases = LOOKUPS if len(self.tracks) > LOOKUPS else len(self.tracks)
 
-
             print(len(self.tracks))
             track_nums = [i for i in range(len(self.tracks))]
             random.shuffle(track_nums)
@@ -92,5 +91,5 @@ class Release:
                         if max_count / lookups >= CUTOFF:
                             self.best_group = group_counts[max_count]
                             break
-							
+
                 track.acoustid.save()

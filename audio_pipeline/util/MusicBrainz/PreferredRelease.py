@@ -48,11 +48,11 @@ class BestRelease:
                 else:
                     self.all_releases[release.id] = score * count
 
-        max_score = max(self.all_releases.values())
-        for mb, score in self.all_releases.items():
-            if score == max_score:
-                self.best_release = mb
-
+        if len(self.all_releases) > 0:
+            max_score = max(self.all_releases.values())
+            for mb, score in self.all_releases.items():
+                if score == max_score:
+                    self.best_release = mb
 
     def mb_comparison(self, ignore_mbid=False):
         max_ratio = 0
