@@ -125,7 +125,7 @@ class Track(Content):
     
     content_type = "music library track"
     
-    def __init__(self, item_code, id="", title=""):
+    def __init__(self, item_code="", id="", title=""):
         """
         Holds track metadata
         """

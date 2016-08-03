@@ -165,14 +165,22 @@ class ReleaseProcessor:
         
         disc_index = audio_file.disc_num.value - 1    # zero-index the disc num
         track_index = audio_file.track_num.value - 1  # zero-index the track num
-        
-        if not self._release:
-            self.process_release()
-            
-        release_meta = self._release
-        track_meta = self.mb_release['medium-list'][disc_index]['track-list'][track_index]
-        recording_meta = track_meta['recording']
 
+        # create the track object
+        track = Resources.Track()
+        
+        release_meta = self.release
+        
+        if disc_index < release_meta.disc_count:
+            disc = self.mb_release['medium-list'][disc_index]
+        else:
+            return track
+            
+        if track_index < len(disc['track-list']):
+            track_meta = disc['track-list'][track_index]
+        else:
+            return track
+            
         # if generating unique item codes, do that
         if Constants.batch_constants.gen_item_code:
             item_code = str(uuid.uuid4())
@@ -185,13 +193,10 @@ class ReleaseProcessor:
             item_code = str(uuid.uuid4())
         else:
             item_code = track_meta['id']
-            
-        # set the item_code value in the audio file
-        audio_file.item_code.value = item_code
-        audio_file.item_code.save()
+        
+        track.item_code = item_code
                         
-        # create the track object
-        track = Resources.Track(item_code)
+        recording_meta = track_meta['recording']
         
         # fields from track_meta
         track.id = track_meta['id']
@@ -254,7 +259,11 @@ class ReleaseProcessor:
         sort_names.sort()
         track.artist_dist_rule = Util.distRuleCleanup(sort_names[0][:1])
         track.various_artist_dist_rule = Util.distRuleCleanup(release_meta.title[:1])
-        
+
+        # set the item_code value in the audio file
+        audio_file.item_code.value = item_code
+
+        audio_file.item_code.save()
         return track
         
     def get_track(self, audio_file):

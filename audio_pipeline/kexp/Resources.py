@@ -63,7 +63,7 @@ class Track(default_resources.Track):
 
     content_type = "music library track"
 
-    def __init__(self, item_code):
+    def __init__(self, item_code=""):
         """
         Holds track metadata
         """
