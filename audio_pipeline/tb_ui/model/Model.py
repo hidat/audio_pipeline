@@ -79,7 +79,7 @@ class ProcessDirectory(object):
 
             while len(self.next_buffer) <= 0:
                 time.sleep(.02)
-                if len(self.next_buffer) <= 0 and not self.loader_thread.is_alive():
+                if self.has_next() and not self.loader_thread.is_alive():
                     print("thread died")
                     self.loader_thread = LoadReleases.LoadReleases(self.prev_buffer, self.next_buffer,
                                                                    self.__current_release, self.__current_release.current[0] + 1)
@@ -97,7 +97,7 @@ class ProcessDirectory(object):
 
             while len(self.prev_buffer) <= 0:
                 time.sleep(.02)
-                if len(self.prev_buffer) <= 0 and not self.loader_thread.is_alive():
+                if self.has_prev() and not self.loader_thread.is_alive():
                     self.loader_thread = LoadReleases.LoadReleases(self.prev_buffer, self.next_buffer,
                                                                    self.__current_release, self.__current_release.current[0] - 1)
                     self.loader_thread.start()
