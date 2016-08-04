@@ -7,7 +7,6 @@ from audio_pipeline import Constants
 from audio_pipeline.util import Process as Processor
 from audio_pipeline.util import AudioFileFactory
 from audio_pipeline.util import Exceptions
-from audio_pipeline.util import MBInfo
 from audio_pipeline.util import Util
 
 
@@ -104,8 +103,17 @@ def process_directory(source_dir, output_dir):
                             print("    ERROR: Invalid characters!")
                             copy_to_path = os.path.join(track_fail_dir, path)
 
+                    # Have to re-hash file, since we're writing the itemcode and thus changing the hash
+                    sha1 = hashlib.sha1()
+                    with open(file_name, 'rb') as f:
+                        sha1.update(f.read())
+
+                    hash_file = os.path.join(processed_hashes, sha1.hexdigest())
+
                     with open(hash_file, 'w+') as hash_file_d:
                         hash_file_d.write(ascii(file_name))
+                else:
+                    print("Already processed " + ascii(file_name))
 
             except Exceptions.UnsupportedFiletypeError as e:
                 # just skip unsupported filetypes??

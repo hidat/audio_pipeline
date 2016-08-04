@@ -175,8 +175,10 @@ class LoadReleases(threading.Thread):
                     else:
                         indices[(file_data.album.value, file_data.album_artist.value,
                                  file_data.disc_num.value)] = index
-                        if not file_data.meta_stuffed.value:
-                            to_scan.add(index)
+                        to_scan.add(index)
+
+            if (file_data.acoustid.value or file_data.meta_stuffed.value) and index in to_scan:
+                to_scan.remove(index)
 
             releases[index].append(file_data)
             
