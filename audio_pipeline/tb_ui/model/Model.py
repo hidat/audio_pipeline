@@ -18,6 +18,7 @@ class ProcessDirectory(object):
         dbpoweramp = True
 
         starting_index = 0
+        root_dir = os.path.normpath(root_dir)
         starting_dir = os.path.normpath(root_dir)
 
         if len([d for d in os.scandir(root_dir) if d.is_dir()]) == 0:
@@ -72,36 +73,38 @@ class ProcessDirectory(object):
         self.prev_buffer.clear()
             
     def next(self):
-        if self.current_release is not None:
-            self.prev_buffer.append(self.__current_release.current)
+        if self.has_next():
+            if self.current_release is not None:
+                self.prev_buffer.append(self.__current_release.current)
 
-        while len(self.next_buffer) <= 0:
-            time.sleep(.02)
-            if not self.loader_thread.is_alive():
-                print("thread died")
-                self.loader_thread = LoadReleases.LoadReleases(self.prev_buffer, self.next_buffer,
-                                                               self.__current_release, self.__current_release.current[0] + 1)
-                self.loader_thread.start()
-                print("thread revived??")
+            while len(self.next_buffer) <= 0:
+                time.sleep(.02)
+                if not self.loader_thread.is_alive():
+                    print("thread died")
+                    self.loader_thread = LoadReleases.LoadReleases(self.prev_buffer, self.next_buffer,
+                                                                   self.__current_release, self.__current_release.current[0] + 1)
+                    self.loader_thread.start()
+                    print("thread revived??")
 
-        self.__current_release.current = self.next_buffer.pop()
+            self.__current_release.current = self.next_buffer.pop()
 
-        return self.current_release
+            return self.current_release
 
     def prev(self):
-        if self.current_release is not None:
-            self.next_buffer.append(self.__current_release.current)
+        if self.has_prev():
+            if self.current_release is not None:
+                self.next_buffer.append(self.__current_release.current)
 
-        while len(self.prev_buffer) <= 0:
-            time.sleep(.02)
-            if not self.loader_thread.is_alive():
-                self.loader_thread = LoadReleases.LoadReleases(self.prev_buffer, self.next_buffer,
-                                                               self.__current_release, self.__current_release.current[0] - 1)
-                self.loader_thread.start()
+            while len(self.prev_buffer) <= 0:
+                time.sleep(.02)
+                if not self.loader_thread.is_alive():
+                    self.loader_thread = LoadReleases.LoadReleases(self.prev_buffer, self.next_buffer,
+                                                                   self.__current_release, self.__current_release.current[0] - 1)
+                    self.loader_thread.start()
 
-        self.__current_release.current = self.prev_buffer.pop()
-        
-        return self.current_release
+            self.__current_release.current = self.prev_buffer.pop()
+            
+            return self.current_release
         
     def jump(self, i):
         if i < 0:
@@ -117,10 +120,13 @@ class ProcessDirectory(object):
 
     def has_next(self):
         return len(self.next_buffer) > 0 or \
-               self.__current_release.current[0] < len(self.__current_release.directories) - 1
+               (self.__current_release.current is not None and 
+                self.__current_release.current[0] < len(self.__current_release.directories) - 1)
 
     def has_prev(self):
-        return len(self.prev_buffer) > 0 or self.__current_release.current[0] > 0
+        return len(self.prev_buffer) > 0 or \
+               (self.__current_release.current is not None and 
+                self.__current_release.current[0] > 0)
 
     @staticmethod
     def is_release(directory):

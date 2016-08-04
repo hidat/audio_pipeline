@@ -49,12 +49,6 @@ class LoadReleases(threading.Thread):
             self.loaded += 1
             self.starting_index += 1
 
-        # make sure there are two releases pre-loaded
-        for i in range(self.fuzz):
-            if self.starting_index + i < num_dirs:
-                self.load_release(self.next_buffer, self.starting_index + i)
-                self.loaded += 1
-
         while self.current_release.current is not None and self.loaded < num_dirs:
 
             # if buffers are full, wait for a signal from the model proper to load more releases,
