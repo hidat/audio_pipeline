@@ -17,10 +17,16 @@ class ProcessDirectory(object):
 
         dbpoweramp = True
 
+        starting_index = 0
+        starting_dir = os.path.normpath(root_dir)
+
+        if len([d for d in os.scandir(root_dir) if d.is_dir()]) == 0:
+            root_dir = os.path.dirname(root_dir)
+
         self.directories = list()
         for path, dirs, files in os.walk(root_dir):
             for directory in dirs:
-                directory = os.path.join(path, directory)
+                directory = os.path.normpath(os.path.join(path, directory))
                 if self.is_release(directory):
                     if dbpoweramp:
                         try:
@@ -33,13 +39,20 @@ class ProcessDirectory(object):
             self.directories.sort(key=lambda x: int(os.path.split(x)[1].split()[0]))
         else:
             self.directories.sort()
-        
+
+        if starting_dir != root_dir:
+            print(self.directories)
+
+            starting_index = self.directories.index(starting_dir)
+
         self.__current_release = LoadReleases.CurrentReleases(self.directories)
-                
+
         self.next_buffer = collections.deque()
         self.prev_buffer = collections.deque()
-        
-        LoadReleases.LoadReleases(self.prev_buffer, self.next_buffer, self.__current_release).start()
+
+        self.loader_thread = LoadReleases.LoadReleases(self.prev_buffer, self.next_buffer,
+                                                       self.__current_release, starting_index)
+        self.loader_thread.start()
 
     def __del__(self):
         self.__current_release.current = None
@@ -63,8 +76,14 @@ class ProcessDirectory(object):
             self.prev_buffer.append(self.__current_release.current)
 
         while len(self.next_buffer) <= 0:
-            time.sleep(.15)
-            print("waiting: " + str(len(self.next_buffer)))
+            time.sleep(.02)
+            if not self.loader_thread.is_alive():
+                print("thread died")
+                self.loader_thread = LoadReleases.LoadReleases(self.prev_buffer, self.next_buffer,
+                                                               self.__current_release, self.__current_release.current[0] + 1)
+                self.loader_thread.start()
+                print("thread revived??")
+
         self.__current_release.current = self.next_buffer.pop()
 
         return self.current_release
@@ -75,6 +94,11 @@ class ProcessDirectory(object):
 
         while len(self.prev_buffer) <= 0:
             time.sleep(.02)
+            if not self.loader_thread.is_alive():
+                self.loader_thread = LoadReleases.LoadReleases(self.prev_buffer, self.next_buffer,
+                                                               self.__current_release, self.__current_release.current[0] - 1)
+                self.loader_thread.start()
+
         self.__current_release.current = self.prev_buffer.pop()
         
         return self.current_release
@@ -92,7 +116,8 @@ class ProcessDirectory(object):
         return self.current_release
 
     def has_next(self):
-        return len(self.next_buffer) > 0 or self.__current_release.current[0] < len(self.__current_release.directories) - 1
+        return len(self.next_buffer) > 0 or \
+               self.__current_release.current[0] < len(self.__current_release.directories) - 1
 
     def has_prev(self):
         return len(self.prev_buffer) > 0 or self.__current_release.current[0] > 0

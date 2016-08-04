@@ -7,7 +7,6 @@ from audio_pipeline.util import Process
 class BestRelease:
     sequence_matcher = difflib.SequenceMatcher(None, None, None)
 
-
     weights = {"type": {"Album": .5}, "medium_count": .5, "medium": .4, "track_count": .7,
                "track_position": .7, "country": {"US": .6}, "format": {"CD": .4}}
 

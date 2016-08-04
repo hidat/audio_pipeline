@@ -21,7 +21,7 @@ class LoadReleases(threading.Thread):
 
     fuzz = 3
 
-    def __init__(self, prev_buffer, next_buffer, current_release, max_releases=MAX_RELEASES):
+    def __init__(self, prev_buffer, next_buffer, current_release, starting_index=0, max_releases=MAX_RELEASES):
         """
         Load next releases
         """
@@ -29,16 +29,12 @@ class LoadReleases(threading.Thread):
         self.prev_buffer = prev_buffer
         self.next_buffer = next_buffer
         self.max_buffer = max_releases
+        self.starting_index = starting_index
         self.current_release = current_release
         self.loaded = 0
         self.scanned = 0
         self.processor = Process.Processor(Constants.processor, Constants.batch_constants.mb)
 
-        # make sure there are two releases pre-loaded
-        for i in range(self.fuzz):
-            if i < len(self.current_release.directories):
-                self.load_release(self.next_buffer, i)
-                self.loaded += 1
 
     def run(self):
         time.sleep(.1)
@@ -47,7 +43,18 @@ class LoadReleases(threading.Thread):
         
         next_limit = num_dirs - self.max_buffer
         prev_limit = self.max_buffer
-        
+
+        if self.starting_index != 0:
+            self.load_release(self.next_buffer, self.starting_index, False)
+            self.loaded += 1
+            self.starting_index += 1
+
+        # make sure there are two releases pre-loaded
+        for i in range(self.fuzz):
+            if self.starting_index + i < num_dirs:
+                self.load_release(self.next_buffer, self.starting_index + i)
+                self.loaded += 1
+
         while self.current_release.current is not None and self.loaded < num_dirs:
 
             # if buffers are full, wait for a signal from the model proper to load more releases,
@@ -56,8 +63,9 @@ class LoadReleases(threading.Thread):
             self.current_release.cond.acquire()
             if len(self.next_buffer) >= self.max_buffer + self.fuzz:
                 self.trim_releases(self.next_buffer)
-            elif len(self.next_buffer) < self.max_buffer and \
-                 (next_limit < 0 or self.current_release.current[0] < next_limit):
+            elif self.current_release.current is not None and \
+                            len(self.next_buffer) < self.max_buffer and \
+                    (next_limit < 0 or self.current_release.current[0] < next_limit):
                 print("loading next")
                 # haven't filled in next_buffer / have moved forward
                 # get next value
@@ -75,7 +83,9 @@ class LoadReleases(threading.Thread):
 
             if len(self.prev_buffer) >= self.max_buffer + self.fuzz:
                 self.trim_releases(self.prev_buffer)
-            elif len(self.prev_buffer) < self.max_buffer < self.current_release.current[0]:
+            elif self.current_release.current is not None and \
+                            len(self.prev_buffer) < self.max_buffer and \
+                            len(self.prev_buffer) < self.current_release.current[0]:
                 print("loading prev")
                 # haven't filled in prev_buffer / have moved forward
                 # so get next buffer
@@ -91,10 +101,11 @@ class LoadReleases(threading.Thread):
                 self.current_release.cond.acquire()
                 self.loaded += 1
                 
-            while len(self.next_buffer) >= self.max_buffer or \
-                (0 < next_limit <= self.current_release.current[0]) and \
-                (len(self.prev_buffer) >= self.max_buffer or
-                    self.current_release.current[0] <= prev_limit):
+            while self.current_release.current is not None and \
+                            len(self.next_buffer) >= self.max_buffer or \
+                            (0 < next_limit <= self.current_release.current[0]) and \
+                            (len(self.prev_buffer) >= self.max_buffer or
+                                     self.current_release.current[0] <= prev_limit):
                  
                 print("waiting (for a miracle)")
                 self.current_release.cond.wait()
@@ -129,7 +140,7 @@ class LoadReleases(threading.Thread):
         else:
             self.loaded -= len(last_directory)
                         
-    def load_release(self, buffer, dir_index):
+    def load_release(self, buffer, dir_index, scan=True):
         if len(buffer) >= self.max_buffer:
             return None
             
@@ -170,35 +181,38 @@ class LoadReleases(threading.Thread):
                     else:
                         indices[(file_data.album.value, file_data.album_artist.value,
                                  file_data.disc_num.value)] = index
-                        to_scan.add(index)
+                        if not file_data.meta_stuffed.value:
+                            to_scan.add(index)
 
             releases[index].append(file_data)
             
-        for i in range(len(releases)):
-            if i in to_scan or 0 < len(releases[i]) <= FEW_TRACKS:
-                r = lookup.Release(releases[i])
-                r.lookup()
-                if r.best_group:
-                    p = PreferredRelease.BestRelease(r)
+        if scan:
+            for i in range(len(releases)):
+                if i in to_scan or 0 < len(releases[i]) <= FEW_TRACKS:
+                    r = lookup.Release(releases[i])
+                    r.lookup()
+                    if r.best_group:
+                        p = PreferredRelease.BestRelease(r)
 
-                    if len(releases[i]) <= FEW_TRACKS:
-                        p.choose_release()
-                        p.set_mbid(p.best_release)
-                        self.scanned += 1
-                    else:
-                        match = p.mb_comparison(True)
-                        print(match)
-                        if match is not None and (match > MATCHING_RATIO):
+                        if len(releases[i]) <= FEW_TRACKS:
+                            p.choose_release()
                             p.set_mbid(p.best_release)
                             self.scanned += 1
+                        else:
+                            match = p.mb_comparison(True)
+                            print(match)
+                            if match is not None and (match > MATCHING_RATIO):
+                                p.set_mbid(p.best_release)
+                                self.scanned += 1
 
         if len(releases[0]) <= 0:
             releases.pop(0)
         else:
-            p = PreferredRelease.BestRelease(lookup.Release(releases[0]))
-            p.choose_release()
-            p.set_mbid(p.best_release)
-            self.scanned += 1
+            if scan:
+                p = PreferredRelease.BestRelease(lookup.Release(releases[0]))
+                p.choose_release()
+                p.set_mbid(p.best_release)
+                self.scanned += 1
 
         for release in releases:
 
@@ -237,8 +251,8 @@ class CurrentReleases:
 
     def __init__(self, directories, timeout=.01):
         self.directories = directories
-        self.__current = (None, None)
-        self.__prev = (None, None)
+        self.__current = (-1, None)
+        self.__prev = (-1, None)
         self.cond = threading.Condition()
         
     @property

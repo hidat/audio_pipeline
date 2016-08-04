@@ -44,6 +44,7 @@ commands = [Command("<track_num>[[,][ ]<track_num>...][ ]<meta_command>", "Add t
               Command("previous, prev, p", "Display metadata of previous album"),
               Command("edit, e", "Edit all metadata categories with the Metadata Input Friend")]
 
+
 def get_text_color(audio_file):
     color = text_color
     

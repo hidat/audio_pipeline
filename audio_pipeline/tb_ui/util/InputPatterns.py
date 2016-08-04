@@ -20,7 +20,6 @@ quit = "quit"
 help = "help"
 edit = "edit"
 
-forward = "forward"
 tracknum_acc = "track_num"
 meta_acc = "meta"
 
@@ -43,13 +42,6 @@ release_pattern = re.compile("\d+ -.*")
 # change obscenity rating pattern
 radio_edit = re.compile("\s*((?P<" + kexp + ">(kd)|(kexp radio( edit?)))|(?P<" + standard + ">(d+)|(radio( edit)?)))", flags=re.I)
 obscenity_rating = re.compile("\s*((?P<" + yellow + ">y+)|(?P<" + red + ">r+)|(?P<" + kexp + ">(kc|kexp clean( edit)?))|(?P<" + standard + ">(c+|clean( edit)?)))", flags=re.I)
-#radio_edit = re.compile("\s*(d+|radio edit)", flags=re.I)
-#kexp_radio_edit = re.compile("\s*k", flags=re.I)
-#yellow_dot = re.compile("\s*y+(ellow)?\s*(dot)?", flags=re.I)
-#red_dot = re.compile("\s*r+(ed)?\s*(dot)?", flags=re.I)
-#clean_edit = re.compile("\s*c+(lean)?\s*(edit)?\s*", flags=re.I)
-#kexp_clean_edit = re.compile("\s*(kc|kexp clean( edit)?)", flags=re.I)
-#kexp_radio_edit = re.compile("\s*(kr|kexp radio( edit)?)", flags=re.I)
 rm_rating = re.compile("\s*(l|clear)", flags=re.I)
 
 whitespace = re.compile("^\s+$")
