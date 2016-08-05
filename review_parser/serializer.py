@@ -67,7 +67,7 @@ class DaletSerializer:
                     text(track.itemCode)
                 with tag('Key1'):
                     text(track.itemCode)
-                with tag('KEXPStarRating'):
+                with tag('KEXPRecordingRecommendationLevel'):
                     text(track.stars)
                 #with tag('Title'):
                 #    text(track.title)
