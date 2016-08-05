@@ -29,19 +29,19 @@ def has_mbid(track):
         
     return good
 
+
 def is_release(directory):
-    d = os.path.split(directory)[1]
     track = False
     # we'll set this to a DBPOWERAMP config later
 
     #if InputPatterns.release_pattern.match(d):
 
-    for f in os.scandir(directory):
-        if f.is_file:
-            file_name = f.name
+    for f in os.listdir(directory):
+        file_path = os.path.join(directory, f)
+        if os.path.isfile(file_path):
 
             try:
-                track = AudioFileFactory.get(f.path)
+                track = AudioFileFactory.get(file_path)
             except IOError:
                 track = False
                 continue
