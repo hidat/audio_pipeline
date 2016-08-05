@@ -1,9 +1,8 @@
 import os
 import collections
 import time
-from ..model import MoveFiles
-from ...util.AudioFileFactory import AudioFileFactory
-from ...util import Exceptions
+from ..util import Resources
+from . import MoveFiles
 from . import Rules
 from . import LoadReleases
 
@@ -28,7 +27,7 @@ class ProcessDirectory(object):
         for path, dirs, files in os.walk(root_dir):
             for directory in dirs:
                 directory = os.path.normpath(os.path.join(path, directory))
-                if self.is_release(directory):
+                if Resources.is_release(directory):
                     if dbpoweramp:
                         try:
                             int(os.path.split(directory)[1].split()[0])
@@ -128,28 +127,6 @@ class ProcessDirectory(object):
                (self.__current_release.current is not None and 
                 self.__current_release.current[0] > 0)
 
-    @staticmethod
-    def is_release(directory):
-        d = os.path.split(directory)[1]
-        track = False
-        # we'll set this to a DBPOWERAMP config later
-
-        #if InputPatterns.release_pattern.match(d):
-
-        for f in os.scandir(directory):
-            if f.is_file:
-                file_name = f.name
-
-                try:
-                    track = AudioFileFactory.get(f.path)
-                except IOError:
-                    track = False
-                    continue
-                except Exceptions.UnsupportedFiletypeError:
-                    track = False
-                    continue
-                break
-        return track
 
     def track_nums(self):
         tn = set([af.track_num.value for af in self.current_release])

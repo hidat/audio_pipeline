@@ -1,9 +1,8 @@
 import shutil
 import os
 import subprocess
-import time
+from ..util import Resources
 
-from . import Model
 
 class MoveFiles:
 
@@ -48,6 +47,5 @@ class MoveFiles:
             print("Moving " + ascii(directory))
             subprocess.run(command, shell=True)
             
-            if not Model.ProcessDirectory.is_release(directory):
+            if not Resources.ProcessDirectory.is_release(directory):
                 shutil.rmtree(directory)
-                
