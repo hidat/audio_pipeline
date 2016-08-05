@@ -3,7 +3,6 @@ from . import AudioFileFactory
 from . import Exceptions
 from . import MBInfo
 from . import Tag
-from . import Tag
 from . import Util
 from . import format
 

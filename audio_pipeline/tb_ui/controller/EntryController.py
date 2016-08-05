@@ -1,6 +1,7 @@
 from ..util import InputPatterns
 from ..view import EntryGrid
 from ...util import Util
+from audio_pipeline.util import Exceptions
 
 
 class Entry():
@@ -71,21 +72,20 @@ class Entry():
         old_meta = audio_file[tag_name].value
         new_meta = None
         if meta:
-            if type(old_meta) is int:
-                try:
-                    new_meta = int(meta)
-                except ValueError:
-                    new_meta = None
-            elif InputPatterns.whitespace.match(meta):
+            if InputPatterns.whitespace.match(meta):
                 new_meta = " "
             elif tag_name == "KEXPFCCOBSCENITYRATING":
+                obscenity_meta = InputPatterns.obscenity_rating.match(meta)
                 # figure out the appropriate tag to put here (to deal with misspellings, etc)
-                if InputPatterns.yellow_dot.match(meta):
-                    new_meta = Util.Obscenity.yellow
-                elif InputPatterns.red_dot.match(meta):
-                    new_meta = Util.Obscenity.red
-                elif InputPatterns.clean_edit.match(meta):
-                    new_meta = Util.Obscenity.clean
+                if obscenity_meta:
+                  if obscenity_meta.group(InputPatterns.yellow):
+                      new_meta = Util.Obscenity.yellow
+                  elif obscenity_meta.group(InputPatterns.red):
+                      new_meta = Util.Obscenity.red
+                  elif obscenity_meta.group(InputPatterns.standard):
+                      new_meta = Util.Obscenity.clean
+                  elif obscenity_meta.group(InputPatterns.kexp):
+                      new_meta = Util.Obscenity.kexp_clean
                 elif InputPatterns.whitespace.match(meta):
                     new_meta = " "
             elif tag_name == "Album Artist":
@@ -93,16 +93,26 @@ class Entry():
                 new_meta = meta
                 self.meta_entry.track_artist_set(new_meta)
             elif tag_name == "KEXPRadioEdit":
-                if InputPatterns.radio_edit.match(meta):
-                    new_meta = Util.Edits.radio_edit
-                elif InputPatterns.kexp_radio_edit.match(meta):
-                    new_meta = Util.Edits.kexp_edit
+                edit_meta = InputPatterns.radio_edit.match(meta)
+                if edit_meta:
+                  if edit_meta.group(InputPatterns.standard):
+                      new_meta = Util.Edits.radio_edit
+                  elif edit_meta.group(InputPatterns.kexp):
+                      new_meta = Util.Edits.kexp_edit
                 elif InputPatterns.whitespace.match(meta):
                     new_meta = " "
             else:
                 new_meta = meta
         else:
             new_meta = " "
+
+        if new_meta and not InputPatterns.whitespace.match(new_meta):
+            try:
+                audio_file[tag_name].value = new_meta
+            except Exceptions.InvalidTagValueError:
+                new_meta = " "
+            audio_file[tag_name].value = old_meta
+
         return new_meta
 
     def save(self):

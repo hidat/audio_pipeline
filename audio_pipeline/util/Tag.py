@@ -56,6 +56,9 @@ class MetadataFormat(abc.ABC):
     _release_date_name = "Year"
     _label_name = "Label"
     _mbid_name = "MBID"
+    _country_name = "Country"
+    _type_name = "Release Type"
+    _media_format_name = "Format"
 
     # track-level tags
     _title_name = "Title"
@@ -63,6 +66,7 @@ class MetadataFormat(abc.ABC):
     _disc_num_name = "Disc Num"
     _track_num_name = "Track Num"
     _length_name = "Length"
+    _acoustid_name = "Acoustid ID"
 
     ################
     #   release-level tags
@@ -88,6 +92,18 @@ class MetadataFormat(abc.ABC):
     @abc.abstractmethod
     def mbid(cls, mutagen): pass
 
+    @classmethod
+    @abc.abstractmethod
+    def release_type(cls, mutagen): pass
+
+    @classmethod
+    @abc.abstractmethod
+    def country(cls, mutagen): pass
+
+    @classmethod
+    @abc.abstractmethod
+    def media_format(cls, mutagen): pass
+
     ######################
     #   track-level tags
     ######################
@@ -112,6 +128,11 @@ class MetadataFormat(abc.ABC):
     def length(cls, mutagen):
         tag = LengthTag(cls._length_name, cls._length, mutagen)
         return tag
+
+    @classmethod
+    @abc.abstractmethod
+    def acoustid(cls, mutagen):
+        pass
     
     ######################
     #   custom tag makers
@@ -153,6 +174,8 @@ class Tag(abc.ABC):
 
     def __str__(self):
         if self._value:
+            if isinstance(self._value, list):
+                return "\n".join(self._value)
             return str(self._value)
         else:
             return ""

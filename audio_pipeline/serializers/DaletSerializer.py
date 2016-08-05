@@ -2,7 +2,6 @@ import os
 import os.path as path
 from yattag import Doc, indent
 from audio_pipeline import Constants
-from audio_pipeline.file_walker import ProcessLog
 from audio_pipeline.util import Util
 from . import Serializer
 
@@ -10,7 +9,10 @@ __author__ = 'hidat'
 
 
 class DaletSerializer(Serializer.Serializer):
-    
+
+    def __init__(self, output_dir):
+        super().__init__(output_dir)
+
     def save_track(self, release, track):
         """
         Create an XML file of track metadata that Dalet will be happy with

@@ -7,10 +7,9 @@ from ..util import InputPatterns
 from ..util import Resources
 import time
 import os
-import re
 
 
-class MetaController:
+class TBController:
 
     def __init__(self, root_dir, copy_dir):
         """
@@ -66,11 +65,10 @@ class MetaController:
         When we have input we've determined is (probably) metadata,
         add it to the metadata of the specified track
         """
-        red = InputPatterns.red_dot.match(value)
-        yellow = InputPatterns.yellow_dot.match(value)
-        clean = InputPatterns.clean_edit.match(value)
+        obscenity = InputPatterns.obscenity_rating.match(value)
+        edit = InputPatterns.radio_edit.match(value)
         clear = InputPatterns.rm_rating.match(value)
-        if not (red or yellow or clean or clear):
+        if not (obscenity or edit or clear):
                 err_msg = "Invalid Input " + str(value)
                 Dialog.err_message(err_msg, None, parent=self.app)
                 return None
@@ -79,15 +77,24 @@ class MetaController:
         # update the ones with the specified track number
         for track in self.model.current_release:
             if track.track_num.value in track_nums:
-                # update this track's metadata
-                if red:
-                    track.obscenity.save(Util.Obscenity.red)
-                elif yellow:
-                    track.obscenity.save(Util.Obscenity.yellow)
-                elif clean:
-                    track.obscenity.save(Util.Obscenity.clean)
-                elif clear:
+                # update this tracks metadata
+                if obscenity:
+                    if obscenity.group(InputPatterns.red):
+                        track.obscenity.save(Util.Obscenity.red)
+                    elif obscenity.group(InputPatterns.yellow):
+                        track.obscenity.save(Util.Obscenity.yellow)
+                    elif obscenity.group(InputPatterns.kexp):
+                        track.obscenity.save(Util.Obscenity.kexp_clean)
+                    elif obscenity.group(InputPatterns.standard):
+                        track.obscenity.save(Util.Obscenity.clean)
+                if edit:
+                    if edit.group(InputPatterns.kexp):
+                        track.radio_edit.save(Util.Edits.kexp_edit)
+                    elif edit.group(InputPatterns.standard):
+                        track.radio_edit.save(Util.Edits.radio_edit)
+                if clear:
                     track.obscenity.save(None)
+                    track.radio_edit.save(None)
                 self.app.update_meta(track)
                 track_nums.remove(track.track_num.value)
 
@@ -156,7 +163,7 @@ class MetaController:
         """
         Display a 'quit'? dialog
         """
-        Dialog.Check(None, "Processing complete", "Close TB", self.app.processing_done, "Close TomatoBanana?")
+        Dialog.Check(None, "Move Files?", "Close TB", self.app.processing_done, "Close TomatoBanana?")
         self.app.wait_variable(self.app.processing_done)
         move_files = self.app.processing_done.get()
         if move_files != Resources.cancel:

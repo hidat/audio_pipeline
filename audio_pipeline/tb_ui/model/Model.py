@@ -1,8 +1,8 @@
 import os
 import collections
-from ..model import MoveFiles
-from ...util.AudioFileFactory import AudioFileFactory
-from ...util import Exceptions
+import time
+from ..util import Resources
+from . import MoveFiles
 from . import Rules
 from . import LoadReleases
 
@@ -16,11 +16,19 @@ class ProcessDirectory(object):
 
         dbpoweramp = True
 
+        starting_index = 0
+        root_dir = os.path.normpath(root_dir)
+        starting_dir = os.path.normpath(root_dir)
+
+        # if len([d for d in os.listdir(root_dir) if d.is_dir()]) == 0:
+        #
+        #     root_dir = os.path.dirname(root_dir)
+
         self.directories = list()
         for path, dirs, files in os.walk(root_dir):
             for directory in dirs:
-                directory = os.path.join(path, directory)
-                if self.is_release(directory):
+                directory = os.path.normpath(os.path.join(path, directory))
+                if Resources.is_release(directory):
                     if dbpoweramp:
                         try:
                             int(os.path.split(directory)[1].split()[0])
@@ -32,13 +40,20 @@ class ProcessDirectory(object):
             self.directories.sort(key=lambda x: int(os.path.split(x)[1].split()[0]))
         else:
             self.directories.sort()
-        
+
+        if starting_dir != root_dir:
+            print(self.directories)
+
+            starting_index = self.directories.index(starting_dir)
+
         self.__current_release = LoadReleases.CurrentReleases(self.directories)
-                
+
         self.next_buffer = collections.deque()
         self.prev_buffer = collections.deque()
-        
-        LoadReleases.LoadReleases(self.prev_buffer, self.next_buffer, self.__current_release).start()
+
+        self.loader_thread = LoadReleases.LoadReleases(self.prev_buffer, self.next_buffer,
+                                                       self.__current_release, starting_index)
+        self.loader_thread.start()
 
     def __del__(self):
         self.__current_release.current = None
@@ -58,20 +73,38 @@ class ProcessDirectory(object):
         self.prev_buffer.clear()
             
     def next(self):
-        if self.current_release is not None:
-           self.prev_buffer.append(self.__current_release.current)
+        if self.has_next():
+            if self.current_release is not None:
+                self.prev_buffer.append(self.__current_release.current)
 
-        self.__current_release.current = self.next_buffer.pop()
+            while len(self.next_buffer) <= 0:
+                time.sleep(.02)
+                if self.has_next() and not self.loader_thread.is_alive():
+                    print("thread died")
+                    self.loader_thread = LoadReleases.LoadReleases(self.prev_buffer, self.next_buffer,
+                                                                   self.__current_release, self.__current_release.current[0] + 1)
+                    self.loader_thread.start()
+                    print("thread revived??")
 
-        return self.current_release
+            self.__current_release.current = self.next_buffer.pop()
+
+            return self.current_release
 
     def prev(self):
-        if self.current_release is not None:
-           self.next_buffer.append(self.__current_release.current)
+        if self.has_prev():
+            if self.current_release is not None:
+                self.next_buffer.append(self.__current_release.current)
 
-        self.__current_release.current = self.prev_buffer.pop()
-        
-        return self.current_release
+            while len(self.prev_buffer) <= 0:
+                time.sleep(.02)
+                if self.has_prev() and not self.loader_thread.is_alive():
+                    self.loader_thread = LoadReleases.LoadReleases(self.prev_buffer, self.next_buffer,
+                                                                   self.__current_release, self.__current_release.current[0] - 1)
+                    self.loader_thread.start()
+
+            self.__current_release.current = self.prev_buffer.pop()
+            
+            return self.current_release
         
     def jump(self, i):
         if i < 0:
@@ -85,35 +118,16 @@ class ProcessDirectory(object):
                     
         return self.current_release
 
-        
     def has_next(self):
-        return len(self.next_buffer) != 0
+        return len(self.next_buffer) > 0 or \
+               (self.__current_release.current is not None and 
+                self.__current_release.current[0] < len(self.__current_release.directories) - 1)
 
     def has_prev(self):
-        return len(self.prev_buffer) != 0
+        return len(self.prev_buffer) > 0 or \
+               (self.__current_release.current is not None and 
+                self.__current_release.current[0] > 0)
 
-    @staticmethod
-    def is_release(directory):
-        d = os.path.split(directory)[1]
-        track = False
-        # we'll set this to a DBPOWERAMP config later
-
-        #if InputPatterns.release_pattern.match(d):
-
-        for f in os.scandir(directory):
-            if f.is_file:
-                file_name = f.name
-
-                try:
-                    track = AudioFileFactory.get(f.path)
-                except IOError:
-                    track = False
-                    continue
-                except Exceptions.UnsupportedFiletypeError:
-                    track = False
-                    continue
-                break
-        return track
 
     def track_nums(self):
         tn = set([af.track_num.value for af in self.current_release])

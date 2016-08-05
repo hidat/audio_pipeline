@@ -30,6 +30,7 @@ class Obscenity:
     red = "RED DOT"
     yellow = "YELLOW DOT"
     clean = "CLEAN EDIT"
+    kexp_clean = "KEXP CLEAN EDIT"
     
 
 def is_mbid(id):
@@ -40,7 +41,9 @@ def is_mbid(id):
         id = uuid.UUID(id)
         good = True
     except ValueError as e:
-        good = False    
+        good = False
+    except AttributeError:
+        good = False
     
     return good
 
@@ -56,6 +59,7 @@ def has_mbid(track):
         good = False
         
     return good
+
     
 def distRuleCleanup(rule):
     cleanRule = rule

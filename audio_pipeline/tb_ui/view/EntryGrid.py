@@ -43,7 +43,7 @@ class EntryGrid(tk.Toplevel):
 
             self.release.set(col, 0, text=name)
             if tag.value:
-                self.release.set(col, 1, text=str(tag.value))
+                self.release.set(col, 1, text=str(tag))
             else:
                 self.release.set(col, 1, text=str(" "))
 
@@ -74,7 +74,7 @@ class EntryGrid(tk.Toplevel):
             for tag in track.track():
                 if tag.name in self.track_categories:
                     if tag.value:
-                        self.tracks.set(col, row, text=str(tag.value))
+                        self.tracks.set(col, row, text=str(tag))
                     else:
                         self.tracks.set(col, row, text=" ")
                     col += 1

@@ -2,6 +2,7 @@ __author__ = 'cephalopodblue'
 import json
 import os
 
+
 class JsonSerializer:
         
     @staticmethod
