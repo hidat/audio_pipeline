@@ -20,8 +20,9 @@ class ProcessDirectory(object):
         root_dir = os.path.normpath(root_dir)
         starting_dir = os.path.normpath(root_dir)
 
-        if len([d for d in os.scandir(root_dir) if d.is_dir()]) == 0:
-            root_dir = os.path.dirname(root_dir)
+        # if len([d for d in os.listdir(root_dir) if d.is_dir()]) == 0:
+        #
+        #     root_dir = os.path.dirname(root_dir)
 
         self.directories = list()
         for path, dirs, files in os.walk(root_dir):
