@@ -12,7 +12,7 @@ class DaletSerializer:
         self.release_meta_dir = output_dir
         if not path.exists(self.release_meta_dir):
             os.makedirs(self.release_meta_dir)
-        print("Release meta: ", self.release_meta_dir)
+        self.track_meta_dir = self.release_meta_dir
 
 
     def saveRelease(self, release):
@@ -60,8 +60,6 @@ class DaletSerializer:
 
         output_dir = self.track_meta_dir
 
-        self.logs.log_track(track)
-
         doc.asis('<?xml version="1.0" encoding="UTF-8"?>')
         with tag('titles'):
             with tag('title'):
@@ -75,6 +73,6 @@ class DaletSerializer:
                 #    text(track.title)
 
         formatted_data = indent(doc.getvalue())
-        output_file = path.join(output_dir, track.item_code + ".xml")
+        output_file = path.join(output_dir, track.itemCode + ".xml")
         with open(output_file, "wb") as f:
             f.write(formatted_data.encode("UTF-8"))

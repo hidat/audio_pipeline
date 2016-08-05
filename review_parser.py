@@ -86,6 +86,9 @@ def exportReviews(reviews, outputDirectory):
     for review in reviews:
         if review.mbID is not None and review.mbID > '':
             fp.saveRelease(review)
+            for track in review.tracks:
+                if track.itemCode is not None:
+                    fp.saveTrack(track)
             exportCount += 1
 
     return exportCount
@@ -153,7 +156,7 @@ def main():
             sdk = ssheet.SDK(apiKey)
             releases = sdk.readWeeklySheet(sheetId)
         else:
-            releases = mb_release.readReleaseLog(jsonLogDir)
+            releases = mb_release.readAllLogs(jsonLogDir)
 
         mergedReviews = mergeReviewsAndReleases(reviews, releases)
         foundCount = printReviews(mergedReviews)

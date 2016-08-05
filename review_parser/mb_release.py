@@ -1,4 +1,5 @@
 import json
+import os
 import os.path as path
 import unicodedata
 
@@ -25,6 +26,19 @@ class MBTrack:
             self.trackNum = jsonDict['track_num']
             self.title = jsonDict['track_name']
             self.itemCode = jsonDict['item_code']
+
+###
+# Finds all directories under the given directory that match  'review_json_log_*', reading in the release and track
+# logs under each directory.
+###
+def readAllLogs(dirname):
+    releases = []
+    files = os.listdir(dirname)
+    for file in files:
+        fullName = path.join(dirname, file)
+        if path.isdir(fullName) and file.startswith('review_json_log_'):
+            releases.extend(readReleaseLog(fullName))
+    return releases
 
 
 ###
