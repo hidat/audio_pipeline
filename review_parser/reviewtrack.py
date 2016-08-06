@@ -20,7 +20,7 @@ class ReviewTrack:
         else:
             self.trackNum = None
 
-        if "<em>" in rawTrack:
+        if "<u>" in rawTrack:
             self.stars +=1
         if "<strong>" in rawTrack:
             self.stars += 1

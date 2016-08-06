@@ -9,11 +9,12 @@ class DaletSerializer:
 
     def __init__(self, output_dir):
         # Set up metadata directories
-        self.release_meta_dir = output_dir
+        self.release_meta_dir = path.join(output_dir, 'releases')
         if not path.exists(self.release_meta_dir):
             os.makedirs(self.release_meta_dir)
-        self.track_meta_dir = self.release_meta_dir
-
+        self.track_meta_dir = path.join(output_dir, 'tracks')
+        if not path.exists(self.track_meta_dir):
+            os.makedirs(self.track_meta_dir)
 
     def saveRelease(self, release):
         """
