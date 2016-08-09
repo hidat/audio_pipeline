@@ -77,14 +77,14 @@ class ProcessDirectory(object):
             if self.current_release is not None:
                 self.prev_buffer.append(self.__current_release.current)
 
-            while len(self.next_buffer) <= 0:
+            while self.has_next() and len(self.next_buffer) <= 0:
                 time.sleep(.02)
-                if self.has_next() and not self.loader_thread.is_alive():
-                    print("thread died")
-                    self.loader_thread = LoadReleases.LoadReleases(self.prev_buffer, self.next_buffer,
-                                                                   self.__current_release, self.__current_release.current[0] + 1)
-                    self.loader_thread.start()
-                    print("thread revived??")
+                # if self.has_next() and not self.loader_thread.is_alive():
+                #     print("thread died")
+                #     self.loader_thread = LoadReleases.LoadReleases(self.prev_buffer, self.next_buffer,
+                #                                                    self.__current_release, self.__current_release.current[0] + 1)
+                #     self.loader_thread.start()
+                #     print("thread revived??")
 
             self.__current_release.current = self.next_buffer.pop()
 
@@ -95,12 +95,12 @@ class ProcessDirectory(object):
             if self.current_release is not None:
                 self.next_buffer.append(self.__current_release.current)
 
-            while len(self.prev_buffer) <= 0:
+            while self.has_prev() and len(self.prev_buffer) <= 0:
                 time.sleep(.02)
-                if self.has_prev() and not self.loader_thread.is_alive():
-                    self.loader_thread = LoadReleases.LoadReleases(self.prev_buffer, self.next_buffer,
-                                                                   self.__current_release, self.__current_release.current[0] - 1)
-                    self.loader_thread.start()
+                # if self.has_prev() and not self.loader_thread.is_alive():
+                #     self.loader_thread = LoadReleases.LoadReleases(self.prev_buffer, self.next_buffer,
+                #                                                    self.__current_release, self.__current_release.current[0] - 1)
+                #     self.loader_thread.start()
 
             self.__current_release.current = self.prev_buffer.pop()
             

@@ -47,5 +47,5 @@ class MoveFiles:
             print("Moving " + ascii(directory))
             subprocess.run(command, shell=True)
             
-            if not Resources.ProcessDirectory.is_release(directory):
+            if not Resources.is_release(directory):
                 shutil.rmtree(directory)

@@ -43,6 +43,7 @@ release_pattern = re.compile("\d+ -.*")
 radio_edit = re.compile("\s*((?P<" + kexp + ">(kd)|(kexp radio( edit?)))|(?P<" + standard + ">(d+)|(radio( edit)?)))", flags=re.I)
 obscenity_rating = re.compile("\s*((?P<" + yellow + ">y+)|(?P<" + red + ">r+)|(?P<" + kexp + ">(kc|kexp clean( edit)?))|(?P<" + standard + ">(c+|clean( edit)?)))", flags=re.I)
 rm_rating = re.compile("\s*(l|clear)", flags=re.I)
+mb_search_pattern = re.compile("\s*s+(earch)?", flags=re.I)
 
 whitespace = re.compile("^\s+$")
 

@@ -81,6 +81,8 @@ class Content:
 
 class Release(Content):
 
+    release_group_url = 'http://musicbrainz.org/release-group/'
+
     content_type = 'Release'
     glossary_type = content_type
     
