@@ -5,13 +5,7 @@ from . import EntryController
 from ..util import InputPatterns, Resources
 import time
 import os
-import webbrowser
-import urllib.parse
-
-mb_release_url = "http://musicbrainz.org/release/"
-mb_search_url = "http://musicbrainz.org/search?query="
-
-search_params = {"type": "release", "method": "indexed"}
+from . import Search
 
 
 class TBController:
@@ -47,7 +41,9 @@ class TBController:
         popup = InputPatterns.popup_pattern.match(input_string)
         search = InputPatterns.mb_search_pattern.match(input_string)
         self.app.select_input()
-        if tracks:
+        if Util.is_mbid(input_string):
+            self.model.set_mbid(input_string)
+        elif tracks:
             # input is (probably) track metadata (currently only RED DOT, YELLOW DOT, CLEAN EDIT, clear (l))
             try:
                 track_nums = InputPatterns.get_track_numbers(tracks.group())
@@ -63,8 +59,10 @@ class TBController:
         elif popup:
             self.popup(popup)
         elif search:
-            search_request = "%s%s&%s" % (mb_search_url, str(self.model.current_release[0].album), urllib.parse.urlencode(search_params))
-            webbrowser.open(search_request)
+            if search.group(InputPatterns.mb):
+                Search.mb_search(self.model.current_release[0], len(self.model.current_release))
+            if search.group(InputPatterns.albunack):
+                Search.albunack_search(self.model.current_release[0])
         else:
             err_msg = "Invalid input " + str(input_string)
             Dialog.err_message(err_msg, None, parent=self.app)

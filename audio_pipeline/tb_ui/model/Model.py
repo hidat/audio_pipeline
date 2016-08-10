@@ -64,7 +64,11 @@ class ProcessDirectory(object):
             return self.__current_release.current[1]
         else:
             return self.__current_release.current
-            
+
+    def set_mbid(self, mbid):
+        for track in self.current_release:
+            track.mbid.save(mbid)
+
     def move_files(self):
         self.processing_complete.move_files(self)
             
