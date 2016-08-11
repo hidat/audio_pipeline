@@ -180,9 +180,10 @@ class ReleaseFrame(MetaFrame):
 
     def update(self, audio_file):
         for tag in audio_file.release():
-            if tag.name in self.labels:
-                self.attribute_text[tag.name].set(str(tag))
-                self.attributes[tag.name].config(fg=Settings.text_color)
+            for label_group in self.labels:
+                if tag.name in label_group:
+                    self.attribute_text[tag.name].set(str(tag))
+                    self.attributes[tag.name].config(fg=Settings.text_color)
 
     def select_release(self):
         self.active.clear()

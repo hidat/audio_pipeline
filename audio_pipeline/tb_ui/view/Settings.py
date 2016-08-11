@@ -34,16 +34,19 @@ obscenity_rating_commands = SubCommand("Valid <meta_command>s:", [Command("red d
                              Command("clear, l", "Remove obscenity rating"),
                              Command("radio edit, d", "Set radio edit value to RADIO EDIT"),
                              Command("kexp radio edit, kd", "Set radio edit value to KEXP RADIO EDIT")])
-                             
 
+search_options = [Command("<artist_name>", "Search for artist by specified artist name instead of artist name in meta"),
+                  Command("bar", "Search for release by carcode/catalog number")]
+                  
 commands = [Command("<track_num>[[,][ ]<track_num>...][ ]<meta_command>", "Add the metadata specified by <meta_command> to track <track_num>.<meta_command> is not case-sensitive.\
               \nMultiple <track_nums> may be specified, separated by \",\" and/or \" \"", sub_commands=obscenity_rating_commands,
               examples = ["7y: Add YELLOW DOT obscenity rating to track 7 of the current album."]),
               Command("quit, q", "Close this application."),
               Command("next, n", "Display metadata of next album"),
               Command("previous, prev, p", "Display metadata of previous album"),
-              Command("edit, e", "Edit all metadata categories with the Metadata Input Friend")]
-
+              Command("edit, e", "Edit all metadata categories with the Metadata Input Friend"),
+              Command("search, s", "Search for MusicBrainz release in browser.", sub_commands=SubCommand("Options", search_options)),
+              Command("albunack, al", "Search for artist in Albunack (in browser).", sub_commands=SubCommand("Options", search_options[:1]))]
 
 def get_text_color(audio_file):
     color = text_color

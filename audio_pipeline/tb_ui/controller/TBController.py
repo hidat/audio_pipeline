@@ -43,6 +43,7 @@ class TBController:
         self.app.select_input()
         if Util.is_mbid(input_string):
             self.model.set_mbid(input_string)
+            self.app.update_meta(self.model.current_release[0])
         elif tracks:
             # input is (probably) track metadata (currently only RED DOT, YELLOW DOT, CLEAN EDIT, clear (l))
             try:
@@ -59,10 +60,12 @@ class TBController:
         elif popup:
             self.popup(popup)
         elif search:
+            artist = search.group(InputPatterns.artist)
+            barcode = search.group(InputPatterns.barcode)
             if search.group(InputPatterns.mb):
-                Search.mb_search(self.model.current_release[0], len(self.model.current_release))
+                Search.mb_search(self.model.current_release[0], artist, barcode)
             if search.group(InputPatterns.albunack):
-                Search.albunack_search(self.model.current_release[0])
+                Search.albunack_search(self.model.current_release[0], artist)
         else:
             err_msg = "Invalid input " + str(input_string)
             Dialog.err_message(err_msg, None, parent=self.app)
@@ -139,7 +142,7 @@ class TBController:
         """
         if command.group(InputPatterns.edit):
             meta_entry = EntryController.Entry(self.model.current_release, self.app, self.update_album)
-            meta_entry.start()        
+            meta_entry.start()
         elif command.group(InputPatterns.quit):
             self.last_album()        
         elif command.group(InputPatterns.help):
@@ -149,8 +152,7 @@ class TBController:
         """
         Update current release metadata
         """
-        for track in self.model.current_release:
-            self.app.update_meta(track)
+        self.app.update_meta(self.model.current_release[0])
             
     def next_album(self):
         """
