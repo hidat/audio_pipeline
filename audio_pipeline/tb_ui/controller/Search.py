@@ -10,7 +10,7 @@ mb_search_url = "http://musicbrainz.org/search?query="
 
 mb_search_terms = {"type": "", "method": "advanced"}
 
-forbidden = [":", "!", "\""]
+forbidden = [":", "!", "\"", "+", "&"]
 
 
 def albunack_search(track, artist=None):
@@ -58,7 +58,7 @@ def mb_search(track, artist=None, barcode=None):
         search_terms = mb_search_terms.copy()
         search_terms["type"] = "artist"
 
-        query.append(("artist", artist))
+        query.append((artist,))
     else:
         search_terms = mb_search_terms.copy()
         if track.album.value:
@@ -85,10 +85,12 @@ def prep_query(query):
         if len(part) > 1:
             q = "%s:\"%s\"" % (part[0], part[1])
         else:
-            q = "\"%s\"" % part[0]
+            q = part[0]
         for r in forbidden:
             rep = "%s%s" % ("%", hex(ord(r))[2:])
             q = q.replace(r, rep)
+        q.replace(" ", "+")
         prepped_query.append(q)
+        print(prepped_query)
 
     return " ".join(prepped_query)
