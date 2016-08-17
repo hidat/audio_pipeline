@@ -34,7 +34,7 @@ def albunack_search(track, artist=None):
         webbrowser.open(search_url)
 
 
-def mb_search(track, artist=None, barcode=None):
+def mb_search(track, artist=None, barcode=None, barcode_value=None):
     """
     Given an audiofile, open an MB search in the browser
 
@@ -50,6 +50,9 @@ def mb_search(track, artist=None, barcode=None):
         search_terms = mb_search_terms.copy()
         search_terms["type"] = "release"
 
+        if barcode_value:
+            query.append(("barcode", barcode_value))
+            query.append(("catno", barcode_value))
         if track.barcode.value:
             query.append(("barcode", track.barcode.value))
         if track.catalog_num.value:

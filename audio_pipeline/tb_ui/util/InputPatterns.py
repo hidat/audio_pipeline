@@ -46,7 +46,7 @@ radio_edit = re.compile("\s*((?P<" + kexp + ">(kd)|(kexp radio( edit?)))|(?P<" +
 obscenity_rating = re.compile("\s*((?P<" + yellow + ">y+)|(?P<" + red + ">r+)|(?P<" + kexp + ">(kc|kexp clean( edit)?))|(?P<" + standard + ">(c+|clean( edit)?)))", flags=re.I)
 rm_rating = re.compile("\s*(l|clear)", flags=re.I)
 mb_search_pattern = re.compile("\s*((?P<" + mb + ">s+(earch)?)|(?P<" + albunack + ">(albunack|al)))(\s*(?P<" + barcode + ">bar)?(\"(?P<" + artist + ">.+)\")?)", flags=re.I)
-
+barcode_search_pattern = re.compile("\s*bar\s*(?P<" + barcode + ">.+)?")
 whitespace = re.compile("^\s+$")
 
 

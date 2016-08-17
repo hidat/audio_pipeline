@@ -40,6 +40,7 @@ class TBController:
         nav = InputPatterns.nav_pattern.match(input_string)
         popup = InputPatterns.popup_pattern.match(input_string)
         search = InputPatterns.mb_search_pattern.match(input_string)
+        barcode = InputPatterns.barcode_search_pattern.match(input_string)
         self.app.select_input()
         if Util.is_mbid(input_string):
             self.model.set_mbid(input_string)
@@ -66,6 +67,9 @@ class TBController:
                 Search.mb_search(self.model.current_release[0], artist, barcode)
             if search.group(InputPatterns.albunack):
                 Search.albunack_search(self.model.current_release[0], artist)
+        elif barcode:
+            bar = barcode.group(InputPatterns.barcode)
+            Search.mb_search(self.model.current_release[0], barcode=True, barcode_value=bar)
         else:
             err_msg = "Invalid input " + str(input_string)
             Dialog.err_message(err_msg, None, parent=self.app)
