@@ -20,9 +20,8 @@ class ProcessDirectory(object):
         root_dir = os.path.normpath(root_dir)
         starting_dir = os.path.normpath(root_dir)
 
-        # if len([d for d in os.listdir(root_dir) if d.is_dir()]) == 0:
-        #
-        #     root_dir = os.path.dirname(root_dir)
+        if not [d for d in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, d))]:
+            root_dir = os.path.dirname(root_dir)
 
         self.directories = list()
         for path, dirs, files in os.walk(root_dir):
@@ -43,7 +42,6 @@ class ProcessDirectory(object):
 
         if starting_dir != root_dir:
             print(self.directories)
-
             starting_index = self.directories.index(starting_dir)
 
         self.__current_release = LoadReleases.CurrentReleases(self.directories)

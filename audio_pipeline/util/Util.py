@@ -1,6 +1,6 @@
 import uuid
 import unicodedata
-import os
+
 
 def minutes_seconds(length):
     # turns a floating point value into a string of (approximate)
@@ -60,8 +60,8 @@ def has_mbid(track):
         
     return good
 
-    
-def distRuleCleanup(rule):
+
+def distrule_cleanup(rule):
     cleanRule = rule
     if not rule.isalpha():
         cleanRule = '#'
@@ -72,7 +72,7 @@ def distRuleCleanup(rule):
     return cleanRule
 
 
-def stringCleanup(text):
+def string_cleanup(text):
     clean = {'\\': '-', '/': '-', '\"': '\''}
     for character, replacement in clean.items():
         text = text.replace(character, replacement)

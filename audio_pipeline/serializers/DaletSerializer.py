@@ -183,7 +183,7 @@ class DaletSerializer(Serializer.Serializer):
                         text(item)
                         
                 if Constants.batch_constants.rotation:
-                    r_status = Util.stringCleanup(Constants.batch_constants.rotation)
+                    r_status = Util.string_cleanup(Constants.batch_constants.rotation)
                     with tag('KEXPReleaseRotationStatus'):
                         text(r_status)
                 if Constants.batch_constants.category:
@@ -253,7 +253,7 @@ class DaletSerializer(Serializer.Serializer):
         with tag('ItemCode'):
             text(artist.item_code)
         with tag('title'):
-            text(Util.stringCleanup(artist.title))
+            text(Util.string_cleanup(artist.title))
         with tag('GlossaryType'):
             text(artist.glossary_type)
         with tag('KEXPName'):

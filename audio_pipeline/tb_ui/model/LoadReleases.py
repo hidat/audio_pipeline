@@ -35,32 +35,24 @@ class LoadReleases(threading.Thread):
         self.scanned = 0
         self.processor = Process.Processor(Constants.processor, Constants.batch_constants.mb)
 
-
     def run(self):
         time.sleep(.1)
         
         num_dirs = len(self.current_release.directories)
-        
-        next_limit = num_dirs - self.max_buffer
-        prev_limit = self.max_buffer
 
         if self.starting_index != 0:
-            self.load_release(self.next_buffer, self.starting_index, False)
+            self.load_release(self.next_buffer, self.starting_index)
             self.loaded += 1
             self.starting_index += 1
 
-        while self.current_release.current is not None and self.loaded < num_dirs:
+        while self.current_release.current is not None and self.loaded < num_dirs and self.loaded < self.max_buffer:
 
             # if buffers are full, wait for a signal from the model proper to load more releases,
             # rather than constantly looping and wasting resources
             
             self.current_release.cond.acquire()
-            if len(self.next_buffer) >= self.max_buffer + self.fuzz:
-                self.trim_releases(self.next_buffer)
-            elif self.current_release.current is not None and \
-                            len(self.next_buffer) < self.max_buffer and \
-                    (next_limit < 0 or self.current_release.current[0] < next_limit):
-                print("loading next")
+            if self.current_release.current is not None and \
+                            len(self.next_buffer) + self.current_release.current[0] < num_dirs:
                 # haven't filled in next_buffer / have moved forward
                 # get next value
                 if len(self.next_buffer) > 0:
@@ -69,17 +61,15 @@ class LoadReleases(threading.Thread):
                     last_release = self.current_release.current
 
                 i = last_release[0] + 1
-                self.current_release.cond.release()
-                self.load_release(self.next_buffer, i)
-                self.current_release.cond.acquire()
-                self.loaded += 1
+                if i < num_dirs:
+                    print("loading next " + str(i))
+                    self.current_release.cond.release()
+                    self.load_release(self.next_buffer, i)
+                    self.current_release.cond.acquire()
+                    self.loaded += 1
 
-            if len(self.prev_buffer) >= self.max_buffer + self.fuzz:
-                self.trim_releases(self.prev_buffer)
-            elif self.current_release.current is not None and \
-                            len(self.prev_buffer) < self.max_buffer and \
-                            len(self.prev_buffer) < self.current_release.current[0]:
-                print("loading prev")
+            if self.current_release.current is not None and \
+                            len(self.prev_buffer) <= self.current_release.current[0]:
                 # haven't filled in prev_buffer / have moved forward
                 # so get next buffer
                 if len(self.prev_buffer) > 0:
@@ -88,50 +78,18 @@ class LoadReleases(threading.Thread):
                     last_release = self.current_release.current
 
                 i = last_release[0] - 1
-                self.current_release.cond.release()
-                self.load_release(self.prev_buffer, i)
-                self.current_release.cond.acquire()
-                self.loaded += 1
+                if i >= 0:
+                    print("loading prev " + str(i))
+                    self.current_release.cond.release()
+                    self.load_release(self.prev_buffer, i)
+                    self.current_release.cond.acquire()
+                    self.loaded += 1
                 
-            while self.current_release.current is not None and \
-                            len(self.next_buffer) >= self.max_buffer or \
-                            (0 < next_limit <= self.current_release.current[0]) and \
-                            (len(self.prev_buffer) >= self.max_buffer or
-                                     self.current_release.current[0] <= prev_limit):
-                 
-                print("waiting (for a miracle)")
-                self.current_release.cond.wait()
-                
-                if self.current_release.current is None:
-                    break
             self.current_release.cond.release()
 
         print("Loaded: " + str(self.loaded))
         print("All releases loaded")
 
-    def trim_releases(self, buffer):
-        # remove releases from the end of the buffer,
-        # preventing the removal of partial directories.
-        print("trimming release????")
-        last_directory = list()
-        last_release = buffer.popleft()
-        last_directory.append(last_release)
-        
-        index = last_release[0]
-        last_release = buffer.popleft()
-
-        while index == last_release[0] and len(buffer) >= self.max_buffer + (self.fuzz / 2):
-            last_directory.append(last_release)
-            last_release = buffer.popleft()
-            
-        buffer.appendleft(last_release)
-
-        if len(buffer) < self.max_buffer + (self.fuzz / 2):
-            # don't want some sort of 50-release directory getting constantly deleted and reloaded
-            buffer.extendleft(last_directory)
-        else:
-            self.loaded -= len(last_directory)
-                        
     def load_release(self, buffer, dir_index, scan=True):
         if len(buffer) >= self.max_buffer:
             return None

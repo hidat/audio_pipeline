@@ -1,6 +1,7 @@
 from . import Settings
 import tkinter.tix as tk
 
+
 class MetaFrame(tk.Frame):
 
     meta_padding = {'sticky': "w", 'padx': 10, 'pady': 3}
@@ -38,6 +39,7 @@ class MetaFrame(tk.Frame):
 
     def close(self):
         self.destroy()
+
 
 class ReleaseFrame(MetaFrame):
 

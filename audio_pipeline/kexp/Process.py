@@ -29,14 +29,14 @@ class ReleaseProcessor(Process.ReleaseProcessor):
                 else:
                     dist_cat.append(artist)
 
-            dist_cat = Util.stringCleanup(" ".join(dist_cat))
+            dist_cat = Util.string_cleanup(" ".join(dist_cat))
             release.distribution_category = dist_cat
 
             glossary_title = release.title + " " + release.artist + " " + \
                 release.date + " " + release.country + " " + " ".join([l.title for l in release.labels]) \
                              + " " + " ".join(release.format) + " " + " ".join([l.catalog_num for l in release.labels])
 
-            release.glossary_title = Util.stringCleanup(glossary_title)
+            release.glossary_title = Util.string_cleanup(glossary_title)
 
             self._release = release
 

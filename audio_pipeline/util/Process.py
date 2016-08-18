@@ -252,13 +252,13 @@ class ReleaseProcessor:
         elif Constants.batch_constants.rotation:
             cat = release_meta.artist
             cat += " - " + release_meta.title
-            cat = self.secondary_category + "/" + Util.stringCleanup(Constants.batch_constants.rotation) + \
-                    "/" + Util.stringCleanup(cat)
+            cat = self.secondary_category + "/" + Util.string_cleanup(Constants.batch_constants.rotation) + \
+                    "/" + Util.string_cleanup(cat)
             track.secondary_category = cat
             
         sort_names.sort()
-        track.artist_dist_rule = Util.distRuleCleanup(sort_names[0][:1])
-        track.various_artist_dist_rule = Util.distRuleCleanup(release_meta.title[:1])
+        track.artist_dist_rule = Util.distrule_cleanup(sort_names[0][:1])
+        track.various_artist_dist_rule = Util.distrule_cleanup(release_meta.title[:1])
 
         # set the item_code value in the audio file
         audio_file.item_code.value = item_code
