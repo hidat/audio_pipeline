@@ -46,6 +46,8 @@ commands = [Command("<track_num>[[,][ ]<track_num>...][ ]<meta_command>", "Add t
               Command("previous, prev, p", "Display metadata of previous album"),
               Command("edit, e", "Edit all metadata categories with the Metadata Input Friend"),
               Command("search, s <option>", "Search for MusicBrainz release in browser.", sub_commands=SubCommand("Options", search_options)),
+              Command("bar <barcode or catno>", "Search by barcode/catno. If no barcode or catalog number is entered, will search for "
+                                                "barcode / catalog number in metadata."),
               Command("albunack, al <option>", "Search for artist in Albunack (in browser).", sub_commands=SubCommand("Options", search_options[:1]))]
 
 def get_text_color(audio_file):

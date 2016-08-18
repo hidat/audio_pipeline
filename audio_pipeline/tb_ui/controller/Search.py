@@ -53,10 +53,11 @@ def mb_search(track, artist=None, barcode=None, barcode_value=None):
         if barcode_value:
             query.append(("barcode", barcode_value))
             query.append(("catno", barcode_value))
-        if track.barcode.value:
-            query.append(("barcode", track.barcode.value))
-        if track.catalog_num.value:
-            query.append(("catno", track.catalog_num.value))
+        else:
+            if track.barcode.value:
+                query.append(("barcode", track.barcode.value))
+            if track.catalog_num.value:
+                query.append(("catno", track.catalog_num.value))
     elif artist:
         search_terms = mb_search_terms.copy()
         search_terms["type"] = "artist"
