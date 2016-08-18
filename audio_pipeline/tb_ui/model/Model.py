@@ -41,7 +41,6 @@ class ProcessDirectory(object):
             self.directories.sort()
 
         if starting_dir != root_dir:
-            print(self.directories)
             starting_index = self.directories.index(starting_dir)
 
         self.__current_release = LoadReleases.CurrentReleases(self.directories)
