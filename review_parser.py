@@ -34,7 +34,7 @@ def mergeReviewsAndReleases(reviews, releases):
         if release is not None:
             review.mbID = release.mbID
             review.daletGlossaryName = release.daletGlossaryName
-            if release.tracks:
+            if release.tracks and review.tracks:
                 for track in review.tracks:
                     if track.trackNum is not None:
                         trackNum = int(track.trackNum)
@@ -86,9 +86,12 @@ def exportReviews(reviews, outputDirectory):
     for review in reviews:
         if review.mbID is not None and review.mbID > '':
             fp.saveRelease(review)
-            for track in review.tracks:
-                if track.itemCode is not None:
-                    fp.saveTrack(track)
+            if review.tracks:
+                for track in review.tracks:
+                    if track.itemCode is not None:
+                        fp.saveTrack(track)
+            else:
+                debug='me'
             exportCount += 1
 
     return exportCount
