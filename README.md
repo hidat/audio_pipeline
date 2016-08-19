@@ -9,7 +9,7 @@ It is assumed that you already have Python 3.4 or greater installed, and it is i
 2. Install musicbrainzngs  `pip install musicbrainzngs`
 3. Install mutagen  `pip install mutagen`
 4. Install yattag  `pip install yattag`
-5. Install mammoth  `pip install mommoth`
+5. Install mammoth  `pip install mammoth`
 6. Install smartsheet  `pip install smartsheet-python-sdk`
 7. Install yaml  `pip install pyyaml`
 8. Install acoustid `pip install pyacoustid`
