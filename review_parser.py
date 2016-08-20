@@ -60,7 +60,11 @@ def printReviews(reviews):
             missing.append(review)
         else:
             foundCount += 1
-            print("'%s' by %s: %s" % (review.name, review.artistCredit, mbID))
+            if review.tracks is None or len(review.tracks) == 0:
+                trackCount = 'NO TRACKS'
+            else:
+                trackCount = str(len(review.tracks)) + " Tracks"
+            print("'%s' by %s: %s - %s" % (review.name, review.artistCredit, mbID, trackCount))
 
     if missingCount > 0:
         print('\nReviews missing MusicBrainz IDs:')
