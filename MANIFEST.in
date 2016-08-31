@@ -1,0 +1,7 @@
+include *.yml *.sample README.md BananaTomato.png
+exclude review_parser.yml
+recursive-include audio_pipeline/test *
+global-exclude audio_pipeline/test/test_files/audio/xml_test_files/234 - Pink/*
+global-exclude audio_pipeline/test/test_files/audio/xml_test_files/294 - Mondo Bongo/*
+global-exclude audio_pipeline/test/test_files/audio/xml_test_files/106 - Voltaïc/*
+global-exclude audio_pipeline/test/test_files/audio/xml_test_files/81 - The New Transistor Heroes/*
