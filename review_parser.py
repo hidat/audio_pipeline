@@ -34,7 +34,7 @@ def mergeReviewsAndReleases(reviews, releases):
         if release is not None:
             review.mbID = release.mbID
             review.daletGlossaryName = release.daletGlossaryName
-            if release.tracks:
+            if release.tracks and review.tracks:
                 for track in review.tracks:
                     if track.trackNum is not None:
                         trackNum = int(track.trackNum)
@@ -60,7 +60,11 @@ def printReviews(reviews):
             missing.append(review)
         else:
             foundCount += 1
-            print("'%s' by %s: %s" % (review.name, review.artistCredit, mbID))
+            if review.tracks is None or len(review.tracks) == 0:
+                trackCount = 'NO TRACKS'
+            else:
+                trackCount = str(len(review.tracks)) + " Tracks"
+            print("'%s' by %s: %s - %s" % (review.name, review.artistCredit, mbID, trackCount))
 
     if missingCount > 0:
         print('\nReviews missing MusicBrainz IDs:')
@@ -86,9 +90,12 @@ def exportReviews(reviews, outputDirectory):
     for review in reviews:
         if review.mbID is not None and review.mbID > '':
             fp.saveRelease(review)
-            for track in review.tracks:
-                if track.itemCode is not None:
-                    fp.saveTrack(track)
+            if review.tracks:
+                for track in review.tracks:
+                    if track.itemCode is not None:
+                        fp.saveTrack(track)
+            else:
+                debug='me'
             exportCount += 1
 
     return exportCount

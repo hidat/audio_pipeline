@@ -129,11 +129,16 @@ A program used to push the weekly album reviews into Dalet
 2. Run `review_parser.py input_file options`
 
 #####Options:
+ * *--dalet, -d*
+   Directory to put Dalet Impex files in.
+   
+ * *--log_dir, -l*
+   The location of the JSON Release Log files
+   
  * *--api_key, -k*
    Your Smartsheet API Key
   
  * *--worksheet, -w*
    Smartsheet Worksheet ID that contains the reviews associated MusicBrainz ID's
       
- * *--dalet, -d*
-   Directory to put Dalet Impex files in.
+
