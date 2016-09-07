@@ -47,6 +47,14 @@ class ReleaseFrame(MetaFrame):
         super().__init__()
         self.labels = []
 
+    def add_tag(self, tag_info, colval):
+        self.attribute_text[tag_info['tag'].name] = tk.StringVar()
+        self.labels[tag_info['row']][tag_info['tag'].name] = tk.Label(self, self.name_style, text=tag_info['tag'].name)
+        self.labels[tag_info['row']][tag_info['tag'].name].grid(self.name_padding, row=(tag_info['row'] * 2), column=colval)
+        colval += 1
+        self.attribute_widths.append(tag_info['width'])
+        return colval
+
     def display_meta(self, metadata):
         """
         Display metadata
@@ -61,101 +69,14 @@ class ReleaseFrame(MetaFrame):
         super().display_meta(metadata)
         
         try:
-            self.labels.append({})
+            for tag_info in track.tb_release():
+                if len(self.labels) <= tag_info['row']:
+                    self.labels.append({})
+                    if tag_info['row'] != 0:
+                        colval = 1
 
-            w = 25
-            tag = track.album_artist
-            self.attribute_text[tag.name] = tk.StringVar()
-            self.labels[0][tag.name] = tk.Label(self, self.name_style, text=tag.name)
-            self.labels[0][tag.name].grid(self.name_padding, row=rowval, column=colval)
-            colval += 1
-            self.attribute_widths.append(w)
-        
-            w = 30
-            tag = track.album
-            self.attribute_text[tag.name] = tk.StringVar()
-            self.labels[0][tag.name] = tk.Label(self, self.name_style, text=tag.name)
-            self.labels[0][tag.name].grid(self.name_padding, row=rowval, column=colval)
-            colval += 1
-            self.attribute_widths.append(w)
-        
-            w = 20
-            tag = track.label
-            self.attribute_text[tag.name] = tk.StringVar()
-            self.labels[0][tag.name] = tk.Label(self, self.name_style, text=tag.name)
-            self.labels[0][tag.name].grid(self.name_padding, row=rowval, column=colval)
-            colval += 1
-            self.attribute_widths.append(w)
-
-            w = 10
-            tag = track.disc_num
-            self.attribute_text[tag.name] = tk.StringVar()
-            self.labels[0][tag.name] = tk.Label(self, self.name_style, text=tag.name)
-            self.labels[0][tag.name].grid(self.name_padding, row=rowval, column=colval)
-            colval += 1
-            self.attribute_widths.append(w)    
-            
-            w = 15
-            tag = track.release_date
-            self.attribute_text[tag.name] = tk.StringVar()
-            self.labels[0][tag.name] = tk.Label(self, self.name_style, text=tag.name)
-            self.labels[0][tag.name].grid(self.name_padding, row=rowval, column=colval)
-            colval += 1
-            self.attribute_widths.append(w)      
-            
-            w = 30
-            tag = track.mbid
-            self.attribute_text[tag.name] = tk.StringVar()
-            self.labels[0][tag.name] = tk.Label(self, self.name_style, text=tag.name)
-            self.labels[0][tag.name].grid(self.name_padding, row=rowval, column=colval)
-            colval += 1
-            self.attribute_widths.append(w)
-
-            # row 2 attributes
-            self.labels.append({})
-            rowval += 2
-            colval = 1
-
-            w = 20
-            tag = track.country
-            self.attribute_text[tag.name] = tk.StringVar()
-            self.labels[1][tag.name] = tk.Label(self, self.name_style, text=tag.name)
-            self.labels[1][tag.name].grid(self.name_padding, row=rowval, column=colval)
-            colval += 1
-            self.attribute_widths.append(w)
-
-            w = 15
-            tag = track.release_type
-            self.attribute_text[tag.name] = tk.StringVar()
-            self.labels[1][tag.name] = tk.Label(self, self.name_style, text=tag.name)
-            self.labels[1][tag.name].grid(self.name_padding, row=rowval, column=colval)
-            colval += 1
-            self.attribute_widths.append(w)
-
-            w = 15
-            tag = track.media_format
-            self.attribute_text[tag.name] = tk.StringVar()
-            self.labels[1][tag.name] = tk.Label(self, self.name_style, text=tag.name)
-            self.labels[1][tag.name].grid(self.name_padding, row=rowval, column=colval)
-            colval += 1
-            self.attribute_widths.append(w)
-
-            w = 15
-            tag = track.barcode
-            self.attribute_text[tag.name] = tk.StringVar()
-            self.labels[1][tag.name] = tk.Label(self, self.name_style, text=tag.name)
-            self.labels[1][tag.name].grid(self.name_padding, row=rowval, column=colval)
-            colval += 1
-            self.attribute_widths.append(w)
-
-            w = 15
-            tag = track.catalog_num
-            self.attribute_text[tag.name] = tk.StringVar()
-            self.labels[1][tag.name] = tk.Label(self, self.name_style, text=tag.name)
-            self.labels[1][tag.name].grid(self.name_padding, row=rowval, column=colval)
-            colval += 1
-            self.attribute_widths.append(w)
-
+                if not tag_info['tag'].name in self.labels[tag_info['row']]:
+                    colval = self.add_tag(tag_info, colval)
         except AttributeError:
             pass
             
@@ -180,7 +101,7 @@ class ReleaseFrame(MetaFrame):
                     width_index += 1
                 rowval += 2
 
-    def update(self, audio_file):
+    def update_meta(self, audio_file):
         for tag in audio_file.release():
             for label_group in self.labels:
                 if tag.name in label_group:
@@ -195,8 +116,14 @@ class ReleaseFrame(MetaFrame):
 
 class TrackFrame(MetaFrame):
 
-    unused_tags = {"kexpprimarygenre", "kexpanchorstatus", "kexpradioedit"}
-    
+    def add_tag(self, tag, width, rowval, colval):
+        self.labels[tag.name] = tk.Label(self, self.name_style, text=tag.name)
+        self.labels[tag.name].grid(self.name_padding, row=rowval, column=colval)
+        colval += 1
+        self.attribute_widths.append(width)
+        return rowval, colval
+
+
     def display_meta(self, metadata):
         super().display_meta(metadata)
 
@@ -212,49 +139,8 @@ class TrackFrame(MetaFrame):
             track = metadata[0]
             
             try:
-                w = 5
-                tag = track.track_num
-                self.labels[tag.name] = tk.Label(self, self.name_style, text=tag.name)
-                self.labels[tag.name].grid(self.name_padding, row=rowval, column=colval)
-                colval += 1
-                self.attribute_widths.append(w)
-                
-                w = 30
-                tag = track.title
-                self.labels[tag.name] = tk.Label(self, self.name_style, text=tag.name)
-                self.labels[tag.name].grid(self.name_padding, row=rowval, column=colval)
-                colval += 1
-                self.attribute_widths.append(w)
-                
-                w = 25
-                tag = track.artist
-                self.labels[tag.name] = tk.Label(self, self.name_style, text=tag.name)
-                self.labels[tag.name].grid(self.name_padding, row=rowval, column=colval)
-                colval += 1
-                self.attribute_widths.append(w)
-                
-                w = 10
-                tag = track.length
-                self.labels[tag.name] = tk.Label(self, self.name_style, text=tag.name)
-                self.labels[tag.name].grid(self.name_padding, row=rowval, column=colval)
-                colval += 1
-                self.attribute_widths.append(w)
-                
-                w = 25
-                tag = track.obscenity
-                self.labels[tag.name] = tk.Label(self, self.name_style, width=w, wraplength=8*w,
-                                                    text=tag.name)
-                self.labels[tag.name].grid(self.name_padding, row=rowval, column=colval)
-                colval += 1
-                self.attribute_widths.append(w)
-
-                w = 25
-                tag = track.radio_edit
-                self.labels[tag.name] = tk.Label(self, self.name_style, width=w, wraplength=8*w,
-                                                 text = tag.name)
-                self.labels[tag.name].grid(self.name_padding, row=rowval, column=colval)
-                colval += 1
-                self.attribute_widths.append(w)
+                for t in track.tb_track():
+                    rowval, colval = self.add_tag(t['tag'], t['width'], rowval, colval)
             except AttributeError:
                 # this should only happen on the obscenity rating - pass
                 pass
@@ -288,7 +174,7 @@ class TrackFrame(MetaFrame):
             for name, label in tags.items():
                 label.destroy()
 
-    def update(self, audio_file):
+    def update_meta(self, audio_file):
         name = audio_file.file_name
         color = Settings.get_text_color(audio_file)
         i = 0

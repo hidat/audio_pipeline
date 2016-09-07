@@ -15,6 +15,9 @@ class CustomTags:
 
 class BaseAudioFile:
 
+    default_release_width = 15
+    default_track_width = 25
+
     vorbis = Vorbis.Format
     id3 = ID3.Format
     aac = AAC.Format
@@ -117,6 +120,20 @@ class BaseAudioFile:
             
     def track(self):
         return [self.track_num, self.title, self.artist, self.length, self.item_code]
+
+    def tb_release(self):
+        return [{'width': 25, 'row': 0, 'tag': self.album_artist}, {'width': 30, 'row': 0, 'tag': self.album},
+                {'width': 20, 'row': 0, 'tag': self.label}, {'width': 10, 'row': 0, 'tag': self.disc_num},
+                {'width': self.default_release_width, 'row': 0, 'tag': self.release_date},
+                {'width': 30, 'row': 0, 'tag': self.mbid}, {'width': 20, 'row': 1, 'tag': self.country},
+                {'width': self.default_release_width, 'row': 1, 'tag': self.release_type},
+                {'width': self.default_release_width, 'row': 1, 'tag': self.media_format},
+                {'width': self.default_release_width, 'row': 1, 'tag': self.barcode},
+                {'width': self.default_release_width, 'row': 1, 'tag': self.catalog_num}]
+
+    def tb_track(self):
+        return [{'width': 5, 'tag': self.track_num}, {'width': 30, 'tag': self.title}, {'width': 25, 'tag': self.artist},
+                {'width': 10, 'tag': self.length}]
     
     def release(self):
         return [self.album_artist, self.album, self.label, self.disc_num, self.release_date, self.mbid,

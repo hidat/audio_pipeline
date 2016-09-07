@@ -56,8 +56,8 @@ class App(tk.Tk):
         self.track_frame.display_meta(track_meta)
 
     def update_meta(self, track_meta):
-        self.release_frame.update(track_meta)
-        self.track_frame.update(track_meta)
+        self.release_frame.update_meta(track_meta)
+        self.track_frame.update_meta(track_meta)
 
     def display_info(self):
         if self.info_window:

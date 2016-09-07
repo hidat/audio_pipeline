@@ -9,14 +9,8 @@ class Entry():
     def __init__(self, release, app, update):
         self.tracks = release
         self.release = release[0].release()
-        self.track = release[0].track()
-        self.track = [self.tracks[0].track_num, self.tracks[0].title, self.tracks[0].artist, self.tracks[0].length]
-        try:
-            self.track.append(self.tracks[0].obscenity)
-            self.track.append(self.tracks[0].radio_edit)
-        except AttributeError:
-            pass
-            
+        self.track = release[0].tb_track()
+
         self.update = update
         
         self.entry = app.input_frame

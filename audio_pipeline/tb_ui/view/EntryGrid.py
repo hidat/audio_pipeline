@@ -18,7 +18,8 @@ class EntryGrid(tk.Toplevel):
         self.__save = control.save
         self.the_end = control.quit
         self.release_categories = [tag.name for tag in control.release]
-        self.track_categories = [tag.name for tag in control.track]
+        self.track_categories = [tag['tag'].name for tag in control.track]
+        self.track_widths = {tag['tag'].name: tag['width'] for tag in control.track}
 
         # set up grid for the release metadata
         self.release = MetaGrid.MetaGrid(update_command=control.check_release, last_command=self.release_end, bindings=self.bind_release,
@@ -55,14 +56,7 @@ class EntryGrid(tk.Toplevel):
 
         for name in self.track_categories:
             col = self.track_categories.index(name)
-            if name == "Title":
-                self.tracks.size_column(index=col, size=250)
-            elif name == "Artist":
-                self.tracks.size_column(index=col, size=200)
-            elif name == "KEXPFCCOBSCENITYRATING":
-                self.tracks.size_column(index=col, size=150)
-            else:
-                self.tracks.size_column(index=col, size=75)
+            self.tracks.size_column(index=col, size=((self.track_widths[name] - 5) * 10))
 
             self.tracks.size_column(index=col, pad0=5, pad1=5)
 
