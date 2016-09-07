@@ -31,3 +31,7 @@ class KEXPAudioFile(AudioFile.BaseAudioFile):
                   {'width': self.default_track_width, 'tag': self.radio_edit},
                   {'width': self.default_track_width, 'tag': self.secondary_genre}]
         return track
+
+    def tb_release(self):
+        release = super().tb_release()
+        return release
