@@ -5,6 +5,9 @@ from ..util import InputPatterns
 import re
 
 
+MIN_WIDTH = 75
+
+
 class EntryGrid(tk.Toplevel):
 
     def __init__(self, control, master=None):
@@ -56,7 +59,9 @@ class EntryGrid(tk.Toplevel):
 
         for name in self.track_categories:
             col = self.track_categories.index(name)
-            self.tracks.size_column(index=col, size=((self.track_widths[name] - 5) * 10))
+            s = (self.track_widths[name] - 5) * 10
+            s = s if s > 0 else MIN_WIDTH
+            self.tracks.size_column(index=col, size=s)
 
             self.tracks.size_column(index=col, pad0=5, pad1=5)
 
