@@ -107,4 +107,3 @@ class Label(default_resources.Label):
     def __init__(self, name='', id='', catalog_num=''):
         super().__init__(name, id)
         self.catalog_num = catalog_num
-        

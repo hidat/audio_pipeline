@@ -19,6 +19,11 @@ class ReleaseProcessor(Process.ReleaseProcessor):
 
             meta = self.mb_release
 
+            if Constants.batch_constants.category:
+                primary_genre = Resources.Genres.get(Constants.batch_constants.category)
+                if primary_genre in Resources.Genres.set_secondary:
+                    release.secondary_genre = Resources.Genres.set_secondary[primary_genre]
+
             dist_cat = []
             for artist in meta['artist-credit']:
                 if 'artist' in artist:

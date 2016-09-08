@@ -235,7 +235,7 @@ class ReleaseProcessor:
         track.disc_num = audio_file.disc_num.value
         track.track_num = audio_file.track_num.value
         track.obscenity = str(audio_file.obscenity)
-        track.primary_genre = str(audio_file.category)
+        track.primary_genre = Resources.Genres.get(str(audio_file.category))
         track.anchor_status = str(audio_file.anchor)
 
         #####################################

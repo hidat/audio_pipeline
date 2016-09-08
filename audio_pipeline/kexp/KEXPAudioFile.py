@@ -22,16 +22,21 @@ class KEXPAudioFile(AudioFile.BaseAudioFile):
 
     def track(self):
         track = super().track()
-        track += [self.obscenity, self.radio_edit, self.category, self.anchor, self.secondary_genre]
+        track += [self.obscenity, self.radio_edit, self.category, self.anchor]
         return track
+
+    def release(self):
+        release = super().release()
+        release += [self.secondary_genre]
+        return release
 
     def tb_track(self):
         track = super().tb_track()
         track += [{'width': self.default_track_width, 'tag': self.obscenity},
-                  {'width': self.default_track_width, 'tag': self.radio_edit},
-                  {'width': self.default_track_width, 'tag': self.secondary_genre}]
+                  {'width': self.default_track_width, 'tag': self.radio_edit}]
         return track
 
     def tb_release(self):
         release = super().tb_release()
+        release += [{'width': self.default_release_width, 'row': 1, 'tag': self.secondary_genre}]
         return release

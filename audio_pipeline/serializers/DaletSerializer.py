@@ -1,4 +1,4 @@
-import os
+from audio_pipeline.kexp import KEXPAudioFile
 import os.path as path
 from yattag import Doc, indent
 from audio_pipeline import Constants
@@ -181,7 +181,7 @@ class DaletSerializer(Serializer.Serializer):
                 for item in release.tags:
                     with tag('KEXPTag'):
                         text(item)
-                        
+
                 if Constants.batch_constants.rotation:
                     r_status = Util.string_cleanup(Constants.batch_constants.rotation)
                     with tag('KEXPReleaseRotationStatus'):
@@ -189,6 +189,9 @@ class DaletSerializer(Serializer.Serializer):
                 if Constants.batch_constants.category:
                     with tag('KEXPPrimaryGenre'):
                         text(Constants.batch_constants.category)
+                if release.secondary_genre:
+                    with tag(KEXPAudioFile.CustomTags.secondary_genre):
+                        text(release.secondary_genre)
 
         formatted_data = indent(doc.getvalue())
         

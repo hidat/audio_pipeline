@@ -125,7 +125,7 @@ class BaseAudioFile:
         return [{'width': 25, 'row': 0, 'tag': self.album_artist}, {'width': 30, 'row': 0, 'tag': self.album},
                 {'width': 20, 'row': 0, 'tag': self.label}, {'width': 10, 'row': 0, 'tag': self.disc_num},
                 {'width': self.default_release_width, 'row': 0, 'tag': self.release_date},
-                {'width': 30, 'row': 0, 'tag': self.mbid}, {'width': 20, 'row': 1, 'tag': self.country},
+                {'width': 30, 'row': 0, 'tag': self.mbid}, {'width': self.default_release_width, 'row': 0, 'tag': self.country},
                 {'width': self.default_release_width, 'row': 1, 'tag': self.release_type},
                 {'width': self.default_release_width, 'row': 1, 'tag': self.media_format},
                 {'width': self.default_release_width, 'row': 1, 'tag': self.barcode},

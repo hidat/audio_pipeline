@@ -112,6 +112,7 @@ class Release(Content):
         self.asin = ""
         self.packaging = ""
         self.distribution_category = ""
+        self.secondary_genre = ""
         
         self.glossary_title = ''
 
@@ -217,4 +218,30 @@ class NameId():
         """
         self.name = name
         self.id = id
-                
+
+
+class Genre:
+    def __init__(self, main, aliases):
+        self.main = main
+        self.aliases = set(aliases)
+
+
+class Genres:
+    set_secondary = {"Local": "Rock/Pop"}
+
+    genres = {Genre("Recent Acquisitions", ["recent acquisitions", "acq"]),
+              Genre("Electronic", ["ele", "electronic"]), Genre("Hip Hop", ["hip", "hip hop"]),
+              Genre("Jazz", ["jaz", "jazz"]), Genre("Live on KEXP", ["liv", "live on kexp"]),
+              Genre("Local", ["local"]), Genre("Reggae", ["reggae", "reg"]),
+              Genre("Rock/Pop", ["rock", "pop", "rock/pop", "roc"]), Genre("Roots", ["roots", "roo"]),
+              Genre("Rotation", ["rotation", "rot"]), Genre("Shows Around Town", ["shows around town", "sho"]),
+              Genre("Soundtracks", ["soundtracks", "sou"]), Genre("World", ["world", "wor"]),
+              Genre("", ["", " "])}
+
+    @classmethod
+    def get(cls, val):
+        val = val.casefold()
+        for g in cls.genres:
+            if val in g.aliases:
+                return g.main
+

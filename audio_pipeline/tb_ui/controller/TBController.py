@@ -3,6 +3,7 @@ from ..view import App, Dialog
 from ...util import Util
 from . import EntryController
 from ..util import InputPatterns, Resources
+from ...util import Resources as r
 import time
 import os
 from . import Search
@@ -41,6 +42,7 @@ class TBController:
         popup = InputPatterns.popup_pattern.match(input_string)
         search = InputPatterns.mb_search_pattern.match(input_string)
         barcode = InputPatterns.barcode_search_pattern.match(input_string)
+        genre = InputPatterns.secondary_genre_pattern.match(input_string)
         self.app.select_input()
         if Util.is_mbid(input_string):
             self.model.set_mbid(input_string)
@@ -70,6 +72,14 @@ class TBController:
         elif barcode:
             bar = barcode.group(InputPatterns.barcode)
             Search.mb_search(self.model.current_release[0], barcode=True, barcode_value=bar)
+        elif genre:
+            full_genre = r.Genres.get(genre.group(InputPatterns.meta_acc))
+            if full_genre:
+                self.model.set_genre(full_genre)
+                self.app.update_meta(self.model.current_release[0])
+            else:
+                err_msg = "Invalid genre " + str(genre.group(InputPatterns.meta_acc))
+                Dialog.err_message(err_msg, None, parent=self.app)
         else:
             err_msg = "Invalid input " + str(input_string)
             Dialog.err_message(err_msg, None, parent=self.app)

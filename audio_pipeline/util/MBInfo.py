@@ -30,6 +30,7 @@ class MBInfo:
         :param request: musicbrainzngs method call to perform
         :return:
         """
+        mb_meta = None
         for i in range(RETRY):
             try:
                 mb_meta = request(*args, **kwargs)

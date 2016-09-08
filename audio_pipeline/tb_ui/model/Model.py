@@ -66,6 +66,10 @@ class ProcessDirectory(object):
         for track in self.current_release:
             track.mbid.save(mbid)
 
+    def set_genre(self, genre):
+        for track in self.current_release:
+            track.secondary_genre.save(genre)
+
     def move_files(self):
         self.processing_complete.move_files(self)
             
