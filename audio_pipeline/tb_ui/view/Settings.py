@@ -48,7 +48,8 @@ commands = [Command("<track_num>[[,][ ]<track_num>...][ ]<meta_command>", "Add t
               Command("search, s <option>", "Search for MusicBrainz release in browser.", sub_commands=SubCommand("Options", search_options)),
               Command("bar <barcode or catno>", "Search by barcode/catno. If no barcode or catalog number is entered, will search for "
                                                 "barcode / catalog number in metadata."),
-              Command("albunack, al <option>", "Search for artist in Albunack (in browser).", sub_commands=SubCommand("Options", search_options[:1]))]
+              Command("albunack, al <option>", "Search for artist in Albunack (in browser).", sub_commands=SubCommand("Options", search_options[:1])),
+              Command("g <genre name>", "Set KEXPSecondaryGenre of current release to <genre name>")]
 
 def get_text_color(audio_file):
     color = text_color
