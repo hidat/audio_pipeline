@@ -5,16 +5,31 @@ from review_parser import parser
 from elasticsearch_dsl.connections import connections
 from review_parser.elastic import ElasticReview
 
+####
+# Initialize the Elasticsearch Index
+# ***** THIS DESTROYS ALL THE DATA IN THE INDEX!!!!!! *****
+# Only works if the index is closed or does not already exist.
+####
+def initialize_index(server=None):
+    setup_elastic(server)
+    ElasticReview.init()
+
+
+def setup_elastic(server):
+    if server is None:
+        server='localhost'
+    connections.create_connection(hosts=[server], timeout=20)
 
 def main():
     argParser = argparse.ArgumentParser(description='Processes a directory full of KEXP Weekly Review sheets and puts them into an ElasticSearch index.')
     argParser.add_argument('input_directory', help="Directory or file to process.  Only docx files are will be processed.")
+    argParser.add_argument('-s', '--elastic_server', help="Elastic server IP or domain name, including port.")
 
     args = argParser.parse_args()
 
-    # Setup elasticsearch - @TODO: Add to configuration file
-    connections.create_connection(hosts=['localhost'], timeout=20)
+    setup_elastic(args.elastic_server)
 
+    print('Parsing reviews from %s.' % (args.input_directory))
     # Parse all the raw reviews
     reviews= []
     if os.path.isfile(args.input_directory):
@@ -25,6 +40,8 @@ def main():
         reviews = fp.process()
 
     # And now put them into elastic search
+
+    print('Indexing %d reviews.' % (len(reviews)))
     c = 0
     for review in reviews:
         s1 = []
@@ -44,7 +61,6 @@ def main():
             artistCredit=review.artistCredit,
             label=review.label,
             review=review.review,
-            trackList=review.trackList,
             reviewedBy=review.reviewedBy,
             oneStarTracks=s1,
             twoStarTracks=s2,
