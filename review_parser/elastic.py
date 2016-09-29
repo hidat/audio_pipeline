@@ -1,6 +1,8 @@
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl.connections import connections
 from elasticsearch_dsl import Index, Mapping, DocType, String, Integer, analyzer, tokenizer
+from elasticsearch_dsl.query import Match
+from review_parser.reviewtrack import ReviewTrack
 
 ####
 # Custom Name Analyzer
@@ -60,4 +62,59 @@ class ElasticReview(DocType):
 
     class Meta:
         index = reviews_index_name
-    
+
+    def merge_release(self, release):
+        self.mbID = release.mbID
+        self.daletGlossaryName = release.daletGlossaryName
+        self.tracks = []
+        for trackNumS in self.oneStarTracks:
+            if trackNumS is not None:
+                try:
+                    trackNum = int(trackNumS)
+                except:
+                    debug = 'me'
+                track = ReviewTrack(None)
+                track.trackNum = trackNum
+                track.stars = 1
+                if trackNum in release.tracks:
+                    releaseTrack = release.tracks[trackNum]
+                    track.itemCode = releaseTrack.itemCode
+                    track.title = releaseTrack.title
+                self.tracks.append(track)
+
+        for trackNumS in self.twoStarTracks:
+            if trackNumS is not None:
+                trackNum = int(trackNumS)
+                track = ReviewTrack(None)
+                track.trackNum = trackNum
+                track.stars = 2
+                if trackNum in release.tracks:
+                    releaseTrack = release.tracks[trackNum]
+                    track.itemCode = releaseTrack.itemCode
+                    track.title = releaseTrack.title
+                self.tracks.append(track)
+
+        for trackNumS in self.threeStarTracks:
+            if trackNumS is not None:
+                trackNum = int(trackNumS)
+                track = ReviewTrack(None)
+                track.trackNum = trackNum
+                track.stars = 3
+                if trackNum in release.tracks:
+                    releaseTrack = release.tracks[trackNum]
+                    track.itemCode = releaseTrack.itemCode
+                    track.title = releaseTrack.title
+                self.tracks.append(track)
+
+
+    @staticmethod
+    def find_review(release):
+        review = None
+        s = ElasticReview.search()
+        q = Match(name={"query": release.title, "type": "phrase"})
+        s = s.query(q)
+        resp = s.execute()
+        if resp.hits.total > 0:
+          review = resp.hits[0]
+
+        return review

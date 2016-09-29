@@ -13,14 +13,15 @@ class ReviewTrack:
         self.itemCode = None
         self.title = None
 
-        m = self.reNumberExtract.search(rawTrack)
+        if rawTrack:
+            m = self.reNumberExtract.search(rawTrack)
 
-        if m:
-            self.trackNum = m.group(0)
-        else:
-            self.trackNum = None
+            if m:
+                self.trackNum = m.group(0)
+            else:
+                self.trackNum = None
 
-        if "<u>" in rawTrack:
-            self.stars +=1
-        if "<strong>" in rawTrack:
-            self.stars += 1
+            if "<u>" in rawTrack:
+                self.stars +=1
+            if "<strong>" in rawTrack:
+                self.stars += 1
