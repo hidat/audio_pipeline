@@ -81,17 +81,26 @@ def main():
     mergedReviews = []
     for release in releases:
         # Attempt to find review in Elastic Search
-        review = elastic.ElasticReview.find_review(release)
+        review = elastic.ElasticReview.find_review_exact(release)
+        if review is None:
+            review = elastic.ElasticReview.find_review_loose(release)
+            if review is not None:
+                print("MAYBE: %s by %s (%s)" % (release.title, release.artist, review.artistCredit))
+
         if review is not None:
+            #print("FOUND: %s by %s" % (release.title, release.artist))
             review.merge_release(release)
             mergedReviews.append(review)
+        else:
+            print("Not found: %s by %s" % (release.title, release.artist))
 
     foundCount = len(mergedReviews)
     doExport = False
+    exportCount = 0
     if foundCount > 0:
         doExport = True
         ans = input("We found %d reviews for the %d processed releases!  Would you like to export these reviews to Dalet? Y[n]: "  % (foundCount, len(releases)))
-        if ans.lower() == 'n':
+        if ans.lowenr() == 'n':
             doExport = False
     else:
         print("No reviews found for the %d processed releases." % (len(releases)))
