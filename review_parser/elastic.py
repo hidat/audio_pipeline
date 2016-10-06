@@ -1,7 +1,7 @@
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl.connections import connections
-from elasticsearch_dsl import Index, Mapping, DocType, String, Integer, analyzer, tokenizer
-from elasticsearch_dsl.query import Match
+from elasticsearch_dsl import Index, Mapping, DocType, String, Integer, analyzer, tokenizer, token_filter
+from elasticsearch_dsl.query import Match, Bool
 from review_parser.reviewtrack import ReviewTrack
 
 ####
@@ -10,10 +10,10 @@ from review_parser.reviewtrack import ReviewTrack
 # To install, on the elasticsearch server, execute the following in you elasticsearch directory.
 # sudo bin/plugin install analysis-icu
 ####
+stopword_filter = token_filter({"type": "stop", "stopwords":"_english_"})
 name_analyzer = analyzer('name_analyzer',
     tokenizer = "standard",
-    filter = ['standard', 'icu_folding', 'lowercase']
-    #filter = ['standard', 'lowercase']
+    filter = ['standard', 'lowercase', "stop", 'icu_folding']
 )
 
 def setup_elastic(server):
@@ -108,13 +108,28 @@ class ElasticReview(DocType):
 
 
     @staticmethod
-    def find_review(release):
+    def find_review_exact(release):
         review = None
         s = ElasticReview.search()
-        q = Match(name={"query": release.title, "type": "phrase"})
+        #q = Match(name={"query": release.title, "type": "phrase"})
+        q = Bool(must = [Match(name={"query": release.title, "operator": "or"}), Match(artistCredit={"query": release.artist})])
         s = s.query(q)
         resp = s.execute()
         if resp.hits.total > 0:
           review = resp.hits[0]
+
+        return review
+
+    def find_review_loose(release):
+        review = None
+        s = ElasticReview.search()
+        q = Match(name={"query": release.title, "type": "phrase"})
+        #q = Bool(must = [Match(name={"query": release.title, "operator": "and"}), Match(artistCredit={"query": release.artist, "operator": "and"})])
+        s = s.query(q)
+        resp = s.execute()
+        if resp.hits.total == 1:
+            review = resp.hits[0]
+        elif resp.hits.total > 1:
+            review = resp.hits[0]
 
         return review
