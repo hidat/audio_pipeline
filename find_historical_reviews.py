@@ -83,12 +83,15 @@ def main():
         # Attempt to find review in Elastic Search
         review = elastic.ElasticReview.find_review_exact(release)
         if review is None:
-            review = elastic.ElasticReview.find_review_loose(release)
-            if review is not None:
-                print("MAYBE: %s by %s (%s by %s)" % (release.title, release.artist, review.name, review.artistCredit))
+            maybe = elastic.ElasticReview.find_review_loose(release)
+            if maybe is not None:
+                #print("MAYBE: %s by %s (%s by %s)" % (release.title, release.artist, maybe.name, maybe.artistCredit))
+                ans = input("FOUND %s by %s FOR %s by %s.  Use? Y[n]: "  % (release.title, release.artist, maybe.name, maybe.artistCredit))
+                if ans.lower() == 'y':
+                    review = maybe
 
         if review is not None:
-            #print("FOUND: %s by %s" % (release.title, release.artist))
+            #print("FOUND: %s by %s (%s by %s)" % (release.title, release.artist, review.name, review.artistCredit))
             review.merge_release(release)
             mergedReviews.append(review)
         else:
