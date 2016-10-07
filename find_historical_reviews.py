@@ -85,7 +85,7 @@ def main():
         if review is None:
             review = elastic.ElasticReview.find_review_loose(release)
             if review is not None:
-                print("MAYBE: %s by %s (%s)" % (release.title, release.artist, review.artistCredit))
+                print("MAYBE: %s by %s (%s by %s)" % (release.title, release.artist, review.name, review.artistCredit))
 
         if review is not None:
             #print("FOUND: %s by %s" % (release.title, release.artist))
@@ -100,7 +100,7 @@ def main():
     if foundCount > 0:
         doExport = True
         ans = input("We found %d reviews for the %d processed releases!  Would you like to export these reviews to Dalet? Y[n]: "  % (foundCount, len(releases)))
-        if ans.lowenr() == 'n':
+        if ans.lower() == 'n':
             doExport = False
     else:
         print("No reviews found for the %d processed releases." % (len(releases)))

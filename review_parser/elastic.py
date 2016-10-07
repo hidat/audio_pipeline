@@ -112,7 +112,8 @@ class ElasticReview(DocType):
         review = None
         s = ElasticReview.search()
         #q = Match(name={"query": release.title, "type": "phrase"})
-        q = Bool(must = [Match(name={"query": release.title, "operator": "or"}), Match(artistCredit={"query": release.artist})])
+        #q = Bool(must = [Match(name={"query": release.title, "operator": "or"}), Match(artistCredit={"query": release.artist})])
+        q = Bool(must = [Match(name={"query": release.title, "type": "phrase"}), Match(artistCredit={"query": release.artist, "operator": "and"})])
         s = s.query(q)
         resp = s.execute()
         if resp.hits.total > 0:
@@ -123,8 +124,8 @@ class ElasticReview(DocType):
     def find_review_loose(release):
         review = None
         s = ElasticReview.search()
-        q = Match(name={"query": release.title, "type": "phrase"})
-        #q = Bool(must = [Match(name={"query": release.title, "operator": "and"}), Match(artistCredit={"query": release.artist, "operator": "and"})])
+        q = Bool(must = [Match(name={"query": release.title, "type": "phrase", "minimum_should_match": "-1"}), Match(artistCredit={"query": release.artist})])
+        #q = Match(name={"query": release.title, "type": "phrase"})
         s = s.query(q)
         resp = s.execute()
         if resp.hits.total == 1:
