@@ -3,22 +3,8 @@ import argparse
 import operator
 from review_parser import parser
 from elasticsearch_dsl.connections import connections
+from review_parser import elastic
 from review_parser.elastic import ElasticReview
-
-####
-# Initialize the Elasticsearch Index
-# ***** THIS DESTROYS ALL THE DATA IN THE INDEX!!!!!! *****
-# Only works if the index is closed or does not already exist.
-####
-def initialize_index(server=None):
-    setup_elastic(server)
-    ElasticReview.init()
-
-
-def setup_elastic(server):
-    if server is None:
-        server='localhost'
-    connections.create_connection(hosts=[server], timeout=20)
 
 def main():
     argParser = argparse.ArgumentParser(description='Processes a directory full of KEXP Weekly Review sheets and puts them into an ElasticSearch index.')
@@ -27,7 +13,7 @@ def main():
 
     args = argParser.parse_args()
 
-    setup_elastic(args.elastic_server)
+    elastic.setup_elastic(args.elastic_server)
 
     print('Parsing reviews from %s.' % (args.input_directory))
     # Parse all the raw reviews

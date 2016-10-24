@@ -146,7 +146,7 @@ class DocParser:
 
             for p in paras:
                 s = p[:-4].strip()
-                #s = s.replace(u'\xa0', ' ').replace(u'\u2013', '-')
+                s = s.replace('<br />', '')
                 s = unicodedata.normalize('NFKC', s).replace(u'\u2013', '-')
                 if len(s) > 0 and s[0] != '<':
                     if len(s) > 0:
