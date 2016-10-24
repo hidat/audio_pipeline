@@ -2,6 +2,7 @@ import abc
 import re
 import copy
 from . import Util
+from audio_pipeline import Constants
 
 
 class BaseFormats(object):
@@ -190,7 +191,12 @@ class Tag(abc.ABC):
         self._value = val
 
     def extract(self):
-        if self.serialization_name in self.mutagen:
+        if Constants.ignore_case:
+            tag_name = {i.casefold(): i for i in self.mutagen.keys()}
+            if self.serialization_name.casefold() in tag_name:
+                self.serialization_name = tag_name[self.serialization_name.casefold()]
+                self._value = copy.deepcopy(self.mutagen[self.serialization_name])
+        elif self.serialization_name in self.mutagen.keys():
             self._value = copy.deepcopy(self.mutagen[self.serialization_name])
         else:
             self._value = None
@@ -260,7 +266,9 @@ class ReleaseDateMixin:
         if isinstance(other, ReleaseDateMixin) or isinstance(other, str):
             d1 = self.dates.search(str(self))
             d2 = self.dates.search(str(other))
-            
+        elif isinstance(other, float):
+            return self._value < other
+
             if d1 and d2:
                 if d1.group(self.year) and d2.group(self.year) and d1.group(self.year) != d2.group(self.year):
                     return False
@@ -276,8 +284,8 @@ class ReleaseDateMixin:
                 return False
         else:
             super().__eq__(other)
-        
-        
+
+
 class LengthTag(Tag):
     # regex to help format / extract values
     min = "min"
@@ -286,13 +294,13 @@ class LengthTag(Tag):
 
     def extract(self):
         self._value = round(self.mutagen.info.length)
-        
+
     def __str__(self):
         if self._value:
             return Util.minutes_seconds(self._value)
         else:
             return ""
-            
+
     def set(self, value=CurrentTag):
         pass
 
@@ -300,11 +308,11 @@ class LengthTag(Tag):
     def value(self):
         if self._value:
             return Util.minutes_seconds(self._value)
-            
+
     @value.setter
     def value(self, val):
         pass
-            
+
     def __eq__(self, other):
         if (isinstance(other, LengthTag)):
             return self._value == other._value
@@ -312,12 +320,10 @@ class LengthTag(Tag):
             return self._value == other
         elif isinstance(other, str):
             return (self.value == other or str(self._value) == other)
-            
+
     def __lt__(self, other):
         if isinstance(other, LengthTag):
             return self._value < other._value
-        elif isinstance(other, float):
-            return self._value < other
         elif isinstance(other, str):
             try:
                 o = float(other)

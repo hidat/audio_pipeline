@@ -1,5 +1,5 @@
-from audio_pipeline.tb_ui.controller import TBController
 from audio_pipeline import Constants
+from audio_pipeline.tb_ui.controller import TBController
 
 import argparse
 import os

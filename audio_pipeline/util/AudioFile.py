@@ -66,6 +66,10 @@ class BaseAudioFile:
         self.release_type = self.format.release_type(self.audio)
         self.media_format = self.format.media_format(self.audio)
 
+        self.item_code = self.format.custom_tag(CustomTags.item_code, self.audio)
+        self.barcode = self.format.custom_tag(CustomTags.barcode, self.audio)
+        self.catalog_num = self.format.custom_tag(CustomTags.catalog_num, self.audio)
+
         #######################
         #   track-level tags
         #######################
@@ -77,9 +81,6 @@ class BaseAudioFile:
         self.length = self.format.length(self.audio)
         self.acoustid = self.format.acoustid(self.audio)
 
-        self.item_code = self.format.custom_tag(CustomTags.item_code, self.audio)
-        self.barcode = self.format.custom_tag(CustomTags.barcode, self.audio)
-        self.catalog_num = self.format.custom_tag(CustomTags.catalog_num, self.audio)
         self.meta_stuffed = self.format.custom_tag("meta_stuffed", self.audio)
         
         self.custom_tags = [self.meta_stuffed]

@@ -34,6 +34,7 @@ class LoadReleases(threading.Thread):
         self.loaded = 0
         self.scanned = 0
         self.processor = Process.Processor(Constants.processor, Constants.batch_constants.mb)
+        self.lookup = Constants.load_releases
 
     def run(self):
         time.sleep(.1)
@@ -41,7 +42,7 @@ class LoadReleases(threading.Thread):
         num_dirs = len(self.current_release.directories)
 
         if self.starting_index != 0:
-            self.load_release(self.next_buffer, self.starting_index)
+            self.load_release(self.next_buffer, self.starting_index, self.lookup)
             self.loaded += 1
             self.starting_index += 1
 
@@ -64,7 +65,7 @@ class LoadReleases(threading.Thread):
                 if i < num_dirs:
                     print("loading next " + str(i))
                     self.current_release.cond.release()
-                    self.load_release(self.next_buffer, i)
+                    self.load_release(self.next_buffer, i, self.lookup)
                     self.current_release.cond.acquire()
                     self.loaded += 1
 
@@ -81,7 +82,7 @@ class LoadReleases(threading.Thread):
                 if i >= 0:
                     print("loading prev " + str(i))
                     self.current_release.cond.release()
-                    self.load_release(self.prev_buffer, i)
+                    self.load_release(self.prev_buffer, i, self.lookup)
                     self.current_release.cond.acquire()
                     self.loaded += 1
                 
@@ -168,7 +169,7 @@ class LoadReleases(threading.Thread):
 
         for release in releases:
 
-            if Util.has_mbid(release[0]):
+            if Util.has_mbid(release[0]) and scan:
                 release_meta = self.processor.get_release(release[0].mbid.value)
                 meta = release_meta.release
                 # stuff any additional MB metadata

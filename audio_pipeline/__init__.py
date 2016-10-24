@@ -3,7 +3,6 @@ import yaml
 import copy
 import re
 
-
 class Constants:
     batch_constants_def = None
     batch_constants = None
@@ -13,6 +12,9 @@ class Constants:
     processor = None
     serializer = None
     custom_tags = None
+    load_releases = True
+
+    ignore_case = False
     
     argument_config = None
 
@@ -37,6 +39,11 @@ class Constants:
                     default_config = yaml.load(f)
                     config.update(default_config)
 
+        if "tags" in config:
+            if "ignore_case" in config["tags"]:
+                cls.ignore_case = config["tags"]["ignore_case"]
+        if "tb_lookup" in config:
+            cls.load_releases = config['tb_lookup']
         if "batch constants" in config:
             cls.batch_constants_def = config["batch constants"]
             cls.batch_constants = cls.batch_constants_def(None)

@@ -1,4 +1,5 @@
-{audiofile: !!python/name:audio_pipeline.kexp.KEXPAudioFile.KEXPAudioFile '',
+{tags: {ignore_case: True}, tb_lookup: False,
+ audiofile: !!python/name:audio_pipeline.kexp.KEXPAudioFile.KEXPAudioFile '',
  processor: !!python/name:audio_pipeline.kexp.Process '',
  batch constants: !!python/name:audio_pipeline.kexp.Resources.BatchConstants '',
  serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '',
