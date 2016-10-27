@@ -22,8 +22,9 @@ class TestUtilMixin:
     def check_af_tag(self, real_tag, af_tag):
         self.assertIsNot(af_tag, None)
         self.assertIsNot(real_tag, None)
-        
-        self.assertEqual(af_tag, real_tag)
+
+        msg = str(af_tag) + " not equal to " + str(real_tag)
+        self.assertEqual(af_tag, real_tag, msg=msg)
         
         # more in-depth equality checks
         self.assertEqual(af_tag.name, real_tag.name)
@@ -52,11 +53,11 @@ class TestUtilMixin:
         self.assertIsNot(vorbis_tag, None)
         self.assertIsNot(aac_tag, None)
         self.assertIsNot(id3_tag, None)
-        message = msg + "vorbis and aac not equal"
+        message = msg + "vorbis (" + str(vorbis_tag) + ") and aac (" + str(aac_tag) + ") not equal"
         self.assertEqual(vorbis_tag, aac_tag, msg=message)
-        message = msg + "aac and id3 not equal"
+        message = msg + "aac (" + str(aac_tag) + ") and id3 (" + str(id3_tag) + ") not equal"
         self.assertEqual(aac_tag, id3_tag, msg=message)
-        message = msg + "id3 and vorbis not equal"
+        message = msg + "id3 (" + str(id3_tag) + ") and vorbis (" + str(vorbis_tag) + ") not equal"
         self.assertEqual(id3_tag, vorbis_tag, msg=message)
 
         

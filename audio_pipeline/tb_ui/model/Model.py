@@ -5,6 +5,7 @@ from ..util import Resources
 from . import MoveFiles
 from . import Rules
 from . import LoadReleases
+from audio_pipeline import Constants
 
 
 class ProcessDirectory(object):
@@ -63,8 +64,11 @@ class ProcessDirectory(object):
             return self.__current_release.current
 
     def set_mbid(self, mbid):
+        release = self.loader_thread.processor.get_release(mbid)
         for track in self.current_release:
-            track.mbid.save(mbid)
+            release.stuff_audiofile(track)
+            track.save()
+        return "done"
 
     def set_genre(self, genre):
         for track in self.current_release:

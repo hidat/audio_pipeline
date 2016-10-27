@@ -1,0 +1,11 @@
+{
+ tags: {ignore_case: True,
+        track: [FCC Rating, Send to ENCO, Radio Edit],
+        release: [Rotation Status, Category, Style]},
+ tb_lookup: False,
+ audiofile: !!python/name:audio_pipeline.util.AudioFile.BaseAudioFile '',
+ processor: !!python/name:audio_pipeline.kexp.Process '',
+ batch constants: !!python/name:audio_pipeline.kexp.Resources.BatchConstants '',
+ serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '',
+ argument_config: !!python/name:audio_pipeline.kexp.argument_config '',
+ user: KBCS}

@@ -1,6 +1,5 @@
 from audio_pipeline.util import AudioFile
 
-
 class CustomTags:
     obscenity = "KEXPFCCOBSCENITYRATING"
     category = "KEXPPRIMARYGENRE"
@@ -11,8 +10,8 @@ class CustomTags:
 
 class KEXPAudioFile(AudioFile.BaseAudioFile):
 
-    def __init__(self, file_name):
-        super().__init__(file_name)
+    def __init__(self, file_name, release_tags=None, track_tags=None):
+        super().__init__(file_name, release_tags, track_tags)
 
         self.obscenity = self.format.custom_tag(CustomTags.obscenity, self.audio)
         self.category = self.format.custom_tag(CustomTags.category, self.audio)
@@ -32,11 +31,15 @@ class KEXPAudioFile(AudioFile.BaseAudioFile):
 
     def tb_track(self):
         track = super().tb_track()
-        track += [{'width': self.default_track_width, 'tag': self.obscenity},
-                  {'width': self.default_track_width, 'tag': self.radio_edit}]
+        TBTag = AudioFile.collections.namedtuple("TBTag", ["width", "tag"])
+
+        track += [TBTag(self.default_track_width, self.obscenity),
+                  TBTag(self.default_track_width, self.radio_edit)]
         return track
 
     def tb_release(self):
         release = super().tb_release()
-        release += [{'width': self.default_release_width, 'row': 1, 'tag': self.secondary_genre}]
+        TBTag = AudioFile.collections.namedtuple("TBTag", ["width", "row", "tag"])
+
+        release += [TBTag(self.default_release_width, 1, self.secondary_genre)]
         return release

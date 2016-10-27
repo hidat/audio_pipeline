@@ -48,11 +48,11 @@ class ReleaseFrame(MetaFrame):
         self.labels = []
 
     def add_tag(self, tag_info, colval):
-        self.attribute_text[tag_info['tag'].name] = tk.StringVar()
-        self.labels[tag_info['row']][tag_info['tag'].name] = tk.Label(self, self.name_style, text=tag_info['tag'].name)
-        self.labels[tag_info['row']][tag_info['tag'].name].grid(self.name_padding, row=(tag_info['row'] * 2), column=colval)
+        self.attribute_text[tag_info.tag.name] = tk.StringVar()
+        self.labels[tag_info.row][tag_info.tag.name] = tk.Label(self, self.name_style, text=tag_info.tag.name)
+        self.labels[tag_info.row][tag_info.tag.name].grid(self.name_padding, row=(tag_info.row * 2), column=colval)
         colval += 1
-        self.attribute_widths.append(tag_info['width'])
+        self.attribute_widths.append(tag_info.width)
         return colval
 
     def display_meta(self, metadata):
@@ -70,12 +70,12 @@ class ReleaseFrame(MetaFrame):
         
         try:
             for tag_info in track.tb_release():
-                if len(self.labels) <= tag_info['row']:
+                if len(self.labels) <= tag_info.row:
                     self.labels.append({})
-                    if tag_info['row'] != 0:
+                    if tag_info.row != 0:
                         colval = 1
 
-                if not tag_info['tag'].name in self.labels[tag_info['row']]:
+                if not tag_info.tag.name in self.labels[tag_info.row]:
                     colval = self.add_tag(tag_info, colval)
         except AttributeError:
             pass
@@ -140,7 +140,7 @@ class TrackFrame(MetaFrame):
             
             try:
                 for t in track.tb_track():
-                    rowval, colval = self.add_tag(t['tag'], t['width'], rowval, colval)
+                    rowval, colval = self.add_tag(t.tag, t.width, rowval, colval)
             except AttributeError:
                 # this should only happen on the obscenity rating - pass
                 pass

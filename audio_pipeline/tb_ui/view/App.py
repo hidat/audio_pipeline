@@ -22,7 +22,7 @@ class App(tk.Tk):
         tk.Tk.__init__(self)
         self['bg'] = Settings.bg_color
         self.title("TomatoBanana")
-        
+
         self.processing_done = tk.IntVar()
         self.processing_done.set(Resources.cancel)
         
@@ -56,8 +56,13 @@ class App(tk.Tk):
         self.track_frame.display_meta(track_meta)
 
     def update_meta(self, track_meta):
-        self.release_frame.update_meta(track_meta)
-        self.track_frame.update_meta(track_meta)
+        if type(track_meta) == list:
+            self.release_frame.update_meta(track_meta[0])
+            for t in track_meta:
+                self.track_frame.update_meta(t)
+        else:
+            self.release_frame.update_meta(track_meta)
+            self.track_frame.update_meta(track_meta)
 
     def display_info(self):
         if self.info_window:

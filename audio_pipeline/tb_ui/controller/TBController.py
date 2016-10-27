@@ -45,8 +45,9 @@ class TBController:
         genre = InputPatterns.secondary_genre_pattern.match(input_string)
         self.app.select_input()
         if Util.is_mbid(input_string):
-            self.model.set_mbid(input_string)
-            self.app.update_meta(self.model.current_release[0])
+            complete = self.model.set_mbid(input_string)
+            print(complete)
+            self.app.update_meta(self.model.current_release)
         elif tracks:
             # input is (probably) track metadata (currently only RED DOT, YELLOW DOT, CLEAN EDIT, clear (l))
             try:
@@ -73,6 +74,7 @@ class TBController:
             bar = barcode.group(InputPatterns.barcode)
             Search.mb_search(self.model.current_release[0], barcode=True, barcode_value=bar)
         elif genre:
+            genre.group(InputPatterns.meta_acc)
             full_genre = r.Genres.get(genre.group(InputPatterns.meta_acc))
             if full_genre:
                 self.model.set_genre(full_genre)
@@ -166,7 +168,7 @@ class TBController:
         """
         Update current release metadata
         """
-        self.app.update_meta(self.model.current_release[0])
+        self.app.update_meta(self.model.current_release)
             
     def next_album(self):
         """

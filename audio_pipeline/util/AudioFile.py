@@ -1,4 +1,5 @@
 import mutagen
+import collections
 
 from .format import Vorbis
 from .format import AAC
@@ -11,6 +12,7 @@ class CustomTags:
     item_code = "ITEMCODE"
     barcode = "BARCODE"
     catalog_num = "CATALOGNUMBER"
+    obscenity = "KEXPFCCOBSCENITYRATING"
 
 
 class BaseAudioFile:
@@ -22,7 +24,7 @@ class BaseAudioFile:
     id3 = ID3.Format
     aac = AAC.Format
     
-    def __init__(self, file_name):
+    def __init__(self, file_name, release_tags=None, track_tags=None):
         self.format = None
         self.file_name = file_name
         
@@ -56,7 +58,10 @@ class BaseAudioFile:
         #######################
         #   release-level tags
         #######################
-        
+
+        self.custom_release_tags = {}
+        self.release_tags = release_tags
+
         self.mbid = self.format.mbid(self.audio)
         self.album = self.format.album(self.audio)
         self.album_artist = self.format.album_artist(self.audio)
@@ -70,9 +75,15 @@ class BaseAudioFile:
         self.barcode = self.format.custom_tag(CustomTags.barcode, self.audio)
         self.catalog_num = self.format.custom_tag(CustomTags.catalog_num, self.audio)
 
+        # get custom release tag values
+        if release_tags:
+            for r_tag in release_tags:
+                self.custom_release_tags[r_tag] = self.format.custom_tag(r_tag, self.audio)
         #######################
         #   track-level tags
         #######################
+        self.custom_track_tags = {}
+        self.track_tags = track_tags
 
         self.title = self.format.title(self.audio)
         self.artist = self.format.artist(self.audio)
@@ -80,6 +91,11 @@ class BaseAudioFile:
         self.track_num = self.format.track_num(self.audio)
         self.length = self.format.length(self.audio)
         self.acoustid = self.format.acoustid(self.audio)
+        self.obscenity = self.format.custom_tag(CustomTags.obscenity, self.audio)
+
+        if track_tags:
+            for t_tag in track_tags:
+                self.custom_track_tags[t_tag] = self.format.custom_tag(t_tag, self.audio)
 
         self.meta_stuffed = self.format.custom_tag("meta_stuffed", self.audio)
         
@@ -102,40 +118,40 @@ class BaseAudioFile:
         for item in self.custom_tags:
             yield item
 
-    def stuff_release(self, release):
-
-        self.mbid.value = release.id
-        self.album.value = release.title
-        self.album_artist.value = release.artist
-        self.release_date.value = release.date
-        if len(release.labels) > 0:
-            self.label.value = [label.title for label in release.labels]
-            self.catalog_num.value = [label.catalog_num for label in release.labels]
-        self.country.value = release.country
-        if len(release.barcode) > 0:
-            self.barcode.value = release.barcode
-        if len(release.release_type) > 0:
-            self.release_type.value = release.release_type
-        if len(release.format) > 0:
-            self.media_format.value = release.format[0]
-            
     def track(self):
-        return [self.track_num, self.title, self.artist, self.length, self.item_code]
+        tracks = [self.track_num, self.title, self.artist, self.length, self.item_code]
+        tracks += [v for v in self.custom_track_tags.values()]
+        return tracks
 
     def tb_release(self):
-        return [{'width': 25, 'row': 0, 'tag': self.album_artist}, {'width': 30, 'row': 0, 'tag': self.album},
-                {'width': 20, 'row': 0, 'tag': self.label}, {'width': 10, 'row': 0, 'tag': self.disc_num},
-                {'width': self.default_release_width, 'row': 0, 'tag': self.release_date},
-                {'width': 30, 'row': 0, 'tag': self.mbid}, {'width': self.default_release_width, 'row': 0, 'tag': self.country},
-                {'width': self.default_release_width, 'row': 1, 'tag': self.release_type},
-                {'width': self.default_release_width, 'row': 1, 'tag': self.media_format},
-                {'width': self.default_release_width, 'row': 1, 'tag': self.barcode},
-                {'width': self.default_release_width, 'row': 1, 'tag': self.catalog_num}]
+        TBTag = collections.namedtuple('TBTag', ['width', 'row', 'tag'])
+
+        release_tags = [TBTag(25, 0, self.album_artist), TBTag(30, 0, self.album),
+                TBTag(20, 0, self.label), TBTag(10, 0, self.disc_num),
+                TBTag(self.default_release_width, 0, self.release_date),
+                TBTag(30, 0, self.mbid), TBTag(self.default_release_width, 0, self.country),
+                TBTag(self.default_release_width, 1, self.release_type),
+                TBTag(self.default_release_width, 1, self.media_format),
+                TBTag(self.default_release_width, 1, self.barcode),
+                TBTag(self.default_release_width, 1, self.catalog_num)]
+
+        for tag in self.release_tags:
+            release_tags.append(TBTag(self.default_release_width, 1, self.custom_release_tags[tag]))
+
+        return release_tags
 
     def tb_track(self):
-        return [{'width': 5, 'tag': self.track_num}, {'width': 30, 'tag': self.title}, {'width': 25, 'tag': self.artist},
-                {'width': 10, 'tag': self.length}]
-    
+        TBTag = collections.namedtuple('TBTag', ['width', 'tag'])
+        track_tags = [TBTag(5, self.track_num), TBTag(30, self.title), TBTag(25, self.artist),
+                      TBTag(10, self.length)]
+
+        for tag in self.track_tags:
+            track_tags.append(TBTag(self.default_track_width, self.custom_track_tags[tag]))
+
+        return track_tags
+
     def release(self):
-        return [self.album_artist, self.album, self.label, self.disc_num, self.release_date, self.mbid,
-                self.country, self.release_type, self.media_format, self.barcode, self.catalog_num]
+        release = [self.album_artist, self.album, self.label, self.disc_num, self.release_date, self.mbid,
+                   self.country, self.release_type, self.media_format, self.barcode, self.catalog_num]
+        release += [v for v in self.custom_release_tags.values()]
+        return release

@@ -116,13 +116,6 @@ class Release(Content):
         
         self.glossary_title = ''
 
-    def stuff(self, audiofile):
-        audiofile.album.value = self.title
-        audiofile.album_artist.value = self.artist
-        audiofile.label.value = self.label.title
-        audiofile.barcode.value = self.barcode
-
-
 class Disc:
 
     def __init__(self, disc_num, tracks):

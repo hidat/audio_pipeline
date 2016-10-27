@@ -3,6 +3,7 @@ import yaml
 import copy
 import re
 
+
 class Constants:
     batch_constants_def = None
     batch_constants = None
@@ -13,7 +14,10 @@ class Constants:
     serializer = None
     custom_tags = None
     load_releases = True
+    is_tb = False
 
+    custom_track_tags = []
+    custom_release_tags = []
     ignore_case = False
     
     argument_config = None
@@ -39,9 +43,17 @@ class Constants:
                     default_config = yaml.load(f)
                     config.update(default_config)
 
+        # configuration options for tag reading/writing -
+        # custom track tags, custom release tags, and whether to ignore tag casing
+        # for AAC & ID3 tags, where case does matter
         if "tags" in config:
-            if "ignore_case" in config["tags"]:
-                cls.ignore_case = config["tags"]["ignore_case"]
+            tag_data = config["tags"]
+            if "ignore_case" in tag_data:
+                cls.ignore_case = tag_data["ignore_case"]
+            if "track" in tag_data:
+                cls.custom_track_tags = tag_data["track"]
+            if "release" in tag_data:
+                cls.custom_release_tags = tag_data["release"]
         if "tb_lookup" in config:
             cls.load_releases = config['tb_lookup']
         if "batch constants" in config:
@@ -55,8 +67,6 @@ class Constants:
             cls.serializer = config["serializer"]
         if "argument_config" in config:
             cls.argument_config = config["argument_config"]
-        if "custom_tags" in config:
-            cls.custom_tags = config["custom_tags"]
 
     @classmethod
     def setup(cls, args, user=None):

@@ -15,6 +15,7 @@ def main():
     config_dir = os.path.split(os.path.abspath(__file__))[0]
 
     Constants.load_config(config_dir)
+    Constants.is_tb = True
 
     controller = TBController.TBController(args.release_directory, args.copy)
     

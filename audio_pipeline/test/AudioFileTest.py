@@ -44,6 +44,16 @@ class TestAudioFileTags(TestUtil.TestUtilMixin):
     def test_length(self):
         tag = self.format.length(self.meta)
         self.check_af_tag(tag, self.af.length)
+
+    def test_custom_release(self):
+        for tag_name in self.af.custom_release_tags.keys():
+            tag = self.format.custom_tag(tag_name, self.meta)
+            self.check_af_tag(tag, self.af.custom_release_tags[tag_name])
+
+    def test_custom_track(self):
+        for tag_name in self.af.custom_track_tags.keys():
+            tag = self.format.custom_tag(tag_name, self.meta)
+            self.check_af_tag(tag, self.af.custom_track_tags[tag_name])
         
 
 class TestAudioFileVorbis_t1(TestAudioFileTags, unittest.TestCase):

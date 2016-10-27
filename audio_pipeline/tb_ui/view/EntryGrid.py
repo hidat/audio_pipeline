@@ -21,8 +21,8 @@ class EntryGrid(tk.Toplevel):
         self.__save = control.save
         self.the_end = control.quit
         self.release_categories = [tag.name for tag in control.release]
-        self.track_categories = [tag['tag'].name for tag in control.track]
-        self.track_widths = {tag['tag'].name: tag['width'] for tag in control.track}
+        self.track_categories = [tag.tag.name for tag in control.track]
+        self.track_widths = {tag.tag.name: tag.width for tag in control.track}
 
         # set up grid for the release metadata
         self.release = MetaGrid.MetaGrid(update_command=control.check_release, last_command=self.release_end, bindings=self.bind_release,

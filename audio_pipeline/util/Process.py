@@ -80,6 +80,37 @@ class ReleaseProcessor:
         self.mb_release = mb_release
         self._release = None
 
+    def stuff_audiofile(self, audio_file):
+        """
+        Stuff the given audio_file (w/ track #) with the musicbrainz data
+        :return:
+        """
+        audio_file.mbid.value = self.release.id
+        audio_file.album_artist.value = self.release.artist
+        audio_file.album.value = self.release.title
+        audio_file.release_date.value = self.release.date
+        if len(self.release.labels) > 0:
+            audio_file.label.value = [label.title for label in self.release.labels]
+            audio_file.catalog_num.value = [label.catalog_num for label in self.release.labels]
+        audio_file.country.value = self.release.country
+        if len(self.release.barcode) > 0:
+            audio_file.barcode.value = self.release.barcode
+        if len(self.release.release_type) > 0:
+            audio_file.release_type.value = self.release.release_type
+        if len(self.release.format) > 0:
+            audio_file.media_format.value = self.release.format[0]
+
+        track = self.get_track(audio_file)
+
+        audio_file.title.value = track.title
+        if track.artist_phrase:
+            audio_file.artist.value = track.artist_phrase
+        else:
+            audio_file.artist.value = track.artist_credit
+        audio_file.disc_num.value = track.disc_num
+        audio_file.track_num.value = track.track_num
+        audio_file.meta_stuffed.value = "yep"
+
     def process_release(self):
         """
         Extract release metadata we care about from the raw metadata
@@ -182,19 +213,20 @@ class ReleaseProcessor:
             return track
             
         # if generating unique item codes, do that
-        if Constants.batch_constants.gen_item_code:
-            item_code = str(uuid.uuid4())
-        elif audio_file.item_code.value is not None:
-            item_code = audio_file.item_code.value
-        elif (audio_file.obscenity.value is not None and \
-             audio_file.obscenity.value.casefold() == "kexp clean edit") or \
-             (audio_file.radio_edit.value is not None and \
-             audio_file.radio_edit.value.casefold() == "kexp radio edit"):
-            item_code = str(uuid.uuid4())
-        else:
-            item_code = track_meta['id']
-        
-        track.item_code = item_code
+        if not Constants.is_tb:
+            if Constants.batch_constants.gen_item_code:
+                item_code = str(uuid.uuid4())
+            elif audio_file.item_code.value is not None:
+                item_code = audio_file.item_code.value
+            elif (audio_file.obscenity.value is not None and \
+                 audio_file.obscenity.value.casefold() == "kexp clean edit") or \
+                 (audio_file.radio_edit.value is not None and \
+                 audio_file.radio_edit.value.casefold() == "kexp radio edit"):
+                item_code = str(uuid.uuid4())
+            else:
+                item_code = track_meta['id']
+
+            track.item_code = item_code
                         
         recording_meta = track_meta['recording']
         
@@ -235,8 +267,9 @@ class ReleaseProcessor:
         track.disc_num = audio_file.disc_num.value
         track.track_num = audio_file.track_num.value
         track.obscenity = str(audio_file.obscenity)
-        track.primary_genre = Resources.Genres.get(str(audio_file.category))
-        track.anchor_status = str(audio_file.anchor)
+        if not Constants.is_tb:
+            track.primary_genre = Resources.Genres.get(str(audio_file.category))
+            track.anchor_status = str(audio_file.anchor)
 
         #####################################
         # NEED TO ADD RADIO EDIT INFORMATION
@@ -261,9 +294,10 @@ class ReleaseProcessor:
         track.various_artist_dist_rule = Util.distrule_cleanup(release_meta.title[:1])
 
         # set the item_code value in the audio file
-        audio_file.item_code.value = item_code
+        if not Constants.is_tb:
+            audio_file.item_code.value = item_code
+            audio_file.item_code.save()
 
-        audio_file.item_code.save()
         return track
         
     def get_track(self, audio_file):

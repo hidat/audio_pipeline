@@ -176,22 +176,10 @@ class LoadReleases(threading.Thread):
                 for track in release:
                     if track.meta_stuffed.value:
                         continue
-                    track.stuff_release(meta)
-                    track.meta_stuffed.value = "yep"
+                    release_meta.stuff_audiofile(track)
                     if meta.disc_count is None:
                         track.mbid.value = None
                         pass
-                    elif track.disc_num.value <= meta.disc_count:
-                        track_meta = release_meta.get_track(track)
-                        # need to create new processor w/ no item_code save - for now, just kill it here.
-                        track.title.value = track_meta.title
-                        if track_meta.artist_phrase:
-                            track.artist.value = track_meta.artist_phrase
-                        else:
-                            track.artist.value = track_meta.artist_credit
-                    else:
-                        track.artist.value = meta.artist
-                        track.title.value = ""
 
                     track.item_code.value = None
                     track.save()

@@ -248,6 +248,7 @@ class ReleaseDateMixin:
     
     # dates are (generally) separated by one of \, /, :, -, " ",
     # and we'll allow any number of spaces before and after delimeter
+    _value = None
     year = "year"
     month = "month"
     day = "day"
@@ -266,8 +267,6 @@ class ReleaseDateMixin:
         if isinstance(other, ReleaseDateMixin) or isinstance(other, str):
             d1 = self.dates.search(str(self))
             d2 = self.dates.search(str(other))
-        elif isinstance(other, float):
-            return self._value < other
 
             if d1 and d2:
                 if d1.group(self.year) and d2.group(self.year) and d1.group(self.year) != d2.group(self.year):
@@ -282,6 +281,8 @@ class ReleaseDateMixin:
                 return True
             else:
                 return False
+        elif isinstance(other, float):
+            return self._value < other
         else:
             super().__eq__(other)
 

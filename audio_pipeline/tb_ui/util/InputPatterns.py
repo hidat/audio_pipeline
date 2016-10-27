@@ -28,7 +28,7 @@ albunack = "albunack"
 tracknum_acc = "track_num"
 meta_acc = "meta"
 
-secondary_genre_pattern = re.compile('(g|genre)\s*(?P<' + meta_acc + '>.+)')
+secondary_genre_pattern = re.compile('g|genre\s+(?P<' + meta_acc + '>.+)')
 track_num_pattern = re.compile('((((?P<start>(\\d+))\\s*-\\s*(?P<end>(\\d+)))|(?P<single>\\d+))\s*,*\s*|(?P<all>all))')
 track_meta_pattern = re.compile('\s*(?P<' + tracknum_acc + '>(\s*' + track_num_pattern.pattern + '\s*)+)(?P<' + meta_acc + '>.+)')
 
