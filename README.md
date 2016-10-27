@@ -13,6 +13,7 @@ It is assumed that you already have Python 3.4 or greater installed, and it is i
 6. Install smartsheet  `pip install smartsheet-python-sdk`
 7. Install yaml  `pip install pyyaml`
 8. Install acoustid `pip install pyacoustid`
+9. Install elasticsearch `pip install elasticsearch`, `pip install elasticsearch_dsl`
 8. Profit!
 
 ### Programs
