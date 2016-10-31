@@ -3,7 +3,6 @@ import yaml
 import copy
 import re
 
-
 class Constants:
     batch_constants_def = None
     batch_constants = None
@@ -18,7 +17,9 @@ class Constants:
 
     custom_track_tags = []
     custom_release_tags = []
+    obscenity_rating = None
     ignore_case = False
+    user = None
     
     argument_config = None
 
@@ -50,10 +51,14 @@ class Constants:
             tag_data = config["tags"]
             if "ignore_case" in tag_data:
                 cls.ignore_case = tag_data["ignore_case"]
-            if "track" in tag_data:
-                cls.custom_track_tags = tag_data["track"]
-            if "release" in tag_data:
-                cls.custom_release_tags = tag_data["release"]
+            if "custom_tags" in tag_data:
+                if "track" in tag_data["custom_tags"]:
+                    cls.custom_track_tags = tag_data["custom_tags"]["track"]
+                if "release" in tag_data["custom_tags"]:
+                    cls.custom_release_tags = tag_data["custom_tags"]["release"]
+            if "obscenity_rating" in tag_data:
+                util.AudioFile.CustomTags.obscenity = tag_data["obscenity_rating"]
+                cls.obscenity_rating = tag_data['obscenity_rating']
         if "tb_lookup" in config:
             cls.load_releases = config['tb_lookup']
         if "batch constants" in config:
@@ -61,6 +66,9 @@ class Constants:
             cls.batch_constants = cls.batch_constants_def(None)
         if "audiofile" in config:
             cls.audiofile = config["audiofile"]
+            if "user" in config:
+                cls.audiofile.audiofile_type = config["user"]
+
         if "processor" in config:
             cls.processor = config["processor"]
         if "serializer" in config:

@@ -1,7 +1,8 @@
 {
  tags: {ignore_case: True,
-        track: [FCC Rating, Send to ENCO, Radio Edit],
-        release: [Rotation Status, Category, Style]},
+        obscenity_rating: FCC Rating,
+        custom_tags: {track: [Send to ENCO, Radio Edit],
+        release: [Rotation Status, Category, Style]}},
  tb_lookup: False,
  audiofile: !!python/name:audio_pipeline.util.AudioFile.BaseAudioFile '',
  processor: !!python/name:audio_pipeline.kexp.Process '',

@@ -157,7 +157,7 @@ class Track(Content):
         self.anchor_status = None
         
     def set_type(self):
-        if (self.item_code != self.id):
+        if self.item_code and (self.item_code != self.id):
             self.type = "track with filewalker mbid"
         else:
             self.type = "track"

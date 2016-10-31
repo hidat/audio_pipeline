@@ -58,6 +58,8 @@ class Release:
                 lookups += 1
                 track = self.tracks[track_nums.pop()]
                 if track.acoustid.value or track.meta_stuffed.value:
+                    print(track.acoustid.value)
+                    print(track.meta_stuffed.value)
                     continue
                 try:
                     fingerprint = acoustid.fingerprint_file(track.file_name)

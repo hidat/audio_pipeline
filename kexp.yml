@@ -1,4 +1,7 @@
-{tags: {ignore_case: False}, tb_lookup: True,
+{
+ tags: {ignore_case: False,
+        obscenity_rating: KEXPFCCOBSCENITYRATING},
+ tb_lookup: True,
  audiofile: !!python/name:audio_pipeline.kexp.KEXPAudioFile.KEXPAudioFile '',
  processor: !!python/name:audio_pipeline.kexp.Process '',
  batch constants: !!python/name:audio_pipeline.kexp.Resources.BatchConstants '',

@@ -17,6 +17,8 @@ class CustomTags:
 
 class BaseAudioFile:
 
+    audiofile_type = "BaseAudioFile"
+
     default_release_width = 15
     default_track_width = 25
 
@@ -37,10 +39,10 @@ class BaseAudioFile:
             # propagate the resulting exception on up
             raise e
             
-        for type in self.audio.mime:
+        for mime_type in self.audio.mime:
             # get the appropriate tag Format for this file type
-            if type in Tag.Formats.mime_map:
-                t = Tag.Formats.mime_map[type]
+            if mime_type in Tag.Formats.mime_map:
+                t = Tag.Formats.mime_map[mime_type]
                 if t.casefold() == "aac":
                     self.format = self.aac
                 elif t.casefold() == "id3":
@@ -59,8 +61,7 @@ class BaseAudioFile:
         #   release-level tags
         #######################
 
-        self.custom_release_tags = {}
-        self.release_tags = release_tags
+        self.custom_release_tags = collections.OrderedDict()
 
         self.mbid = self.format.mbid(self.audio)
         self.album = self.format.album(self.audio)
@@ -82,8 +83,7 @@ class BaseAudioFile:
         #######################
         #   track-level tags
         #######################
-        self.custom_track_tags = {}
-        self.track_tags = track_tags
+        self.custom_track_tags = collections.OrderedDict()
 
         self.title = self.format.title(self.audio)
         self.artist = self.format.artist(self.audio)
@@ -119,7 +119,7 @@ class BaseAudioFile:
             yield item
 
     def track(self):
-        tracks = [self.track_num, self.title, self.artist, self.length, self.item_code]
+        tracks = [self.track_num, self.title, self.artist, self.length, self.item_code, self.obscenity]
         tracks += [v for v in self.custom_track_tags.values()]
         return tracks
 
@@ -135,7 +135,7 @@ class BaseAudioFile:
                 TBTag(self.default_release_width, 1, self.barcode),
                 TBTag(self.default_release_width, 1, self.catalog_num)]
 
-        for tag in self.release_tags:
+        for tag in self.custom_release_tags:
             release_tags.append(TBTag(self.default_release_width, 1, self.custom_release_tags[tag]))
 
         return release_tags
@@ -145,7 +145,10 @@ class BaseAudioFile:
         track_tags = [TBTag(5, self.track_num), TBTag(30, self.title), TBTag(25, self.artist),
                       TBTag(10, self.length)]
 
-        for tag in self.track_tags:
+        if CustomTags.obscenity != None:
+            track_tags.append(TBTag(self.default_track_width, self.obscenity))
+
+        for tag in self.custom_track_tags:
             track_tags.append(TBTag(self.default_track_width, self.custom_track_tags[tag]))
 
         return track_tags
