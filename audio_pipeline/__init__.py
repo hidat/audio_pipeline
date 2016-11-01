@@ -20,6 +20,7 @@ class Constants:
     obscenity_rating = None
     ignore_case = False
     user = None
+    tb_meta_commands = None
     
     argument_config = None
 
@@ -31,6 +32,7 @@ class Constants:
         config_file = os.path.join(cls.config_dir, "default.yml")
 
         if os.path.exists(config_file):
+            cls.config_file = config_file
             with open(config_file, "r") as f:
                 config = yaml.load(f)
                 cls.load(config)
@@ -40,6 +42,7 @@ class Constants:
         if "default" in config:
             default_file = os.path.join(cls.config_dir, config["default"] + '.yml')
             if os.path.exists(default_file):
+                cls.config_file = default_file
                 with open(default_file, "r") as f:
                     default_config = yaml.load(f)
                     config.update(default_config)
@@ -57,7 +60,7 @@ class Constants:
                 if "release" in tag_data["custom_tags"]:
                     cls.custom_release_tags = tag_data["custom_tags"]["release"]
             if "obscenity_rating" in tag_data:
-                util.AudioFile.CustomTags.obscenity = tag_data["obscenity_rating"]
+                # util.AudioFile.CustomTags.obscenity = tag_data["obscenity_rating"]
                 cls.obscenity_rating = tag_data['obscenity_rating']
         if "tb_lookup" in config:
             cls.load_releases = config['tb_lookup']
@@ -68,7 +71,8 @@ class Constants:
             cls.audiofile = config["audiofile"]
             if "user" in config:
                 cls.audiofile.audiofile_type = config["user"]
-
+        if "tb_meta" in config:
+            cls.tb_meta_commands = config["tb_meta"]
         if "processor" in config:
             cls.processor = config["processor"]
         if "serializer" in config:

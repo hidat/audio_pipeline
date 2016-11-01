@@ -1,5 +1,6 @@
 from ..util import InputPatterns
 
+
 class Command:
     def __init__(self, command, help, sub_commands=None, examples=[]):
         self.command = command

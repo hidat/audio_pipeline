@@ -1,4 +1,5 @@
 from audio_pipeline import Constants
+import audio_pipeline.tb_ui.controller
 from audio_pipeline.tb_ui.controller import TBController
 
 import argparse
@@ -16,6 +17,7 @@ def main():
 
     Constants.load_config(config_dir)
     Constants.is_tb = True
+    audio_pipeline.tb_ui.controller.build_commands()
 
     controller = TBController.TBController(args.release_directory, args.copy)
     

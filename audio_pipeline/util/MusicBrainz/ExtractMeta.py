@@ -1,7 +1,7 @@
-from .. import Resources
+from .. import Process
 
 
-class ReleaseProcessor:
+class ReleaseProcessor(Process.ReleaseProcessor):
     def __init__(self, mb_release):
         self.mb_release = mb_release
         self._release = None
@@ -13,7 +13,7 @@ class ReleaseProcessor:
         if not self._release:
             meta = self.mb_release
 
-            release = Resources.Release(item_code=meta['id'])
+            release = Process.Resources.Release(item_code=meta['id'])
 
             rg = meta['release-group']
 
@@ -31,7 +31,7 @@ class ReleaseProcessor:
 
             formats = ''
             for disc in meta['medium-list']:
-                release.media.append(Resources.Disc(disc['position'], len(disc['track-list'])))
+                release.media.append(Process.Resources.Disc(disc['position'], len(disc['track-list'])))
                 if 'format' in disc:
                     release.format.append(disc['format'])
                     formats = formats + " " + disc['format']
@@ -44,7 +44,7 @@ class ReleaseProcessor:
             if 'label-info-list' in meta:
                 for l in meta['label-info-list']:
                     if 'label' in l:
-                        label = Resources.Label(l['label']['id'], l['label']['id'], l['label']['name'])
+                        label = Process.Resources.Label(l['label']['id'], l['label']['id'], l['label']['name'])
                         if 'catalog-number' in l:
                             label.catalog_num = l['catalog-number']
                         release.labels.append(label)
@@ -94,7 +94,7 @@ class ReleaseProcessor:
         track_index = audio_file.track_num.value - 1  # zero-index the track num
 
         # create the track object
-        track = Resources.Track()
+        track = Process.Resources.Track()
 
         release_meta = self.release
 
@@ -177,7 +177,7 @@ class ArtistProcessor:
 
             # extract relevent metadata into an Artist object
             # (at this point, the artist item code is always the artist mbid)
-            artist = Resources.Artist(meta['id'])
+            artist = Process.Resources.Artist(meta['id'])
 
             artist.name = meta['name']
 

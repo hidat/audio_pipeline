@@ -1,4 +1,4 @@
-{default: kexp,
+{default: kbcs,
 audiofile: !!python/name:audio_pipeline.util.AudioFile.BaseAudioFile '',
 batch constants: !!python/name:audio_pipeline.util.Resources.BatchConstants '',
 serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '',

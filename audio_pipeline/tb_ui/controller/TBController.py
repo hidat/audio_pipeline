@@ -4,6 +4,7 @@ from ...util import Util
 from . import EntryController
 from ..util import InputPatterns, Resources
 from ...util import Resources as r
+from . import check_command
 import time
 import os
 from . import Search
@@ -37,13 +38,24 @@ class TBController:
         :param event:
         :return:
         """
+        # check for release commands
+        self.app.select_input()
+        release_tag, release_value = check_command(input_string)
+        if release_tag is not None:
+            if self.model.set_release_tag(release_tag, release_value):
+                self.app.update_meta(self.model.current_release)
+                return
+            else:
+                err_msg = "Invalid input " + str(input_string)
+                Dialog.err_message(err_msg, None, parent=self.app)
+                return
+
         tracks = InputPatterns.track_meta_pattern.match(input_string)
         nav = InputPatterns.nav_pattern.match(input_string)
         popup = InputPatterns.popup_pattern.match(input_string)
         search = InputPatterns.mb_search_pattern.match(input_string)
         barcode = InputPatterns.barcode_search_pattern.match(input_string)
         genre = InputPatterns.secondary_genre_pattern.match(input_string)
-        self.app.select_input()
         if Util.is_mbid(input_string):
             complete = self.model.set_mbid(input_string)
             print(complete)
@@ -128,7 +140,7 @@ class TBController:
         for track in track_nums:
             err_msg = "Invalid Track Number: " + str(track)
             Dialog.err_message(err_msg, None, parent=self.app)
-            
+
     def navigate(self, command):
         """
         Change the album displayed.

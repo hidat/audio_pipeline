@@ -63,6 +63,15 @@ class ProcessDirectory(object):
         else:
             return self.__current_release.current
 
+    def set_release_tag(self, name, value):
+        for track in self.current_release:
+            if name in track.custom_release_tags:
+                track.custom_release_tags[name].value = value
+                track.save()
+            else:
+                return False
+        return True
+
     def set_mbid(self, mbid):
         release = self.loader_thread.processor.get_release(mbid)
         for track in self.current_release:
