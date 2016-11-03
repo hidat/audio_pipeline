@@ -4,7 +4,7 @@ from ...util import Util
 from . import EntryController
 from ..util import InputPatterns, Resources
 from ...util import Resources as r
-from . import check_command
+from .. import check_release_tag, check_track_tag
 import time
 import os
 from . import Search
@@ -40,7 +40,7 @@ class TBController:
         """
         # check for release commands
         self.app.select_input()
-        release_tag, release_value = check_command(input_string)
+        release_tag, release_value = check_release_tag(input_string)
         if release_tag is not None:
             if self.model.set_release_tag(release_tag, release_value):
                 self.app.update_meta(self.model.current_release)
@@ -50,7 +50,32 @@ class TBController:
                 Dialog.err_message(err_msg, None, parent=self.app)
                 return
 
-        tracks = InputPatterns.track_meta_pattern.match(input_string)
+        track_nums, track_tag, track_value = check_track_tag(input_string)
+        print(track_nums)
+        print(track_tag)
+        print(track_value)
+        if track_nums:
+            # input is (probably) track metadata
+            try:
+                for track in self.model.current_release:
+                    if track.track_num.value in track_nums or \
+                        "all" in track_nums:
+                        track.track_tags[track_tag].value = track_value
+                        track.save()
+                        self.app.update_meta(track)
+                track_nums = track_nums - {'all'} - self.model.track_nums()
+                if len(track_nums) > 0:
+                    for track in track_nums:
+                        err_msg = "Invalid Track Number: " + str(track)
+                        Dialog.err_message(err_msg, None, parent=self.app)
+                    return
+
+                return
+            except ValueError:
+                err_msg = "Invalid input " + str(input_string)
+                Dialog.err_message(err_msg, None, parent=self.app)
+                return
+
         nav = InputPatterns.nav_pattern.match(input_string)
         popup = InputPatterns.popup_pattern.match(input_string)
         search = InputPatterns.mb_search_pattern.match(input_string)
@@ -60,17 +85,6 @@ class TBController:
             complete = self.model.set_mbid(input_string)
             print(complete)
             self.app.update_meta(self.model.current_release)
-        elif tracks:
-            # input is (probably) track metadata (currently only RED DOT, YELLOW DOT, CLEAN EDIT, clear (l))
-            try:
-                track_nums = InputPatterns.get_track_numbers(tracks.group())
-                if "all" in track_nums:
-                    track_nums = self.model.track_nums()
-                value = tracks.group(InputPatterns.meta_acc)
-                self.new_meta_input(track_nums, value)
-            except ValueError as e:
-                err_msg = "Invalid input " + str(input_string)
-                Dialog.err_message(err_msg, None, parent=self.app)
         elif nav:
             self.navigate(nav)
         elif popup:
@@ -96,49 +110,6 @@ class TBController:
                 Dialog.err_message(err_msg, None, parent=self.app)
         else:
             err_msg = "Invalid input " + str(input_string)
-            Dialog.err_message(err_msg, None, parent=self.app)
-
-    def new_meta_input(self, track_nums, value):
-        """
-        When we have input we've determined is (probably) metadata,
-        add it to the metadata of the specified track
-        """
-        obscenity = InputPatterns.obscenity_rating.match(value)
-        edit = InputPatterns.radio_edit.match(value)
-        clear = InputPatterns.rm_rating.match(value)
-        if not (obscenity or edit or clear):
-                err_msg = "Invalid Input " + str(value)
-                Dialog.err_message(err_msg, None, parent=self.app)
-                return None
-
-        # we have a valid metadata input - go through tracks in release &
-        # update the ones with the specified track number
-        for track in self.model.current_release:
-            if track.track_num.value in track_nums:
-                # update this tracks metadata
-                if obscenity:
-                    if obscenity.group(InputPatterns.red):
-                        track.obscenity.save(Util.Obscenity.red)
-                    elif obscenity.group(InputPatterns.yellow):
-                        track.obscenity.save(Util.Obscenity.yellow)
-                    elif obscenity.group(InputPatterns.kexp):
-                        track.obscenity.save(Util.Obscenity.kexp_clean)
-                    elif obscenity.group(InputPatterns.standard):
-                        track.obscenity.save(Util.Obscenity.clean)
-                if edit:
-                    if edit.group(InputPatterns.kexp):
-                        track.radio_edit.save(Util.Edits.kexp_edit)
-                    elif edit.group(InputPatterns.standard):
-                        track.radio_edit.save(Util.Edits.radio_edit)
-                if clear:
-                    track.obscenity.save(None)
-                    track.radio_edit.save(None)
-                self.app.update_meta(track)
-                track_nums.remove(track.track_num.value)
-
-        # any leftover track numbers are not valid - display an error message
-        for track in track_nums:
-            err_msg = "Invalid Track Number: " + str(track)
             Dialog.err_message(err_msg, None, parent=self.app)
 
     def navigate(self, command):

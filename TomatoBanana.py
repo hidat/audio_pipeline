@@ -17,7 +17,7 @@ def main():
 
     Constants.load_config(config_dir)
     Constants.is_tb = True
-    audio_pipeline.tb_ui.controller.build_commands()
+    audio_pipeline.tb_ui.build_commands()
 
     controller = TBController.TBController(args.release_directory, args.copy)
     

@@ -1,20 +1,20 @@
 {
  tags: {ignore_case: True,
-        obscenity_rating: FCC Rating,
-        custom_tags: {track: [Send to ENCO, Radio Edit],
-        release: [Rotation Status, Category, Style]}},
+        custom_tags: {}},
  tb_lookup: False,
  tb_meta: {release:
               [
-                {command: Rotation Status, aliases: ['R', 'Rotation'],
+                {tag: Rotation Status, aliases: ['R', 'Rotation'],
                   options: [{command: Heavy, alias: h}, {command: Medium, alias: m}, {command: Light, alias: l}]},
-                {command: Category, options: [{command: Local}, {command: Live}], aliases: [c]},
-                {command: Style, options: [{command: Rock/Pop}, {command: Roots}, {command: Bluegrass}], aliases: [s]}
+                {tag: Category, options: [{command: Local}, {command: Live}], aliases: [c]},
+                {tag: Style, options: [{command: Rock/Pop}, {command: Roots}, {command: Bluegrass}], aliases: [s]}
               ],
             track:
               [
-                {command: Send to Enco, aliases: [enco, e]},
-                {command: Radio Edit, aliases: [edit, r, e, radio]}
+                {tag: Send to ENCO, aliases: [enco, e]},
+                {tag: Radio Edit, aliases: [edit, d, radio]},
+                {tag: FCC Rating, aliases: [obscenity, o], options: [{command: Yellow Dot, alias: y, color: yellow},
+                          {command: red dot, alias: r, color: red}]}
               ]
           },
  audiofile: !!python/name:audio_pipeline.util.AudioFile.BaseAudioFile '',

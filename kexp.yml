@@ -1,9 +1,21 @@
 {
  tags: {ignore_case: False,
-        obscenity_rating: KEXPFCCOBSCENITYRATING},
- tb_lookup: True,
- audiofile: !!python/name:audio_pipeline.kexp.KEXPAudioFile.KEXPAudioFile '',
- processor: !!python/name:audio_pipeline.kexp.Process '',
+        custom_tags: {track: [KEXPAnchorStatus, KEXPPRIMARYGENRE]}},
+ tb_lookup: False,
+  tb_meta: {release:
+              [
+                {tag: KEXPSecondaryGenre, aliases: ['R', 'Rotation'],
+                  options: [{command: Heavy, alias: h}, {command: Medium, alias: m}, {command: Light, alias: l}]}
+              ],
+            track:
+              [
+                {tag: KEXPFCCOBSCENITYRATING, aliases: [obscenity, o], options: [{command: Yellow Dot, alias: y, color: yellow},
+                          {command: Red Dot, alias: r, color: red}]},
+                {tag: KEXPRadioEdit, aliases: [edit, d, radio]}
+              ]
+          },
+ audiofile: !!python/name:audio_pipeline.util.AudioFile.BaseAudioFile '',
+ processor: !!python/name:audio_pipeline.util.MusicBrainz.ExtractMeta '',
  batch constants: !!python/name:audio_pipeline.kexp.Resources.BatchConstants '',
  serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '',
  argument_config: !!python/name:audio_pipeline.kexp.argument_config '',

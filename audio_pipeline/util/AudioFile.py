@@ -83,7 +83,7 @@ class BaseAudioFile:
         #######################
         #   track-level tags
         #######################
-        self.custom_track_tags = collections.OrderedDict()
+        self.track_tags = collections.OrderedDict()
 
         self.title = self.format.title(self.audio)
         self.artist = self.format.artist(self.audio)
@@ -91,11 +91,10 @@ class BaseAudioFile:
         self.track_num = self.format.track_num(self.audio)
         self.length = self.format.length(self.audio)
         self.acoustid = self.format.acoustid(self.audio)
-        self.obscenity = self.format.custom_tag(CustomTags.obscenity, self.audio)
 
         if track_tags:
             for t_tag in track_tags:
-                self.custom_track_tags[t_tag] = self.format.custom_tag(t_tag, self.audio)
+                self.track_tags[t_tag] = self.format.custom_tag(t_tag, self.audio)
 
         self.meta_stuffed = self.format.custom_tag("meta_stuffed", self.audio)
         
@@ -119,8 +118,8 @@ class BaseAudioFile:
             yield item
 
     def track(self):
-        tracks = [self.track_num, self.title, self.artist, self.length, self.item_code, self.obscenity]
-        tracks += [v for v in self.custom_track_tags.values()]
+        tracks = [self.track_num, self.title, self.artist, self.length, self.item_code]
+        tracks += [v for v in self.track_tags.values()]
         return tracks
 
     def tb_release(self):
@@ -145,11 +144,8 @@ class BaseAudioFile:
         track_tags = [TBTag(5, self.track_num), TBTag(30, self.title), TBTag(25, self.artist),
                       TBTag(10, self.length)]
 
-        if CustomTags.obscenity != None:
-            track_tags.append(TBTag(self.default_track_width, self.obscenity))
-
-        for tag in self.custom_track_tags:
-            track_tags.append(TBTag(self.default_track_width, self.custom_track_tags[tag]))
+        for tag in self.track_tags:
+            track_tags.append(TBTag(self.default_track_width, self.track_tags[tag]))
 
         return track_tags
 

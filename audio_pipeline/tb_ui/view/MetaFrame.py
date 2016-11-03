@@ -1,6 +1,6 @@
 from . import Settings
 import tkinter.tix as tk
-
+from .. import get_text_color, track_tags, release_tags
 
 class MetaFrame(tk.Frame):
 
@@ -42,6 +42,8 @@ class MetaFrame(tk.Frame):
 
 
 class ReleaseFrame(MetaFrame):
+
+    default_cell_width = 15
 
     def __init__(self):
         super().__init__()
@@ -116,6 +118,8 @@ class ReleaseFrame(MetaFrame):
 
 class TrackFrame(MetaFrame):
 
+    default_cell_width = 25
+
     def add_tag(self, tag, width, rowval, colval):
         self.labels[tag.name] = tk.Label(self, self.name_style, text=tag.name)
         self.labels[tag.name].grid(self.name_padding, row=rowval, column=colval)
@@ -153,7 +157,7 @@ class TrackFrame(MetaFrame):
             self.attributes[name] = dict()
             self.attribute_text[name] = dict()
                     
-            color = Settings.get_text_color(track)
+            color = get_text_color(track)
             width_index = 0
             for tag in track.track():
                 if tag.name in self.labels and width_index < len(self.attribute_widths):
@@ -176,7 +180,7 @@ class TrackFrame(MetaFrame):
 
     def update_meta(self, audio_file):
         name = audio_file.file_name
-        color = Settings.get_text_color(audio_file)
+        color = get_text_color(audio_file)
         i = 0
         for tag in audio_file.track():
             if tag.name in self.labels and i < len(self.attribute_widths):

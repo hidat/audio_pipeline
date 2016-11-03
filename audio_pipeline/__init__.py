@@ -62,6 +62,11 @@ class Constants:
             if "obscenity_rating" in tag_data:
                 # util.AudioFile.CustomTags.obscenity = tag_data["obscenity_rating"]
                 cls.obscenity_rating = tag_data['obscenity_rating']
+        if "tb_meta" in config:
+            if "release" in config["tb_meta"]:
+                cls.custom_release_tags += [t['tag'] for t in config["tb_meta"]["release"]]
+            if "track" in config["tb_meta"]:
+                cls.custom_track_tags += [t['tag'] for t in config["tb_meta"]["track"]]
         if "tb_lookup" in config:
             cls.load_releases = config['tb_lookup']
         if "batch constants" in config:

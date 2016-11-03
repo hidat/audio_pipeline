@@ -1,5 +1,145 @@
+from audio_pipeline import Constants
 from . import controller
 from . import model
 from . import view
+import yaml
+import re
+
+
+# track_number_pattern = re.compile()
+separator_pattern = re.compile('(,|\s+)\s*')
+span = re.compile("(\d+)(\s*-\s*)(\d+)")
+tracknum_pattern = re.compile("(?<=,|\s)\d+|\d+(?=,|\s)")
+clear_pattern = "clear"
+release_tags = []
+track_tags = []
+
+default_release_width = 15
+default_track_width = 25
+
+bg_color = "black"
+text_color = "light gray"
+yellow = "yellow"
+red = "red"
+blue = "cyan"
+heading = ('Helvetica', '10', 'bold')
+standard = ('Helvetica', '10')
+action = ('Courier New', '10', 'bold')
+initial_size = (500, 500)
+
+
+def get_text_color(audio_file):
+    color = text_color
+
+    for com in track_tags:
+        for option in com.options:
+            if option.color and option.command.casefold() == str(audio_file.track_tags[com.command]).casefold():
+                color = option.color
+    return color
+
+# TB Commands
+class Option:
+    def __init__(self, command, alias=None, color=None):
+        self.command = command
+        self.alias = alias
+        self.color = color
+
+
+class Command:
+    def __init__(self, tag, aliases=None, options=None, command_help=None, examples=None, track=False):
+        self.command = tag
+        self.aliases = []
+        self.aliases = aliases
+        self.options = []
+        if options:
+            for option in options:
+                self.options.append(Option(**option))
+        self.command_help = command_help
+        self.examples = examples
+        self.track = track
+
+# Build TB commands
+def build_commands():
+    with open(Constants.config_file) as f:
+        config = yaml.load(f)
+    if "tb_meta" in config:
+        if "release" in config["tb_meta"]:
+            global release_tags
+            for release_command in config["tb_meta"]["release"]:
+                release_tags.append(Command(**release_command))
+        if "track" in config["tb_meta"]:
+            global track_tags
+            for track_command in config["tb_meta"]["track"]:
+                track_tags.append(Command(**track_command, track=True))
+
+
+def check_command(input_string, commands):
+    for command in commands:
+        command_string = input_string
+
+        tag_name = None
+        tag_value = None
+
+        # if this command has options defined, check if we match one
+        matchee = '(' + separator_pattern.pattern + ')' + clear_pattern + '(' \
+                  + separator_pattern.pattern + '|$)'
+        match = re.search(matchee, command_string, flags=re.I)
+        if match:
+            command_string = re.sub(match.group(0), "", command_string)
+        else:
+            if not command.options:
+                tag_value = True
+            for option in command.options:
+                if option.alias:
+                    aliases = '(' + option.command + '|' + option.alias + ')'
+                else:
+                    aliases = '(' + option.command + ')'
+                option = option.command
+                matchee = '(' + separator_pattern.pattern + ')' + aliases + '(' \
+                          + separator_pattern.pattern + '|$)'
+                match = re.search(matchee, command_string, flags=re.I)
+                if match:
+                    command_string = re.sub(match.group(0), "", command_string)
+                    tag_value = option
+        aliases = [alias for alias in command.aliases]
+        aliases.append(command.command)
+        aliases = '(' + "|".join(aliases) + ')'
+        matchee = '^(' + separator_pattern.pattern + ')*' + aliases + '$'
+        if re.search(matchee, command_string, flags=re.I):
+            tag_name = command.command
+
+        if tag_name or (command.track and command.options and tag_value):
+            print(command_string)
+            return command.command, tag_value
+    return None, None
+
+
+def check_release_tag(input_string):
+    return check_command(input_string, release_tags)
+
+def span_replacement(match):
+    start = int(match.group(1))
+    end = int(match.group(3)) + 1
+    return ",".join([str(i) for i in range(start,end)])
+
+
+def check_track_tag(input_string):
+    # check that we're starting with a track number or 'all'
+    start = re.match("\s*(\d+|all)", input_string, flags=re.I)
+    if start:
+        start = start.group(1).casefold()
+        track_nums = {int(start) if start != "all" else start}
+
+        # replace all "# - #" spans with appropriate #s
+        find_tracks = span.sub(span_replacement, input_string)
+        # return track numbers
+        for i in tracknum_pattern.findall(find_tracks):
+            track_nums.add(int(i))
+            find_tracks = find_tracks.replace(i, "", 1)
+            #find_tracks = separator_pattern.sub("", find_tracks, 1)
+        tag_name, tag_value = check_command(find_tracks, track_tags)
+        return track_nums, tag_name, tag_value
+    return None, None, None
+
 
 __all__ = ['controller', 'model', 'view']

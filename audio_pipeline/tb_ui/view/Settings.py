@@ -52,9 +52,10 @@ commands = [Command("<track_num>[[,][ ]<track_num>...][ ]<meta_command>", "Add t
               Command("albunack, al <option>", "Search for artist in Albunack (in browser).", sub_commands=SubCommand("Options", search_options[:1])),
               Command("g <genre name>", "Set KEXPSecondaryGenre of current release to <genre name>")]
 
+
 def get_text_color(audio_file):
     color = text_color
-    
+
     try:
         if audio_file.obscenity.value:
             obscenity = InputPatterns.obscenity_rating.match(audio_file.obscenity.value)
