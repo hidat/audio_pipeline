@@ -132,31 +132,35 @@ class LoadReleases(threading.Thread):
                     else:
                         indices[(file_data.album.value, file_data.album_artist.value,
                                  file_data.disc_num.value)] = index
-                        to_scan.add(index)
-
-            if (file_data.acoustid.value or file_data.meta_stuffed.value) and index in to_scan:
-                to_scan.remove(index)
+                    to_scan.add(index)
 
             releases[index].append(file_data)
-            
-        if scan:
-            for i in range(len(releases)):
-                if i in to_scan or 0 < len(releases[i]) <= FEW_TRACKS:
-                    r = lookup.Release(releases[i])
-                    r.lookup()
-                    if r.best_group:
-                        p = PreferredRelease.BestRelease(r)
 
-                        if len(releases[i]) <= FEW_TRACKS:
-                            p.choose_release()
+            # all releases are initially added to the to_scan pile; if they should not be
+            # (already scanned, already had metadata stuffed, have mbid & have more tracks
+            # than our 'confidence threshold') remove them
+            if (file_data.acoustid.value or file_data.meta_stuffed.value or \
+                    (Resources.has_mbid(file_data) and len(releases[index]) > FEW_TRACKS)) \
+                    and index in to_scan:
+                to_scan.remove(index)
+
+        if scan:
+            for i in to_scan:
+                r = lookup.Release(releases[i])
+                r.lookup()
+                if r.best_group:
+                    p = PreferredRelease.BestRelease(r)
+
+                    if len(releases[i]) <= FEW_TRACKS:
+                        p.choose_release()
+                        p.set_mbid(p.best_release)
+                        self.scanned += 1
+                    else:
+                        match = p.mb_comparison(True)
+                        print(match)
+                        if match is not None and (match > MATCHING_RATIO):
                             p.set_mbid(p.best_release)
                             self.scanned += 1
-                        else:
-                            match = p.mb_comparison(True)
-                            print(match)
-                            if match is not None and (match > MATCHING_RATIO):
-                                p.set_mbid(p.best_release)
-                                self.scanned += 1
 
         if len(releases[0]) <= 0:
             releases.pop(0)
@@ -169,7 +173,7 @@ class LoadReleases(threading.Thread):
 
         for release in releases:
 
-            if Util.has_mbid(release[0]) and scan:
+            if scan and (Util.has_mbid(release[0]) and not release[0].meta_stuffed.value):
                 release_meta = self.processor.get_release(release[0].mbid.value)
                 meta = release_meta.release
                 # stuff any additional MB metadata
