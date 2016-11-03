@@ -13,6 +13,7 @@ It is assumed that you already have Python 3.4 or greater installed, and it is i
 6. Install smartsheet  `pip install smartsheet-python-sdk`
 7. Install yaml  `pip install pyyaml`
 8. Install acoustid `pip install pyacoustid`
+9. Install elasticsearch `pip install elasticsearch`, `pip install elasticsearch_dsl`
 8. Profit!
 
 ### Programs
@@ -140,5 +141,27 @@ A program used to push the weekly album reviews into Dalet
   
  * *--worksheet, -w*
    Smartsheet Worksheet ID that contains the reviews associated MusicBrainz ID's
-      
+
+### Historical Review Parser
+A program to find historical reviews and attach them to albums in Dalet after their associated CD's have been digitized. 
+ * There is a seperate program that reads the reviews from MS Word docx files and inserts them into a database
+ * This program should be run after a batch of CD's has been digitized and FileWalked
+ 
+#####To Run the Review Importer
+1. Navigate to the top-level audio_pipeline directory
+2. Run `review_importer.py input_file options`
+
+#####Options:
+ * *--elastic_server, -s* 
+   Elastic server IP or domain name, including port.
+ 
+#####To Run the Review Matcher 
+1. Navigate to the top-level audio_pipeline directory
+2. Run `find_historical_reviews.py log_dir`
+
+#####Options:
+ * *--dalet, -d*
+   Directory to put Dalet Impex files in.
+ * *--elastic_server, -s* 
+   Elastic server IP or domain name, including port.
 
