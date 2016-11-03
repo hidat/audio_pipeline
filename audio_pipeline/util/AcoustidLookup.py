@@ -41,7 +41,8 @@ class Release:
             fpcalc_path = os.path.join(os.environ["ProgramFiles(x86)"], fpcalc_name)
             if os.path.exists(fpcalc_path):
                 os.environ[acoustid.FPCALC_ENVVAR] = fpcalc_path
-            if os.path.exists(os.environ[acoustid.FPCALC_ENVVAR]):
+            if acoustid.FPCALC_ENVVAR in os.environ \
+                and os.path.exists(os.environ[acoustid.FPCALC_ENVVAR]):
                 self.can_lookup = True
 
     def lookup(self):
