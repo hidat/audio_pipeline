@@ -88,14 +88,14 @@ def main():
             if maybe is not None:
                 #print("MAYBE: %s by %s (%s by %s)" % (release.title, release.artist, maybe.name, maybe.artistCredit))
                 msg = "FOUND '%s by %s' FOR '%s by %s'.  Use? Y[n]: "  % (release.title, release.artist, maybe.name, maybe.artistCredit)
-                msg = unicodedata.normalize('NFKD', msg) #.encode('ascii', 'ignore')
+                msg = unicodedata.normalize('NFKD', msg).encode('ascii', 'ignore').decode('ascii')
                 ans = input(msg)
                 if ans.lower() == 'y':
                     review = maybe
 
         if review is not None:
             msg = "FOUND: %s by %s (%s by %s)" % (release.title, release.artist, review.name, review.artistCredit)
-            msg = unicodedata.normalize('NFKD', msg) #.encode('ascii', 'ignore')
+            msg = unicodedata.normalize('NFKD', msg).encode('ascii', 'ignore').decode('ascii')
             print(msg)
             review.merge_release(release)
             mergedReviews.append(review)
