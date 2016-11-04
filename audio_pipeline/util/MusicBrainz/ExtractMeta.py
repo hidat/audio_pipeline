@@ -153,7 +153,6 @@ class ReleaseProcessor(Process.ReleaseProcessor):
         # fields straight from the AudioFile
         track.disc_num = audio_file.disc_num.value
         track.track_num = audio_file.track_num.value
-        track.obscenity = str(audio_file.obscenity)
 
         return track
 
