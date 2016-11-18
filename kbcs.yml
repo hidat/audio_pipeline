@@ -1,7 +1,7 @@
 {
  tags: {ignore_case: True,
         custom_tags: {}},
- tb_lookup: False,
+ tb_lookup: True,
  tb_meta: {release:
               [
                 {tag: Rotation Status, aliases: ['R', 'Rotation'],
