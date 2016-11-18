@@ -37,6 +37,7 @@ def get_text_color(audio_file):
                 color = option.color
     return color
 
+
 # TB Commands
 class Option:
     def __init__(self, command, alias=None, color=None):
@@ -46,17 +47,26 @@ class Option:
 
 
 class Command:
-    def __init__(self, tag, aliases=None, options=None, command_help=None, examples=None, track=False):
+    def __init__(self, tag, aliases=None, options=None, freeform=False, command_help=None, examples=None, track=False):
         self.command = tag
         self.aliases = []
         self.aliases = aliases
         self.options = []
+        self.freeform = freeform
         if options:
             for option in options:
                 self.options.append(Option(**option))
         self.command_help = command_help
         self.examples = examples
         self.track = track
+
+
+def set_destination():
+    with open(Constants.config_file) as f:
+        config = yaml.load(f)
+        if "destination folder" in config:
+            return config["destination folder"]
+
 
 # Build TB commands
 def build_commands():
@@ -80,33 +90,44 @@ def check_command(input_string, commands):
         tag_name = None
         tag_value = None
 
+        # check if we have a match for this command at start of string
+        aliases = [alias for alias in command.aliases]
+        aliases.append(command.command)
+        aliases = '(' + "|".join(aliases) + ')'
+        matchee = '^(' + separator_pattern.pattern + ')*' + aliases + '(' + separator_pattern.pattern + '|$)'
+        match = re.search(matchee, command_string, flags=re.I)
+
+        if match:
+            # if there is a command name match, strip command name from string
+            tag_name = command.command
+            command_string = re.sub(match.group(0), "", command_string)
+
         # if this command has options defined, check if we match one
-        matchee = '(' + separator_pattern.pattern + ')' + clear_pattern + '(' \
-                  + separator_pattern.pattern + '|$)'
+        # check for clear command
+        matchee = '^(' + separator_pattern.pattern + ')*' + clear_pattern + '(' + separator_pattern.pattern + '|$)'
         match = re.search(matchee, command_string, flags=re.I)
         if match:
             command_string = re.sub(match.group(0), "", command_string)
         else:
-            if not command.options:
-                tag_value = True
+            # freeform tags
             for option in command.options:
                 if option.alias:
-                    aliases = '(' + option.command + '|' + option.alias + ')'
+                    aliases = '^(' + separator_pattern.pattern + ')*' + '(' + option.command + '|' + option.alias + ')'
                 else:
-                    aliases = '(' + option.command + ')'
+                    aliases = '^(' + separator_pattern.pattern + ')*' + '(' + option.command + ')'
                 option = option.command
-                matchee = '(' + separator_pattern.pattern + ')' + aliases + '(' \
-                          + separator_pattern.pattern + '|$)'
-                match = re.search(matchee, command_string, flags=re.I)
+                matchee = aliases + '(' + separator_pattern.pattern + '|$)'
+                match = re.match(matchee, command_string, flags=re.I)
                 if match:
                     command_string = re.sub(match.group(0), "", command_string)
                     tag_value = option
-        aliases = [alias for alias in command.aliases]
-        aliases.append(command.command)
-        aliases = '(' + "|".join(aliases) + ')'
-        matchee = '^(' + separator_pattern.pattern + ')*' + aliases + '$'
-        if re.search(matchee, command_string, flags=re.I):
-            tag_name = command.command
+            if command_string and not separator_pattern.match(command_string):
+                if command.freeform and not tag_value:
+                    tag_value = command_string
+                else:
+                    tag_name = None
+            elif not command.options:
+                tag_value = True
 
         if tag_name or (command.track and command.options and tag_value):
             print(command_string)
@@ -117,6 +138,7 @@ def check_command(input_string, commands):
 def check_release_tag(input_string):
     return check_command(input_string, release_tags)
 
+
 def span_replacement(match):
     start = int(match.group(1))
     end = int(match.group(3)) + 1
@@ -125,7 +147,8 @@ def span_replacement(match):
 
 def check_track_tag(input_string):
     # check that we're starting with a track number or 'all'
-    start = re.match("\s*(\d+|all)", input_string, flags=re.I)
+    all = re.search("(^|\s|,)(all)(,|\s|-)", input_string, flags=re.I)
+    start = re.match("\s*(\d+|all)(,|\s|-)", input_string, flags=re.I)
     if start:
         start = start.group(1).casefold()
         track_nums = {int(start) if start != "all" else start}
@@ -137,6 +160,12 @@ def check_track_tag(input_string):
             track_nums.add(int(i))
             find_tracks = find_tracks.replace(i, "", 1)
             #find_tracks = separator_pattern.sub("", find_tracks, 1)
+
+        if all:
+            print(all.group(2))
+            track_nums.add(all.group(2))
+            find_tracks = find_tracks.replace("all", "", 1)
+
         tag_name, tag_value = check_command(find_tracks, track_tags)
         return track_nums, tag_name, tag_value
     return None, None, None

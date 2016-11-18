@@ -40,7 +40,7 @@ class BaseTag(Tag.Tag):
     def __str__(self):
         rep = ""
         if self._value is not None:
-            rep = " ".join(self._value)
+            rep = " ".join([str(val) for val in self._value])
             
         return rep
                 
@@ -52,14 +52,13 @@ class FreeformTag(BaseTag):
             self.value = value
             
         if self._value:
-            values = list()
-            for val in self._value:
-                # values.append(val)
-                values.append(val.encode('utf-8'))
             try:
-                self.mutagen[self.serialization_name] = values
+                self.mutagen[self.serialization_name] = [str(val).encode('utf-8') for val in self._value]
             except TypeError:
                 self.mutagen[self.serialization_name] = [str(val) for val in self._value]
+            except AttributeError:
+                self.mutagen[self.serialization_name] = [str(val) for val in self._value]
+                self.mutagen[self.serialization_name] = [val.encode('utf-8') for val in self.mutagen[self.serialization_name]]
         else:
             if self.serialization_name in self.mutagen:
                 self.mutagen.pop(self.serialization_name)

@@ -11,8 +11,9 @@ from audio_pipeline import Constants
 class ProcessDirectory(object):
 
     def __init__(self, root_dir, dest_dir, copy):
-        rule = Rules.KEXPDestinationDirectoryRule(dest_dir)
-        
+        # rule = Rules.KEXPDestinationDirectoryRule(dest_dir)
+        rule = Rules.FileUnderRule(dest_dir)
+
         self.processing_complete = MoveFiles.MoveFiles(rule, copy)
 
         dbpoweramp = True
@@ -40,6 +41,8 @@ class ProcessDirectory(object):
             self.directories.sort(key=lambda x: int(os.path.split(x)[1].split()[0]))
         else:
             self.directories.sort()
+
+        print(self.directories)
 
         if starting_dir != root_dir:
             starting_index = self.directories.index(starting_dir)
@@ -87,9 +90,11 @@ class ProcessDirectory(object):
         self.processing_complete.move_files(self)
             
     def first(self):
+        self.next_buffer.append(self.__current_release.current)
         self.next_buffer.extend(self.prev_buffer)
         self.prev_buffer.clear()
-            
+        self.__current_release.reset()
+
     def next(self):
         if self.has_next():
             if self.current_release is not None:

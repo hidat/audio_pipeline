@@ -54,12 +54,12 @@ class TBController:
         print(track_nums)
         print(track_tag)
         print(track_value)
-        if track_nums:
+        if track_nums and (track_tag or track_value):
             # input is (probably) track metadata
             try:
                 for track in self.model.current_release:
                     if track.track_num.value in track_nums or \
-                        "all" in track_nums:
+                                    "all" in track_nums:
                         track.track_tags[track_tag].value = track_value
                         track.save()
                         self.app.update_meta(track)
@@ -198,9 +198,6 @@ class TBController:
                 
             new_model = Model.ProcessDirectory(root_dir, dest_dir, False)
             if new_model.has_next():
-            
-                path, releases = os.path.split(root_dir)
-            
                 self.root_dir = root_dir
                 self.model = new_model
                 self.next_album()

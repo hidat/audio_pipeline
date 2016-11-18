@@ -103,6 +103,7 @@ class CustomTag(BaseTag):
     @value.setter
     def value(self, val):
         if val:
+            val = str(val)
             if self._value is None:
                 self._value = self._frame_type(self._frame_encoding, self.desc, val)
             if isinstance(val, list):

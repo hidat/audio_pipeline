@@ -190,11 +190,17 @@ class LoadReleases(threading.Thread):
 
 class CurrentReleases:
 
+    starting_position = (-1, None)
+
     def __init__(self, directories, timeout=.01):
         self.directories = directories
         self.__current = (-1, None)
         self.__prev = (-1, None)
         self.cond = threading.Condition()
+
+    def reset(self):
+        self.__current = self.starting_position
+        self.__prev = self.starting_position
         
     @property
     def current(self):

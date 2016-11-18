@@ -3,6 +3,7 @@ import re
 import copy
 from . import Util
 from audio_pipeline import Constants
+import datetime
 
 
 class BaseFormats(object):
@@ -285,6 +286,20 @@ class ReleaseDateMixin:
             return self._value < other
         else:
             super().__eq__(other)
+
+    @property
+    def date(self):
+        d = self.dates.search(self.value)
+        year = d.group(self.year)
+        if year:
+            year = int(year)
+        month = d.group(self.month)
+        if month:
+            month = int(month)
+        day = d.group(self.day)
+        if day:
+            day = int(day)
+        return datetime.date(year, month, day)
 
 
 class LengthTag(Tag):

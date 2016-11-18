@@ -90,10 +90,7 @@ def prep_query(query):
             q = "%s:\"%s\"" % (part[0], part[1])
         else:
             q = part[0]
-        for r in forbidden:
-            rep = "%s%s" % ("%", hex(ord(r))[2:])
-            q = q.replace(r, rep)
-        q.replace(" ", "+")
+        q = urllib.parse.quote_plus(q)
         prepped_query.append(q)
         print(prepped_query)
 

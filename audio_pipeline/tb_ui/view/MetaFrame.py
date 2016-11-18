@@ -2,6 +2,10 @@ from . import Settings
 import tkinter.tix as tk
 from .. import get_text_color, track_tags, release_tags
 
+
+__max_width__ = 260
+
+
 class MetaFrame(tk.Frame):
 
     meta_padding = {'sticky': "w", 'padx': 10, 'pady': 3}
@@ -71,37 +75,48 @@ class ReleaseFrame(MetaFrame):
         super().display_meta(metadata)
         
         try:
+            total_width = 0
+            rowidth = 0
+            fields_per_row = -1
+            self.labels.append({})
             for tag_info in track.tb_release():
-                if len(self.labels) <= tag_info.row:
-                    self.labels.append({})
-                    if tag_info.row != 0:
-                        colval = 1
+                total_width += (tag_info.width + self.name_padding['padx'])
+                rowidth += (tag_info.width + self.name_padding['padx'])
+                if total_width < __max_width__:
+                    fields_per_row += 1
+                elif colval > fields_per_row or rowidth > __max_width__:
+                    rowval += 1
+                    colval = 1
+                    rowidth = (tag_info.width + self.name_padding['padx'])
+                    if rowval == len(self.labels):
+                        self.labels.append({})
 
-                if not tag_info.tag.name in self.labels[tag_info.row]:
-                    colval = self.add_tag(tag_info, colval)
+                if not tag_info.tag.name in self.labels[rowval]:
+                    self.attribute_text[tag_info.tag.name] = tk.StringVar()
+                    self.labels[rowval][tag_info.tag.name] = tk.Label(self, self.name_style,
+                                                                            text=tag_info.tag.name)
+                    self.labels[rowval][tag_info.tag.name].grid(self.name_padding, row=(rowval * 2),
+                                                                      column=colval)
+                    self.attribute_widths.append(tag_info.width)
+                    # colval = self.add_tag(tag_info, colval)
+                    colval += 1
         except AttributeError:
             pass
             
-        colval = 0
         width_index = 0
         for tag in track.release():
             name = tag.name
-            rowval = 1
             for label_group in self.labels:
                 if name in label_group and width_index < len(self.attribute_widths):
-                    column_value = colval
-                    row_value = rowval
-                    for i in range(0, int(rowval / 2)):
-                        column_value -= len(self.labels[i])
-                        column_value += 1
+
+                    column_value = label_group[name].grid_info()["column"]
+                    row_value = label_group[name].grid_info()["row"] + 1
                     self.attribute_text[name].set(str(tag))
                     self.attributes[name] = tk.Label(self, self.tag_style, width=self.attribute_widths[width_index],
                                                      wraplength=(self.attribute_widths[width_index] * 8),
                                                      textvariable=self.attribute_text[name])
                     self.attributes[name].grid(self.meta_padding, row=row_value, column=column_value)
-                    colval += 1
                     width_index += 1
-                rowval += 2
 
     def update_meta(self, audio_file):
         for tag in audio_file.release():

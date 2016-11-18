@@ -6,8 +6,10 @@
               [
                 {tag: Rotation Status, aliases: ['R', 'Rotation'],
                   options: [{command: Heavy, alias: h}, {command: Medium, alias: m}, {command: Light, alias: l}]},
-                {tag: Category, options: [{command: Local}, {command: Live}], aliases: [c]},
-                {tag: Style, options: [{command: Rock/Pop}, {command: Roots}, {command: Bluegrass}], aliases: [s]}
+                {tag: Category, freeform: True, options: [{command: Local}, {command: Live}], aliases: [c]},
+                {tag: Style, freeform: True,
+                 options: [{command: Rock/Pop}, {command: Roots}, {command: Bluegrass}], aliases: [s]},
+                 {tag: File Under, aliases: ['F', 'File'], freeform: True}
               ],
             track:
               [
@@ -17,6 +19,7 @@
                           {command: red dot, alias: r, color: red}]}
               ]
           },
+ destination folder: "C:\\kbcs",
  audiofile: !!python/name:audio_pipeline.util.AudioFile.BaseAudioFile '',
  processor: !!python/name:audio_pipeline.util.MusicBrainz.ExtractMeta '',
  batch constants: !!python/name:audio_pipeline.util.Resources.BatchConstants '',
