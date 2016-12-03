@@ -5,7 +5,6 @@ from ..util import Resources
 from . import MoveFiles
 from . import Rules
 from . import LoadReleases
-from audio_pipeline import Constants
 
 
 class ProcessDirectory(object):
@@ -68,8 +67,8 @@ class ProcessDirectory(object):
 
     def set_release_tag(self, name, value):
         for track in self.current_release:
-            if name in track.custom_release_tags:
-                track.custom_release_tags[name].value = value
+            if name in track.release_tags:
+                track.release_tags[name].value = value
                 track.save()
             else:
                 return False

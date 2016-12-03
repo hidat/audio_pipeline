@@ -47,12 +47,14 @@ class Option:
 
 
 class Command:
-    def __init__(self, tag, aliases=None, options=None, freeform=False, command_help=None, examples=None, track=False):
+    def __init__(self, tag, display_name=None, aliases=None, options=None, freeform=False,
+                 command_help=None, examples=None, track=False):
         self.command = tag
         self.aliases = []
         self.aliases = aliases
         self.options = []
         self.freeform = freeform
+        self.display_name = display_name
         if options:
             for option in options:
                 self.options.append(Option(**option))

@@ -60,7 +60,10 @@ class TBController:
                 for track in self.model.current_release:
                     if track.track_num.value in track_nums or \
                                     "all" in track_nums:
-                        track.track_tags[track_tag].value = track_value
+                        if track_value is True and track.track_tags[track_tag].value:
+                            track.track_tags[track_tag].value = None
+                        else:
+                            track.track_tags[track_tag].value = track_value
                         track.save()
                         self.app.update_meta(track)
                 track_nums = track_nums - {'all'} - self.model.track_nums()

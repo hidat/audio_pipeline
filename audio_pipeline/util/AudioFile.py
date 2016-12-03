@@ -26,7 +26,8 @@ class BaseAudioFile:
     id3 = ID3.Format
     aac = AAC.Format
     
-    def __init__(self, file_name, release_tags=None, track_tags=None):
+    def __init__(self, file_name, release_tags=None, track_tags=None,
+                 tb_release_tags=None, tb_track_tags=None):
         self.format = None
         self.file_name = file_name
         
@@ -61,7 +62,8 @@ class BaseAudioFile:
         #   release-level tags
         #######################
 
-        self.custom_release_tags = collections.OrderedDict()
+        self.release_tags = collections.OrderedDict()
+        self.tb_release_tags = []
 
         self.mbid = self.format.mbid(self.audio)
         self.album = self.format.album(self.audio)
@@ -89,12 +91,17 @@ class BaseAudioFile:
 
         # get custom release tag values
         if release_tags:
-            for r_tag in release_tags:
-                self.custom_release_tags[r_tag] = self.format.custom_tag(r_tag, self.audio)
+            self.release_tags = {r_tag: self.format.custom_tag(r_tag, self.audio) for r_tag in release_tags}
+        if tb_release_tags:
+            for t in tb_release_tags:
+                if t not in self.release_tags:
+                    self.release_tags[t] = self.format.custom_tag(t, self.audio)
+                self.tb_release_tags.append(t)
         #######################
         #   track-level tags
         #######################
         self.track_tags = collections.OrderedDict()
+        self.tb_track_tags = []
 
         self.title = self.format.title(self.audio)
         self.artist = self.format.artist(self.audio)
@@ -104,8 +111,12 @@ class BaseAudioFile:
         self.acoustid = self.format.acoustid(self.audio)
 
         if track_tags:
-            for t_tag in track_tags:
-                self.track_tags[t_tag] = self.format.custom_tag(t_tag, self.audio)
+            self.track_tags = {t_tag: self.format.custom_tag(t_tag, self.audio) for t_tag in track_tags}
+        if tb_track_tags:
+            for t in tb_track_tags:
+                self.tb_track_tags.append(t)
+                if t not in self.track_tags:
+                    self.track_tags[t] = self.format.custom_tag(t, self.audio)
 
         self.meta_stuffed = self.format.custom_tag("meta_stuffed", self.audio)
         
@@ -145,8 +156,8 @@ class BaseAudioFile:
                 TBTag(self.default_release_width, 1, self.barcode),
                 TBTag(self.default_release_width, 1, self.catalog_num)]
 
-        for tag in self.custom_release_tags:
-            release_tags.append(TBTag(self.default_release_width, 1, self.custom_release_tags[tag]))
+        for tag in self.tb_release_tags:
+            release_tags.append(TBTag(self.default_release_width, 1, self.release_tags[tag]))
 
         return release_tags
 
@@ -155,7 +166,7 @@ class BaseAudioFile:
         track_tags = [TBTag(5, self.track_num), TBTag(30, self.title), TBTag(25, self.artist),
                       TBTag(10, self.length)]
 
-        for tag in self.track_tags:
+        for tag in self.tb_track_tags:
             track_tags.append(TBTag(self.default_track_width, self.track_tags[tag]))
 
         return track_tags
@@ -163,7 +174,8 @@ class BaseAudioFile:
     def release(self):
         release = [self.album_artist, self.album, self.label, self.disc_num, self.release_date, self.mbid,
                    self.country, self.release_type, self.media_format, self.barcode, self.catalog_num]
-        release += [v for v in self.custom_release_tags.values()]
+        release += [v for v in self.release_tags.values()]
+
         return release
 
     def mb_release_seeding(self):

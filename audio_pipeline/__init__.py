@@ -17,6 +17,8 @@ class Constants:
 
     custom_track_tags = []
     custom_release_tags = []
+    tb_track_tags = []
+    tb_release_tags = []
     obscenity_rating = None
     ignore_case = False
     user = None
@@ -63,10 +65,13 @@ class Constants:
                 # util.AudioFile.CustomTags.obscenity = tag_data["obscenity_rating"]
                 cls.obscenity_rating = tag_data['obscenity_rating']
         if "tb_meta" in config:
+            cls.tb_meta_commands = config["tb_meta"]
             if "release" in config["tb_meta"]:
-                cls.custom_release_tags += [t['tag'] for t in config["tb_meta"]["release"]]
+                cls.tb_release_tags = [t['tag'] for t in config["tb_meta"]["release"]]
+                print(cls.tb_release_tags)
             if "track" in config["tb_meta"]:
-                cls.custom_track_tags += [t['tag'] for t in config["tb_meta"]["track"]]
+                cls.tb_track_tags = [t['tag'] for t in config["tb_meta"]["track"]]
+                print(cls.tb_track_tags)
         if "tb_lookup" in config:
             cls.load_releases = config['tb_lookup']
         if "batch constants" in config:
@@ -76,8 +81,6 @@ class Constants:
             cls.audiofile = config["audiofile"]
             if "user" in config:
                 cls.audiofile.audiofile_type = config["user"]
-        if "tb_meta" in config:
-            cls.tb_meta_commands = config["tb_meta"]
         if "processor" in config:
             cls.processor = config["processor"]
         if "serializer" in config:

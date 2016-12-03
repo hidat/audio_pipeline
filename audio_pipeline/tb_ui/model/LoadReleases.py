@@ -2,14 +2,11 @@ import threading
 import os
 import time
 from audio_pipeline.util import AcoustidLookup as lookup
-from audio_pipeline.util import Process
-from audio_pipeline.util import Util
+from audio_pipeline.util import Process, Util, Exceptions
 from audio_pipeline.util.MusicBrainz import PreferredRelease
 from audio_pipeline import Constants
-from ..util import InputPatterns
+from ..util import InputPatterns, Resources
 from ...util.AudioFileFactory import AudioFileFactory
-from ..util import Resources
-from ...util import Exceptions
 
 MAX_RELEASES = 500
 MATCHING_RATIO = .75

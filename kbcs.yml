@@ -1,12 +1,12 @@
 {
- tags: {ignore_case: True,
+ tags: {ignore_case: False,
         custom_tags: {}},
  tb_lookup: True,
  tb_meta: {release:
               [
                 {tag: Rotation Status, aliases: ['R', 'Rotation'],
                   options: [{command: Heavy, alias: h}, {command: Medium, alias: m}, {command: Light, alias: l}]},
-                {tag: Category, freeform: True, options: [{command: Local}, {command: Live}], aliases: [c]},
+                {tag: Category, display_name: "Genre", freeform: True, options: [{command: Local}, {command: Live}], aliases: [c]},
                 {tag: Style, freeform: True,
                  options: [{command: Rock/Pop}, {command: Roots}, {command: Bluegrass}], aliases: [s]},
                  {tag: File Under, aliases: ['F', 'File'], freeform: True}
@@ -15,7 +15,8 @@
               [
                 {tag: Send to ENCO, aliases: [enco, e]},
                 {tag: Radio Edit, aliases: [edit, d, radio]},
-                {tag: FCC Rating, aliases: [obscenity, o], options: [{command: Yellow Dot, alias: y, color: yellow},
+                {tag: FCC Rating, display_name: Obscenity Rating,
+                 aliases: [obscenity, o], options: [{command: Yellow Dot, alias: y, color: yellow},
                           {command: red dot, alias: r, color: red}]}
               ]
           },

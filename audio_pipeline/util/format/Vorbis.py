@@ -7,7 +7,6 @@ class BaseTag(Tag.Tag):
 
     def extract(self):
         super().extract()
-        
         if self._value is not None:
             self._value = self._value[0]
 
@@ -198,6 +197,10 @@ class Format(Tag.MetadataFormat):
 
     @classmethod
     def custom_tag(cls, name, tags):
-        serialization_name = re.sub("\s", "_", name)
-        tag = BaseTag(name, serialization_name, tags)
+        tag = BaseTag(name, name, tags)
+        if not tag.value:
+            serialization_name = re.sub("\s", "_", name)
+            under_tag = BaseTag(name, serialization_name, tags)
+            tag.value = under_tag.value
+            tag.save()
         return tag

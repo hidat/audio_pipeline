@@ -91,10 +91,16 @@ class ReleaseFrame(MetaFrame):
                     if rowval == len(self.labels):
                         self.labels.append({})
 
-                if not tag_info.tag.name in self.labels[rowval]:
+                if tag_info.tag.name not in self.labels[rowval]:
+                    display_name = tag_info.tag.name
+                    for r in release_tags:
+                        if r.command == display_name:
+                            if r.display_name:
+                                display_name = r.display_name
+                            break
                     self.attribute_text[tag_info.tag.name] = tk.StringVar()
                     self.labels[rowval][tag_info.tag.name] = tk.Label(self, self.name_style,
-                                                                            text=tag_info.tag.name)
+                                                                            text=display_name)
                     self.labels[rowval][tag_info.tag.name].grid(self.name_padding, row=(rowval * 2),
                                                                       column=colval)
                     self.attribute_widths.append(tag_info.width)
@@ -136,12 +142,18 @@ class TrackFrame(MetaFrame):
     default_cell_width = 25
 
     def add_tag(self, tag, width, rowval, colval):
-        self.labels[tag.name] = tk.Label(self, self.name_style, text=tag.name)
+        display_name = tag.name
+        for t in track_tags:
+            if t.command == display_name:
+                if t.display_name:
+                    display_name = t.display_name
+                break
+
+        self.labels[tag.name] = tk.Label(self, self.name_style, text=display_name)
         self.labels[tag.name].grid(self.name_padding, row=rowval, column=colval)
         colval += 1
         self.attribute_widths.append(width)
         return rowval, colval
-
 
     def display_meta(self, metadata):
         super().display_meta(metadata)
