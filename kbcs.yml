@@ -1,28 +1,53 @@
 {
- tags: {ignore_case: False,
-        custom_tags: {}},
- tb_lookup: True,
- tb_meta: {release:
+   tags: {
+          ignore_case: False,
+          custom_tags: {}
+         },
+   tb_lookup: True,
+   tb_meta: {release:
               [
-                {tag: Rotation Status, aliases: ['R', 'Rotation'],
-                  options: [{command: Heavy, alias: h}, {command: Medium, alias: m}, {command: Light, alias: l}]},
-                {tag: Category, display_name: "Genre", freeform: True, options: [{command: Local}, {command: Live}], aliases: [c]},
-                {tag: Style, freeform: True,
-                 options: [{command: Rock/Pop}, {command: Roots}, {command: Bluegrass}], aliases: [s]},
-                 {tag: File Under, aliases: ['F', 'File'], freeform: True}
+                {
+                  tag: Rotation Status, aliases: ['R', 'Rotation'],
+                  options: [{command: Heavy, alias: h}, {command: Medium, alias: m}, {command: Light, alias: l}],
+                  description: "Set rotation status of current release"
+                },
+                {
+                  tag: Category, display_name: "Genre", freeform: True, 
+                  options: [{command: Local}, {command: Live}], aliases: [c],
+                  description: "Set category of current release - this is a freeform tag."
+                },
+                {
+                  tag: Style, freeform: True,
+                  options: [{command: Rock/Pop}, {command: Roots}, {command: Bluegrass}], aliases: [s], 
+                  descripion: "Set style of current release - this is a freeform tag."
+                },
+                {
+                  tag: File Under, aliases: ['F', 'File'], freeform: True,
+                  description: "Set directory under which to file this release - this is a freeform tag."
+                }
               ],
             track:
               [
-                {tag: Send to ENCO, aliases: [enco, e]},
-                {tag: Radio Edit, aliases: [edit, d, radio]},
-                {tag: FCC Rating, display_name: Obscenity Rating,
-                 aliases: [obscenity, o], options: [{command: Yellow Dot, alias: y, color: yellow},
-                          {command: red dot, alias: r, color: red}]}
+                {
+                  tag: Send to ENCO, aliases: [enco, e], 
+                  description: "Toggle if specified track(s) should be sent to ENCO or not."
+                },
+                {
+                  tag: Radio Edit, aliases: [edit, d, radio],
+                  description: "Toggle radio edit status of specified track(s)."
+                },
+                {
+                  tag: FCC Rating, display_name: Obscenity Rating, aliases: [obscenity, o], 
+                  description: "Set the obscenity rating of specified track(s).",
+                  options: [{command: Yellow Dot, alias: y, color: yellow}, 
+                    {command: red dot, alias: r, color: red}]
+                }
               ]
           },
- destination folder: "C:\\kbcs",
- audiofile: !!python/name:audio_pipeline.util.AudioFile.BaseAudioFile '',
- processor: !!python/name:audio_pipeline.util.MusicBrainz.ExtractMeta '',
- batch constants: !!python/name:audio_pipeline.util.Resources.BatchConstants '',
- serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '',
- user: KBCS}
+   destination folder: "C:\\kbcs",
+   audiofile: !!python/name:audio_pipeline.util.AudioFile.BaseAudioFile '',
+   processor: !!python/name:audio_pipeline.util.MusicBrainz.ExtractMeta '',
+   batch constants: !!python/name:audio_pipeline.util.Resources.BatchConstants '',
+   serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '',
+   user: KBCS
+}
