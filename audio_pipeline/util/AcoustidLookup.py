@@ -35,13 +35,15 @@ class Release:
         # this is terrible (but not as terrible as just tellin' you to set your FPCALC variable??)
         if have_acoustid:
             fpcalc_name = os.path.join("MusicBrainz Picard", "fpcalc.exe")
-            fpcalc_path = os.path.join(os.environ["ProgramFiles"], fpcalc_name)
-            if os.path.exists(fpcalc_path):
-                os.environ[acoustid.FPCALC_ENVVAR] = fpcalc_path
-            fpcalc_path = os.path.join(os.environ["ProgramFiles(x86)"], fpcalc_name)
-            if os.path.exists(fpcalc_path):
-                os.environ[acoustid.FPCALC_ENVVAR] = fpcalc_path
-            if os.path.exists(os.environ[acoustid.FPCALC_ENVVAR]):
+            if "ProgramFiles" in os.environ:
+                fpcalc_path = os.path.join(os.environ["ProgramFiles"], fpcalc_name)
+                if os.path.exists(fpcalc_path):
+                    os.environ[acoustid.FPCALC_ENVVAR] = fpcalc_path
+            if "ProgramFiles (x86)" in os.environ:
+                fpcalc_path = os.path.join(os.environ["ProgramFiles(x86)"], fpcalc_name)
+                if os.path.exists(fpcalc_path):
+                    os.environ[acoustid.FPCALC_ENVVAR] = fpcalc_path
+            if acoustid.FPCALC_ENVVAR in os.environ and os.path.exists(os.environ[acoustid.FPCALC_ENVVAR]):
                 self.can_lookup = True
 
     def lookup(self):

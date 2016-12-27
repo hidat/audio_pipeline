@@ -250,36 +250,34 @@ class ReleaseDateMixin:
     # dates are (generally) separated by one of \, /, :, -, " ",
     # and we'll allow any number of spaces before and after delimeter
     _value = None
-    year = "year"
-    month = "month"
-    day = "day"
-    delimeters = "\s*((\\\\|/|:|-)|\s)\s*"
+    year = None
+    month = None
+    day = None
+    delimeters = r"\s*?[\/:\-\s]\s*?"
     
-    dates = re.compile("(?P<" + year + ">\d\d\d\d)(" + delimeters + 
-                       "(?P<" + month + ">\d\d))?(" + delimeters + "(?P<" + day + ">\d\d))?")
-                       
+    dates = re.compile("(\d\d\d\d)" + delimeters + "(\d\d)?" + delimeters + "(\d\d)?")
+
     def _normalize(self):
         # normalize the date string
+        # also set the year / month / day
         if self._value:
             normalized = re.subn(self.delimeters, "-", str(self), count=3)[0]
             self.value = normalized
 
-    def __eq__(self, other):
-        if isinstance(other, ReleaseDateMixin) or isinstance(other, str):
-            d1 = self.dates.search(str(self))
-            d2 = self.dates.search(str(other))
+        match = self.dates.search(self.value)
+        if match:
+            self.year = match.group(1)
+            self.month = match.group(2)
+            self.day = match.group(3)
 
-            if d1 and d2:
-                if d1.group(self.year) and d2.group(self.year) and d1.group(self.year) != d2.group(self.year):
-                    return False
-                elif d1.group(self.month) and d2.group(self.month) and d1.group(self.month) != d2.group(self.month):
-                    return False
-                elif d1.group(self.day) and d2.group(self.day) and d1.group(self.day) != d2.group(self.day):
-                    return False
-                else:
-                    return True
-            elif not (d1 and d2):
-                return True
+    def __eq__(self, other):
+        if isinstance(other, ReleaseDateMixin):
+            return (self.year == other.year and self.month == other.month and self.day == other.day)
+        elif isinstance(other, str):
+            other_date = self.dates.search(other)
+            if other_date:
+                return self.year == other_date.group(1) and self.month == other_date.group(2) \
+                       and self.day == other_date.group(3)
             else:
                 return False
         elif isinstance(other, float):
@@ -289,17 +287,13 @@ class ReleaseDateMixin:
 
     @property
     def date(self):
-        d = self.dates.search(self.value)
-        year = d.group(self.year)
-        if year:
-            year = int(year)
-        month = d.group(self.month)
-        if month:
-            month = int(month)
-        day = d.group(self.day)
-        if day:
-            day = int(day)
-        return datetime.date(year, month, day)
+        if not (self.month and self.year and self.day):
+            d = self.dates.search(self.value)
+            self.year = d.group(1)
+            self.month = d.group(2)
+            self.day = d.group(3)
+        if self.month and self.year and self.day:
+            return datetime.date(self.year, self.month, self.day)
 
 
 class LengthTag(Tag):

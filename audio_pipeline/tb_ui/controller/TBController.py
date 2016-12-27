@@ -26,10 +26,23 @@ class TBController:
         self.app = App.App(self.process_input, self.choose_dir, self.last_album)
         self.app.bind("<Escape>", self.last_album)
         
+        self.seeder_file = set()
+        
         if root_dir:
             self.choose_dir(root_dir)
         else:
             self.app.after_idle(func=self.app.choose_dir)
+            
+    def clean_temp_files(self):
+        deleted = set()
+        for fname in self.seeder_file:
+            try:
+                os.remove(fname)
+                deleted.add(fname)
+            except PermissionError:
+                print("Can't close this file")
+        for fname in deleted:
+            self.seeder_file.remove(fname)
 
     def process_input(self, input_string):
         """
@@ -38,6 +51,11 @@ class TBController:
         :param event:
         :return:
         """
+        # if we had a temp file open (seeding mb), delete it - 
+        # probably safe, since someone has entered a new input
+        if self.seeder_file:
+            self.clean_temp_files()
+        
         # check for release commands
         self.app.select_input()
         release_tag, release_value = check_release_tag(input_string)
@@ -79,6 +97,7 @@ class TBController:
                 Dialog.err_message(err_msg, None, parent=self.app)
                 return
 
+        release_seed = InputPatterns.mb_add_pattern.match(input_string)
         nav = InputPatterns.nav_pattern.match(input_string)
         popup = InputPatterns.popup_pattern.match(input_string)
         search = InputPatterns.mb_search_pattern.match(input_string)
@@ -88,6 +107,9 @@ class TBController:
             complete = self.model.set_mbid(input_string)
             print(complete)
             self.app.update_meta(self.model.current_release)
+        elif release_seed:
+            release_seed = self.model.get_release_seed()
+            self.seeder_file.add(Search.mb_release_seed(release_seed))
         elif nav:
             self.navigate(nav)
         elif popup:

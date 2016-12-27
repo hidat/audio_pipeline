@@ -22,11 +22,15 @@ quit = "quit"
 help = "help"
 edit = "edit"
 
+mb_add = "add release"
+
 mb = "mb"
 albunack = "albunack"
 
 tracknum_acc = "track_num"
 meta_acc = "meta"
+
+mb_add_pattern = re.compile('add release')
 
 secondary_genre_pattern = re.compile('g|genre\s+(?P<' + meta_acc + '>.+)')
 track_num_pattern = re.compile('((((?P<start>(\\d+))\\s*-\\s*(?P<end>(\\d+)))|(?P<single>\\d+))\s*,*\s*|(?P<all>all))')
