@@ -4,6 +4,8 @@ import copy
 import re
 
 class Constants:
+    config_data = {}
+    
     batch_constants_def = None
     batch_constants = None
 
@@ -41,6 +43,9 @@ class Constants:
 
     @classmethod
     def load(cls, config):
+        config_name = os.path.split(os.path.splitext(cls.config_file)[0])[1]
+        cls.config_data[config_name] = config.copy()
+        
         if "default" in config:
             default_file = os.path.join(cls.config_dir, config["default"] + '.yml')
             if os.path.exists(default_file):
@@ -49,6 +54,10 @@ class Constants:
                     default_config = yaml.load(f)
                     config.update(default_config)
 
+        config_name = os.path.split(os.path.splitext(cls.config_file)[0])[1]
+        cls.config_data[config_name] = config.copy()
+            
+        print(cls.config_data)
         # configuration options for tag reading/writing -
         # custom track tags, custom release tags, and whether to ignore tag casing
         # for AAC & ID3 tags, where case does matter

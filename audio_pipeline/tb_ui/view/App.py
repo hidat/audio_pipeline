@@ -72,7 +72,7 @@ class App(tk.Tk):
             self.info_window.title("Help")
             self.info_window["bg"] = Settings.bg_color
             info = InfoFrame.InfoFrame(master=self.info_window)
-            info.display_commands()
+#             info.display_commands()
             self.info_window.focus_set()
             self.info_window.protocol("WM_DELETE_WINDOW", self.close_info)
 

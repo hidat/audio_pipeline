@@ -4,6 +4,7 @@ from . import model
 from . import view
 import yaml
 import re
+from pip import commands
 
 
 # track_number_pattern = re.compile()
@@ -13,6 +14,7 @@ tracknum_pattern = re.compile("(?<=,|\s)\d+|\d+(?=,|\s)")
 clear_pattern = "clear"
 release_tags = []
 track_tags = []
+general_commands = []
 
 default_release_width = 15
 default_track_width = 25
@@ -40,27 +42,45 @@ def get_text_color(audio_file):
 
 # TB Commands
 class Option:
-    def __init__(self, command, alias=None, color=None):
+    def __init__(self, command, alias="", color=None, description=None):
         self.command = command
         self.alias = alias
         self.color = color
-
+        self.description = description
+        
+    def full_option(self):
+        if self.alias:
+            full_option = ", ".join([self.command.casefold(), self.alias.casefold()])
+        else:
+            full_option = self.command.casefold()
+            
+        return full_option
 
 class Command:
-    def __init__(self, tag, display_name=None, aliases=None, options=None, freeform=False,
-                 command_help=None, examples=None, track=False):
-        self.command = tag
+    def __init__(self, tag=None, command=None, display_name=None, aliases=None, options=None, freeform=False, 
+                 description=None, examples=None, track=False):
+        if tag:
+            self.command = tag
+        elif command:
+            self.command = command
+        else:
+            self.command = None
         self.aliases = []
-        self.aliases = aliases
+        if aliases:
+            self.aliases = aliases
         self.options = []
         self.freeform = freeform
         self.display_name = display_name
+        self.description = description
         if options:
             for option in options:
                 self.options.append(Option(**option))
-        self.command_help = command_help
         self.examples = examples
         self.track = track
+        
+    def full_command(self):
+        full_command = ", ".join([self.command.casefold()] + [alias.casefold() for alias in self.aliases])
+        return full_command
 
 
 def set_destination():
@@ -72,8 +92,14 @@ def set_destination():
 
 # Build TB commands
 def build_commands():
-    with open(Constants.config_file) as f:
-        config = yaml.load(f)
+    if 'default' in Constants.config_data:
+        __build_commands__(Constants.config_data['default'])
+        if 'default' in Constants.config_data['default']:
+            __build_commands__(Constants.config_data[Constants.config_data['default']['default']])
+
+
+# do the actual command creation    
+def __build_commands__(config):
     if "tb_meta" in config:
         if "release" in config["tb_meta"]:
             global release_tags
@@ -81,8 +107,12 @@ def build_commands():
                 release_tags.append(Command(**release_command))
         if "track" in config["tb_meta"]:
             global track_tags
-            for track_command in config["tb_meta"]["track"]:
-                track_tags.append(Command(**track_command, track=True))
+            for t_command in config["tb_meta"]["track"]:
+                track_tags.append(Command(**t_command, track=True))
+        if "commands" in config["tb_meta"]:
+            global general_commands
+            for command in config["tb_meta"]["commands"]:
+                general_commands.append(Command(**command))
 
 
 def check_command(input_string, commands):

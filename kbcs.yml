@@ -8,18 +8,25 @@
               [
                 {
                   tag: Rotation Status, aliases: ['R', 'Rotation'],
-                  options: [{command: Heavy, alias: h}, {command: Medium, alias: m}, {command: Light, alias: l}],
+                  options: [
+                    {command: Heavy, alias: h, description: "Rotation status 'heavy'"}, 
+                    {command: Medium, alias: m, description: "Roation status 'medium'"}, 
+                    {command: Light, alias: l, description: "Rotation status 'light'"}
+                  ],
                   description: "Set rotation status of current release"
                 },
                 {
                   tag: Category, display_name: "Genre", freeform: True, 
-                  options: [{command: Local}, {command: Live}], aliases: [c],
-                  description: "Set category of current release - this is a freeform tag."
+                  options: [
+                    {command: Local}, 
+                    {command: Live}
+                  ], 
+                  aliases: [c], description: "Set category of current release - this is a freeform tag."
                 },
                 {
                   tag: Style, freeform: True,
                   options: [{command: Rock/Pop}, {command: Roots}, {command: Bluegrass}], aliases: [s], 
-                  descripion: "Set style of current release - this is a freeform tag."
+                  description: "Set style of current release - this is a freeform tag."
                 },
                 {
                   tag: File Under, aliases: ['F', 'File'], freeform: True,
