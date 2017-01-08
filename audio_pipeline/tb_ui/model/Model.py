@@ -89,6 +89,13 @@ class ProcessDirectory(object):
             release.stuff_audiofile(track)
             track.save()
         return "done"
+    
+    def set_discogs(self, id):
+        release = self.loader_thread.processor.get_release(id, "discogs")
+        for track in self.current_release:
+            release.stuff_audiofile(track)
+            track.save()
+        return "done"
 
     def set_genre(self, genre):
         for track in self.current_release:
@@ -206,7 +213,6 @@ class MBReleaseSeed:
         if medium not in self.mediums:
             medium_num = str(len(self.mediums))
             self.input_tag(".".join(("mediums", medium_num,  "format")), audiofile.media_format.value)
-            self.input_tag(".".join(("mediums", medium_num, "position")), medium)
             self.mediums[medium] = []
         if audiofile.track_num.value not in self.mediums[medium]:
             track_num = str(len(self.mediums[medium]))
@@ -219,6 +225,13 @@ class MBReleaseSeed:
             self.mediums[medium].append(track_base)
 
     def get_result(self):
+        # add medium position tags if necesary
+        if len(self.mediums) > 1:
+            for medium, tracklist in self.mediums.items():
+                medium_position = ".".join(tracklist[0].split(".")[:2] + ["position"])
+                self.input_tag(medium_position, medium)
+                print(medium_position)
+                print(medium)
         self.doc.stag("input", type="submit")
         self.form_tag.__exit__(None, None, None)
         with self.tag("script"):

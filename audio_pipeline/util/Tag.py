@@ -250,12 +250,12 @@ class ReleaseDateMixin:
     # dates are (generally) separated by one of \, /, :, -, " ",
     # and we'll allow any number of spaces before and after delimeter
     _value = None
-    year = None
-    month = None
-    day = None
+    _year = None
+    _month = None
+    _day = None
     delimeters = r"\s*?[\/:\-\s]\s*?"
     
-    dates = re.compile("(\d\d\d\d)" + delimeters + "(\d\d)?" + delimeters + "(\d\d)?")
+    dates = re.compile("(?P<year>\d\d\d\d)(" + delimeters + ")?(?P<month>\d\d)?(" + delimeters + ")?(?P<day>\d\d)?")
 
     def _normalize(self):
         # normalize the date string
@@ -264,12 +264,12 @@ class ReleaseDateMixin:
             normalized = re.subn(self.delimeters, "-", str(self), count=3)[0]
             self.value = normalized
 
-        match = self.dates.search(self.value)
-        if match:
-            self.year = match.group(1)
-            self.month = match.group(2)
-            self.day = match.group(3)
-
+            match = self.dates.search(self.value)
+            if match:
+                self._year = match.group("year")
+                self._month = match.group("month")
+                self._day = match.group("day")
+    
     def __eq__(self, other):
         if isinstance(other, ReleaseDateMixin):
             return (self.year == other.year and self.month == other.month and self.day == other.day)
@@ -294,6 +294,25 @@ class ReleaseDateMixin:
             self.day = d.group(3)
         if self.month and self.year and self.day:
             return datetime.date(self.year, self.month, self.day)
+        
+    @property
+    def year(self):
+        if not self._year:
+            self._normalize()
+        return self._year
+    
+    @property
+    def month(self):
+        if not self._month:
+            self._normalize()
+        return self._month
+
+    @property
+    def day(self):
+        if not self._day:
+            self._normalize()
+        return self._day
+
 
 
 class LengthTag(Tag):
