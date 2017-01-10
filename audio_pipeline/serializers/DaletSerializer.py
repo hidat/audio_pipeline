@@ -1,4 +1,3 @@
-from audio_pipeline.kexp import KEXPAudioFile
 import os.path as path
 from yattag import Doc, indent
 from audio_pipeline import Constants

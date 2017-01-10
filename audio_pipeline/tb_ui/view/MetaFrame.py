@@ -49,8 +49,8 @@ class ReleaseFrame(MetaFrame):
 
     default_cell_width = 15
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, master=None):
+        super().__init__(master)
         self.labels = []
 
     def add_tag(self, tag_info, colval):

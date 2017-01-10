@@ -8,16 +8,17 @@ from . import Exceptions
 from . import Tag
 
 
-class CustomTags:
-    item_code = "ITEMCODE"
-    barcode = "BARCODE"
-    catalog_num = "CATALOGNUMBER"
-    file_under = "File Under"
-
-
 class BaseAudioFile:
 
     audiofile_type = "BaseAudioFile"
+    
+    renameable_tags = {"item_code": "ITEMCODE",
+                       "barcode": "BARCODE",
+                       "catalog_num": "CATALOGNUMBER",
+                       "file_under": "File Under",
+                       "obscenity": "FCC Rating",
+                       "radio_edit": "Radio Edit",
+                       "category": "Category"}
 
     default_release_width = 15
     default_track_width = 25
@@ -74,12 +75,12 @@ class BaseAudioFile:
         self.release_type = self.format.release_type(self.audio)
         self.media_format = self.format.media_format(self.audio)
 
-        self.item_code = self.format.custom_tag(CustomTags.item_code, self.audio)
-        self.barcode = self.format.custom_tag(CustomTags.barcode, self.audio)
-        self.catalog_num = self.format.custom_tag(CustomTags.catalog_num, self.audio)
+        self.item_code = self.format.custom_tag(BaseAudioFile.renameable_tags["item_code"], self.audio)
+        self.barcode = self.format.custom_tag(BaseAudioFile.renameable_tags['barcode'], self.audio)
+        self.catalog_num = self.format.custom_tag(BaseAudioFile.renameable_tags['catalog_num'], self.audio)
 
         # a basic filesystem arrangement - should be easily toggled on/off
-        self.file_under = self.format.custom_tag(CustomTags.file_under, self.audio)
+        self.file_under = self.format.custom_tag(BaseAudioFile.renameable_tags['file_under'], self.audio)
         if not self.file_under.value:
             artist_value = str(self.album_artist)
             if self.album_artist.value is not None:
@@ -119,7 +120,7 @@ class BaseAudioFile:
                     self.track_tags[t] = self.format.custom_tag(t, self.audio)
 
         self.meta_stuffed = self.format.custom_tag("meta_stuffed", self.audio)
-        
+                
         self.custom_tags = [self.meta_stuffed]
 
     def save(self):
@@ -177,47 +178,3 @@ class BaseAudioFile:
         release += [v for v in self.release_tags.values()]
 
         return release
-
-    def mb_release_seeding(self):
-        seeding = {}
-
-        # Release information
-        seeding["name"] = self.album.value
-        seeding["barcode"] = self.barcode.value
-
-        events = []
-        if self.release_date.value:
-            event = {}
-            event["date"] = {}
-            d = self.release_date.date
-            event["date"]["year"] = d.year
-            event["date"]["month"] = d.month
-            event["date"]["day"] = d.day
-            event["country"] = self.country.value
-            events.append(event)
-        if len(events) > 0:
-            seeding["events"] = events
-
-        labels = []
-        if self.label.value:
-            label = {}
-            label["name"] = self.label.value
-            if self.catalog_num.value:
-                label["catalog_number"] = self.catalog_num.value
-            labels.append(label)
-        if len(labels) > 0:
-            seeding["labels"] = label
-
-        # will need to .... look into this.....
-        artist_credit = {"names": []}
-        if self.album_artist.value:
-            value = {}
-            value["name"] = self.album_artist
-            artist_credit["names"].append(value)
-        seeding["artist_credit"] = artist_credit
-
-        # multi-disc releases. fuck. fuck.
-
-
-
-        return seeding

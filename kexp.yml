@@ -1,21 +1,30 @@
 {
  tags: {ignore_case: False,
-        custom_tags: {track: [KEXPAnchorStatus, KEXPPRIMARYGENRE]}},
+#        obscenity: KEXPFCCOBSCENITYRATING,
+        category: KEXPPRIMARYGENRE,
+#        radio_edit: KEXPRadioEdit,
+        custom_tags: {track: [KEXPAnchorStatus, KEXPPrimaryGenre]}},
  tb_lookup: False,
   tb_meta: {release:
               [
-                {tag: KEXPSecondaryGenre, aliases: ['R', 'Rotation'],
-                  options: [{command: Heavy, alias: h}, {command: Medium, alias: m}, {command: Light, alias: l}]}
+                {tag: KEXPSecondaryGenre, aliases: ['genre', 'secondary', 'category']}
               ],
             track:
               [
-                {tag: KEXPFCCOBSCENITYRATING, aliases: [obscenity, o], options: [{command: Yellow Dot, alias: y, color: yellow},
-                          {command: Red Dot, alias: r, color: red}]},
-                {tag: KEXPRadioEdit, aliases: [edit, d, radio]}
+                {tag: KEXPFCCOBSCENITYRATING, aliases: [obscenity, o], 
+                options: [{command: Yellow Dot, aliases: [y], color: yellow},
+                          {command: Red Dot, aliases: [r], color: red},
+                          {command: "CLEAN EDIT", aliases: [clean], color: light blue},
+                          {command: "KEXP CLEAN EDIT", aliases: [kc], color: blue}]
+                },
+                {tag: KEXPRadioEdit, display_name: "Radio Edit", 
+                 options: [{command: "KEXP RADIO EDIT", aliases: [kd]},
+                            {command: "RADIO EDIT", aliases: [d]}],
+                 aliases: [edit, radio]}
               ]
           },
  audiofile: !!python/name:audio_pipeline.util.AudioFile.BaseAudioFile '',
- processor: !!python/name:audio_pipeline.util.MusicBrainz.ExtractMeta '',
+ processor: !!python/name:audio_pipeline.kexp.Process '',
  batch constants: !!python/name:audio_pipeline.kexp.Resources.BatchConstants '',
  serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '',
  argument_config: !!python/name:audio_pipeline.kexp.argument_config '',

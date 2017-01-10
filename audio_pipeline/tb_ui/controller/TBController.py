@@ -4,7 +4,7 @@ from ...util import Util
 from . import EntryController
 from ..util import InputPatterns, Resources
 from ...util import Resources as r
-from .. import check_release_tag, check_track_tag
+from .. import release_tags, track_tags, general_commands, navigate, get_track_nums
 import time
 import os
 from . import Search
@@ -25,6 +25,7 @@ class TBController:
         self.copy_dir = copy_dir
         self.app = App.App(self.process_input, self.choose_dir, self.last_album)
         self.app.bind("<Escape>", self.last_album)
+        
         
         self.seeder_file = set()
         
@@ -56,74 +57,59 @@ class TBController:
         if self.seeder_file:
             self.clean_temp_files()
         
-        # check for release commands
         self.app.select_input()
-        release_tag, release_value = check_release_tag(input_string)
-        if release_tag is not None:
-            if self.model.set_release_tag(release_tag, release_value):
+                
+        # check for release tags
+        for tag in release_tags:
+            release_tag, release_value = tag.execute(input_string)
+            if release_tag is not None:
+                self.model.set_release_tag(release_tag, release_value)
                 self.app.update_meta(self.model.current_release)
                 return
-            else:
+            elif release_value is not None:
                 err_msg = "Invalid input " + str(input_string)
                 Dialog.err_message(err_msg, None, parent=self.app)
                 return
 
-        track_nums, track_tag, track_value = check_track_tag(input_string)
-        print(track_nums)
-        print(track_tag)
-        print(track_value)
-        if track_nums and (track_tag or track_value):
-            # input is (probably) track metadata
-            try:
-                for track in self.model.current_release:
-                    if track.track_num.value in track_nums or \
-                                    "all" in track_nums:
-                        if track_value is True and track.track_tags[track_tag].value:
-                            track.track_tags[track_tag].value = None
-                        else:
-                            track.track_tags[track_tag].value = track_value
-                        track.save()
-                        self.app.update_meta(track)
-                track_nums = track_nums - {'all'} - self.model.track_nums()
-                if len(track_nums) > 0:
-                    for track in track_nums:
-                        err_msg = "Invalid Track Number: " + str(track)
-                        Dialog.err_message(err_msg, None, parent=self.app)
+        track_nums, input_string = get_track_nums(input_string)
+        if track_nums is not None:
+            for tag in track_tags:
+                track_tag, track_value = tag.execute(input_string)
+                if track_tag:
+                    for track in self.model.current_release:
+                        if track.track_num.value in track_nums or 'all' in track_nums:
+                            if track_value is True and track.track_tags[track_tag].value:
+                                track.track_tags[track_tag].value = None
+                            else:
+                                track.track_tags[track_tag].value = track_value
+                            track.save()
+                            self.app.update_meta(track)
+                    track_nums = track_nums - {'all'} - self.model.track_nums()
+                    if len(track_nums) > 0:
+                        for track in track_nums:
+                            err_msg = "Invalid Track Number: " + str(track)
+                            Dialog.err_message(err_msg, None, parent=self.app)
                     return
 
-                return
-            except ValueError:
-                err_msg = "Invalid input " + str(input_string)
-                Dialog.err_message(err_msg, None, parent=self.app)
-                return
-
-        release_seed = InputPatterns.mb_add_pattern.match(input_string)
-        nav = InputPatterns.nav_pattern.match(input_string)
+        nav = navigate(input_string)
+        if nav is not None:
+            if nav > 0 and not self.model.has_next():
+                self.last_album()
+            elif nav < 0 and not self.model.has_prev():
+                self.last_album()
+            else:
+                tracks = self.model.jump(nav)
+                self.app.display_meta(tracks)
+            return
+        
         popup = InputPatterns.popup_pattern.match(input_string)
-        search = InputPatterns.mb_search_pattern.match(input_string)
-        barcode = InputPatterns.barcode_search_pattern.match(input_string)
         genre = InputPatterns.secondary_genre_pattern.match(input_string)
         if Util.is_mbid(input_string):
             complete = self.model.set_mbid(input_string)
             print(complete)
             self.app.update_meta(self.model.current_release)
-        elif release_seed:
-            release_seed = self.model.get_release_seed()
-            self.seeder_file.add(Search.mb_release_seed(release_seed))
-        elif nav:
-            self.navigate(nav)
         elif popup:
             self.popup(popup)
-        elif search:
-            artist = search.group(InputPatterns.artist)
-            barcode = search.group(InputPatterns.barcode)
-            if search.group(InputPatterns.mb):
-                Search.mb_search(self.model.current_release[0], artist, barcode)
-            if search.group(InputPatterns.albunack):
-                Search.albunack_search(self.model.current_release[0], artist)
-        elif barcode:
-            bar = barcode.group(InputPatterns.barcode)
-            Search.mb_search(self.model.current_release[0], barcode=True, barcode_value=bar)
         elif genre:
             genre.group(InputPatterns.meta_acc)
             full_genre = r.Genres.get(genre.group(InputPatterns.meta_acc))
@@ -134,31 +120,15 @@ class TBController:
                 err_msg = "Invalid genre " + str(genre.group(InputPatterns.meta_acc))
                 Dialog.err_message(err_msg, None, parent=self.app)
         else:
-            err_msg = "Invalid input " + str(input_string)
-            Dialog.err_message(err_msg, None, parent=self.app)
-
-    def navigate(self, command):
-        """
-        Change the album displayed.
-        """
-        jump = command.group(InputPatterns.jump)
-        
-        if command.group(InputPatterns.next):
-            if jump:
-                tracks = self.model.jump(int(jump))
-                self.app.display_meta(tracks)
-            elif self.model.has_next():
-                self.next_album()
-            else:
-                self.last_album()
-        elif command.group(InputPatterns.prev):
-            if jump:
-                tracks = self.model.jump((-1 *int(jump)))
-                self.app.display_meta(tracks)
-            elif self.model.has_prev():
-                self.prev_album()
-            else:
-                self.last_album()
+            complete = None
+            for command in general_commands:
+                complete = command.execute(input_string, self.model)
+                if complete:
+                    self.app.update_meta(self.model.current_release)
+                    break
+            if complete is None:
+                err_msg = "Invalid input " + str(input_string)
+                Dialog.err_message(err_msg, None, parent=self.app)
             
     def popup(self, command):
         """

@@ -4,7 +4,14 @@ from . import model
 from . import view
 import yaml
 import re
-from pip import commands
+import urllib
+import webbrowser
+import tempfile
+import os
+import time
+
+min_width = 120 * 8
+min_height = 85 * 8
 
 
 # track_number_pattern = re.compile()
@@ -15,6 +22,10 @@ clear_pattern = "clear"
 release_tags = []
 track_tags = []
 general_commands = []
+
+__nav_commands = []
+open_editor = None
+close_command = None
 
 default_release_width = 15
 default_track_width = 25
@@ -39,26 +50,166 @@ def get_text_color(audio_file):
                 color = option.color
     return color
 
+###################
+# search and stuff
+###################
+class WebBrowserAssist:
+    mb_release = "http://musicbrainz.org/add"
+    albunack_search_terms = {"artistname": "", "musicbrainzartistid": "", "musicbrainzartistdbid": "", "discogsartistid": ""}    
+    mb_search_terms = {"type": "", "method": "advanced"}
 
+    @staticmethod
+    def prep_query(query):
+        prepped_query = []
+        for part in query:
+            if len(part) > 1:
+                q = "%s:\"%s\"" % (part[0], part[1])
+            else:
+                q = part[0]
+            q = urllib.parse.quote_plus(q)
+            prepped_query.append(q)
+            print(prepped_query)
+    
+        return " ".join(prepped_query)  
+    
+    @staticmethod
+    def mb_release_seed(release_seed):
+        fd, fname = tempfile.mkstemp(suffix = '.html')
+        os.close(fd)
+        with open(fname, "wb") as f:
+            f.write(release_seed.encode('utf-8'))
+        webbrowser.open(fname)
+        return fname
+    
+    @staticmethod
+    def albunack_search(track, url_base, artist=None):
+        """
+        Given an audiofile, open an albunack artist search in the browser
+        :param self:
+        :param track:
+        :return:
+        """
+        search_terms = None
+        if artist:
+            search_terms = WebBrowserAssist.albunack_search_terms.copy()
+            search_terms["artistname"] = artist
+        elif track.artist.value:
+            search_terms = albunack_search_terms.copy()
+            search_terms["artistname"] = track.album_artist.value
+        if search_terms:
+            search_terms = urllib.parse.urlencode(search_terms)
+            search_url = url_base + search_terms
+            print(search_url)
+            webbrowser.open(search_url)
+    
+    @staticmethod
+    def mb_barcode_search(track, url_base, barcode_value=None):
+        """
+        Given an audiofile, open an MB search for the barcode in the browser
+        """
+        query = []
+        search_terms = WebBrowserAssist.mb_search_terms.copy()
+        search_terms["type"] = "release"
+        
+        if barcode_value:
+            query.append(("barcode", barcode_value))
+            query.append(("catno", barcode_value))
+        else:
+            if track.barcode.value:
+                query.append(("barcode", track.barcode.value))
+            if track.catalog_num.value:
+                query.append(("catno", track.catalog_num.value))
+    
+        if search_terms and len(query) > 0:
+            query = WebBrowserAssist.prep_query(query)
+            search_terms = urllib.parse.urlencode(search_terms)
+            search_url = "%s%s&%s" % (url_base, query, search_terms)
+            print(search_url)
+            webbrowser.open(search_url)
+
+    @staticmethod
+    def mb_search(track, url_base, artist=None):
+        """
+        Given an audiofile, open an MB search in the browser
+    
+        search priorities:
+            barcode and/or catalog number
+            release name and/or artist name
+        :param self:
+        :param track:
+        :return:
+        """
+        query = []
+        if artist:
+            search_terms = WebBrowserAssist.mb_search_terms.copy()
+            search_terms["type"] = "artist"
+    
+            query.append((artist,))
+        else:
+            search_terms = WebBrowserAssist.mb_search_terms.copy()
+            if track.album.value:
+                search_terms["type"] = "release"
+                query.append((track.album.value,))
+                if track.album_artist.value:
+                    query.append(("artist", track.album_artist.value))
+            else:
+                search_terms["type"] = "artist"
+                if track.album_artist.value:
+                    query.append((track.album_artist.value,))
+    
+        if search_terms and len(query) > 0:
+            query = WebBrowserAssist.prep_query(query)
+            search_terms = urllib.parse.urlencode(search_terms)
+            search_url = "%s%s&%s" % (url_base, query, search_terms)
+            print(search_url)
+            webbrowser.open(search_url)
+            
+#######################
 # TB Commands
+#######################
 class Option:
-    def __init__(self, command, alias="", color=None, description=None):
+    def __init__(self, command, aliases=None, color=None, description=None):
         self.command = command
-        self.alias = alias
+        if aliases:
+            self.aliases = aliases
+        else:
+            self.aliases = []
         self.color = color
         self.description = description
+        self.freeform = False
+        
+        if self.command.startswith("<") and self.command.endswith(">"):
+            build_re = '^(' + separator_pattern.pattern + ')*(.+?)(' + separator_pattern.pattern + '|$)'
+            self.regex_match = re.compile(build_re)
+            self.freeform = True
+        elif self.command.startswith("\"<") and self.command.endswith(">\""): 
+            build_re = '^(' + separator_pattern.pattern + ')*"(.+?)"(' + separator_pattern.pattern + '|$)'
+            self.regex_match = re.compile(build_re)
+            self.freeform = True
+        else:
+            build_re = [alias for alias in self.aliases]
+            build_re.append(self.command)
+            build_re = '^(' + separator_pattern.pattern + ')*(' + "|".join(build_re) + ')(' + separator_pattern.pattern + '|$)'
+            self.regex_match = re.compile(build_re, flags=re.I)
         
     def full_option(self):
-        if self.alias:
-            full_option = ", ".join([self.command.casefold(), self.alias.casefold()])
-        else:
-            full_option = self.command.casefold()
-            
-        return full_option
+        full_command = ", ".join([self.command.casefold()] + [alias.casefold() for alias in self.aliases])
+        return full_command
+    
+    def match(self, input_string):
+        match = self.regex_match.match(input_string)
+        if match:
+            match_string = re.sub(match.group(0), "", input_string)
+            if self.freeform:
+                return match.group(0), match_string
+            else:
+                return self.command, match_string
+        return None, input_string
+
 
 class Command:
     def __init__(self, tag=None, command=None, display_name=None, aliases=None, options=None, freeform=False, 
-                 description=None, examples=None, track=False):
+                 description=None, examples=None, track=None, url_base=None, active=True):
         if tag:
             self.command = tag
         elif command:
@@ -71,23 +222,181 @@ class Command:
         self.options = []
         self.freeform = freeform
         self.display_name = display_name
+        if not display_name:
+            self.display_name = self.command
         self.description = description
         if options:
             for option in options:
                 self.options.append(Option(**option))
         self.examples = examples
-        self.track = track
+        self.active = active
+        
         
     def full_command(self):
         full_command = ", ".join([self.command.casefold()] + [alias.casefold() for alias in self.aliases])
         return full_command
+    
+    def _match(self, input_string):
+        # check if there is a match for this command at start of string
+        aliases = [alias for alias in self.aliases]
+        aliases.append(self.command)
+        if self.display_name:
+            aliases.append(self.display_name)
+        aliases = '(' + "|".join(aliases) + ')'
+        matchee = '^(' + separator_pattern.pattern + ')*' + aliases + '(' + separator_pattern.pattern + '|$)'
+        match = re.search(matchee, input_string, flags=re.I)
+        
+        if match:
+            # if there is a command name match, strip command name from string & return what remains
+            match_string = re.sub(match.group(0), "", input_string)
+            return self.command, match_string
+        return None, input_string
+        
+    def execute(self, input_string, tb_model=None):
+        # check if we match this command's name
+        command_name, input_string = self._match(input_string)
+                
+        if not command_name:
+            return None, None
+                
+        # perform the command - base execution is for a release tag
+        matchee = '^(' + separator_pattern.pattern + ')*' + clear_pattern + '(' + separator_pattern.pattern + '|$)'
+        match = re.search(matchee, input_string, flags=re.I)
+        if match:
+            tag_value = None
+        else:
+            # check if we match one of the command's defined options
+            tag_value = None
+            for option in self.options:
+                tag_value, input_string = option.match(input_string)
+                if tag_value:
+                    break
+            if input_string:
+                if self.freeform and not tag_value:
+                    tag_value = input_string
+                else:
+                    command_name = None
+                    tag_value = False
+            elif not self.options:
+                tag_value = True
+                
+        return command_name, tag_value
+    
+    
+class TrackCommand(Command):
+    def _match(self, input_string, tb_model=None):
+        command_name, input_string = super()._match(input_string)
+        
+        if self.options:
+            command_name = self.command
+        
+        return command_name, input_string
+    
 
+class NavigationCommand(Command):
+    
+    def __init__(self, base_distance=0, **kwargs):
+        print(kwargs)
+        self.base_distance = base_distance
+        
+        super().__init__(**kwargs)
+    
+    def execute(self, input_string, tb_model=None):
+        command_name, input_string = self._match(input_string)
+        
+        if command_name:
+            distance = self.base_distance
+            jump = re.search(separator_pattern.pattern + '(?P<jump>(\d+))', input_string)
+            if jump:
+                distance *= int(match.group("jump"))
+            return distance
+        
 
+class MusicBrainzSeedCommand(Command):
+    
+    def __init__(self, url_base=None, **kwargs):
+        self.seeder_file = set()
+        self.url_base = url_base
+        super().__init__(**kwargs)
+        
+    def execute(self, input_string, tb_model=None):
+        if not model:
+            return
+        command_name, input_string = self._match(input_string)
+        
+        if command_name:
+            # generate a release seed HTML file and open the MusicBrainz add release page
+            release_seed = tb_model.get_release_seed(self.url_base)
+            self.seeder_file.add(WebBrowserAssist.mb_release_seed(release_seed))
+            time.sleep(1.5)
+            deleted = set()
+            for fname in self.seeder_file:
+                try:
+                    os.remove(fname)
+                    deleted.add(fname)
+                except PermissionError:
+                    print("Can't close this file")
+            for fname in deleted:
+                self.seeder_file.remove(fname)
+            return True
+                
+        
+class GetDiscogsMetaCommand(Command):
+
+    def execute(self, input_string, model):
+        match, input_string = self._match(input_string)
+        if match:
+            matchee = '(' + separator_pattern.pattern + ')*(?P<id>\d+)(' + separator_pattern.pattern + '|$)'
+            match = re.search(matchee, input_string, flags=re.I)
+        
+            if match:
+                complete = model.set_discogs(match.group("id"))
+                print(complete)
+                return complete
+            
+class SearchCommand(Command):
+    search_executors = {
+        
+            "albunack_search": WebBrowserAssist.albunack_search,
+            "mb_search": WebBrowserAssist.mb_search,
+            "mb_barcode": WebBrowserAssist.mb_barcode_search
+        }  
+    
+    def __init__(self, search_type=None, url_base=None, **kwargs):
+        self.url_base = url_base
+            
+        self.search_execution = SearchCommand.search_executors[search_type]
+        super().__init__(**kwargs)
+        
+    def execute(self, input_string, model):
+        command_name, input_string = self._match(input_string)
+        
+        if command_name:
+            for option in self.options:
+                tag_value, input_string = option.match(input_string)
+            self.search_execution(model.current_release[0], self.url_base, tag_value)
+            return True
+                        
+
+def navigate(input_string):      
+    for command in __nav_commands:
+        distance = command.execute(input_string)
+        if distance is not None:
+            return distance
+               
+            
 def set_destination():
     with open(Constants.config_file) as f:
         config = yaml.load(f)
         if "destination folder" in config:
             return config["destination folder"]
+        
+        
+def save_setting_changes():
+    global release_tags, track_tags
+    with open(Constants.config_file) as f:
+        config = yaml.load(f)
+        config.update()
 
 
 # Build TB commands
@@ -101,74 +410,39 @@ def build_commands():
 # do the actual command creation    
 def __build_commands__(config):
     if "tb_meta" in config:
-        if "release" in config["tb_meta"]:
+        tb_meta = config["tb_meta"]
+        if "release" in tb_meta:
             global release_tags
-            for release_command in config["tb_meta"]["release"]:
-                release_tags.append(Command(**release_command))
-        if "track" in config["tb_meta"]:
+            for release_command in tb_meta["release"]:
+                release_tags.append(Command(track=False, **release_command))
+        if "track" in tb_meta:
             global track_tags
-            for t_command in config["tb_meta"]["track"]:
-                track_tags.append(Command(**t_command, track=True))
-        if "commands" in config["tb_meta"]:
-            global general_commands
-            for command in config["tb_meta"]["commands"]:
+            for t_command in tb_meta["track"]:
+                track_tags.append(TrackCommand(**t_command, track=True))
+        global general_commands
+        if "commands" in tb_meta:
+            for command in tb_meta["commands"]:
                 general_commands.append(Command(**command))
-
-
-def check_command(input_string, commands):
-    for command in commands:
-        command_string = input_string
-
-        tag_name = None
-        tag_value = None
-
-        # check if we have a match for this command at start of string
-        aliases = [alias for alias in command.aliases]
-        aliases.append(command.command)
-        aliases = '(' + "|".join(aliases) + ')'
-        matchee = '^(' + separator_pattern.pattern + ')*' + aliases + '(' + separator_pattern.pattern + '|$)'
-        match = re.search(matchee, command_string, flags=re.I)
-
-        if match:
-            # if there is a command name match, strip command name from string
-            tag_name = command.command
-            command_string = re.sub(match.group(0), "", command_string)
-
-        # if this command has options defined, check if we match one
-        # check for clear command
-        matchee = '^(' + separator_pattern.pattern + ')*' + clear_pattern + '(' + separator_pattern.pattern + '|$)'
-        match = re.search(matchee, command_string, flags=re.I)
-        if match:
-            command_string = re.sub(match.group(0), "", command_string)
-        else:
-            # freeform tags
-            for option in command.options:
-                if option.alias:
-                    aliases = '^(' + separator_pattern.pattern + ')*' + '(' + option.command + '|' + option.alias + ')'
-                else:
-                    aliases = '^(' + separator_pattern.pattern + ')*' + '(' + option.command + ')'
-                option = option.command
-                matchee = aliases + '(' + separator_pattern.pattern + '|$)'
-                match = re.match(matchee, command_string, flags=re.I)
-                if match:
-                    command_string = re.sub(match.group(0), "", command_string)
-                    tag_value = option
-            if command_string and not separator_pattern.match(command_string):
-                if command.freeform and not tag_value:
-                    tag_value = command_string
-                else:
-                    tag_name = None
-            elif not command.options:
-                tag_value = True
-
-        if tag_name or (command.track and command.options and tag_value):
-            print(command_string)
-            return command.command, tag_value
-    return None, None
-
-
-def check_release_tag(input_string):
-    return check_command(input_string, release_tags)
+        if "release_seeder" in tb_meta:
+            general_commands.append(MusicBrainzSeedCommand(**tb_meta["release_seeder"]))
+        if "discogs" in tb_meta:
+            general_commands.append(GetDiscogsMetaCommand(**tb_meta["discogs"]))
+        if "search" in tb_meta:
+            for search_type, command in tb_meta["search"].items():
+                general_commands.append(SearchCommand(search_type, **command))
+        if "navigation" in tb_meta:
+            global __nav_commands
+            for direction, command in tb_meta["navigation"].items():
+                if direction == 'forward':
+                    __nav_commands.append(NavigationCommand(base_distance=1, **command))
+                if direction == 'backward':
+                    __nav_commands.append(NavigationCommand(base_distance=-1, **command))
+        if "close" in tb_meta:
+            global close_command
+            close_command = Command(**tb_meta["close"])
+        if "editor" in tb_meta:
+            global open_editor
+            open_editor = Command(**tb_meta["editor"])
 
 
 def span_replacement(match):
@@ -177,8 +451,8 @@ def span_replacement(match):
     return ",".join([str(i) for i in range(start,end)])
 
 
-def check_track_tag(input_string):
-    # check that we're starting with a track number or 'all'
+def get_track_nums(input_string):
+    # check that input starts with a track number or 'all'
     all = re.search("(^|\s|,)(all)(,|\s|-)", input_string, flags=re.I)
     start = re.match("\s*(\d+|all)(,|\s|-)", input_string, flags=re.I)
     if start:
@@ -194,13 +468,11 @@ def check_track_tag(input_string):
             #find_tracks = separator_pattern.sub("", find_tracks, 1)
 
         if all:
-            print(all.group(2))
             track_nums.add(all.group(2))
             find_tracks = find_tracks.replace("all", "", 1)
 
-        tag_name, tag_value = check_command(find_tracks, track_tags)
-        return track_nums, tag_name, tag_value
-    return None, None, None
-
+        return track_nums, find_tracks
+    return None, input_string
+    
 
 __all__ = ['controller', 'model', 'view']

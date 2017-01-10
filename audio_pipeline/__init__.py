@@ -12,6 +12,7 @@ class Constants:
     config_dir = ""
     audiofile = None
     processor = None
+    discogs_processor = None
     serializer = None
     custom_tags = None
     load_releases = True
@@ -21,7 +22,6 @@ class Constants:
     custom_release_tags = []
     tb_track_tags = []
     tb_release_tags = []
-    obscenity_rating = None
     ignore_case = False
     user = None
     tb_meta_commands = None
@@ -57,30 +57,15 @@ class Constants:
         config_name = os.path.split(os.path.splitext(cls.config_file)[0])[1]
         cls.config_data[config_name] = config.copy()
             
-        print(cls.config_data)
         # configuration options for tag reading/writing -
         # custom track tags, custom release tags, and whether to ignore tag casing
         # for AAC & ID3 tags, where case does matter
-        if "tags" in config:
-            tag_data = config["tags"]
-            if "ignore_case" in tag_data:
-                cls.ignore_case = tag_data["ignore_case"]
-            if "custom_tags" in tag_data:
-                if "track" in tag_data["custom_tags"]:
-                    cls.custom_track_tags = tag_data["custom_tags"]["track"]
-                if "release" in tag_data["custom_tags"]:
-                    cls.custom_release_tags = tag_data["custom_tags"]["release"]
-            if "obscenity_rating" in tag_data:
-                # util.AudioFile.CustomTags.obscenity = tag_data["obscenity_rating"]
-                cls.obscenity_rating = tag_data['obscenity_rating']
         if "tb_meta" in config:
             cls.tb_meta_commands = config["tb_meta"]
             if "release" in config["tb_meta"]:
                 cls.tb_release_tags = [t['tag'] for t in config["tb_meta"]["release"]]
-                print(cls.tb_release_tags)
             if "track" in config["tb_meta"]:
                 cls.tb_track_tags = [t['tag'] for t in config["tb_meta"]["track"]]
-                print(cls.tb_track_tags)
         if "tb_lookup" in config:
             cls.load_releases = config['tb_lookup']
         if "batch constants" in config:
@@ -92,10 +77,21 @@ class Constants:
                 cls.audiofile.audiofile_type = config["user"]
         if "processor" in config:
             cls.processor = config["processor"]
+        if "discogs_processor" in config:
+            cls.discogs_processor = config["discogs_processor"]
         if "serializer" in config:
             cls.serializer = config["serializer"]
         if "argument_config" in config:
             cls.argument_config = config["argument_config"]
+        if "tags" in config:
+            tag_data = config["tags"]
+            if "ignore_case" in tag_data:
+                cls.ignore_case = tag_data["ignore_case"]
+            if "custom_tags" in tag_data:
+                if "track" in tag_data["custom_tags"]:
+                    cls.custom_track_tags = tag_data["custom_tags"]["track"]
+                if "release" in tag_data["custom_tags"]:
+                    cls.custom_release_tags = tag_data["custom_tags"]["release"]
 
     @classmethod
     def setup(cls, args, user=None):

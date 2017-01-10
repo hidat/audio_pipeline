@@ -107,3 +107,4 @@ def prep_query(query):
         print(prepped_query)
 
     return " ".join(prepped_query)
+

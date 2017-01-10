@@ -1,0 +1,1 @@
+primary_types = ["album", "single",  "ep", "broadcast", "other"]

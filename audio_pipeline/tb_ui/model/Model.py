@@ -76,8 +76,8 @@ class ProcessDirectory(object):
                 return False
         return True
         
-    def get_release_seed(self):
-      release_seed = MBReleaseSeed()
+    def get_release_seed(self, url_base):
+      release_seed = MBReleaseSeed(url_base)
       release_seed.set_release_body(self.current_release[0])
       for track in self.current_release:
           release_seed.add_track(track)
@@ -173,10 +173,13 @@ class ProcessDirectory(object):
 
 
 class MBReleaseSeed:
-    def __init__(self):
+    def __init__(self, url_base):
+        """
+        Class to put together an HTML form to seed the MusicBrainz add release page with metadata
+        """
         self.doc, self.tag, self.text = Doc().tagtext()
         self.doc.asis('<!DOCTYPE html>')
-        self.form_tag = self.tag("form", method="POST", action="https://musicbrainz.org/release/add")
+        self.form_tag = self.tag("form", method="POST", action=url_base)
         self.form_tag.__enter__()
         self.mediums = {}
 

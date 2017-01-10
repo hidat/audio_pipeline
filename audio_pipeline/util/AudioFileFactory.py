@@ -4,6 +4,7 @@ from audio_pipeline import Constants
 class AudioFileFactory:
 
     audiofiles = dict()
+    setup = False
 
     @classmethod
     def get(cls, file_name):

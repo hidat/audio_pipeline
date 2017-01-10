@@ -31,6 +31,7 @@ class LoadReleases(threading.Thread):
         self.loaded = 0
         self.scanned = 0
         self.processor = Process.Processor(Constants.processor, Constants.batch_constants.mb)
+        self.processor.populate()
         self.lookup = Constants.load_releases
 
     def run(self):

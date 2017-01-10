@@ -1,42 +1,66 @@
 {
-  default: kbcs,
+  default: kexp,
+  tags: {
+    item_code: itemcode,
+    custom_tags: {track: [KEXPAnchorStatus, KEXPPRIMARYGENRE]}
+  },
   tb_meta: 
-    {commands:
-      [
-        {
-          command: quit, aliases: [q], description: "Close this application."
-        },
-        {
-          command: next, aliases: [n], description: "Display metadata of next album."
-        },
-        {
-          command: previous, aliases: [prev, p], description: "Display metadata of previous album."
-        },
-        {
-          command: edit, aliases: [e], description: "Edit all metadata categories with the Metadata Input Friend."
-        },
+    {navigation:
+      {
+        forward:
+          {
+            command: next, aliases: [n], description: "Display metadata of next album."
+          },
+        backward: 
+          {
+            command: previous, aliases: [prev, p], description: "Display metadata of previous album."
+          }
+       },
+    close:
+      {
+        command: quit, aliases: [q], description: "Close this application."
+      },
+    editor:
+      {
+        command: edit, aliases: [e], description: "Edit all metadata categories with the Metadata Input Friend."
+      },
+    discogs:
+      {
+        command: discogs, aliases: [disccc], description: "Populate audio file metadata with metadata from discogs"
+      },
+    release_seeder:
+      {
+        command: "add release", url_base: "https://musicbrainz.org/release/add", 
+        description: "Add current disc to MusicBrainz as a new release. The MusicBrainz add release page will open in browser with most metadata pre-filled."
+      },
+    search:
+      {
+        mb_search:
         {
           command: search, aliases: [s], description: "Search for MusicBrainz release in browser.",
           options: [
-            {command: "<artist_name>", description: "Search for artist using specified name instead of name in metadata."},
-            {command: "bar", description: "Search for release by barcode / catalog number."}
-          ]
+            {command: '"<artist_name>"', description: "Search for artist using specified name instead of name in metadata."},
+          ],
+          url_base: "http://musicbrainz.org/search?query="
         },
-        {
-          command: bar, options: [command: "<barcode or catno>"], 
-          description: "Search by barcode/catno. If no barcode or catalog number is entered, will search for barcode / catalog number in metadata."
-        },
+        albunack_search:
         {
           command: albunack, aliases: [al], description: "Search for release in Albunack in browser.",
           options: [
-            {command: "<artist_name>", description: "Search for artist using specified name instead of name in metadata."},
-            {command: "bar", description: "Search for release by barcode / catalog number."}
-          ]
-        }        
-      ]
+            {command: '"<artist_name>"', description: "Search for artist using specified name instead of name in metadata."},
+          ],
+          url_base: "http://www.albunack.net/artist/search?"
+        },
+        mb_barcode:
+        {
+          command: barcode, aliases: [bar], options: [command: "<barcode>"],
+          url_base: "http://musicbrainz.org/search?query=", 
+          description: "Search by barcode/catno. If no barcode or catalog number is entered, will search for barcode / catalog number in metadata."
+        }
+      },
     },
   audiofile: !!python/name:audio_pipeline.util.AudioFile.BaseAudioFile '',
   batch constants: !!python/name:audio_pipeline.util.Resources.BatchConstants '',
   serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '',
-  custom_tags: {category: CATEGORY, item_code: ITEMCODE, obscenity: OBSCENITYRATING}
+  discogs_processor: !!python/module:audio_pipeline.util.Discogs.ExtractMeta '',
 }

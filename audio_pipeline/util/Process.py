@@ -1,9 +1,9 @@
 import uuid
 
 from audio_pipeline import Constants
-from audio_pipeline.util import Exceptions
-from audio_pipeline.util import Util, Resources
-
+from audio_pipeline.util.Discogs import DiscogsInfo
+from audio_pipeline.util import Exceptions, Util, Resources
+from audio_pipeline.util.MusicBrainz import primary_types
 
 class Processor:
 
@@ -11,14 +11,57 @@ class Processor:
     releases = dict()
     artists = dict()
     mbinfo = None
+    discogsinfo = None
     processor = None
-
+    discogs_processor = None
+    meta_sourcees = None
+    
     def __init__(self, *args):
         Processor.mbinfo = Constants.batch_constants.mb
+        Processor.discogsinfo = DiscogsInfo.DiscogsInfo
         Processor.processor = Constants.processor
+        Processor.discogs_processor = Constants.discogs_processor
+        self.populate()
+        
+    @classmethod
+    def populate(cls):
+        cls.meta_sources = {
+            "mb": {
+                "get_releases": cls.__get_mb_releases,
+                "get_release": cls.__get_mb_release,
+                "get_artist": cls.__get_mb_artist
+                },
+            "discogs": {
+                "get_release": cls.__get_discogs_release,
+                "get_releases": None,
+                "get_artist": None
+                }
+            }
+
 
     @classmethod
-    def get_releases(cls, mbid):
+    def get_releases(cls, id, source="mb"):
+        lookup = cls.meta_sources[source]["get_releases"]
+        return lookup(id)
+        
+    @classmethod
+    def __get_discogs_release(cls, id):
+        if cls.discogsinfo is None:
+            raise Exceptions.NoDiscogsError("No Discogs object when processing release " + str(id))
+
+        if id in cls.releases:
+            return cls.releases[id]
+        else:
+            discogs_release = cls.discogsinfo.get_release(id)
+            if not discogs_release:
+                raise Exceptions.NoDiscogsError("Problem getting release info from Discogs for id " + str(id))
+
+            release = cls.discogs_processor.ReleaseProcessor(discogs_release)
+            cls.releases[id] = release
+            return release
+
+    @classmethod
+    def __get_mb_releases(cls, mbid):
         if cls.mbinfo is None:
             raise Exceptions.NoMusicBrainzError("No MBInfo object when processing release group " + str(mbid))
 
@@ -39,9 +82,15 @@ class Processor:
                 results.append(release)
                 cls.releases[release_id] = release
             return results
+        
+    @classmethod
+    def get_release(cls, id, source="mb"):
+        lookup = cls.meta_sources[source]["get_release"]
+        print(lookup)
+        return lookup(id)
 
     @classmethod
-    def get_release(cls, mbid):
+    def __get_mb_release(cls, mbid):
         if cls.mbinfo is None:
             raise Exceptions.NoMusicBrainzError("No MBInfo object when processing release " + str(mbid))
 
@@ -57,7 +106,13 @@ class Processor:
             return release
 
     @classmethod
-    def get_artist(cls, mbid):
+    def get_artist(cls, id, source="mb"):
+        lookup = cls.meta_sources[source]["get_artist"]
+        return lookup(id)
+
+
+    @classmethod
+    def __get_mb_artist(cls, mbid):
         if cls.mbinfo is None:
             raise Exceptions.NoMusicBrainzError("No MBInfo object when processing artist " + str(mbid))
 
@@ -71,7 +126,7 @@ class Processor:
             artist = cls.processor.ArtistProcessor(mb_artist)
             cls.artists[mbid] = artist
             return artist
-
+    
 
 class ReleaseProcessor:
     secondary_category = "CATEGORIES/ROTATION-STAGING"
@@ -211,23 +266,7 @@ class ReleaseProcessor:
             track_meta = disc['track-list'][track_index]
         else:
             return track
-            
-        # if generating unique item codes, do that
-        if not Constants.is_tb:
-            if Constants.batch_constants.gen_item_code:
-                item_code = str(uuid.uuid4())
-            elif audio_file.item_code.value is not None:
-                item_code = audio_file.item_code.value
-            elif (audio_file.obscenity.value is not None and \
-                 audio_file.obscenity.value.casefold() == "kexp clean edit") or \
-                 (audio_file.radio_edit.value is not None and \
-                 audio_file.radio_edit.value.casefold() == "kexp radio edit"):
-                item_code = str(uuid.uuid4())
-            else:
-                item_code = track_meta['id']
-
-            track.item_code = item_code
-                        
+                                    
         recording_meta = track_meta['recording']
         
         # fields from track_meta

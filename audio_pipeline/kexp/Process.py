@@ -83,29 +83,43 @@ class ReleaseProcessor(ExtractMeta.ReleaseProcessor):
             # and we are not able to properly extract the metadata
             return track
 
-        if Constants.batch_constants.gen_item_code:
-            item_code = str(uuid.uuid4())
-        elif audio_file.item_code.value is not None:
-            item_code = audio_file.item_code.value
-        elif (audio_file.obscenity.value is not None and \
-                          audio_file.obscenity.value.casefold() == "kexp clean edit") or \
-                (audio_file.radio_edit.value is not None and \
-                             audio_file.radio_edit.value.casefold() == "kexp radio edit"):
-            item_code = str(uuid.uuid4())
-        else:
-            item_code = track_meta['id']
-
-        track.item_code = item_code
-
-        track.set_type()
-
+ 
         #####################################################
         # Set KEXP-specific metadata from audio file tags
         #####################################################
 
-        track.primary_genre = Resources.Genres.get(str(audio_file.category))
-        track.anchor_status = str(audio_file.anchor)
+        track.primary_genre = Resources.Genres.get(str(audio_file.track_tags["KEXPPrimaryGenre"]))
+        track.anchor_status = str(audio_file.track_tags["KEXPAnchorStatus"])
+        track.obscenity = str(audio_file.track_tags["KEXPFCCOBSCENITYRATING"])
+        track.radio_edit = str(audio_file.track_tags["KEXPRadioEdit"])
+        
+        print("Primary genre: " + track.primary_genre)
+        print("Anchor status: " + track.anchor_status)
+        print("Obscenity rating: " + track.obscenity)
+        print("Radio edit status: " + track.radio_edit)
+        
+        print(track.obscenity.casefold())
+        print(track.radio_edit.casefold())
+        print(track.obscenity.casefold() == "kexp clean edit")
+        print(track.radio_edit.casefold() == "kexp radio edit")
 
+        # if generating unique item codes, do that
+        if not Constants.is_tb:
+            if Constants.batch_constants.gen_item_code:
+                item_code = str(uuid.uuid4())
+            elif audio_file.item_code.value is not None:
+                item_code = audio_file.item_code.value
+            elif (track.obscenity.casefold() == "kexp clean edit") or (track.radio_edit.casefold() == "kexp radio edit"):
+                item_code = str(uuid.uuid4())
+            else:
+                item_code = track_meta['id']
+    
+            track.item_code = item_code
+            print("Track mbid: " + track_meta['id'])
+            print("Track item code: " + track.item_code)
+            
+        track.set_type()
+        
         # get the secondary category
         sort_names = []
         for artist in release_meta.artist_sort_names:

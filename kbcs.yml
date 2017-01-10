@@ -9,9 +9,9 @@
                 {
                   tag: Rotation Status, aliases: ['R', 'Rotation'],
                   options: [
-                    {command: Heavy, alias: h, description: "Rotation status 'heavy'"}, 
-                    {command: Medium, alias: m, description: "Roation status 'medium'"}, 
-                    {command: Light, alias: l, description: "Rotation status 'light'"}
+                    {command: Heavy, aliases: [h], description: "Rotation status 'heavy'"}, 
+                    {command: Medium, aliases: [m], description: "Roation status 'medium'"}, 
+                    {command: Light, aliases: [l], description: "Rotation status 'light'"}
                   ],
                   description: "Set rotation status of current release"
                 },
@@ -36,7 +36,7 @@
             track:
               [
                 {
-                  tag: Send to ENCO, aliases: [enco, e], 
+                  tag: Gen Sequence Num, display_name: "Send to Enco", aliases: [enco, e], 
                   description: "Toggle if specified track(s) should be sent to ENCO or not."
                 },
                 {
@@ -46,8 +46,8 @@
                 {
                   tag: FCC Rating, display_name: Obscenity Rating, aliases: [obscenity, o], 
                   description: "Set the obscenity rating of specified track(s).",
-                  options: [{command: Yellow Dot, alias: y, color: yellow}, 
-                    {command: red dot, alias: r, color: red}]
+                  options: [{command: Yellow Dot, aliases: [y], color: yellow}, 
+                    {command: red dot, aliases: [r], color: red}]
                 }
               ]
           },

@@ -92,6 +92,9 @@ class Release(Content):
         """
         super().__init__(item_code, id, title)
         
+        # if we got data from discogs, this info will be filled in
+        self.discogs_id = ""
+        
         self.release_group_id = ""
         self.disc_count = None
         self.first_released = ""
@@ -103,6 +106,7 @@ class Release(Content):
         self.release_type = ""
         
         self.artist_ids = []
+        self.artists = []
         self.artist = ''
         self.artist_sort_names = []
         
@@ -150,9 +154,11 @@ class Track(Content):
         self.type = ""
         
         self.radio_edit = False
+        
         self.artists = []
         self.artist_credit = ''
         self.artist_phrase = ''
+        self.extra_artists = []
         
         self.anchor_status = None
         
@@ -179,6 +185,7 @@ class Artist(Content):
         self.sort_name = ''
         self.annotation = ''
         self.type = ''
+        self.join_phrase = ''
         
         self.begin_area = NameId('', '')
         self.end_area = NameId('', '')
