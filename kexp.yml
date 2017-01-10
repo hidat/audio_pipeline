@@ -1,13 +1,11 @@
 {
  tags: {ignore_case: False,
-#        obscenity: KEXPFCCOBSCENITYRATING,
-        category: KEXPPRIMARYGENRE,
-#        radio_edit: KEXPRadioEdit,
         custom_tags: {track: [KEXPAnchorStatus, KEXPPrimaryGenre]}},
  tb_lookup: False,
   tb_meta: {release:
               [
-                {tag: KEXPSecondaryGenre, aliases: ['genre', 'secondary', 'category']}
+                {tag: KEXPSecondaryGenre, aliases: ['genre', 'secondary', 'category'],
+                 freeform: True}
               ],
             track:
               [

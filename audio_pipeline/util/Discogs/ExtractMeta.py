@@ -14,8 +14,9 @@ class ReleaseProcessor(Process.ReleaseProcessor):
         with the data retrieved from discogs
         """
         
-        # if the audio file has an mbid, take it out - it is probably wrong!
-        audio_file.mbid.value = None
+        # leave the mbid alone; they can remove it manually if they'd like to.
+        # Sometimes the discogs info will be used supplementally.
+#         audio_file.mbid.value = None
         audio_file.album_artist.value = self.release.artist
         audio_file.album.value = self.release.title
         audio_file.release_date.value = self.release.date

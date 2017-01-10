@@ -231,6 +231,11 @@ class Command:
         self.examples = examples
         self.active = active
         
+        if self.freeform and not self.description:
+            self.description = "Accepts any input as a valid tag value."
+        elif not self.options and not self.description:
+            self.description = "This is a true/false tag that is toggled with each command entry."
+        
         
     def full_command(self):
         full_command = ", ".join([self.command.casefold()] + [alias.casefold() for alias in self.aliases])
