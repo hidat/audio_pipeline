@@ -14,7 +14,7 @@ min_width = 120 * 8
 min_height = 85 * 8
 
 
-# track_number_pattern = re.compile()
+tag_command_help = "All tags can be cleared by entering \"<TAG NAME> clear\". Tags with no defined options can be toggled on/off."
 separator_pattern = re.compile('(,|\s+)\s*')
 span = re.compile("(\d+)(\s*-\s*)(\d+)")
 tracknum_pattern = re.compile("(?<=,|\s)\d+|\d+(?=,|\s)")

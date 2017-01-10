@@ -1,5 +1,5 @@
 from . import Settings
-from .. import release_tags, track_tags, general_commands
+from .. import release_tags, track_tags, general_commands, tag_command_help
 import tkinter.tix as tk
         
 selected_bg = "gray"
@@ -13,6 +13,7 @@ class InfoFrame(tk.Frame):
         self.desc = None
         self.command_frame = None
         self.master = master
+        self.gen_help = None
                 
         width_frame = tk.Frame(master=self.master, bg=Settings.bg_color, width=115*8, height=0)
         width_frame.grid(row=0, column=1, padx=5, pady=3, sticky="nw")
@@ -22,8 +23,8 @@ class InfoFrame(tk.Frame):
         tk.Frame.__init__(self, master, bg=Settings.bg_color)
         self.menubar = tk.Menu(self.master, takefocus=True)
         self.menubar.add_command(label="General Commands", command=lambda: self.display_commands(general_commands, "General Commands", 1))
-        self.menubar.add_command(label="Track Commands", command=lambda: self.display_commands(track_tags, "Track Metadata", 3))
-        self.menubar.add_command(label="Release Commands", command=lambda: self.display_commands(release_tags, "Release Metadata", 5))
+        self.menubar.add_command(label="Track Commands", command=lambda: self.display_commands(track_tags, "Track Metadata", 3, tag_command_help))
+        self.menubar.add_command(label="Release Commands", command=lambda: self.display_commands(release_tags, "Release Metadata", 5, tag_command_help))
         self.master.config(menu=self.menubar)
         self.menubar.activate(1)
         self.menubar.invoke(1)
@@ -31,7 +32,7 @@ class InfoFrame(tk.Frame):
         self.grid(row=1, column=1, padx=5, pady=3, sticky="nw")
 
 
-    def display_commands(self, commands, section_header, index):
+    def display_commands(self, commands, section_header, index, gen_help=None):
         """
         Display information about available commands onscreen
 
@@ -42,6 +43,14 @@ class InfoFrame(tk.Frame):
         desc = tk.Label(self, text=section_header, bg=Settings.bg_color, fg=Settings.text_color,
             anchor="nw", font=Settings.heading)
         desc.grid(row=0, column=0, padx=5, pady=3, sticky="nw")
+        if self.gen_help:
+            self.gen_help.destroy()
+            self.gen_help = None
+        if gen_help:
+            desc_help = tk.Label(self, text=gen_help, bg=Settings.bg_color, fg=Settings.text_color,
+                                 anchor="nw")
+            desc_help.grid(row=1, column=0, padx=5, pady=3, sticky="nw")
+            self.gen_help = desc_help
         if self.desc:
             self.desc.destroy()
             self.desc = None
@@ -50,7 +59,7 @@ class InfoFrame(tk.Frame):
         if self.command_frame:
             self.command_frame.destroy()
             self.command_frame = None
-        self.populate_frame(commands, 0, section_header)
+        self.populate_frame(commands, 1, section_header)
             
     def populate_frame(self, commands, base_row, section_header):        
         base_row += 1
