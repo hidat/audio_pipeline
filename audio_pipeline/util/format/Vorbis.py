@@ -198,6 +198,5 @@ class Format(Tag.MetadataFormat):
 
     @classmethod
     def custom_tag(cls, name, tags):
-        serialization_name = re.sub("\s", "_", name)
-        tag = BaseTag(name, serialization_name, tags)
+        tag = BaseTag(name, name, tags)
         return tag

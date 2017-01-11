@@ -196,7 +196,7 @@ class Tag(abc.ABC):
             if self.serialization_name.casefold() in tag_name:
                 self.serialization_name = tag_name[self.serialization_name.casefold()]
                 self._value = copy.deepcopy(self.mutagen[self.serialization_name])
-        elif self.serialization_name in self.mutagen.keys():
+        elif self.serialization_name in self.mutagen:
             self._value = copy.deepcopy(self.mutagen[self.serialization_name])
         else:
             self._value = None
