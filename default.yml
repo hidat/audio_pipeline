@@ -1,8 +1,7 @@
 {
-  default: kexp,
+  default: kbcs,
   tags: {
-    item_code: itemcode,
-    custom_tags: {track: [KEXPAnchorStatus, KEXPPRIMARYGENRE]}
+    item_code: itemcode
   },
   tb_meta: 
     {navigation:
@@ -57,7 +56,7 @@
           url_base: "http://musicbrainz.org/search?query=", 
           description: "Search by barcode/catno. If no barcode or catalog number is entered, will search for barcode / catalog number in metadata."
         }
-      },
+      }
     },
   audiofile: !!python/name:audio_pipeline.util.AudioFile.BaseAudioFile '',
   batch constants: !!python/name:audio_pipeline.util.Resources.BatchConstants '',

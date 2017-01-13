@@ -32,6 +32,11 @@
                   tag: File Under, aliases: ['F', 'File'], freeform: True,
                   description: "Set directory under which to file this release - this is a freeform tag."
                 }
+                ,
+                {
+                  tag: Playlist Center, aliases: ["Playlist", "Play"], display_name: "Send to Playlist Center",
+                  description: "Set tag to send this release to playlist center"
+                }
               ],
             track:
               [
@@ -50,10 +55,10 @@
                     {command: red dot, aliases: [r], color: red}]
                 }
               ]
-          },
+            },
    destination folder: "C:\\kbcs",
    audiofile: !!python/name:audio_pipeline.util.AudioFile.BaseAudioFile '',
-   processor: !!python/name:audio_pipeline.util.MusicBrainz.ExtractMeta '',
+   processor: !!python/module:audio_pipeline.util.MusicBrainz.ExtractMeta '',
    batch constants: !!python/name:audio_pipeline.util.Resources.BatchConstants '',
    serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '',
    user: KBCS

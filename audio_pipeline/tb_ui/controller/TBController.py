@@ -63,6 +63,8 @@ class TBController:
         for tag in release_tags:
             release_tag, release_value = tag.execute(input_string)
             if release_tag is not None:
+                if release_value is True and self.model.current_release[0].release_tags[release_tag].value:
+                    release_value = None
                 self.model.set_release_tag(release_tag, release_value)
                 self.app.update_meta(self.model.current_release)
                 return

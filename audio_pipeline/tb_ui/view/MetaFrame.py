@@ -80,6 +80,10 @@ class ReleaseFrame(MetaFrame):
             fields_per_row = -1
             self.labels.append({})
             for tag_info in track.tb_release():
+                for label_group in self.labels[rowval]:
+                    if tag_info.tag.name in label_group:
+                        continue
+                
                 total_width += (tag_info.width + self.name_padding['padx'])
                 rowidth += (tag_info.width + self.name_padding['padx'])
                 if total_width < __max_width__:
@@ -88,24 +92,23 @@ class ReleaseFrame(MetaFrame):
                     rowval += 1
                     colval = 1
                     rowidth = (tag_info.width + self.name_padding['padx'])
-                    if rowval == len(self.labels):
+                    if rowval >= len(self.labels):
                         self.labels.append({})
 
-                if tag_info.tag.name not in self.labels[rowval]:
-                    display_name = tag_info.tag.name
-                    for r in release_tags:
-                        if r.command == display_name:
-                            if r.display_name:
-                                display_name = r.display_name
-                            break
-                    self.attribute_text[tag_info.tag.name] = tk.StringVar()
-                    self.labels[rowval][tag_info.tag.name] = tk.Label(self, self.name_style,
-                                                                            text=display_name)
-                    self.labels[rowval][tag_info.tag.name].grid(self.name_padding, row=(rowval * 2),
-                                                                      column=colval)
-                    self.attribute_widths.append(tag_info.width)
-                    # colval = self.add_tag(tag_info, colval)
-                    colval += 1
+                display_name = tag_info.tag.name
+                for r in release_tags:
+                    if r.command == display_name:
+                        if r.display_name:
+                            display_name = r.display_name
+                        break
+                self.attribute_text[tag_info.tag.name] = tk.StringVar()
+                self.labels[rowval][tag_info.tag.name] = tk.Label(self, self.name_style,
+                                                                        text=display_name)
+                self.labels[rowval][tag_info.tag.name].grid(self.name_padding, row=(rowval * 2),
+                                                                  column=colval)
+                self.attribute_widths.append(tag_info.width)
+                # colval = self.add_tag(tag_info, colval)
+                colval += 1
         except AttributeError:
             pass
             
