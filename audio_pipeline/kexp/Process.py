@@ -92,16 +92,6 @@ class ReleaseProcessor(ExtractMeta.ReleaseProcessor):
         track.anchor_status = str(audio_file.track_tags["KEXPAnchorStatus"])
         track.obscenity = str(audio_file.track_tags["KEXPFCCOBSCENITYRATING"])
         track.radio_edit = str(audio_file.track_tags["KEXPRadioEdit"])
-        
-        print("Primary genre: " + track.primary_genre)
-        print("Anchor status: " + track.anchor_status)
-        print("Obscenity rating: " + track.obscenity)
-        print("Radio edit status: " + track.radio_edit)
-        
-        print(track.obscenity.casefold())
-        print(track.radio_edit.casefold())
-        print(track.obscenity.casefold() == "kexp clean edit")
-        print(track.radio_edit.casefold() == "kexp radio edit")
 
         # if generating unique item codes, do that
         if not Constants.is_tb:

@@ -41,6 +41,10 @@ action = ('Courier New', '10', 'bold')
 initial_size = (500, 500)
 
 
+##########################
+#   Utilities for TomatoBanana
+##########################
+
 def get_text_color(audio_file):
     color = text_color
 
@@ -68,8 +72,7 @@ class WebBrowserAssist:
                 q = part[0]
             q = urllib.parse.quote_plus(q)
             prepped_query.append(q)
-            print(prepped_query)
-    
+
         return " ".join(prepped_query)  
     
     @staticmethod
@@ -99,7 +102,6 @@ class WebBrowserAssist:
         if search_terms:
             search_terms = urllib.parse.urlencode(search_terms)
             search_url = url_base + search_terms
-            print(search_url)
             webbrowser.open(search_url)
     
     @staticmethod
@@ -124,7 +126,6 @@ class WebBrowserAssist:
             query = WebBrowserAssist.prep_query(query)
             search_terms = urllib.parse.urlencode(search_terms)
             search_url = "%s%s&%s" % (url_base, query, search_terms)
-            print(search_url)
             webbrowser.open(search_url)
 
     @staticmethod
@@ -161,7 +162,6 @@ class WebBrowserAssist:
             query = WebBrowserAssist.prep_query(query)
             search_terms = urllib.parse.urlencode(search_terms)
             search_url = "%s%s&%s" % (url_base, query, search_terms)
-            print(search_url)
             webbrowser.open(search_url)
             
 #######################
@@ -301,7 +301,6 @@ class TrackCommand(Command):
 class NavigationCommand(Command):
     
     def __init__(self, base_distance=0, **kwargs):
-        print(kwargs)
         self.base_distance = base_distance
         
         super().__init__(**kwargs)

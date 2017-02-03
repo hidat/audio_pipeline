@@ -1,7 +1,8 @@
 {
  tags: {ignore_case: False,
         custom_tags: {track: [KEXPAnchorStatus, KEXPPrimaryGenre]}},
- tb_lookup: False,
+  tb_lookup: True,
+  acoustid_lookup: False,
   tb_meta: {release:
               [
                 {tag: KEXPSecondaryGenre, aliases: ['genre', 'secondary', 'category'],
@@ -21,8 +22,7 @@
                  aliases: [edit, radio]}
               ]
           },
- audiofile: !!python/name:audio_pipeline.util.AudioFile.BaseAudioFile '',
- processor: !!python/name:audio_pipeline.kexp.Process '',
+ processor: !!python/module:audio_pipeline.kexp.Process '',
  batch constants: !!python/name:audio_pipeline.kexp.Resources.BatchConstants '',
  serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '',
  argument_config: !!python/name:audio_pipeline.kexp.argument_config '',

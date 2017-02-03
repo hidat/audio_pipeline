@@ -4,8 +4,9 @@ import collections
 from .format import Vorbis
 from .format import AAC
 from .format import ID3
-from . import Exceptions
-from . import Tag
+from . import Exceptions, Tag
+from . import Utilities
+from audio_pipeline import Constants
 
 
 class BaseAudioFile:
@@ -178,3 +179,37 @@ class BaseAudioFile:
         release += [v for v in self.release_tags.values()]
 
         return release
+
+    def has_minimum_metadata(self):
+        """
+        Checks if this audiofile has the minimum 'required' metadata -
+        album name, album artist name, track name, and track artist name
+        :return: True if minimum metadata is there, False otherwise
+        """
+        min_meta = bool(self.album.value and Utilities.know_artist_name(self.album_artist.value) and self.title.value
+                    and Utilities.know_artist_name(self.artist.value))
+        print("Has minimum metadata: " + str(min_meta))
+        return min_meta
+
+    def should_stuff_metadata(self):
+        """
+        Checks if this audiofile has already been stuffed with metadata.
+        :return: True if audiofile has had metadata stuffed, false otherwise
+        """
+        return self.meta_stuffed.value
+
+
+class AudioFileFactory:
+
+    audiofiles = dict()
+    setup = False
+
+    @classmethod
+    def get(cls, file_name):
+        if file_name in cls.audiofiles:
+            return cls.audiofiles[file_name]
+        else:
+            af = BaseAudioFile(file_name, Constants.custom_release_tags, Constants.custom_track_tags,
+                                     Constants.tb_release_tags, Constants.tb_track_tags)
+            cls.audiofiles[file_name] = af
+            return af

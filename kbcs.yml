@@ -57,7 +57,6 @@
               ]
             },
    destination folder: "C:\\kbcs",
-   audiofile: !!python/name:audio_pipeline.util.AudioFile.BaseAudioFile '',
    processor: !!python/module:audio_pipeline.util.MusicBrainz.ExtractMeta '',
    batch constants: !!python/name:audio_pipeline.util.Resources.BatchConstants '',
    serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '',

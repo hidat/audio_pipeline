@@ -5,7 +5,7 @@ import shutil
 
 from audio_pipeline import Constants
 from audio_pipeline.util import Process as Processor
-from audio_pipeline.util import AudioFileFactory
+from audio_pipeline.util.AudioFile import AudioFileFactory
 from audio_pipeline.util import Exceptions
 from audio_pipeline.util import Util
 

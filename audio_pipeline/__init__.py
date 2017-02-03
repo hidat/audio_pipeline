@@ -10,12 +10,12 @@ class Constants:
     batch_constants = None
 
     config_dir = ""
-    audiofile = None
     processor = None
     discogs_processor = None
     serializer = None
     custom_tags = None
-    load_releases = True
+    tb_lookup = True
+    acoustid_lookup = True
     is_tb = False
 
     custom_track_tags = []
@@ -67,14 +67,12 @@ class Constants:
             if "track" in config["tb_meta"]:
                 cls.tb_track_tags = [t['tag'] for t in config["tb_meta"]["track"]]
         if "tb_lookup" in config:
-            cls.load_releases = config['tb_lookup']
+            cls.tb_lookup = config['tb_lookup']
+        if "acoustid_lookup" in config:
+            cls.acoustid_lookup = config["acoustid_lookup"]
         if "batch constants" in config:
             cls.batch_constants_def = config["batch constants"]
             cls.batch_constants = cls.batch_constants_def(None)
-        if "audiofile" in config:
-            cls.audiofile = config["audiofile"]
-            if "user" in config:
-                cls.audiofile.audiofile_type = config["user"]
         if "processor" in config:
             cls.processor = config["processor"]
         if "discogs_processor" in config:

@@ -1,6 +1,6 @@
 import uuid
 import os
-from audio_pipeline.util.AudioFileFactory import AudioFileFactory
+from audio_pipeline.util.AudioFile import AudioFileFactory
 from audio_pipeline.util import Exceptions
 
 

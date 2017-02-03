@@ -1,5 +1,5 @@
 {
-  default: kbcs,
+  default: kexp,
   tags: {
     item_code: itemcode
   },
@@ -58,7 +58,6 @@
         }
       }
     },
-  audiofile: !!python/name:audio_pipeline.util.AudioFile.BaseAudioFile '',
   batch constants: !!python/name:audio_pipeline.util.Resources.BatchConstants '',
   serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '',
   discogs_processor: !!python/module:audio_pipeline.util.Discogs.ExtractMeta '',
