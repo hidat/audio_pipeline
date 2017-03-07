@@ -1,6 +1,7 @@
 from . import Settings
 import tkinter.tix as tk
 from .. import get_text_color, track_tags, release_tags
+from collections import OrderedDict
 
 
 __max_width__ = 260
@@ -27,9 +28,9 @@ class MetaFrame(tk.Frame):
 
         tk.Frame.__init__(self, master, bg=Settings.bg_color)
         self.attributes = {}
-        self.labels = {}
+        self.labels = OrderedDict()
         self.attribute_text = {}
-        self.attribute_widths = []
+        self.attribute_widths = {}
 
         self.active = []
 
@@ -58,7 +59,7 @@ class ReleaseFrame(MetaFrame):
         self.labels[tag_info.row][tag_info.tag.name] = tk.Label(self, self.name_style, text=tag_info.tag.name)
         self.labels[tag_info.row][tag_info.tag.name].grid(self.name_padding, row=(tag_info.row * 2), column=colval)
         colval += 1
-        self.attribute_widths.append(tag_info.width)
+        self.attribute_widths[tag_info.tag.name] = tag_info.width
         return colval
 
     def display_meta(self, metadata):
@@ -106,26 +107,24 @@ class ReleaseFrame(MetaFrame):
                                                                         text=display_name)
                 self.labels[rowval][tag_info.tag.name].grid(self.name_padding, row=(rowval * 2),
                                                                   column=colval)
-                self.attribute_widths.append(tag_info.width)
+                self.attribute_widths[tag_info.tag.name] = tag_info.width
                 # colval = self.add_tag(tag_info, colval)
                 colval += 1
         except AttributeError:
             pass
             
-        width_index = 0
         for tag in track.release():
             name = tag.name
             for label_group in self.labels:
-                if name in label_group and width_index < len(self.attribute_widths):
+                if name in label_group:
 
                     column_value = label_group[name].grid_info()["column"]
                     row_value = label_group[name].grid_info()["row"] + 1
                     self.attribute_text[name].set(str(tag))
-                    self.attributes[name] = tk.Label(self, self.tag_style, width=self.attribute_widths[width_index],
-                                                     wraplength=(self.attribute_widths[width_index] * 8),
+                    self.attributes[name] = tk.Label(self, self.tag_style, width=self.attribute_widths[name],
+                                                     wraplength=(self.attribute_widths[name] * 8),
                                                      textvariable=self.attribute_text[name])
                     self.attributes[name].grid(self.meta_padding, row=row_value, column=column_value)
-                    width_index += 1
 
     def update_meta(self, audio_file):
         for tag in audio_file.release():
@@ -155,7 +154,7 @@ class TrackFrame(MetaFrame):
         self.labels[tag.name] = tk.Label(self, self.name_style, text=display_name)
         self.labels[tag.name].grid(self.name_padding, row=rowval, column=colval)
         colval += 1
-        self.attribute_widths.append(width)
+        self.attribute_widths[tag.name] = width
         return rowval, colval
 
     def display_meta(self, metadata):
@@ -179,29 +178,27 @@ class TrackFrame(MetaFrame):
                 # this should only happen on the obscenity rating - pass
                 pass
                 
-        colval = 1
         rowval = 1
-
+        columns = list(self.labels.keys())
+        
         for track in metadata:
             name = track.file_name
             self.attributes[name] = dict()
             self.attribute_text[name] = dict()
                     
             color = get_text_color(track)
-            width_index = 0
             for tag in track.track():
-                if tag.name in self.labels and width_index < len(self.attribute_widths):
+                if tag.name in self.labels:
+                    colval = columns.index(tag.name) + 1
                     self.attribute_text[name][tag.name] = tk.StringVar()
                     self.attribute_text[name][tag.name].set(tag)
+                    
                     self.attributes[name][tag.name] = tk.Label(self, self.tag_style, foreground=color,
-                                                          width=self.attribute_widths[width_index], 
-                                                          wraplength=(self.attribute_widths[width_index]*8),
+                                                          width=self.attribute_widths[tag.name], 
+                                                          wraplength=(self.attribute_widths[tag.name]*8),
                                                           textvariable=self.attribute_text[name][tag.name])
                     self.attributes[name][tag.name].grid(self.meta_padding, row=rowval, column=colval)
-                    width_index += 1
-                    colval += 1
             rowval += 1
-            colval = 1
 
     def clear(self):
         for file, tags in self.attributes.items():
@@ -217,21 +214,3 @@ class TrackFrame(MetaFrame):
                 self.attribute_text[name][tag.name].set(tag)
                 self.attributes[name][tag.name].config(fg=color)
                 i += 1
-
-    def select_tracks(self, tracks):
-        self.active.clear()
-        for track_name, track in self.attributes.items():
-            if track_name in tracks:
-                for tag, label in track.items():
-                    label['state'] = 'active'
-            else:
-                for tag, label in track.items():
-                    label['state'] = 'normal'
-
-    def select_tags(self, tag):
-        for track_name, track in self.attributes.items():
-            for name, label in track.items():
-                if label['state'] == 'active' and name == tag:
-                    self.active.append(self.attribute_text[name])
-                else:
-                    label['state'] = 'normal'

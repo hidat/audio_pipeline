@@ -152,7 +152,7 @@ class Track(Content):
         self.obscenity = ""
         self.primary_genre = ""
         self.type = ""
-        
+                
         self.radio_edit = False
         
         self.artists = []

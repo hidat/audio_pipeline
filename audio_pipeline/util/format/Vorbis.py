@@ -110,6 +110,8 @@ class Format(Tag.MetadataFormat):
     _track_num = "tracknumber"
     _length = "Length"
     _acoustid = "ACOUSTID_ID"
+    _track_mbid = 'MUSICBRAINZ_RELEASETRACKID'
+    _recording_mbid = 'MUSICBRAINZ_TRACKID'
     
     ################
     #   release-level tags
@@ -189,6 +191,16 @@ class Format(Tag.MetadataFormat):
     @classmethod
     def acoustid(cls, tags):
         tag = BaseTag(cls._acoustid_name, cls._acoustid, tags)
+        return tag
+
+    @classmethod
+    def recording_mbid(cls, tags):
+        tag = BaseTag(cls._recording_mbid_name, cls._recording_mbid, tags)
+        return tag
+    
+    @classmethod
+    def track_mbid(cls, tags):
+        tag = BaseTag(cls._track_mbid_name, cls._track_mbid, tags)
         return tag
 
     #########################

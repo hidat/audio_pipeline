@@ -157,6 +157,11 @@ class ReleaseProcessor:
 
         track = self.get_track(audio_file)
 
+        if track.recording_id:
+            audio_file.recording_mbid.value = track.recording_id
+        if track.id:
+            audio_file.track_mbid.value = track.id
+            
         audio_file.title.value = track.title
         if track.artist_phrase:
             audio_file.artist.value = track.artist_phrase

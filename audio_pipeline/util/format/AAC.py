@@ -166,7 +166,9 @@ class Format(Tag.MetadataFormat):
     _track_num = "trkn"
     _length = "Length"
     _acoustid = "Acoustid Id"
-
+    _track_mbid = '----:com.apple.iTunes:MusicBrainz Track Id'
+    _recording_mbid = '----:com.apple.iTunes:MusicBrainz Release Track Id'
+    
     # custom tag base
     custom_tag_base = "----:com.apple.iTunes:"
 
@@ -243,6 +245,16 @@ class Format(Tag.MetadataFormat):
     @classmethod
     def acoustid(cls, tags):
         tag = cls.custom_tag(cls._acoustid, tags)
+        return tag
+
+    @classmethod
+    def recording_mbid(cls, tags):
+        tag = FreeformTag(cls._recording_mbid_name, cls._recording_mbid, tags)
+        return tag
+    
+    @classmethod
+    def track_mbid(cls, tags):
+        tag = FreeformTag(cls._track_mbid_name, cls._track_mbid, tags)
         return tag
 
     #########################

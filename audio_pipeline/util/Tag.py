@@ -69,6 +69,8 @@ class MetadataFormat(abc.ABC):
     _track_num_name = "Track Num"
     _length_name = "Length"
     _acoustid_name = "Acoustid ID"
+    _recording_mbid_name = "Recording MBID"
+    _track_mbid_name = "Track MBID"
 
     ################
     #   release-level tags
@@ -134,6 +136,16 @@ class MetadataFormat(abc.ABC):
     @classmethod
     @abc.abstractmethod
     def acoustid(cls, mutagen):
+        pass
+    
+    @classmethod
+    @abc.abstractmethod
+    def track_mbid(cls, mutagen):
+        pass
+    
+    @classmethod
+    @abc.abstractmethod
+    def recording_mbid(cls, mutagen):
         pass
     
     ######################

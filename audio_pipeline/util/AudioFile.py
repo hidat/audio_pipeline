@@ -111,6 +111,8 @@ class BaseAudioFile:
         self.track_num = self.format.track_num(self.audio)
         self.length = self.format.length(self.audio)
         self.acoustid = self.format.acoustid(self.audio)
+        self.recording_mbid = self.format.recording_mbid(self.audio)
+        self.track_mbid = self.format.track_mbid(self.audio)
 
         if track_tags:
             self.track_tags = {t_tag: self.format.custom_tag(t_tag, self.audio) for t_tag in track_tags}
@@ -142,7 +144,7 @@ class BaseAudioFile:
             yield item
 
     def track(self):
-        tracks = [self.track_num, self.title, self.artist, self.length, self.item_code]
+        tracks = [self.track_num, self.title, self.artist, self.length, self.item_code, self.track_mbid, self.recording_mbid]
         tracks += [v for v in self.track_tags.values()]
         return tracks
 
