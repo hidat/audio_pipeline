@@ -105,8 +105,6 @@ class ReleaseProcessor(ExtractMeta.ReleaseProcessor):
                 item_code = track_meta['id']
     
             track.item_code = item_code
-            print("Track mbid: " + track_meta['id'])
-            print("Track item code: " + track.item_code)
             
         track.set_type()
         

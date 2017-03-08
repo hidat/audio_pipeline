@@ -86,7 +86,6 @@ class Processor:
     @classmethod
     def get_release(cls, id, source="mb"):
         lookup = cls.meta_sources[source]["get_release"]
-        print(lookup)
         return lookup(id)
 
     @classmethod

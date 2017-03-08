@@ -28,7 +28,7 @@ def process_directory(source_dir, output_dir):
     # Set the (metadata) processor's mbinfo object
     processor = Processor.Processor(mbinfo, Constants.processor)
     
-    af = AudioFileFactory.AudioFileFactory
+    af = AudioFileFactory
     
     path_start = len(source_dir) + 1
     for root, dir, files in os.walk(source_dir):
