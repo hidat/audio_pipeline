@@ -145,7 +145,7 @@ class LoadReleases(threading.Thread):
         if self.acoustid_lookup:
             for i in to_scan:
                 r = lookup.Release(releases[i])
-                print("Looking up " + str(releases[i]))
+                print("Looking up " + ascii(releases[i]))
                 r.lookup()
                 if r.best_group:
                     p = PreferredRelease.BestRelease(r)

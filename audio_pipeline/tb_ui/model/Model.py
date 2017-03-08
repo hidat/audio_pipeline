@@ -43,8 +43,6 @@ class ProcessDirectory(object):
         else:
             self.directories.sort()
 
-        print(self.directories)
-
         if starting_dir != root_dir:
             starting_index = self.directories.index(starting_dir)
 
@@ -236,8 +234,6 @@ class MBReleaseSeed:
             for medium, tracklist in self.mediums.items():
                 medium_position = ".".join(tracklist[0].split(".")[:2] + ["position"])
                 self.input_tag(medium_position, medium)
-                print(medium_position)
-                print(medium)
         self.doc.stag("input", type="submit")
         self.form_tag.__exit__(None, None, None)
         with self.tag("script"):
