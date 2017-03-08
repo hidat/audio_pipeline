@@ -1,5 +1,5 @@
 from . import Settings
-from .. import release_tags, track_tags, general_commands, tag_command_help
+from .. import release_tags, track_tags, general_commands, tag_command_help, clear_track
 import tkinter.tix as tk
         
 selected_bg = "gray"
@@ -23,7 +23,7 @@ class InfoFrame(tk.Frame):
         tk.Frame.__init__(self, master, bg=Settings.bg_color)
         self.menubar = tk.Menu(self.master, takefocus=True)
         self.menubar.add_command(label="General Commands", command=lambda: self.display_commands(general_commands, "General Commands", 1))
-        self.menubar.add_command(label="Track Commands", command=lambda: self.display_commands(track_tags, "Track Metadata", 3, tag_command_help))
+        self.menubar.add_command(label="Track Commands", command=lambda: self.display_commands(track_tags + clear_track, "Track Metadata", 3, tag_command_help))
         self.menubar.add_command(label="Release Commands", command=lambda: self.display_commands(release_tags, "Release Metadata", 5, tag_command_help))
         self.master.config(menu=self.menubar)
         self.menubar.activate(1)

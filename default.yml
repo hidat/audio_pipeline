@@ -56,7 +56,11 @@
           url_base: "http://musicbrainz.org/search?query=", 
           description: "Search by barcode/catno. If no barcode or catalog number is entered, will search for barcode / catalog number in metadata."
         }
-      }
+      },
+    clear_track:
+      {
+        command: clear, aliases: [l], description: "Remove all metadata values for commands on this page."
+      },
     },
   batch constants: !!python/name:audio_pipeline.util.Resources.BatchConstants '',
   serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '',

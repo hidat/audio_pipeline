@@ -185,6 +185,9 @@ class MBReleaseSeed:
 
     def input_tag(self, name, value):
         if value:
+            if isinstance(value, list):
+                # (for now) we'll just take the first list value
+                value = value[0]
             self.doc.input(name=name, value=value, type="hidden")
 
     def set_release_body(self, audiofile):

@@ -21,6 +21,7 @@ tracknum_pattern = re.compile("(?<=,|\s)\d+|\d+(?=,|\s)")
 clear_pattern = "clear"
 release_tags = []
 track_tags = []
+clear_track = []
 general_commands = []
 
 __nav_commands = []
@@ -297,6 +298,14 @@ class TrackCommand(Command):
         
         return command_name, input_string
     
+    
+class ClearTrack(Command):
+    def execute(self, input_string, tb_model=None):
+        # check if we match this command's name
+        command_name, input_string = self._match(input_string)
+
+        return command_name
+
 
 class NavigationCommand(Command):
     
@@ -357,7 +366,8 @@ class GetDiscogsMetaCommand(Command):
                 complete = model.set_discogs(match.group("id"))
                 print(complete)
                 return complete
-            
+
+
 class SearchCommand(Command):
     search_executors = {
         
@@ -447,6 +457,9 @@ def __build_commands__(config):
         if "editor" in tb_meta:
             global open_editor
             open_editor = Command(**tb_meta["editor"])
+        if "clear_track" in tb_meta:
+            global clear_track
+            clear_track.append(ClearTrack(**tb_meta["clear_track"]))
 
 
 def span_replacement(match):

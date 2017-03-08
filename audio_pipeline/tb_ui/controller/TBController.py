@@ -4,7 +4,7 @@ from ...util import Util
 from . import EntryController
 from ..util import InputPatterns, Resources
 from ...util import Resources as r
-from .. import release_tags, track_tags, general_commands, navigate, get_track_nums
+from .. import release_tags, track_tags, general_commands, navigate, get_track_nums, clear_track
 import time
 import os
 from . import Search
@@ -75,7 +75,13 @@ class TBController:
 
         track_nums, input_string = get_track_nums(input_string)
         if track_nums is not None:
+            clear = False
+            if clear_track[0]:
+                clear = clear_track[0].execute(input_string)
+                
             for tag in track_tags:
+                if clear:
+                    input_string = tag.command
                 track_tag, track_value = tag.execute(input_string)
                 if track_tag:
                     for track in self.model.current_release:
@@ -86,12 +92,14 @@ class TBController:
                                 track.track_tags[track_tag].value = track_value
                             track.save()
                             self.app.update_meta(track)
-                    track_nums = track_nums - {'all'} - self.model.track_nums()
-                    if len(track_nums) > 0:
-                        for track in track_nums:
-                            err_msg = "Invalid Track Number: " + str(track)
-                            Dialog.err_message(err_msg, None, parent=self.app)
-                    return
+                    if not clear:
+                        break
+            track_nums = track_nums - {'all'} - self.model.track_nums()
+            if len(track_nums) > 0:
+                for track in track_nums:
+                    err_msg = "Invalid Track Number: " + str(track)
+                    Dialog.err_message(err_msg, None, parent=self.app)
+            return
 
         nav = navigate(input_string)
         if nav is not None:
