@@ -3,19 +3,23 @@ import collections
 import time
 from yattag import Doc
 
+from audio_pipeline import Constants
+
 from ..util import Resources
 from . import MoveFiles
-from . import Rules
+from .Rules import rules
 from . import LoadReleases
 
 
 class ProcessDirectory(object):
 
     def __init__(self, root_dir, dest_dir, copy):
-        # rule = Rules.KEXPDestinationDirectoryRule(dest_dir)
-        rule = Rules.FileUnderRule(dest_dir)
-
-        self.processing_complete = MoveFiles.MoveFiles(rule, copy)
+        rule = rules[Constants.move_files]
+        if rule:
+            rule = rule(dest_dir)
+            self.processing_complete = MoveFiles.MoveFiles(rule, copy)
+        else:
+            self.processing_complete = None
 
         dbpoweramp = True
 
@@ -57,7 +61,7 @@ class ProcessDirectory(object):
 
     def __del__(self):
         self.__current_release.current = None
-        
+
     @property
     def current_release(self):
         if self.__current_release.current is not None:
@@ -73,7 +77,7 @@ class ProcessDirectory(object):
             else:
                 return False
         return True
-        
+
     def get_release_seed(self, url_base):
       release_seed = MBReleaseSeed(url_base)
       release_seed.set_release_body(self.current_release[0])
@@ -87,7 +91,7 @@ class ProcessDirectory(object):
             release.stuff_audiofile(track)
             track.save()
         return "done"
-    
+
     def set_discogs(self, id):
         release = self.loader_thread.processor.get_release(id, "discogs")
         for track in self.current_release:
@@ -101,7 +105,7 @@ class ProcessDirectory(object):
 
     def move_files(self):
         self.processing_complete.move_files(self)
-            
+
     def first(self):
         self.next_buffer.append(self.__current_release.current)
         self.next_buffer.extend(self.prev_buffer)
@@ -139,9 +143,9 @@ class ProcessDirectory(object):
                 #     self.loader_thread.start()
 
             self.__current_release.current = self.prev_buffer.pop()
-            
+
             return self.current_release
-        
+
     def jump(self, i):
         if i < 0:
             for k in range(-1 * i):
@@ -151,17 +155,17 @@ class ProcessDirectory(object):
             for k in range(i):
                 if self.has_next():
                     self.next()
-                    
+
         return self.current_release
 
     def has_next(self):
         return len(self.next_buffer) > 0 or \
-               (self.__current_release.current is not None and 
+               (self.__current_release.current is not None and
                 self.__current_release.current[0] < len(self.__current_release.directories) - 1)
 
     def has_prev(self):
         return len(self.prev_buffer) > 0 or \
-               (self.__current_release.current is not None and 
+               (self.__current_release.current is not None and
                 self.__current_release.current[0] > 0)
 
 

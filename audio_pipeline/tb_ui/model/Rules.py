@@ -1,4 +1,3 @@
-from ..util import Resources
 import os
 
 
@@ -12,8 +11,41 @@ class Rule:
             name = name.replace(f, "")
         return name
 
+    def get_dest(self, audiofile):
+        pass
+
+
+class RulePool(object):
+
+    def __init__(self):
+        self.rules = {}
+
+    def register(self, rule):
+        """
+        Register the given rule
+        Do some sanity checks
+        Used to clean up .... things
+        A design pattern absolutely aped from Django
+        """
+        if not issubclass(rule, Rule):
+            raise IllegalArgumentException()
+        rule_name = rule.name.casefold()
+        if rule_name in self.rules:
+            raise IllegalArgumentException()
+
+        self.rules[rule_name] = rule
+
+    def __getitem__(self, item):
+        if item.casefold() in self.rules:
+            print(self.rules[item.casefold()])
+            return self.rules[item.casefold()]
+        else:
+            return None
+
+rules = RulePool()
 
 class FileUnderRule(Rule):
+    name = "File Under"
 
     def get_dest(self, audiofile):
         if audiofile.file_under.value:
@@ -25,20 +57,24 @@ class FileUnderRule(Rule):
             return dest
 
 
-class KEXPDestinationDirectoryRule(Rule):
+class HasMBIDRule(Rule):
+    name = "Has MBID"
 
     def __init__(self, dest_dir):
         super().__init__(dest_dir)
-        self.picard_dir = Resources.picard_directory
-        self.mbid_dir = Resources.mbid_directory
-        
+        self.picard_dir = "Picard Me"
+        self.mbid_dir = "Has Necessary Metadata"
+
     def get_dest(self, audiofile):
         # get the name of the release directory
         directory = os.path.split(os.path.dirname(audiofile.file_name))[1]
-        
-        if Resources.has_mbid(audiofile):
+
+        if audiofile.has_mbid():
             dest = os.path.join(self.mbid_dir, directory)
         else:
             dest = os.path.join(self.picard_dir, directory)
-            
+
         return dest
+
+rules.register(FileUnderRule)
+rules.register(HasMBIDRule)

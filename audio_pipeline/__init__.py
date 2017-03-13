@@ -5,7 +5,7 @@ import re
 
 class Constants:
     config_data = {}
-    
+
     batch_constants_def = None
     batch_constants = None
 
@@ -17,6 +17,7 @@ class Constants:
     tb_lookup = True
     acoustid_lookup = True
     is_tb = False
+    move_files = ""
 
     custom_track_tags = []
     custom_release_tags = []
@@ -25,7 +26,7 @@ class Constants:
     ignore_case = False
     user = None
     tb_meta_commands = None
-    
+
     argument_config = None
 
     @classmethod
@@ -45,7 +46,7 @@ class Constants:
     def load(cls, config):
         config_name = os.path.split(os.path.splitext(cls.config_file)[0])[1]
         cls.config_data[config_name] = config.copy()
-        
+
         if "default" in config:
             default_file = os.path.join(cls.config_dir, config["default"] + '.yml')
             if os.path.exists(default_file):
@@ -56,7 +57,7 @@ class Constants:
 
         config_name = os.path.split(os.path.splitext(cls.config_file)[0])[1]
         cls.config_data[config_name] = config.copy()
-            
+
         # configuration options for tag reading/writing -
         # custom track tags, custom release tags, and whether to ignore tag casing
         # for AAC & ID3 tags, where case does matter
@@ -90,6 +91,10 @@ class Constants:
                     cls.custom_track_tags = tag_data["custom_tags"]["track"]
                 if "release" in tag_data["custom_tags"]:
                     cls.custom_release_tags = tag_data["custom_tags"]["release"]
+        if "post_process" in config:
+            post_process = config["post_process"]
+            if "move_files" in post_process:
+                cls.move_files = post_process["move_files"]
 
     @classmethod
     def setup(cls, args, user=None):

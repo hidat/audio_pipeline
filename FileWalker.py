@@ -22,14 +22,14 @@ def process_directory(source_dir, output_dir):
 
     # Get directories for processed hashes
     processed_hashes = info_directories(output_dir)
-    
+
     # create a MBInfo object to get MusicBrainz metadata
     mbinfo = batch_constants.mb
     # Set the (metadata) processor's mbinfo object
     processor = Processor.Processor(mbinfo, Constants.processor)
-    
+
     af = AudioFileFactory
-    
+
     path_start = len(source_dir) + 1
     for root, dir, files in os.walk(source_dir):
         if len(root) > path_start:
@@ -40,20 +40,20 @@ def process_directory(source_dir, output_dir):
         for src_name in files:
             file_name = os.path.join(root, src_name)
             copy_to_path = ''
-            
+
             try:
                 audio_file = af.get(file_name)
-                
+
                 # check if file is in processed_hash directory
                 sha1 = hashlib.sha1()
                 with open(file_name, 'rb') as f:
                     sha1.update(f.read())
-                    
+
                 hash_file = os.path.join(processed_hashes, sha1.hexdigest())
-                
+
                 if not os.path.exists(hash_file):
                     # Get the MusicBrainz Release ID from the file
-                    if Util.has_mbid(audio_file):
+                    if audio_file.has_mbid():
                         print("Processing " + ascii(file_name))
 
                         try:
@@ -71,33 +71,33 @@ def process_directory(source_dir, output_dir):
                             # Serialize track metadata
                             track = release_meta.get_track(audio_file)
                             serializer.save_track(release, track)
-                            
+
                             # Make a copy of the original file (just in case)
-                            copy_to_path = os.path.join(track_success_dir, path)                            
-                            
+                            copy_to_path = os.path.join(track_success_dir, path)
+
                             if batch_constants.artist_gen:
                                 for artist in track.artists:
                                     # Save artist meta if we have not already.
                                     if artist not in processor.artists:
-                                    
+
                                         artist_meta = processor.get_artist(artist)
                                         artist = artist_meta.artist
-                                        
+
                                         group_members = []
-                                        
+
                                         for member in artist.group_members:
                                             if member not in processor.artists:
                                                 member_meta = processor.get_artist(member)
                                                 group_members.append(member_meta.artist)
-                                                
+
                                         serializer.save_artist(artist, group_members)
-                                    
+
                             # move track to success directory (if we're copying files)
                             if not batch_constants.meta_only:
                                 ext = os.path.splitext(file_name)[1].lower()
                                 target = os.path.join(track_dir, track.item_code + ext)
                                 shutil.copy(file_name, target)
-                                
+
                         # Move the file out of the source directory
                         except UnicodeDecodeError:
                             print("    ERROR: Invalid characters!")
@@ -128,7 +128,7 @@ def process_directory(source_dir, output_dir):
                 # If we aren't just generating metadata, make backup of original file just in case
                 if not os.path.exists(copy_to_path):
                     os.makedirs(copy_to_path)
-                    
+
                 target = os.path.join(copy_to_path, src_name)
                 if batch_constants.delete:
                     shutil.move(file_name, target)
@@ -150,10 +150,10 @@ def audio_directories(output_dir):
     if not os.path.exists(track_fail_dir):
         os.makedirs(track_fail_dir)
     print("Track Fail: ", track_fail_dir)
-    
+
     return track_dir, track_success_dir, track_fail_dir
-    
-    
+
+
 def info_directories(output_dir):
     """
     Get the location of directories that record 'extra' information
@@ -162,10 +162,10 @@ def info_directories(output_dir):
     processed_hashes = os.path.join(output_dir, 'processed_hashes')
     if not os.path.exists(processed_hashes):
         os.makedirs(processed_hashes)
-        
+
     return processed_hashes
 
-        
+
 def main():
     """
     Crawls the given directory for audio files, extracting raw metadata
@@ -177,14 +177,14 @@ def main():
     Constants.load_config(config_dir)
 
     parser = argparse.ArgumentParser(description='Get metadata from files.')
-    
+
     if Constants.argument_config:
         parser = Constants.argument_config(parser)
 
     parser.add_argument('input_directory', help="Input audio file.")
     parser.add_argument('output_directory', help="Directory to store output files.")
 
-        
+
     parser.add_argument('-p', '--profile', type=str.casefold, help="Specify a user profile. If a profile with this"
                                                                    " name does not exist, it will be created.")
 

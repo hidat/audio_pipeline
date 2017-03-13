@@ -38,7 +38,7 @@ class LoadReleases(threading.Thread):
 
     def run(self):
         time.sleep(.1)
-        
+
         num_dirs = len(self.current_release.directories)
 
         if self.starting_index != 0:
@@ -50,7 +50,7 @@ class LoadReleases(threading.Thread):
 
             # if buffers are full, wait for a signal from the model proper to load more releases,
             # rather than constantly looping and wasting resources
-            
+
             self.current_release.cond.acquire()
             if self.current_release.current is not None and \
                             len(self.next_buffer) + self.current_release.current[0] < num_dirs:
@@ -85,7 +85,7 @@ class LoadReleases(threading.Thread):
                     self.load_release(self.prev_buffer, i)
                     self.current_release.cond.acquire()
                     self.loaded += 1
-                
+
             self.current_release.cond.release()
 
         print("Loaded: " + str(self.loaded))
@@ -94,7 +94,7 @@ class LoadReleases(threading.Thread):
     def load_release(self, buffer, dir_index):
         if len(buffer) >= self.max_buffer:
             return None
-            
+
         directory = self.current_release.directories[dir_index]
 
         files = os.listdir(directory)
@@ -115,7 +115,7 @@ class LoadReleases(threading.Thread):
                 print("Unsupported filetype")
                 continue
 
-            if not Resources.has_mbid(file_data) and Utilities.know_artist_name(str(file_data.album_artist)):
+            if not file_data.has_mbid() and Utilities.know_artist_name(str(file_data.album_artist)):
                 index = 0
             else:
                 mbid_medium = (file_data.mbid.value, file_data.disc_num.value)
@@ -127,7 +127,7 @@ class LoadReleases(threading.Thread):
                 else:
                     index = len(releases)
                     releases.append([])
-                    if Resources.has_mbid(file_data):
+                    if file_data.has_mbid():
                         indices[mbid_medium] = index
                     else:
                         indices[release_details] = index
@@ -138,7 +138,7 @@ class LoadReleases(threading.Thread):
             # all releases are initially added to the to_scan pile; if they should not be
             # (already scanned, already had metadata stuffed, have mbid & have more tracks
             # than our 'confidence threshold') remove them
-            if ((Resources.has_mbid(file_data) and len(releases[index]) > FEW_TRACKS) or file_data.acoustid.value
+            if ((file_data.has_mbid() and len(releases[index]) > FEW_TRACKS) or file_data.acoustid.value
                     or file_data.meta_stuffed.value) and index in to_scan:
                 to_scan.remove(index)
 
@@ -170,7 +170,7 @@ class LoadReleases(threading.Thread):
 
         for release in releases:
             release_track = release[0]
-            if (Util.has_mbid(release_track) and (release_track.should_stuff_metadata() or
+            if (release_track.has_mbid() and (release_track.should_stuff_metadata() or
                                                   not release_track.has_minimum_metadata())) \
                     and (self.acoustid_lookup or self.tb_lookup):
                 print("Getting metadata")
@@ -200,7 +200,7 @@ class CurrentReleases:
     def reset(self):
         self.__current = self.starting_position
         self.__prev = self.starting_position
-        
+
     @property
     def current(self):
         self.cond.acquire()
@@ -208,14 +208,14 @@ class CurrentReleases:
         self.cond.notify()
         self.cond.release()
         return v
-                
+
     @current.setter
     def current(self, value):
         self.cond.acquire()
         self.__current = value
         self.cond.notify()
         self.cond.release()
-        
+
     @property
     def prev(self):
         self.cond.acquire()
@@ -223,7 +223,7 @@ class CurrentReleases:
         self.cond.notify()
         self.cond.release()
         return v
-        
+
     @prev.setter
     def prev(self, value):
         self.cond.acquire()

@@ -1,9 +1,8 @@
 import mutagen
 import collections
+import uuid
 
-from .format import Vorbis
-from .format import AAC
-from .format import ID3
+from .format import Vorbis, AAC, ID3
 from . import Exceptions, Tag
 from . import Utilities
 from audio_pipeline import Constants
@@ -12,7 +11,7 @@ from audio_pipeline import Constants
 class BaseAudioFile:
 
     audiofile_type = "BaseAudioFile"
-    
+
     renameable_tags = {"item_code": "ITEMCODE",
                        "barcode": "BARCODE",
                        "catalog_num": "CATALOGNUMBER",
@@ -27,12 +26,12 @@ class BaseAudioFile:
     vorbis = Vorbis.Format
     id3 = ID3.Format
     aac = AAC.Format
-    
+
     def __init__(self, file_name, release_tags=None, track_tags=None,
                  tb_release_tags=None, tb_track_tags=None):
         self.format = None
         self.file_name = file_name
-        
+
         try:
             self.audio = mutagen.File(file_name)
             if not self.audio:
@@ -41,7 +40,7 @@ class BaseAudioFile:
             # if there's an error opening the file (probably not an audio file)
             # propagate the resulting exception on up
             raise e
-            
+
         for mime_type in self.audio.mime:
             # get the appropriate tag Format for this file type
             if mime_type in Tag.Formats.mime_map:
@@ -53,13 +52,13 @@ class BaseAudioFile:
                 elif t.casefold() == "vorbis":
                     self.format = self.vorbis
                 break
-                
+
         if not self.format:
             # Can't process this type of audio file; raise UnsupportedFileType error
             raise Exceptions.UnsupportedFiletypeError(file_name)
-            
+
         # get tags
-        
+
         #######################
         #   release-level tags
         #######################
@@ -123,23 +122,23 @@ class BaseAudioFile:
                     self.track_tags[t] = self.format.custom_tag(t, self.audio)
 
         self.meta_stuffed = self.format.custom_tag("meta_stuffed", self.audio)
-                
+
         self.custom_tags = [self.meta_stuffed]
 
     def save(self):
         for item in self:
             item.set()
         self.audio.save()
-        
+
     def __iter__(self):
         release = self.release()
         for item in release:
             yield item
-            
+
         track = self.track()
         for item in track:
             yield item
-            
+
         for item in self.custom_tags:
             yield item
 
@@ -199,6 +198,22 @@ class BaseAudioFile:
         :return: True if audiofile has had metadata stuffed, false otherwise
         """
         return self.meta_stuffed.value
+
+    def has_mbid(self):
+        """
+        Check whether the track has an MBID value, and that value looks like
+        an MBID (i.e. is a UUID)
+        :return: True if valid MBID value, False otherwise
+        """
+
+        if self.mbid.value:
+            try:
+                id = uuid.UUID(self.mbid.value)
+                return True
+            except ValueError as e:
+                pass
+        return False
+
 
 
 class AudioFileFactory:

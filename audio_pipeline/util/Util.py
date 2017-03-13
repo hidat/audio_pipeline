@@ -14,24 +14,24 @@ def minutes_seconds(length):
     final = str(minutes) + ":" + str(seconds)
     return final
 
-    
+
 def seconds(min_sec):
     min, sec = min_sec.split(":")
     seconds = int(min) * 60 + int(sec)
     return seconds
 
-    
+
 class Edits:
     radio_edit = "RADIO EDIT"
     kexp_edit = "KEXP RADIO EDIT"
-    
-    
+
+
 class Obscenity:
     red = "RED DOT"
     yellow = "YELLOW DOT"
     clean = "CLEAN EDIT"
     kexp_clean = "KEXP CLEAN EDIT"
-    
+
 
 def is_mbid(id):
     """
@@ -44,20 +44,7 @@ def is_mbid(id):
         good = False
     except AttributeError:
         good = False
-    
-    return good
 
-
-def has_mbid(track):
-    """
-    Check whether or not the given track has an MBID.
-    """
-    
-    if track.mbid.value:
-        good = is_mbid(track.mbid.value)
-    else:
-        good = False
-        
     return good
 
 

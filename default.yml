@@ -3,14 +3,15 @@
   tags: {
     item_code: itemcode
   },
-  tb_meta: 
-    {navigation:
+  tb_meta:
+    {
+    navigation:
       {
         forward:
           {
             command: next, aliases: [n], description: "Display metadata of next album."
           },
-        backward: 
+        backward:
           {
             command: previous, aliases: [prev, p], description: "Display metadata of previous album."
           }
@@ -29,7 +30,7 @@
       },
     release_seeder:
       {
-        command: "add release", url_base: "https://musicbrainz.org/release/add", 
+        command: "add release", url_base: "https://musicbrainz.org/release/add",
         description: "Add current disc to MusicBrainz as a new release. The MusicBrainz add release page will open in browser with most metadata pre-filled."
       },
     search:
@@ -53,7 +54,7 @@
         mb_barcode:
         {
           command: barcode, aliases: [bar], options: [command: "<barcode>"],
-          url_base: "http://musicbrainz.org/search?query=", 
+          url_base: "http://musicbrainz.org/search?query=",
           description: "Search by barcode/catno. If no barcode or catalog number is entered, will search for barcode / catalog number in metadata."
         }
       },
@@ -62,6 +63,11 @@
         command: clear, aliases: [l], description: "Remove all metadata values for commands on this page."
       },
     },
+  post_process:
+    {
+      move_files: File Under
+    },
+  processor: !!python/module:audio_pipeline.util.MusicBrainz.ExtractMeta '',
   batch constants: !!python/name:audio_pipeline.util.Resources.BatchConstants '',
   serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '',
   discogs_processor: !!python/module:audio_pipeline.util.Discogs.ExtractMeta '',

@@ -1,6 +1,7 @@
 import shutil
 import os
 import subprocess
+
 from ..util import Resources
 from .. import set_destination
 
@@ -34,7 +35,7 @@ class MoveFiles:
         :return:
         """
         files.first()
-        
+
         while files.has_next():
             command = [self.command]
             tracks = files.next()
@@ -49,7 +50,7 @@ class MoveFiles:
                         command += self.join
                     command.append(tracks[i].file_name)
                     command.append(dest)
-                
+
             directory = os.path.split(tracks[0].file_name)[0]
             print("Moving " + ascii(directory))
             subprocess.run(command, shell=True)
