@@ -7,7 +7,7 @@
    tb_meta: {release:
               [
                 {
-                  tag: Rotation Status, aliases: ['R', 'Rotation'],
+                  tag: Rotation Status, aliases: ['rs', 'Rotation'],
                   options: [
                     {command: Heavy, aliases: [h], description: "Rotation status 'heavy'"},
                     {command: Medium, aliases: [m], description: "Roation status 'medium'"},
@@ -16,25 +16,25 @@
                   description: "Set rotation status of current release"
                 },
                 {
-                  tag: Category, display_name: "Genre", freeform: True,
+                  tag: Category, display_name: "Category", freeform: True,
                   options: [
                     {command: Local},
                     {command: Live}
                   ],
-                  aliases: [c], description: "Set category of current release - this is a freeform tag."
+                  aliases: [ca], description: "Set category of current release - this is a freeform tag."
                 },
                 {
                   tag: Style, freeform: True,
-                  options: [{command: Rock/Pop}, {command: Roots}, {command: Bluegrass}], aliases: [s],
+                  options: [{command: Rock/Pop}, {command: Roots}, {command: Bluegrass}], aliases: [st],
                   description: "Set style of current release - this is a freeform tag."
                 },
                 {
-                  tag: File Under, aliases: ['F', 'File'], freeform: True,
+                  tag: File Under, aliases: ['fu', 'File'], freeform: True,
                   description: "Set directory under which to file this release - this is a freeform tag."
                 }
                 ,
                 {
-                  tag: sendto_plc, aliases: ["Playlist", "Play"], display_name: "Send to Playlist Center",
+                  tag: sendto_plc, aliases: ["plc"], display_name: "Send to Playlist Center",
                   description: "Set tag to send this release to playlist center"
                 }
               ],
@@ -45,7 +45,7 @@
                   description: "Toggle if specified track(s) should be sent to ENCO or not."
                 },
                 {
-                  tag: Radio Edit, aliases: [edit, d, radio],
+                  tag: Radio Edit, aliases: [re],
                   description: "Toggle radio edit status of specified track(s)."
                 },
                 {
