@@ -59,8 +59,8 @@
             },
    post_process:
    {
-       move_files: File Under
+       move_files: "Has MBID"
    },
-   destination folder: "C:\\kbcs",
+   destination folder: "C:\\cd_processed",
    user: KBCS
 }
