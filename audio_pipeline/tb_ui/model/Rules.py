@@ -1,4 +1,4 @@
-import os
+import os, hashlib
 
 
 class Rule:
@@ -11,8 +11,26 @@ class Rule:
             name = name.replace(f, "")
         return name
 
+    ###
+    # Returns the path to place the destination file into.
+    # This is relative to the target directory
+    ###
     def get_dest(self, audiofile):
         pass
+
+    ###
+    # Returns the name of the destination file.
+    # If None, the caller should just use the original file name
+    ###
+    def get_filename(self, audiofile):
+        pass
+
+    ###
+    # Checks to see if the given file is valid to be copied
+    # This gives us a chance to to check if all required metadata has been entered.
+    ###
+    def is_valid(self, audiofile):
+        return  True
 
 
 class RulePool(object):
@@ -56,6 +74,11 @@ class FileUnderRule(Rule):
             dest = os.path.join(layer_two, directory)
             return dest
 
+    def is_valid(self, audiofile):
+        valid = False
+        if audiofile.file_under.value:
+            valid = True
+        return valid
 
 class HasMBIDRule(Rule):
     name = "Has MBID"
@@ -76,5 +99,31 @@ class HasMBIDRule(Rule):
 
         return dest
 
+###
+# Copies the file to a flat directory, where another process can pick it up
+###
+class DropzoneRule(Rule):
+    name = "Dropzone"
+
+    def get_dest(self, audiofile):
+        return ''
+
+    ###
+    # Generates the filename as a hash of the original filename, so we are guarenteed a unique filename
+    ###
+    def get_filename(self, audiofile):
+       md5 = hashlib.md5()
+       md5.update(audiofile.file_name.encode('utf-8'))
+       dest = md5.hexdigest() + '_' + os.path.basename(audiofile.file_name)
+
+       return dest
+
+    def is_valid(self, audiofile):
+        valid = False
+        if audiofile.file_under.value:
+            valid = True
+        return valid
+
 rules.register(FileUnderRule)
 rules.register(HasMBIDRule)
+rules.register(DropzoneRule)

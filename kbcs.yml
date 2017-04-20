@@ -31,8 +31,7 @@
                 {
                   tag: File Under, aliases: ['F', 'File'], freeform: True,
                   description: "Set directory under which to file this release - this is a freeform tag."
-                }
-                ,
+                },
                 {
                   tag: sendto_plc, aliases: ["Playlist", "Play"], display_name: "Send to Playlist Center",
                   description: "Set tag to send this release to playlist center"
@@ -59,7 +58,7 @@
             },
    post_process:
    {
-       move_files: File Under
+       move_files: Dropzone
    },
    destination folder: "C:\\kbcs",
    user: KBCS
