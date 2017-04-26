@@ -39,7 +39,7 @@ class MoveFiles:
         while files.has_next():
             command = [self.command]
             tracks = files.next()
-            valid_cd = True
+            cd_valid = True
             for i in range(len(tracks)):
                 if self.rule.is_valid(tracks[i]):
                     repo_path = self.rule.get_dest(tracks[i])
