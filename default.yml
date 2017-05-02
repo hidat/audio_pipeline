@@ -26,8 +26,11 @@
       },
     discogs:
       {
-        command: discogs, aliases: [disccc], description: "Populate audio file metadata with metadata from discogs"
-      },
+        command: discogs, aliases: [disccc], description: "Populate audio file metadata with metadata from discogs. Requires discogs ID of release.",
+        options: [
+          {command: '<discogs_id>', description: "Discogs ID of current release."},
+        ]
+     },
     release_seeder:
       {
         command: "add release", url_base: "https://musicbrainz.org/release/add",
