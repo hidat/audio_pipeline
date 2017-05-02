@@ -13,8 +13,8 @@ class BaseAudioFile:
     audiofile_type = "BaseAudioFile"
 
     renameable_tags = {"item_code": "ITEMCODE",
-                       "barcode": "BARCODE",
-                       "catalog_num": "CATALOGNUMBER",
+                       "barcode": "Barcode",
+                       "catalog_num": "Catalog #",
                        "file_under": "File Under",
                        "obscenity": "FCC Rating",
                        "radio_edit": "Radio Edit",

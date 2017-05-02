@@ -7,16 +7,7 @@
    tb_meta: {release:
               [
                 {
-                  tag: Rotation Status, aliases: ['rs', 'Rotation'],
-                  options: [
-                    {command: Heavy, aliases: [h], description: "Rotation status 'heavy'"},
-                    {command: Medium, aliases: [m], description: "Roation status 'medium'"},
-                    {command: Light, aliases: [l], description: "Rotation status 'light'"}
-                  ],
-                  description: "Set rotation status of current release"
-                },
-                {
-                  tag: Category, display_name: "Category", freeform: True,
+                  tag: Genre, display_name: "Category", freeform: True,
                   options: [
                     {command: Local},
                     {command: Live}

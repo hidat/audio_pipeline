@@ -37,7 +37,7 @@ obscenity_rating_commands = SubCommand("Valid <meta_command>s:", [Command("red d
                              Command("kexp radio edit, kd", "Set radio edit value to KEXP RADIO EDIT")])
 
 search_options = [Command("\"<artist_name>\"", "Search for artist by specified artist name instead of artist name in meta"),
-                  Command("bar", "Search for release by carcode/catalog number")]
+                  Command("bar", "Search for release by barcode/catalog number")]
                   
 commands = [Command("<track_num>[[,][ ]<track_num>...][ ]<meta_command>", "Add the metadata specified by <meta_command> to track <track_num>.<meta_command> is not case-sensitive.\
               \nMultiple <track_nums> may be specified, separated by \",\" and/or \" \"", sub_commands=obscenity_rating_commands,
