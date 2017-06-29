@@ -15,9 +15,11 @@ class ProcessDirectory(object):
 
     def __init__(self, root_dir, dest_dir, copy):
         rule = rules[Constants.move_files]
+        wait_for_close = Constants.wait_for_close
+
         if rule:
             rule = rule(dest_dir)
-            self.processing_complete = MoveFiles.MoveFiles(rule, copy)
+            self.processing_complete = MoveFiles.MoveFiles(rule, copy, wait_for_close=wait_for_close)
         else:
             self.processing_complete = None
 

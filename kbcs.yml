@@ -45,7 +45,8 @@
             },
    post_process:
    {
-       move_files: Dropzone
+       move_files: Dropzone,
+       wait_for_close: True
    },
    destination folder: "C:\\cd_processed",
    user: KBCS

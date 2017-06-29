@@ -1,5 +1,6 @@
 import shutil
 import os
+import sys
 import subprocess
 
 from ..util import Resources
@@ -7,7 +8,7 @@ from .. import set_destination
 
 class MoveFiles:
 
-    def __init__(self, rule, copy, dest_folder=None):
+    def __init__(self, rule, copy, wait_for_close=False, dest_folder=None):
         """
         Move audiofiles to the appropriate destination directories,
         as determined by the 'rule' function passed to rule
@@ -16,6 +17,8 @@ class MoveFiles:
         """
         self.rule = rule
         self.dest_folder = set_destination()
+        self.wait_for_close = wait_for_close
+
         if not self.dest_folder:
             self.dest_folder = dest_folder
 
@@ -35,6 +38,8 @@ class MoveFiles:
         :return:
         """
         files.first()
+        valid_count = 0
+        invalid_count = 0
 
         while files.has_next():
             command = [self.command]
@@ -61,10 +66,19 @@ class MoveFiles:
 
             directory = os.path.split(tracks[0].file_name)[0]
             if cd_valid:
+                valid_count += 1
                 print("Moving " + ascii(directory))
                 subprocess.run(command, shell=True)
 
                 if not Resources.is_release(directory):
                     shutil.rmtree(directory)
             else:
+                invalid_count += 1
                 print("Invalid content found in " + directory + ", not copying.")
+
+        if self.wait_for_close and (valid_count > 0 or invalid_count > 0) :
+            print("\n{0} CDs moved, {1} failed.".format(valid_count, invalid_count))
+            print("Press the [Enter] key to finish...")
+            sys.stdin.read(1)
+
+        return valid_count

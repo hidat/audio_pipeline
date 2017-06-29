@@ -18,6 +18,7 @@ class Constants:
     acoustid_lookup = True
     is_tb = False
     move_files = ""
+    wait_for_close = False
 
     custom_track_tags = []
     custom_release_tags = []
@@ -95,6 +96,8 @@ class Constants:
             post_process = config["post_process"]
             if "move_files" in post_process:
                 cls.move_files = post_process["move_files"]
+                if "wait_for_close" in post_process:
+                    cls.wait_for_close = post_process["wait_for_close"]
 
     @classmethod
     def setup(cls, args, user=None):
