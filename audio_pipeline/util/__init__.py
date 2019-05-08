@@ -18,5 +18,5 @@ class Utilities:
         :param artist:
         :return:
         """
-        unknown_artist = not (artist or artist.isspace() or cls.unknown_artist_pattern.search(artist))
+        unknown_artist = artist is None or not (artist or artist.isspace() or cls.unknown_artist_pattern.search(artist))
         return unknown_artist
