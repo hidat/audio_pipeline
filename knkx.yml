@@ -27,10 +27,6 @@
             track:
               [
                 {
-                  tag: sendto_enco, display_name: "Send to Enco", aliases: [enco, e],
-                  description: "Toggle if specified track(s) should be sent to ENCO or not."
-                },
-                {
                   tag: Radio Edit, aliases: [re],
                   description: "Toggle radio edit status of specified track(s)."
                 },
