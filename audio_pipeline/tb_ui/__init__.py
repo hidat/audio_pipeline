@@ -401,7 +401,7 @@ def navigate(input_string):
             
 def set_destination():
     with open(Constants.config_file) as f:
-        config = yaml.load(f)
+        config = yaml.full_load(f)
         if "destination folder" in config:
             return config["destination folder"]
         
@@ -409,7 +409,7 @@ def set_destination():
 def save_setting_changes():
     global release_tags, track_tags
     with open(Constants.config_file) as f:
-        config = yaml.load(f)
+        config = yaml.full_load(f)
         config.update()
 
 

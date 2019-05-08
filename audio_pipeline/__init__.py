@@ -40,7 +40,7 @@ class Constants:
         if os.path.exists(config_file):
             cls.config_file = config_file
             with open(config_file, "r") as f:
-                config = yaml.load(f)
+                config = yaml.full_load(f)
                 cls.load(config)
 
     @classmethod
@@ -53,7 +53,7 @@ class Constants:
             if os.path.exists(default_file):
                 cls.config_file = default_file
                 with open(default_file, "r") as f:
-                    default_config = yaml.load(f)
+                    default_config = yaml.full_load(f)
                     config.update(default_config)
 
         config_name = os.path.split(os.path.splitext(cls.config_file)[0])[1]
@@ -105,7 +105,7 @@ class Constants:
             user_file = os.path.join(cls.config_dir, user + ".yml")
             if os.path.exists(user_file):
                 with open(user_file, "r") as f:
-                    user_config = yaml.load(f)
+                    user_config = yaml.full_load(f)
                 cls.batch_constants = copy.deepcopy(user_config['user constants'])
                 cls.batch_constants.set(args)
             else:
