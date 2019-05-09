@@ -7,7 +7,6 @@ class BaseTag(Tag.Tag):
 
     def extract(self):
         super().extract()
-        
         if self._value is not None:
             self._value = self._value[0]
 
@@ -111,7 +110,9 @@ class Format(Tag.MetadataFormat):
     _track_num = "tracknumber"
     _length = "Length"
     _acoustid = "ACOUSTID_ID"
-    
+    _track_mbid = 'MUSICBRAINZ_RELEASETRACKID'
+    _recording_mbid = 'MUSICBRAINZ_TRACKID'
+
     ################
     #   release-level tags
     ################
@@ -192,6 +193,16 @@ class Format(Tag.MetadataFormat):
         tag = BaseTag(cls._acoustid_name, cls._acoustid, tags)
         return tag
 
+    @classmethod
+    def recording_mbid(cls, tags):
+        tag = BaseTag(cls._recording_mbid_name, cls._recording_mbid, tags)
+        return tag
+
+    @classmethod
+    def track_mbid(cls, tags):
+        tag = BaseTag(cls._track_mbid_name, cls._track_mbid, tags)
+        return tag
+
     #########################
     #   custom tags
     #########################
@@ -199,4 +210,9 @@ class Format(Tag.MetadataFormat):
     @classmethod
     def custom_tag(cls, name, tags):
         tag = BaseTag(name, name, tags)
+        if not tag.value:
+            serialization_name = re.sub("\s", "_", name)
+            under_tag = BaseTag(name, serialization_name, tags)
+            tag.value = under_tag.value
+            tag.save()
         return tag

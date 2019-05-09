@@ -1,0 +1,49 @@
+{
+   tags: {
+          ignore_case: False,
+          custom_tags: {}
+         },
+   tb_lookup: True,
+   tb_meta: {release:
+              [
+                {
+                  tag: Genre, display_name: "Category", freeform: True,
+                  options: [
+                    {command: Local},
+                    {command: Live}
+                  ],
+                  aliases: [ca], description: "Set category of current release - this is a freeform tag."
+                },
+                {
+                  tag: Style, freeform: True,
+                  options: [{command: Rock/Pop}, {command: Roots}, {command: Bluegrass}], aliases: [st],
+                  description: "Set style of current release - this is a freeform tag."
+                },
+                {
+                  tag: File Under, aliases: ['fu', 'File'], freeform: True,
+                  description: "Set directory under which to file this release - this is a freeform tag."
+                },
+              ],
+            track:
+              [
+                {
+                  tag: Radio Edit, aliases: [re],
+                  description: "Toggle radio edit status of specified track(s)."
+                },
+                {
+                  tag: FCC Rating, display_name: Obscenity Rating, aliases: [obscenity, o],
+                  description: "Set the obscenity rating of specified track(s).",
+                  options: [{command: Yellow Dot, aliases: [y], color: yellow},
+                    {command: Red Dot, aliases: [r], color: red}, 
+                    {command: Green Dot, aliases: [g], color: green}]
+                }
+              ]
+            },
+   post_process:
+   {
+       move_files: Dropzone,
+       wait_for_close: True
+   },
+   destination folder: "e:\\processed-rips",
+   user: KNKX
+}

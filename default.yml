@@ -1,7 +1,77 @@
-{default: kexp,
-audiofile: !!python/name:audio_pipeline.util.AudioFile.BaseAudioFile '',
-batch constants: !!python/name:audio_pipeline.util.Resources.BatchConstants '',
-serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '',
-custom_tags: {category: CATEGORY, item_code: ITEMCODE, obscenity: OBSCENITYRATING}
+{
+  default: kbcs,
+  tags: {
+    item_code: itemcode
+  },
+  tb_meta:
+    {
+    navigation:
+      {
+        forward:
+          {
+            command: next, aliases: [n], description: "Display metadata of next album."
+          },
+        backward:
+          {
+            command: previous, aliases: [prev, p], description: "Display metadata of previous album."
+          }
+       },
+    close:
+      {
+        command: quit, aliases: [q], description: "Close this application."
+      },
+    editor:
+      {
+        command: edit, aliases: [e], description: "Edit all metadata categories with the Metadata Input Friend."
+      },
+    discogs:
+      {
+        command: discogs, aliases: [disccc], description: "Populate audio file metadata with metadata from discogs. Requires discogs ID of release.",
+        options: [
+          {command: '<discogs_id>', description: "Discogs ID of current release."},
+        ]
+     },
+    release_seeder:
+      {
+        command: "add release", url_base: "https://musicbrainz.org/release/add",
+        description: "Add current disc to MusicBrainz as a new release. The MusicBrainz add release page will open in browser with most metadata pre-filled."
+      },
+    search:
+      {
+        mb_search:
+        {
+          command: search, aliases: [s], description: "Search for MusicBrainz release in browser.",
+          options: [
+            {command: '"<artist_name>"', description: "Search for artist using specified name instead of name in metadata."},
+          ],
+          url_base: "http://musicbrainz.org/search?query="
+        },
+        albunack_search:
+        {
+          command: albunack, aliases: [al], description: "Search for release in Albunack in browser.",
+          options: [
+            {command: '"<artist_name>"', description: "Search for artist using specified name instead of name in metadata."},
+          ],
+          url_base: "http://www.albunack.net/artist/search?"
+        },
+        mb_barcode:
+        {
+          command: barcode, aliases: [bar], options: [command: "<barcode>"],
+          url_base: "http://musicbrainz.org/search?query=",
+          description: "Search by barcode/catno. If no barcode or catalog number is entered, will search for barcode / catalog number in metadata."
+        }
+      },
+    clear_track:
+      {
+        command: clear, aliases: [l], description: "Remove all metadata values for commands on this page."
+      },
+    },
+  post_process:
+    {
+      move_files: File Under
+    },
+  processor: !!python/module:audio_pipeline.util.MusicBrainz.ExtractMeta '',
+  batch constants: !!python/name:audio_pipeline.util.Resources.BatchConstants '',
+  serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '',
+  discogs_processor: !!python/module:audio_pipeline.util.Discogs.ExtractMeta '',
 }
-

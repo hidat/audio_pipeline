@@ -92,6 +92,9 @@ class Release(Content):
         """
         super().__init__(item_code, id, title)
         
+        # if we got data from discogs, this info will be filled in
+        self.discogs_id = ""
+        
         self.release_group_id = ""
         self.disc_count = None
         self.first_released = ""
@@ -103,6 +106,7 @@ class Release(Content):
         self.release_type = ""
         
         self.artist_ids = []
+        self.artists = []
         self.artist = ''
         self.artist_sort_names = []
         
@@ -115,13 +119,6 @@ class Release(Content):
         self.secondary_genre = ""
         
         self.glossary_title = ''
-
-    def stuff(self, audiofile):
-        audiofile.album.value = self.title
-        audiofile.album_artist.value = self.artist
-        audiofile.label.value = self.label.title
-        audiofile.barcode.value = self.barcode
-
 
 class Disc:
 
@@ -155,16 +152,18 @@ class Track(Content):
         self.obscenity = ""
         self.primary_genre = ""
         self.type = ""
-        
+                
         self.radio_edit = False
+        
         self.artists = []
         self.artist_credit = ''
         self.artist_phrase = ''
+        self.extra_artists = []
         
         self.anchor_status = None
         
     def set_type(self):
-        if (self.item_code != self.id):
+        if self.item_code and (self.item_code != self.id):
             self.type = "track with filewalker mbid"
         else:
             self.type = "track"
@@ -186,6 +185,7 @@ class Artist(Content):
         self.sort_name = ''
         self.annotation = ''
         self.type = ''
+        self.join_phrase = ''
         
         self.begin_area = NameId('', '')
         self.end_area = NameId('', '')

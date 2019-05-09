@@ -51,7 +51,6 @@ class MetaGrid(tk.Grid):
         return True
 
     def restore_meta(self, event):
-        print("restoring: " + self.curr_meta)
         meta = self.curr_meta
         position = self.curr_pos
         self.edit_set(self.start[0], self.start[1])

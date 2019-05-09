@@ -13,7 +13,8 @@ t1_tags = {'tracktotal': 12, 'album': 'Who Killed...... The Zutons?',
            'accurateripresult': 'AccurateRip: Accurate (confidence 62)   [37DEB629]', 
            'artist': 'The Zutons', 'tracknumber': 4, 'disctotal': 1,
            'genre': 'Rock', 'mbid': '5560ffa9-3824-44f4-b2bf-a96ae4864187', 'length': '0:07',
-           'item_code': '8b3b7f33-4e8c-4146-90b7-96611863d133', 'obscenity': 'RED DOT'}
+           'item_code': '8b3b7f33-4e8c-4146-90b7-96611863d133', 'obscenity': 'RED DOT',
+           'send to enco': 'yes', 'rotation status': 'heavy', 'style': 'Bluegrass'}
 
  
 picard_tags = {'tracknumber': 6, 'totaltracks': 13, 'encoded by': 'dBpoweramp Release 14.4', 

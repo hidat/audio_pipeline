@@ -4,18 +4,30 @@ import copy
 import re
 
 class Constants:
+    config_data = {}
+
     batch_constants_def = None
     batch_constants = None
 
     config_dir = ""
-    audiofile = None
     processor = None
+    discogs_processor = None
     serializer = None
     custom_tags = None
-    load_releases = True
+    tb_lookup = True
+    acoustid_lookup = True
+    is_tb = False
+    move_files = ""
+    wait_for_close = False
 
+    custom_track_tags = []
+    custom_release_tags = []
+    tb_track_tags = []
+    tb_release_tags = []
     ignore_case = False
-    
+    user = None
+    tb_meta_commands = None
+
     argument_config = None
 
     @classmethod
@@ -26,37 +38,66 @@ class Constants:
         config_file = os.path.join(cls.config_dir, "default.yml")
 
         if os.path.exists(config_file):
+            cls.config_file = config_file
             with open(config_file, "r") as f:
-                config = yaml.load(f)
+                config = yaml.unsafe_load(f)
                 cls.load(config)
 
     @classmethod
     def load(cls, config):
+        config_name = os.path.split(os.path.splitext(cls.config_file)[0])[1]
+        cls.config_data[config_name] = config.copy()
+
         if "default" in config:
             default_file = os.path.join(cls.config_dir, config["default"] + '.yml')
             if os.path.exists(default_file):
+                cls.config_file = default_file
                 with open(default_file, "r") as f:
-                    default_config = yaml.load(f)
+                    default_config = yaml.unsafe_load(f)
                     config.update(default_config)
 
-        if "tags" in config:
-            if "ignore_case" in config["tags"]:
-                cls.ignore_case = config["tags"]["ignore_case"]
+        config_name = os.path.split(os.path.splitext(cls.config_file)[0])[1]
+        cls.config_data[config_name] = config.copy()
+
+        # configuration options for tag reading/writing -
+        # custom track tags, custom release tags, and whether to ignore tag casing
+        # for AAC & ID3 tags, where case does matter
+        if "tb_meta" in config:
+            cls.tb_meta_commands = config["tb_meta"]
+            if "release" in config["tb_meta"]:
+                cls.tb_release_tags = [t['tag'] for t in config["tb_meta"]["release"]]
+            if "track" in config["tb_meta"]:
+                cls.tb_track_tags = [t['tag'] for t in config["tb_meta"]["track"]]
         if "tb_lookup" in config:
-            cls.load_releases = config['tb_lookup']
+            cls.tb_lookup = config['tb_lookup']
+        if "acoustid_lookup" in config:
+            cls.acoustid_lookup = config["acoustid_lookup"]
         if "batch constants" in config:
             cls.batch_constants_def = config["batch constants"]
             cls.batch_constants = cls.batch_constants_def(None)
-        if "audiofile" in config:
-            cls.audiofile = config["audiofile"]
         if "processor" in config:
             cls.processor = config["processor"]
+        if "discogs_processor" in config:
+            cls.discogs_processor = config["discogs_processor"]
         if "serializer" in config:
             cls.serializer = config["serializer"]
         if "argument_config" in config:
             cls.argument_config = config["argument_config"]
-        if "custom_tags" in config:
-            cls.custom_tags = config["custom_tags"]
+        if "tags" in config:
+            tag_data = config["tags"]
+            if "ignore_case" in tag_data:
+                cls.ignore_case = tag_data["ignore_case"]
+            if "custom_tags" in tag_data:
+                if "track" in tag_data["custom_tags"]:
+                    cls.custom_track_tags = tag_data["custom_tags"]["track"]
+                if "release" in tag_data["custom_tags"]:
+                    cls.custom_release_tags = tag_data["custom_tags"]["release"]
+        if "post_process" in config:
+            post_process = config["post_process"]
+            if "move_files" in post_process:
+                cls.move_files = post_process["move_files"]
+                if "wait_for_close" in post_process:
+                    cls.wait_for_close = post_process["wait_for_close"]
 
     @classmethod
     def setup(cls, args, user=None):
@@ -64,7 +105,7 @@ class Constants:
             user_file = os.path.join(cls.config_dir, user + ".yml")
             if os.path.exists(user_file):
                 with open(user_file, "r") as f:
-                    user_config = yaml.load(f)
+                    user_config = yaml.unsafe_load(f)
                 cls.batch_constants = copy.deepcopy(user_config['user constants'])
                 cls.batch_constants.set(args)
             else:

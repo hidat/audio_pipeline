@@ -1,9 +1,9 @@
 import uuid
 
 from audio_pipeline import Constants
-from audio_pipeline.util import Exceptions
-from audio_pipeline.util import Util, Resources
-
+from audio_pipeline.util.Discogs import DiscogsInfo
+from audio_pipeline.util import Exceptions, Util, Resources
+from audio_pipeline.util.MusicBrainz import primary_types
 
 class Processor:
 
@@ -11,14 +11,57 @@ class Processor:
     releases = dict()
     artists = dict()
     mbinfo = None
+    discogsinfo = None
     processor = None
-
+    discogs_processor = None
+    meta_sourcees = None
+    
     def __init__(self, *args):
         Processor.mbinfo = Constants.batch_constants.mb
+        Processor.discogsinfo = DiscogsInfo.DiscogsInfo
         Processor.processor = Constants.processor
+        Processor.discogs_processor = Constants.discogs_processor
+        self.populate()
+        
+    @classmethod
+    def populate(cls):
+        cls.meta_sources = {
+            "mb": {
+                "get_releases": cls.__get_mb_releases,
+                "get_release": cls.__get_mb_release,
+                "get_artist": cls.__get_mb_artist
+                },
+            "discogs": {
+                "get_release": cls.__get_discogs_release,
+                "get_releases": None,
+                "get_artist": None
+                }
+            }
+
 
     @classmethod
-    def get_releases(cls, mbid):
+    def get_releases(cls, id, source="mb"):
+        lookup = cls.meta_sources[source]["get_releases"]
+        return lookup(id)
+        
+    @classmethod
+    def __get_discogs_release(cls, id):
+        if cls.discogsinfo is None:
+            raise Exceptions.NoDiscogsError("No Discogs object when processing release " + str(id))
+
+        if id in cls.releases:
+            return cls.releases[id]
+        else:
+            discogs_release = cls.discogsinfo.get_release(id)
+            if not discogs_release:
+                raise Exceptions.NoDiscogsError("Problem getting release info from Discogs for id " + str(id))
+
+            release = cls.discogs_processor.ReleaseProcessor(discogs_release)
+            cls.releases[id] = release
+            return release
+
+    @classmethod
+    def __get_mb_releases(cls, mbid):
         if cls.mbinfo is None:
             raise Exceptions.NoMusicBrainzError("No MBInfo object when processing release group " + str(mbid))
 
@@ -39,9 +82,14 @@ class Processor:
                 results.append(release)
                 cls.releases[release_id] = release
             return results
+        
+    @classmethod
+    def get_release(cls, id, source="mb"):
+        lookup = cls.meta_sources[source]["get_release"]
+        return lookup(id)
 
     @classmethod
-    def get_release(cls, mbid):
+    def __get_mb_release(cls, mbid):
         if cls.mbinfo is None:
             raise Exceptions.NoMusicBrainzError("No MBInfo object when processing release " + str(mbid))
 
@@ -57,7 +105,13 @@ class Processor:
             return release
 
     @classmethod
-    def get_artist(cls, mbid):
+    def get_artist(cls, id, source="mb"):
+        lookup = cls.meta_sources[source]["get_artist"]
+        return lookup(id)
+
+
+    @classmethod
+    def __get_mb_artist(cls, mbid):
         if cls.mbinfo is None:
             raise Exceptions.NoMusicBrainzError("No MBInfo object when processing artist " + str(mbid))
 
@@ -71,7 +125,7 @@ class Processor:
             artist = cls.processor.ArtistProcessor(mb_artist)
             cls.artists[mbid] = artist
             return artist
-
+    
 
 class ReleaseProcessor:
     secondary_category = "CATEGORIES/ROTATION-STAGING"
@@ -79,6 +133,42 @@ class ReleaseProcessor:
     def __init__(self, mb_release):
         self.mb_release = mb_release
         self._release = None
+
+    def stuff_audiofile(self, audio_file):
+        """
+        Stuff the given audio_file (w/ track #) with the musicbrainz data
+        :return:
+        """
+        audio_file.mbid.value = self.release.id
+        audio_file.album_artist.value = self.release.artist
+        audio_file.album.value = self.release.title
+        audio_file.release_date.value = self.release.date
+        if len(self.release.labels) > 0:
+            audio_file.label.value = [label.title for label in self.release.labels]
+            audio_file.catalog_num.value = [label.catalog_num for label in self.release.labels]
+        audio_file.country.value = self.release.country
+        if len(self.release.barcode) > 0:
+            audio_file.barcode.value = self.release.barcode
+        if len(self.release.release_type) > 0:
+            audio_file.release_type.value = self.release.release_type
+        if len(self.release.format) > 0:
+            audio_file.media_format.value = self.release.format[0]
+
+        track = self.get_track(audio_file)
+
+        if track.recording_id:
+            audio_file.recording_mbid.value = track.recording_id
+        if track.id:
+            audio_file.track_mbid.value = track.id
+            
+        audio_file.title.value = track.title
+        if track.artist_phrase:
+            audio_file.artist.value = track.artist_phrase
+        else:
+            audio_file.artist.value = track.artist_credit
+        audio_file.disc_num.value = track.disc_num
+        audio_file.track_num.value = track.track_num
+        audio_file.meta_stuffed.value = "yep"
 
     def process_release(self):
         """
@@ -180,22 +270,7 @@ class ReleaseProcessor:
             track_meta = disc['track-list'][track_index]
         else:
             return track
-            
-        # if generating unique item codes, do that
-        if Constants.batch_constants.gen_item_code:
-            item_code = str(uuid.uuid4())
-        elif audio_file.item_code.value is not None:
-            item_code = audio_file.item_code.value
-        elif (audio_file.obscenity.value is not None and \
-             audio_file.obscenity.value.casefold() == "kexp clean edit") or \
-             (audio_file.radio_edit.value is not None and \
-             audio_file.radio_edit.value.casefold() == "kexp radio edit"):
-            item_code = str(uuid.uuid4())
-        else:
-            item_code = track_meta['id']
-        
-        track.item_code = item_code
-                        
+                                    
         recording_meta = track_meta['recording']
         
         # fields from track_meta
@@ -235,8 +310,9 @@ class ReleaseProcessor:
         track.disc_num = audio_file.disc_num.value
         track.track_num = audio_file.track_num.value
         track.obscenity = str(audio_file.obscenity)
-        track.primary_genre = Resources.Genres.get(str(audio_file.category))
-        track.anchor_status = str(audio_file.anchor)
+        if not Constants.is_tb:
+            track.primary_genre = Resources.Genres.get(str(audio_file.category))
+            track.anchor_status = str(audio_file.anchor)
 
         #####################################
         # NEED TO ADD RADIO EDIT INFORMATION
@@ -261,9 +337,10 @@ class ReleaseProcessor:
         track.various_artist_dist_rule = Util.distrule_cleanup(release_meta.title[:1])
 
         # set the item_code value in the audio file
-        audio_file.item_code.value = item_code
+        if not Constants.is_tb:
+            audio_file.item_code.value = item_code
+            audio_file.item_code.save()
 
-        audio_file.item_code.save()
         return track
         
     def get_track(self, audio_file):

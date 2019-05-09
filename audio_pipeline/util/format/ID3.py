@@ -108,6 +108,7 @@ class CustomTag(BaseTag):
             if isinstance(val, list):
                 self._value.text = val
             else:
+                val = str(val)
                 self._value.text = [val]
         else:
             self._value = None
@@ -182,6 +183,31 @@ class LengthTag(BaseTag):
     _frame_type = mutagen.id3.TLEN
 
 
+class UFIDTag(BaseTag):
+    _frame_type = mutagen.id3.UFID
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.desc = self.serialization_name[5:]
+
+    @property
+    def value(self):
+        if self._value:
+            val = str(self._value.data)
+            return val
+
+    @value.setter
+    def value(self, val):
+        if val:
+            val = str(val).encode('utf-8')
+            if self._value is None:
+                self._value = self._frame_type(self.desc, val)
+            else:
+                self._value.data = val
+        else:
+            self._value = None
+
+
 class Format(Tag.MetadataFormat):
 
     # release-level serialization names
@@ -202,6 +228,8 @@ class Format(Tag.MetadataFormat):
     _track_num = "TRCK"
     _length = "TLEN"
     _acoustid = "TXXX:Acoustid Id"
+    _track_mbid = 'TXXX:MusicBrainz Release Track Id'
+    _recording_mbid = 'UFID:http://musicbrainz.org'
 
     ################
     #   release-level tags
@@ -280,6 +308,16 @@ class Format(Tag.MetadataFormat):
     @classmethod
     def acoustid(cls, tags):
         tag = CustomTag(cls._acoustid_name, cls._acoustid, tags)
+        return tag
+    
+    @classmethod
+    def recording_mbid(cls, tags):
+        tag = UFIDTag(cls._recording_mbid_name, cls._recording_mbid, tags)
+        return tag
+    
+    @classmethod
+    def track_mbid(cls, tags):
+        tag = CustomTag(cls._track_mbid_name, cls._track_mbid, tags)
         return tag
 
     #########################

@@ -75,7 +75,7 @@ class Track(default_resources.Track):
         self.primary_genre = ""
         self.type = ""
 
-        self.radio_edit = False
+        self.radio_edit = ""
 
         self.anchor_status = None
 

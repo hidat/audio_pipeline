@@ -57,7 +57,7 @@ class BestRelease:
         max_ratio = 0
         if not ignore_mbid:
             track = self.results.track[0]
-            if Util.has_mbid(track):
+            if track.has_mbid():
                 return max_ratio
 
         # get & process MB metadata

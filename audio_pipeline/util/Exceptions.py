@@ -31,3 +31,15 @@ class NoMusicBrainzError(Exception):
             m = m + ": " + self.message
             
         return str(m)
+    
+class NoDiscogsError(Exception):
+    def __init__(self, message=None):
+        self.message = message
+        
+    def __str(self):
+        m = "No Discogs object"
+        
+        if self.message:
+            m = m + ": " + self.message
+        
+        return str(m)

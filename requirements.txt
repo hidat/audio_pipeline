@@ -1,0 +1,8 @@
+yattag
+mammoth
+pyyaml
+musicbrainzngs
+mutagen
+smartsheet-python-sdk
+pyacoustid
+discogs_client

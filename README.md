@@ -7,6 +7,7 @@ It is assumed that you already have Python 3.4 or greater installed, and it is i
 
 1. Checkout this repository
 2. Install musicbrainzngs  `pip install musicbrainzngs`
+3. Install discogs_client `pip install discogs_client`
 3. Install mutagen  `pip install mutagen`
 4. Install yattag  `pip install yattag`
 5. Install mammoth  `pip install mammoth`

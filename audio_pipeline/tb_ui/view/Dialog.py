@@ -52,20 +52,20 @@ class Check(tk.Toplevel):
     def cancel(self):
         self.set_variable.set(Resources.cancel)
         self.destroy()
-        
+
     def start(self):
         self.grab_set()
-        
+
     def apply(self):
         # get value of checkbox
         if self.selected.get():
             self.set_variable.set(Resources.checked)
         else:
             self.set_variable.set(Resources.unchecked)
-        
+
         self.destroy()
 
-        
+
 class MultiCheck(tk.Toplevel):
 
     def __init__(self, master, check_messages, button_name, on_commands, off_commands,
@@ -123,7 +123,7 @@ class MultiCheck(tk.Toplevel):
 
     def start(self):
         self.grab_set()
-        
+
     def apply(self):
         # get value of checkbox
         for selection in self.selected:
@@ -140,7 +140,7 @@ class DialogBox(tk.Toplevel):
     def __init__(self, message, buttons=None, dimensions=(100,75), title=None, master=None):
         """
         Create a dialog popup box containing the specified message string and button options.
-        
+
         :param message: string message to display in popup
         :param buttons: List of button dictionaries; each button dictionary must contain
                         {"name": name, "command": command}
@@ -163,10 +163,10 @@ class DialogBox(tk.Toplevel):
     def text(self, message):
         label = tk.Label(self, text=message)
         label.pack()
-        
+
     def button_box(self, buttons):
         box = tk.Frame(self)
-        
+
         for i in range(0, len(buttons)):
             button = buttons[i]
             if "command" in button and button["command"]:
@@ -175,7 +175,7 @@ class DialogBox(tk.Toplevel):
                 but = tk.Button(box, text=button["name"], command=self.cancel)
             if i == 0:
                 but.focus_set()
-                
+
             but.bind("<Return>", but['command'])
             but.pack(side=tk.LEFT, padx=5,pady=5)
 
@@ -184,7 +184,7 @@ class DialogBox(tk.Toplevel):
 
     def start(self):
         self.grab_set();
-        self.master.wait_window(self);
+        # self.master.wait_window(self);
         
     def apply(self, command):
         command()
@@ -206,4 +206,4 @@ def err_message(message, ok_command, parent=None, quit=False):
     buttons = [{"name": "OK", "command": ok_command}]
     if quit:
         buttons.append({"name": "Cancel", "command": err_display.cancel})
-    err_display.button_box(buttons) 
+    err_display.button_box(buttons)

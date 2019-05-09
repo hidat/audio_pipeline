@@ -3,10 +3,10 @@ import uuid
 from audio_pipeline import Constants
 from audio_pipeline.util import Util, Resources
 # from . import Resources
-from ..util import Process
+from ..util.MusicBrainz import ExtractMeta
 
 
-class ReleaseProcessor(Process.ReleaseProcessor):
+class ReleaseProcessor(ExtractMeta.ReleaseProcessor):
     secondary_category = "CATEGORIES/ROTATION-STAGING"
 
     def process_release(self):
@@ -61,7 +61,76 @@ class ReleaseProcessor(Process.ReleaseProcessor):
         """
 
         track = super().process_track(audio_file)
+
+        disc_index = audio_file.disc_num.value - 1  # zero-index the disc num
+        track_index = audio_file.track_num.value - 1  # zero-index the track num
+
+        release_meta = self.release
+
+        if disc_index < release_meta.disc_count:
+            disc = self.mb_release['medium-list'][disc_index]
+        else:
+            # the disc num in the file tags is not compatible with the number of discs
+            # in the musicbrainz release we retrived, so it's probably the wrong release
+            # and we are not able to properly extract the metadata
+            return track
+
+        if track_index < len(disc['track-list']):
+            track_meta = disc['track-list'][track_index]
+        else:
+            # the track number in the file tags is not compatible with the number of tracks
+            # in the musicbrainz release we retrived, so it's probably the wrong release
+            # and we are not able to properly extract the metadata
+            return track
+
+ 
+        #####################################################
+        # Set KEXP-specific metadata from audio file tags
+        #####################################################
+
+        track.primary_genre = Resources.Genres.get(str(audio_file.track_tags["KEXPPrimaryGenre"]))
+        track.anchor_status = str(audio_file.track_tags["KEXPAnchorStatus"])
+        track.obscenity = str(audio_file.track_tags["KEXPFCCOBSCENITYRATING"])
+        track.radio_edit = str(audio_file.track_tags["KEXPRadioEdit"])
+
+        # if generating unique item codes, do that
+        if not Constants.is_tb:
+            if Constants.batch_constants.gen_item_code:
+                item_code = str(uuid.uuid4())
+            elif audio_file.item_code.value is not None:
+                item_code = audio_file.item_code.value
+            elif (track.obscenity.casefold() == "kexp clean edit") or (track.radio_edit.casefold() == "kexp radio edit"):
+                item_code = str(uuid.uuid4())
+            else:
+                item_code = track_meta['id']
+    
+            track.item_code = item_code
+            
+        track.set_type()
         
+        # get the secondary category
+        sort_names = []
+        for artist in release_meta.artist_sort_names:
+            sort_names.append(artist)
+
+        if Constants.batch_constants.source == Resources.Hitters.source:
+            track.secondary_category = Resources.Hitters.artist + Constants.batch_constants.rotation + " Hitters"
+        elif Constants.batch_constants.rotation:
+            cat = release_meta.artist
+            cat += " - " + release_meta.title
+            cat = self.secondary_category + "/" + Util.string_cleanup(Constants.batch_constants.rotation) + \
+                  "/" + Util.string_cleanup(cat)
+            track.secondary_category = cat
+
+        sort_names.sort()
+        track.artist_dist_rule = Util.distrule_cleanup(sort_names[0][:1])
+        track.various_artist_dist_rule = Util.distrule_cleanup(release_meta.title[:1])
+
+        # set the item_code value in the audio file
+        if not Constants.is_tb:
+            audio_file.item_code.value = item_code
+            audio_file.item_code.save()
+
         return track
         
     def get_track(self, audio_file):
@@ -69,93 +138,7 @@ class ReleaseProcessor(Process.ReleaseProcessor):
         return track
 
         
-class ArtistProcessor:
+class ArtistProcessor(ExtractMeta.ArtistProcessor):
 
     def __init__(self, mb_artist):
-        self.mb_artist = mb_artist
-        self._artist = None
-
-    def process_artist(self):
-        # make sure we haven't already processed this artist:
-        if self._artist:
-            artist = self._artist
-        else:
-            # get MusicBrainz metadata
-            meta = self.mb_artist
-            
-            # extract relevent metadata into an Artist object
-            # (at this point, the artist item code is always the artist mbid)
-            artist = Resources.Artist(meta['id'])
-            
-            artist.name = meta['name']
-            
-            if 'disambiguation' in meta:
-                artist.disambiguation = meta['disambiguation']
-                artist.title = artist.name + ' (' + artist.disambiguation + ') '
-            else:
-                artist.title = artist.name
-                
-            artist.id = meta['id']
-            artist.sort_name = meta['sort-name']
-            
-            if 'annotation' in meta and 'annotation' in meta['annotation']:
-                artist.annotation = meta['anotation']['text']
-            if 'type' in meta:
-                artist.type = meta['type']
-            
-            if 'begin-area' in meta:
-                artist.begin_area.name = meta['begin-area']['name']
-                artist.begin_area.id = meta['begin-area']['id']
-            if 'end-area' in meta:
-                artist.end_area.name = meta['end-area']['name']
-                artist.end_area.id = meta['end-area']['id']
-                
-            if 'life-span' in meta:
-                life = meta['life-span']
-                if 'begin' in life:
-                    artist.begin_date = life['begin']
-                if 'end' in life:
-                    artist.end_date = life['end']
-                if 'ended' in life:
-                    if life['ended'].lower() == 'true':
-                        artist.ended = '1'
-                    else:
-                        artist.ended = '0'
-            
-            if 'country' in meta:
-                # check that country is there, but mb's 'country' field is a code (such as 'GB')
-                # so the actual information we want is stored in 'area'
-                if 'area' in meta:
-                    artist.country.name = meta['area']['name']
-                    artist.country.id = meta['area']['id']
-            
-            if 'ipi-list' in meta:
-                artist.ipi_list = meta['ipi-list']
-                
-            if 'isni-list' in meta:
-                artist.isni_list = meta['isni-list']
-                
-            if 'url-relation-list' in meta:
-                for link in meta['url-relation-list']:
-                    if 'target' in link:
-                        artist.url_relation_list.append(link['target'])
-
-            if 'artist-relation-list' in meta:
-                for member in meta['artist-relation-list']:
-                    if member['type'] == 'member of band' and 'direction' in member \
-                            and member['direction'] == 'backward':
-                        artist.group_members.append(member['artist']['id'])
-                        
-        self._artist = artist
-
-    @property
-    def artist(self):
-        if self._artist:
-            # already have info about this artist; don't need to do anything
-            artist = self._artist
-        else:
-            # process this artist
-            self.process_artist()
-            artist = self._artist
-            
-        return artist
+        super().__init__(mb_artist)

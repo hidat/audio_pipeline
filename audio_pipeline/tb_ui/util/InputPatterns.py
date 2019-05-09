@@ -22,13 +22,17 @@ quit = "quit"
 help = "help"
 edit = "edit"
 
+mb_add = "add release"
+
 mb = "mb"
 albunack = "albunack"
 
 tracknum_acc = "track_num"
 meta_acc = "meta"
 
-secondary_genre_pattern = re.compile('(g|genre)\s*(?P<' + meta_acc + '>.+)')
+mb_add_pattern = re.compile('add release')
+
+secondary_genre_pattern = re.compile('g|genre\s+(?P<' + meta_acc + '>.+)')
 track_num_pattern = re.compile('((((?P<start>(\\d+))\\s*-\\s*(?P<end>(\\d+)))|(?P<single>\\d+))\s*,*\s*|(?P<all>all))')
 track_meta_pattern = re.compile('\s*(?P<' + tracknum_acc + '>(\s*' + track_num_pattern.pattern + '\s*)+)(?P<' + meta_acc + '>.+)')
 
@@ -46,7 +50,7 @@ release_pattern = re.compile("\d+ -.*")
 radio_edit = re.compile("\s*((?P<" + kexp + ">(kd)|(kexp radio( edit?)))|(?P<" + standard + ">(d+)|(radio( edit)?)))", flags=re.I)
 obscenity_rating = re.compile("\s*((?P<" + yellow + ">y+)|(?P<" + red + ">r+)|(?P<" + kexp + ">(kc|kexp clean( edit)?))|(?P<" + standard + ">(c+|clean( edit)?)))", flags=re.I)
 rm_rating = re.compile("\s*(l|clear)", flags=re.I)
-mb_search_pattern = re.compile("\s*((?P<" + mb + ">s+(earch)?)|(?P<" + albunack + ">(albunack|al)))(\s*(?P<" + barcode + ">bar)?(\"(?P<" + artist + ">.+)\")?)", flags=re.I)
+mb_search_pattern = re.compile("\s*((?P<" + mb + ">s+(earch)?)|(?P<" + albunack + ">((albunack|al)(\s|$))))(\s*(?P<" + barcode + ">bar)?(\"(?P<" + artist + ">.+)\")?)", flags=re.I)
 barcode_search_pattern = re.compile("\s*bar\s*(?P<" + barcode + ">.+)?")
 whitespace = re.compile("^\s+$")
 

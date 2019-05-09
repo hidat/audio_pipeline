@@ -4,6 +4,7 @@ from ...util import Util
 from . import EntryController
 from ..util import InputPatterns, Resources
 from ...util import Resources as r
+from .. import release_tags, track_tags, general_commands, navigate, get_track_nums, clear_track
 import time
 import os
 from . import Search
@@ -24,11 +25,25 @@ class TBController:
         self.copy_dir = copy_dir
         self.app = App.App(self.process_input, self.choose_dir, self.last_album)
         self.app.bind("<Escape>", self.last_album)
-        
+
+
+        self.seeder_file = set()
+
         if root_dir:
             self.choose_dir(root_dir)
         else:
             self.app.after_idle(func=self.app.choose_dir)
+
+    def clean_temp_files(self):
+        deleted = set()
+        for fname in self.seeder_file:
+            try:
+                os.remove(fname)
+                deleted.add(fname)
+            except PermissionError:
+                print("Can't close this file")
+        for fname in deleted:
+            self.seeder_file.remove(fname)
 
     def process_input(self, input_string):
         """
@@ -37,42 +52,76 @@ class TBController:
         :param event:
         :return:
         """
-        tracks = InputPatterns.track_meta_pattern.match(input_string)
-        nav = InputPatterns.nav_pattern.match(input_string)
-        popup = InputPatterns.popup_pattern.match(input_string)
-        search = InputPatterns.mb_search_pattern.match(input_string)
-        barcode = InputPatterns.barcode_search_pattern.match(input_string)
-        genre = InputPatterns.secondary_genre_pattern.match(input_string)
+        # if we had a temp file open (seeding mb), delete it -
+        # probably safe, since someone has entered a new input
+        if self.seeder_file:
+            self.clean_temp_files()
+
         self.app.select_input()
-        if Util.is_mbid(input_string):
-            self.model.set_mbid(input_string)
-            self.app.update_meta(self.model.current_release[0])
-        elif tracks:
-            # input is (probably) track metadata (currently only RED DOT, YELLOW DOT, CLEAN EDIT, clear (l))
-            try:
-                track_nums = InputPatterns.get_track_numbers(tracks.group())
-                if "all" in track_nums:
-                    track_nums = self.model.track_nums()
-                value = tracks.group(InputPatterns.meta_acc)
-                self.new_meta_input(track_nums, value)
-            except ValueError as e:
+
+        # check for release tags
+        for tag in release_tags:
+            release_tag, release_value = tag.execute(input_string)
+            if release_tag is not None:
+                if release_value is True and self.model.current_release[0].release_tags[release_tag].value:
+                    release_value = None
+                self.model.set_release_tag(release_tag, release_value)
+                self.app.update_meta(self.model.current_release)
+                return
+            elif release_value is not None:
                 err_msg = "Invalid input " + str(input_string)
                 Dialog.err_message(err_msg, None, parent=self.app)
-        elif nav:
-            self.navigate(nav)
+                return
+
+        track_nums, input_string = get_track_nums(input_string)
+        if track_nums is not None:
+            clear = False
+            if clear_track[0]:
+                clear = clear_track[0].execute(input_string)
+
+            for tag in track_tags:
+                if clear:
+                    input_string = tag.command
+                track_tag, track_value = tag.execute(input_string)
+                if track_tag:
+                    for track in self.model.current_release:
+                        if track.track_num.value in track_nums or 'all' in track_nums:
+                            if track_value is True and track.track_tags[track_tag].value:
+                                track.track_tags[track_tag].value = None
+                            else:
+                                track.track_tags[track_tag].value = track_value
+                            track.save()
+                            self.app.update_meta(track)
+                    if not clear:
+                        break
+            track_nums = track_nums - {'all'} - self.model.track_nums()
+            if len(track_nums) > 0:
+                for track in track_nums:
+                    err_msg = "Invalid Track Number: " + str(track)
+                    Dialog.err_message(err_msg, None, parent=self.app)
+            return
+
+        nav = navigate(input_string)
+        if nav is not None:
+            if nav > 0 and not self.model.has_next():
+                self.last_album()
+            elif nav < 0 and not self.model.has_prev():
+                self.last_album()
+            else:
+                tracks = self.model.jump(nav)
+                self.app.display_meta(tracks)
+            return
+
+        popup = InputPatterns.popup_pattern.match(input_string)
+        genre = InputPatterns.secondary_genre_pattern.match(input_string)
+        if Util.is_mbid(input_string):
+            complete = self.model.set_mbid(input_string)
+            print(complete)
+            self.app.update_meta(self.model.current_release)
         elif popup:
             self.popup(popup)
-        elif search:
-            artist = search.group(InputPatterns.artist)
-            barcode = search.group(InputPatterns.barcode)
-            if search.group(InputPatterns.mb):
-                Search.mb_search(self.model.current_release[0], artist, barcode)
-            if search.group(InputPatterns.albunack):
-                Search.albunack_search(self.model.current_release[0], artist)
-        elif barcode:
-            bar = barcode.group(InputPatterns.barcode)
-            Search.mb_search(self.model.current_release[0], barcode=True, barcode_value=bar)
         elif genre:
+            genre.group(InputPatterns.meta_acc)
             full_genre = r.Genres.get(genre.group(InputPatterns.meta_acc))
             if full_genre:
                 self.model.set_genre(full_genre)
@@ -81,75 +130,16 @@ class TBController:
                 err_msg = "Invalid genre " + str(genre.group(InputPatterns.meta_acc))
                 Dialog.err_message(err_msg, None, parent=self.app)
         else:
-            err_msg = "Invalid input " + str(input_string)
-            Dialog.err_message(err_msg, None, parent=self.app)
-
-    def new_meta_input(self, track_nums, value):
-        """
-        When we have input we've determined is (probably) metadata,
-        add it to the metadata of the specified track
-        """
-        obscenity = InputPatterns.obscenity_rating.match(value)
-        edit = InputPatterns.radio_edit.match(value)
-        clear = InputPatterns.rm_rating.match(value)
-        if not (obscenity or edit or clear):
-                err_msg = "Invalid Input " + str(value)
+            complete = None
+            for command in general_commands:
+                complete = command.execute(input_string, self.model)
+                if complete:
+                    self.app.update_meta(self.model.current_release)
+                    break
+            if complete is None:
+                err_msg = "Invalid input " + str(input_string)
                 Dialog.err_message(err_msg, None, parent=self.app)
-                return None
 
-        # we have a valid metadata input - go through tracks in release &
-        # update the ones with the specified track number
-        for track in self.model.current_release:
-            if track.track_num.value in track_nums:
-                # update this tracks metadata
-                if obscenity:
-                    if obscenity.group(InputPatterns.red):
-                        track.obscenity.save(Util.Obscenity.red)
-                    elif obscenity.group(InputPatterns.yellow):
-                        track.obscenity.save(Util.Obscenity.yellow)
-                    elif obscenity.group(InputPatterns.kexp):
-                        track.obscenity.save(Util.Obscenity.kexp_clean)
-                    elif obscenity.group(InputPatterns.standard):
-                        track.obscenity.save(Util.Obscenity.clean)
-                if edit:
-                    if edit.group(InputPatterns.kexp):
-                        track.radio_edit.save(Util.Edits.kexp_edit)
-                    elif edit.group(InputPatterns.standard):
-                        track.radio_edit.save(Util.Edits.radio_edit)
-                if clear:
-                    track.obscenity.save(None)
-                    track.radio_edit.save(None)
-                self.app.update_meta(track)
-                track_nums.remove(track.track_num.value)
-
-        # any leftover track numbers are not valid - display an error message
-        for track in track_nums:
-            err_msg = "Invalid Track Number: " + str(track)
-            Dialog.err_message(err_msg, None, parent=self.app)
-            
-    def navigate(self, command):
-        """
-        Change the album displayed.
-        """
-        jump = command.group(InputPatterns.jump)
-        
-        if command.group(InputPatterns.next):
-            if jump:
-                tracks = self.model.jump(int(jump))
-                self.app.display_meta(tracks)
-            elif self.model.has_next():
-                self.next_album()
-            else:
-                self.last_album()
-        elif command.group(InputPatterns.prev):
-            if jump:
-                tracks = self.model.jump((-1 *int(jump)))
-                self.app.display_meta(tracks)
-            elif self.model.has_prev():
-                self.prev_album()
-            else:
-                self.last_album()
-            
     def popup(self, command):
         """
         Open the appropriate popup, as determined by the command
@@ -158,16 +148,16 @@ class TBController:
             meta_entry = EntryController.Entry(self.model.current_release, self.app, self.update_album)
             meta_entry.start()
         elif command.group(InputPatterns.quit):
-            self.last_album()        
+            self.last_album()
         elif command.group(InputPatterns.help):
             self.app.display_info()
-            
+
     def update_album(self):
         """
         Update current release metadata
         """
-        self.app.update_meta(self.model.current_release[0])
-            
+        self.app.update_meta(self.model.current_release)
+
     def next_album(self):
         """
         Display the next directory / album
@@ -186,36 +176,45 @@ class TBController:
         """
         Display a 'quit'? dialog
         """
-        Dialog.Check(None, "Move Files?", "Close TB", self.app.processing_done, "Close TomatoBanana?")
-        self.app.wait_variable(self.app.processing_done)
-        move_files = self.app.processing_done.get()
-        if move_files != Resources.cancel:
-            self.app.destroy()
-            time.sleep(.5)
-            if move_files > 0:
-                print('move files')
-                self.close()
-            del self.model
+        set_variable = self.app.processing_done
+        if self.model.processing_complete:
+            Dialog.Check(None, "Move Files?", "Close TB", set_variable, "Close TomatoBanana?")
+            self.app.wait_variable(set_variable)
+            move_files = set_variable.get()
+            print(move_files)
+            if move_files != Resources.cancel:
+                self.app.destroy()
+                time.sleep(.5)
+                if move_files > 0:
+                    print('move files')
+                    self.close()
+                del self.model
+        else:
+            Dialog.DialogBox("Close TomatoBanana?", buttons=[{"name": "OK", "command": lambda: set_variable.set(Resources.checked)},
+                             {"name": "Cancel", "command": lambda: set_variable.set(Resources.cancel)}], master=self.app)
+            self.app.wait_variable(set_variable)
+            close_tb = set_variable.get()
+            if close_tb != Resources.cancel:
+                self.app.destroy()
+                time.sleep(.5)
+                del self.model
 
     def close(self):
         """
         Close TomatoBanana; move files into appropriate folders
         """
         self.model.processing_complete.move_files(self.model)
-        
+
     def choose_dir(self, root_dir):
         if root_dir > "":
-        
+
             if self.copy_dir:
                 dest_dir = self.copy_dir
             else:
                 dest_dir = os.path.split(root_dir)[0]
-                
+
             new_model = Model.ProcessDirectory(root_dir, dest_dir, False)
             if new_model.has_next():
-            
-                path, releases = os.path.split(root_dir)
-            
                 self.root_dir = root_dir
                 self.model = new_model
                 self.next_album()

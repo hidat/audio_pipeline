@@ -1,6 +1,32 @@
-{tags: {ignore_case: False}, tb_lookup: True,
- audiofile: !!python/name:audio_pipeline.kexp.KEXPAudioFile.KEXPAudioFile '',
- processor: !!python/name:audio_pipeline.kexp.Process '',
+{
+ tags: {ignore_case: False,
+        custom_tags: {track: [KEXPAnchorStatus, KEXPPrimaryGenre]}},
+  tb_lookup: True,
+  acoustid_lookup: False,
+  tb_meta: {release:
+              [
+                {tag: KEXPSecondaryGenre, aliases: ['genre', 'secondary', 'category'],
+                 freeform: True}
+              ],
+            track:
+              [
+                {tag: KEXPFCCOBSCENITYRATING, aliases: [obscenity, o],
+                options: [{command: YELLOW DOT, aliases: [y], color: yellow},
+                          {command: RED DOT, aliases: [r], color: red},
+                          {command: CLEAN EDIT, aliases: [clean, c], color: light green},
+                          {command: KEXP CLEAN EDIT, aliases: [kc], color: green}]
+                },
+                {tag: KEXPRadioEdit, display_name: Radio Edit,
+                 options: [{command: KEXP RADIO EDIT, aliases: [kd]},
+                            {command: RADIO EDIT, aliases: [d]}],
+                 aliases: [edit, radio]}
+              ]
+          },
+  post_process:
+    {
+      move_files: "Has MBID",
+    },
+ processor: !!python/module:audio_pipeline.kexp.Process '',
  batch constants: !!python/name:audio_pipeline.kexp.Resources.BatchConstants '',
  serializer: !!python/name:audio_pipeline.serializers.DaletSerializer.DaletSerializer '',
  argument_config: !!python/name:audio_pipeline.kexp.argument_config '',

@@ -1,9 +1,5 @@
 import tkinter.tix as tk
-from . import Settings
-from . import MetaFrame
-from . import InfoFrame
-from . import InputFrame
-from . import Dialog
+from . import Settings, MetaFrame, InfoFrame, InputFrame, Dialog, Setup
 from ..util import Resources
 
 
@@ -15,35 +11,48 @@ class App(tk.Tk):
         self.directory_selector = directory_selector
         self.close_command = close_command
 
+        release_row = 0
+        release_column = 0
         self.release_location = (1, 1)
         self.track_location = (2, 1)
         self.input_location = (3, 1)
 
         tk.Tk.__init__(self)
+        height_frame = tk.Frame(master=self, bg=Settings.bg_color, height=80*8, width=0)
+        height_frame.grid(row=0, column=0, rowspan=2, padx=5, pady=3, sticky="nw")
+        main_frame = tk.Frame(master=self, bg=Settings.bg_color)
+        main_frame.grid(row=0, column=1, sticky="nw")
         self['bg'] = Settings.bg_color
         self.title("TomatoBanana")
-        
+
         self.processing_done = tk.IntVar()
         self.processing_done.set(Resources.cancel)
         
-        self.release_frame = MetaFrame.ReleaseFrame()
-        self.track_frame = MetaFrame.TrackFrame()
+        self.release_frame = MetaFrame.ReleaseFrame(main_frame)
+        self.track_frame = MetaFrame.TrackFrame(main_frame)
         self.input_frame = InputFrame.InputFrame(input_processor)
         self.info_window = None
 
-        self.release_frame.grid(row=self.release_location[0], column=self.release_location[1], sticky="w")
-        self.track_frame.grid(row=self.track_location[0], column=self.track_location[1], sticky="w")
-        self.input_frame.grid(row=self.input_location[0], column=self.input_location[1], sticky="w")
+        self.release_frame.grid(row=release_row, column=release_column, sticky="nw")
+        self.track_frame.grid(row=release_row + 1, column=release_column, sticky="nw")
+        self.input_frame.grid(row=1, column=1, sticky="sw")
 
         self.menubar = tk.Menu(self)
         self.menubar.add_command(label="Change Directory", command=self.choose_dir)
+        self.menubar.add_separator()
         self.menubar.add_command(label="Help", command=self.display_info)
+#         self.menubar.add_separator()
+#         self.menubar.add_command(label="Settings", command=self.show_setup)
         self.config(menu=self.menubar)
 
         self.protocol("WM_DELETE_WINDOW", self.close_command)
 
         self.allow_input()
         self.grid()
+
+    def show_setup(self):
+        setup = Setup.App()
+        setup.protocol("WM_DELETE_WINDOW", setup.destroy)
 
     def choose_dir(self):
         """
@@ -56,8 +65,13 @@ class App(tk.Tk):
         self.track_frame.display_meta(track_meta)
 
     def update_meta(self, track_meta):
-        self.release_frame.update_meta(track_meta)
-        self.track_frame.update_meta(track_meta)
+        if type(track_meta) == list:
+            self.release_frame.update_meta(track_meta[0])
+            for t in track_meta:
+                self.track_frame.update_meta(t)
+        else:
+            self.release_frame.update_meta(track_meta)
+            self.track_frame.update_meta(track_meta)
 
     def display_info(self):
         if self.info_window:
@@ -66,9 +80,8 @@ class App(tk.Tk):
             self.info_window = tk.Toplevel()
             self.info_window.title("Help")
             self.info_window["bg"] = Settings.bg_color
-            info = InfoFrame.InfoFrame(master=self.info_window)
-            info.display_commands()
-            self.info_window.focus_set()
+            info = InfoFrame.InfoFrame(master=self.info_window, base_name = "Help | ")
+#             info.display_commands()
             self.info_window.protocol("WM_DELETE_WINDOW", self.close_info)
 
     ######################

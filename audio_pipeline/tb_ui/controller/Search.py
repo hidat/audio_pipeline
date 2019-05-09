@@ -1,9 +1,12 @@
 import urllib.parse
 import webbrowser
+import tempfile
+import os
+import time
 import re
 
 whitespace = re.compile("\s")
-
+mb_release = "http://musicbrainz.org/add"
 albunack_search_url = "http://www.albunack.net/artist/search?"
 albunack_search_terms = {"artistname": "", "musicbrainzartistid": "", "musicbrainzartistdbid": "", "discogsartistid": ""}
 mb_search_url = "http://musicbrainz.org/search?query="
@@ -81,6 +84,15 @@ def mb_search(track, artist=None, barcode=None, barcode_value=None):
         search_url = "%s%s&%s" % (mb_search_url, query, search_terms)
         print(search_url)
         webbrowser.open(search_url)
+        
+        
+def mb_release_seed(release_seed):
+    fd, fname = tempfile.mkstemp(suffix = '.html')
+    os.close(fd)
+    with open(fname, "wb") as f:
+        f.write(release_seed.encode('utf-8'))
+    webbrowser.open(fname)
+    return fname
 
 
 def prep_query(query):
@@ -90,11 +102,9 @@ def prep_query(query):
             q = "%s:\"%s\"" % (part[0], part[1])
         else:
             q = part[0]
-        for r in forbidden:
-            rep = "%s%s" % ("%", hex(ord(r))[2:])
-            q = q.replace(r, rep)
-        q.replace(" ", "+")
+        q = urllib.parse.quote_plus(q)
         prepped_query.append(q)
         print(prepped_query)
 
     return " ".join(prepped_query)
+

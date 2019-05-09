@@ -3,6 +3,7 @@ import re
 import copy
 from . import Util
 from audio_pipeline import Constants
+import datetime
 
 
 class BaseFormats(object):
@@ -68,6 +69,8 @@ class MetadataFormat(abc.ABC):
     _track_num_name = "Track Num"
     _length_name = "Length"
     _acoustid_name = "Acoustid ID"
+    _recording_mbid_name = "Recording MBID"
+    _track_mbid_name = "Track MBID"
 
     ################
     #   release-level tags
@@ -133,6 +136,16 @@ class MetadataFormat(abc.ABC):
     @classmethod
     @abc.abstractmethod
     def acoustid(cls, mutagen):
+        pass
+    
+    @classmethod
+    @abc.abstractmethod
+    def track_mbid(cls, mutagen):
+        pass
+    
+    @classmethod
+    @abc.abstractmethod
+    def recording_mbid(cls, mutagen):
         pass
     
     ######################
@@ -248,42 +261,70 @@ class ReleaseDateMixin:
     
     # dates are (generally) separated by one of \, /, :, -, " ",
     # and we'll allow any number of spaces before and after delimeter
-    year = "year"
-    month = "month"
-    day = "day"
-    delimeters = "\s*((\\\\|/|:|-)|\s)\s*"
+    _value = None
+    _year = None
+    _month = None
+    _day = None
+    delimeters = r"\s*?[\/:\-\s]\s*?"
     
-    dates = re.compile("(?P<" + year + ">\d\d\d\d)(" + delimeters + 
-                       "(?P<" + month + ">\d\d))?(" + delimeters + "(?P<" + day + ">\d\d))?")
-                       
+    dates = re.compile("(?P<year>\d\d\d\d)(" + delimeters + ")?(?P<month>\d\d)?(" + delimeters + ")?(?P<day>\d\d)?")
+
     def _normalize(self):
         # normalize the date string
+        # also set the year / month / day
         if self._value:
             normalized = re.subn(self.delimeters, "-", str(self), count=3)[0]
             self.value = normalized
 
+            match = self.dates.search(self.value)
+            if match:
+                self._year = match.group("year")
+                self._month = match.group("month")
+                self._day = match.group("day")
+    
     def __eq__(self, other):
-        if isinstance(other, ReleaseDateMixin) or isinstance(other, str):
-            d1 = self.dates.search(str(self))
-            d2 = self.dates.search(str(other))
-        elif isinstance(other, float):
-            return self._value < other
-
-            if d1 and d2:
-                if d1.group(self.year) and d2.group(self.year) and d1.group(self.year) != d2.group(self.year):
-                    return False
-                elif d1.group(self.month) and d2.group(self.month) and d1.group(self.month) != d2.group(self.month):
-                    return False
-                elif d1.group(self.day) and d2.group(self.day) and d1.group(self.day) != d2.group(self.day):
-                    return False
-                else:
-                    return True
-            elif not (d1 and d2):
-                return True
+        if isinstance(other, ReleaseDateMixin):
+            return (self.year == other.year and self.month == other.month and self.day == other.day)
+        elif isinstance(other, str):
+            other_date = self.dates.search(other)
+            if other_date:
+                return self.year == other_date.group(1) and self.month == other_date.group(2) \
+                       and self.day == other_date.group(3)
             else:
                 return False
+        elif isinstance(other, float):
+            return self._value < other
         else:
             super().__eq__(other)
+
+    @property
+    def date(self):
+        if not (self.month and self.year and self.day):
+            d = self.dates.search(self.value)
+            self.year = d.group(1)
+            self.month = d.group(2)
+            self.day = d.group(3)
+        if self.month and self.year and self.day:
+            return datetime.date(self.year, self.month, self.day)
+        
+    @property
+    def year(self):
+        if not self._year:
+            self._normalize()
+        return self._year
+    
+    @property
+    def month(self):
+        if not self._month:
+            self._normalize()
+        return self._month
+
+    @property
+    def day(self):
+        if not self._day:
+            self._normalize()
+        return self._day
+
 
 
 class LengthTag(Tag):
