@@ -114,7 +114,7 @@ class DropzoneRule(Rule):
     def get_filename(self, audiofile):
        md5 = hashlib.md5()
        md5.update(audiofile.file_name.encode('utf-8'))
-       dest = os.path.basename(audiofile.file_name) + '_' + md5.hexdigest()
+       dest = md5.hexdigest() + "_" + os.path.basename(audiofile.file_name)
 
        return dest
 
