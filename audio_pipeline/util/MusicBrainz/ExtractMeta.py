@@ -90,8 +90,12 @@ class ReleaseProcessor(Process.ReleaseProcessor):
         and the audio file's metadata tags
         """
 
-        disc_index = audio_file.disc_num.value - 1  # zero-index the disc num
-        track_index = audio_file.track_num.value - 1  # zero-index the track num
+        disc_index = 0
+        if audio_file.disc_num is not None:
+            disc_index = audio_file.disc_num.value - 1  # zero-index the disc num
+        track_index = 0
+        if audio_file.track_num is not None:
+            track_index = audio_file.track_num.value - 1  # zero-index the track num
 
         # create the track object
         track = Process.Resources.Track()
